@@ -4,8 +4,6 @@ import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { gsap, prefersReducedMotion } from "@/lib/animations";
 import EdgeTapCard from "./EdgeTapCard";
-import PhoneMockup from "./PhoneMockup";
-import PhoneProfile from "./PhoneProfile";
 import DoodleField from "./DoodleField";
 import {
   NfcWaves,
@@ -15,7 +13,6 @@ import {
   StarDoodle,
   ScribbleDoodle,
   UnderlineDoodle,
-  TapRipple,
   InstagramIcon,
   WhatsAppIcon,
   LinkedInIcon,
@@ -98,12 +95,7 @@ export default function Hero() {
           <EdgeTapCard />
         </div>
 
-        {/* phone (left) — hidden on tablet, visible on desktop */}
-        <div className="absolute left-[5%] top-[38%] hidden w-[110px] -rotate-[8deg] animate-float lg:block" style={{ animationDelay: "0.6s" }}>
-          <PhoneMockup>
-            <PhoneProfile />
-          </PhoneMockup>
-        </div>
+        {/* phone removed — face icon cluttered the hero composition */}
 
         {/* QR bottom-left */}
         <QrDoodle className="absolute bottom-[12%] left-[8%] h-16 w-16 rotate-[-10deg] text-[--ink] animate-float-slow" />
@@ -160,13 +152,12 @@ export default function Hero() {
             </span>
           </h1>
 
-          {/* tap ripple behind card-ish center */}
-          <TapRipple className="absolute left-1/2 top-1/2 h-[120%] w-[90%] -translate-x-1/2 -translate-y-1/2 text-[--ink]/8 opacity-0" />
+          {/* decorative underline lives inside the headline span */}
         </div>
 
         {/* sub */}
         <p className="mt-6 max-w-xl text-[17px] leading-relaxed text-[--ink-soft]">
-          Tap a physical EdgeTap card against any phone and watch a digital
+          Tap a physical EdgeTap card against most modern smartphones and watch a digital
           profile, menu, review or website appear instantly — no app, no
           searching. Just one tap.
         </p>

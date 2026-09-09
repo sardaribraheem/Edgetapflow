@@ -9,7 +9,6 @@ import {
   ArrowDoodle,
   NfcWaves,
   SparkleDoodle,
-  TapRipple,
   StarDoodle,
 } from "./doodles";
 
@@ -54,10 +53,9 @@ export default function UseCaseStory() {
       <div className="usecase-track scroll-smooth">
         {useCases.map((uc) => (
           <div key={uc.id} className="usecase-panel relative">
-            {/* backdrop doodles */}
-            <SparkleDoodle className="absolute left-[8%] top-[14%] h-8 w-8 text-[--yellow] opacity-70" />
-            <StarDoodle className="absolute right-[10%] top-[20%] h-7 w-7 text-[--sky] opacity-70" />
-            <TapRipple className="absolute left-1/2 top-1/2 h-[70vh] w-[70vw] -translate-x-1/2 -translate-y-1/2 text-[--ink]/6" />
+            {/* backdrop doodles — subtle, not chaotic */}
+            <SparkleDoodle className="absolute left-[8%] top-[14%] h-8 w-8 text-[--yellow] opacity-50" />
+            <StarDoodle className="absolute right-[10%] top-[20%] h-7 w-7 text-[--sky] opacity-50" />
 
             <div className="container-x relative flex flex-col items-center gap-6 py-10 text-center md:py-0">
               <div className="flex flex-col items-center gap-2">
