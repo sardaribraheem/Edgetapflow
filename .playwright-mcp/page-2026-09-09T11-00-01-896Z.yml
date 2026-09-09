@@ -1,0 +1,52 @@
+- generic [active] [ref=f27e1]:
+  - main [ref=f27e7]:
+    - link "EdgeTap" [ref=f27e8] [cursor=pointer]:
+      - /url: /
+    - generic [ref=f27e19]:
+      - generic [ref=f27e23]:
+        - generic [ref=f27e24]:
+          - img "Ibraheem Anwar — profile photo" [ref=f27e27]
+          - heading "Ibraheem Anwar" [level=1] [ref=f27e31]
+          - paragraph [ref=f27e32]: Developer & AI Engineer
+          - generic [ref=f27e33]: 📍 Pakistan
+          - paragraph [ref=f27e34]: I Design Software, build Flutter apps, AI integrations, and automation systems that solve real problems. Clean architecture, fast iteration, shipped products.
+          - generic [ref=f27e35]:
+            - generic [ref=f27e36]: Open to opportunities
+            - generic [ref=f27e37]: Flutter · AI · Automation
+        - region "Contact actions" [ref=f27e38]:
+          - generic [ref=f27e39]: Reach me
+          - link "WhatsApp →" [ref=f27e40] [cursor=pointer]:
+            - /url: https://wa.me/923044149674
+            - generic [ref=f27e45]: WhatsApp
+            - generic [ref=f27e46]: →
+          - link "LinkedIn →" [ref=f27e47] [cursor=pointer]:
+            - /url: https://linkedin.com/sardaribraheem
+            - generic [ref=f27e52]: LinkedIn
+            - generic [ref=f27e53]: →
+          - link "Instagram →" [ref=f27e54] [cursor=pointer]:
+            - /url: https://www.instagram.com/ibraheemr.dev
+            - generic [ref=f27e60]: Instagram
+            - generic [ref=f27e61]: →
+          - link "Portfolio →" [ref=f27e62] [cursor=pointer]:
+            - /url: https://ibraheem.dev
+            - generic [ref=f27e68]: Portfolio
+            - generic [ref=f27e69]: →
+          - link "GitHub →" [ref=f27e70] [cursor=pointer]:
+            - /url: https://github.com/sardaribraheem
+            - generic [ref=f27e74]: GitHub
+            - generic [ref=f27e75]: →
+          - link "Email →" [ref=f27e76] [cursor=pointer]:
+            - /url: mailto:sardaribraheem277@gmail.com
+            - generic [ref=f27e82]: Email
+            - generic [ref=f27e83]: →
+          - link "Save Contact →" [ref=f27e84] [cursor=pointer]:
+            - /url: "#"
+            - generic [ref=f27e90]: Save Contact
+            - generic [ref=f27e91]: →
+          - generic [ref=f27e92]: u/ibraheem · One tap. Infinite possibilities.
+      - generic [ref=f27e94]:
+        - generic [ref=f27e95]: Powered by EdgeTap
+        - link "Get your own →" [ref=f27e104] [cursor=pointer]:
+          - /url: /
+  - button "Open Next.js Dev Tools" [ref=f27e110] [cursor=pointer]
+  - alert [ref=f27e114]

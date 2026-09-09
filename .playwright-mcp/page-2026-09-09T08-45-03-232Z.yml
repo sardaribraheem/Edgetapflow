@@ -1,0 +1,264 @@
+- generic [ref=f3e3]:
+  - navigation [ref=f3e6]:
+    - paragraph [ref=f3e9]:
+      - link "Wrls." [ref=f3e10] [cursor=pointer]:
+        - /url: ./
+    - generic [ref=f3e11]:
+      - paragraph [ref=f3e13]:
+        - link "What you get" [ref=f3e14] [cursor=pointer]:
+          - /url: ./#bento
+      - paragraph [ref=f3e16]:
+        - link "Showcase" [ref=f3e17] [cursor=pointer]:
+          - /url: ./#bla
+      - paragraph [ref=f3e19]:
+        - link "Testimonials" [ref=f3e20] [cursor=pointer]:
+          - /url: ./#testimonial
+      - paragraph [ref=f3e22]:
+        - link "FAQs" [ref=f3e23] [cursor=pointer]:
+          - /url: ./#faq
+      - paragraph [ref=f3e25]:
+        - link "Blogs" [ref=f3e26] [cursor=pointer]:
+          - /url: ./blogs
+    - link [ref=f3e29] [cursor=pointer]:
+      - /url: https://kailash.lemonsqueezy.com/buy/e86e74e5-2c35-451c-af90-c7b1e803bd95
+      - paragraph [ref=f3e31]: Get Now
+  - banner [ref=f3e33]:
+    - img "crown" [ref=f3e36]
+    - img "exclamation mark" [ref=f3e39]
+    - img "multiple sparkles" [ref=f3e42]
+    - img "smilie" [ref=f3e45]
+    - img "swirly right arrow" [ref=f3e48]
+    - img "paper rocket" [ref=f3e51]
+    - img "blue blob with hand-drawn lines" [ref=f3e54]
+    - img "arrow filled with hand-drawn lines" [ref=f3e57]
+    - img "a whirl" [ref=f3e60]
+    - img "red blob with whirl-like lines" [ref=f3e63]
+    - img "heart" [ref=f3e68]
+    - img "sparkle" [ref=f3e71]
+    - heading "A growing collection of decorative illustrations for your projects" [level=2] [ref=f3e82]
+    - heading "Whirrls of delight" [level=1] [ref=f3e87]
+    - link "Get Now" [ref=f3e90] [cursor=pointer]:
+      - /url: https://kailash.lemonsqueezy.com/buy/e86e74e5-2c35-451c-af90-c7b1e803bd95
+  - generic [ref=f3e94]:
+    - generic [ref=f3e95]:
+      - generic [ref=f3e96]:
+        - paragraph [ref=f3e99]: Whirrrrls
+        - paragraph [ref=f3e104]: Whirrrrls
+        - paragraph [ref=f3e109]: Whirrrrls
+      - generic [ref=f3e110]:
+        - paragraph [ref=f3e113]: Whirrrrls
+        - paragraph [ref=f3e118]: Whirrrrls
+        - paragraph [ref=f3e123]: Whirrrrls
+      - generic [ref=f3e124]:
+        - paragraph [ref=f3e127]: Whirrrrls
+        - paragraph [ref=f3e132]: Whirrrrls
+        - paragraph [ref=f3e137]: Whirrrrls
+      - generic [ref=f3e138]:
+        - paragraph [ref=f3e141]: Whirrrrls
+        - paragraph [ref=f3e146]: Whirrrrls
+        - paragraph [ref=f3e151]: Whirrrrls
+      - generic [ref=f3e152]:
+        - paragraph [ref=f3e155]: Whirrrrls
+        - img "hand-drawn arrow" [ref=f3e158]
+        - paragraph [ref=f3e161]: Whirrrrls
+        - paragraph [ref=f3e166]: Whirrrrls
+    - generic [ref=f3e167]:
+      - generic [ref=f3e168]:
+        - paragraph [ref=f3e171]: Whirrrrls
+        - img "hand-drawn balloon" [ref=f3e174]
+        - paragraph [ref=f3e177]: Whirrrrls
+        - paragraph [ref=f3e182]: Whirrrrls
+      - generic [ref=f3e183]:
+        - paragraph [ref=f3e186]: Whirrrrls
+        - img "hand-drawn sparkling star" [ref=f3e189]
+        - paragraph [ref=f3e192]: Whirrrrls
+        - paragraph [ref=f3e197]: Whirrrrls
+      - generic [ref=f3e199]:
+        - paragraph [ref=f3e202]: Whirrrrls
+        - img "hand-drawn laughing emoji" [ref=f3e205]
+        - paragraph [ref=f3e208]: Whirrrrls
+        - paragraph [ref=f3e213]: Whirrrrls
+      - generic [ref=f3e214]:
+        - paragraph [ref=f3e217]: Whirrrrls
+        - img "hand-drawn money icon" [ref=f3e220]
+        - paragraph [ref=f3e223]: Whirrrrls
+        - paragraph [ref=f3e228]: Whirrrrls
+      - generic [ref=f3e229]:
+        - paragraph [ref=f3e232]: Whirrrrls
+        - img "hand-drawn arrow" [ref=f3e235]
+        - paragraph [ref=f3e238]: Whirrrrls
+        - paragraph [ref=f3e243]: Whirrrrls
+  - generic [ref=f3e245]:
+    - generic [ref=f3e246]:
+      - generic [ref=f3e249]:
+        - list [ref=f3e252]:
+          - listitem [ref=f3e253]
+          - listitem [aria-hidden] [ref=f3e256]
+          - listitem [aria-hidden] [ref=f3e259]
+        - heading "Decorative Whirrls" [level=3] [ref=f3e264]
+      - heading "Hand-drawn Emojis" [level=3] [ref=f3e269]
+    - generic [ref=f3e374]:
+      - generic [ref=f3e375]:
+        - heading "Figma and SVG Files" [level=3] [ref=f3e380] [cursor=pointer]
+        - generic [ref=f3e387]:
+          - heading "All future updates" [level=3] [ref=f3e389]
+          - list [ref=f3e392]:
+            - listitem [ref=f3e393]:
+              - paragraph [ref=f3e396]: v 1.0
+            - listitem [ref=f3e397]:
+              - paragraph [ref=f3e400]: v 1.1
+            - listitem [ref=f3e401]:
+              - paragraph [ref=f3e404]: v 1.2
+            - listitem [ref=f3e405]:
+              - paragraph [ref=f3e408]: v 1.4
+            - listitem [ref=f3e409]:
+              - paragraph [ref=f3e412]: v 1.5
+            - listitem [ref=f3e413]:
+              - paragraph [ref=f3e416]: v 2.0
+            - listitem [ref=f3e417]:
+              - paragraph [ref=f3e420]: v 3.0
+            - listitem [ref=f3e421]:
+              - paragraph [ref=f3e424]: v 8.0
+            - listitem [aria-hidden] [ref=f3e425]:
+              - paragraph [ref=f3e428]: v 1.0
+            - listitem [aria-hidden] [ref=f3e429]:
+              - paragraph [ref=f3e432]: v 1.1
+            - listitem [aria-hidden] [ref=f3e433]:
+              - paragraph [ref=f3e436]: v 1.2
+            - listitem [aria-hidden] [ref=f3e437]:
+              - paragraph [ref=f3e440]: v 1.4
+            - listitem [aria-hidden] [ref=f3e441]:
+              - paragraph [ref=f3e444]: v 1.5
+            - listitem [aria-hidden] [ref=f3e445]:
+              - paragraph [ref=f3e448]: v 2.0
+            - listitem [aria-hidden] [ref=f3e449]:
+              - paragraph [ref=f3e452]: v 3.0
+            - listitem [aria-hidden] [ref=f3e453]:
+              - paragraph [ref=f3e456]: v 8.0
+            - listitem [aria-hidden] [ref=f3e457]:
+              - paragraph [ref=f3e460]: v 1.0
+            - listitem [aria-hidden] [ref=f3e461]:
+              - paragraph [ref=f3e464]: v 1.1
+            - listitem [aria-hidden] [ref=f3e465]:
+              - paragraph [ref=f3e468]: v 1.2
+            - listitem [aria-hidden] [ref=f3e469]:
+              - paragraph [ref=f3e472]: v 1.4
+            - listitem [aria-hidden] [ref=f3e473]:
+              - paragraph [ref=f3e476]: v 1.5
+            - listitem [aria-hidden] [ref=f3e477]:
+              - paragraph [ref=f3e480]: v 2.0
+            - listitem [aria-hidden] [ref=f3e481]:
+              - paragraph [ref=f3e484]: v 3.0
+            - listitem [aria-hidden] [ref=f3e485]:
+              - paragraph [ref=f3e488]: v 8.0
+      - generic [ref=f3e491] [cursor=pointer]:
+        - generic [ref=f3e492]:
+          - heading "100%" [level=3] [ref=f3e493]
+          - heading "Vector" [level=3] [ref=f3e494]
+        - heading "Editable and Scalable" [level=4] [ref=f3e496]
+    - generic [ref=f3e502] [cursor=pointer]:
+      - paragraph [ref=f3e506]: HUGE Collection
+      - heading "800+ Decorative Elements" [level=3] [ref=f3e519]
+      - generic [ref=f3e523]:
+        - generic [ref=f3e524]:
+          - generic [ref=f3e525]: H
+          - generic [ref=f3e526]: U
+          - generic [ref=f3e527]: G
+          - generic [ref=f3e528]: E
+        - generic [ref=f3e530]:
+          - generic [ref=f3e531]: C
+          - generic [ref=f3e532]: o
+          - generic [ref=f3e533]: l
+          - generic [ref=f3e534]: l
+          - generic [ref=f3e535]: e
+          - generic [ref=f3e536]: c
+          - generic [ref=f3e537]: t
+          - generic [ref=f3e538]: i
+          - generic [ref=f3e539]: o
+          - generic [ref=f3e540]: "n"
+    - generic [ref=f3e541]:
+      - generic [ref=f3e547]:
+        - heading "Editable Shapes" [level=3] [ref=f3e549]
+        - generic [ref=f3e550]:
+          - generic [ref=f3e553] [cursor=pointer]
+          - generic [ref=f3e555] [cursor=pointer]
+          - generic [ref=f3e557] [cursor=pointer]
+      - generic [ref=f3e562]:
+        - heading "100+" [level=3] [ref=f3e564]
+        - heading "Hand-drawn Icons" [level=3] [ref=f3e566]
+        - list [ref=f3e569]:
+          - listitem [ref=f3e570]
+          - listitem [aria-hidden] [ref=f3e573]
+          - listitem [aria-hidden] [ref=f3e576]
+        - list [ref=f3e581]:
+          - listitem [ref=f3e582]
+          - listitem [aria-hidden] [ref=f3e585]
+          - listitem [aria-hidden] [ref=f3e588]
+        - list [ref=f3e593]:
+          - listitem [ref=f3e594]
+          - listitem [aria-hidden] [ref=f3e597]
+          - listitem [aria-hidden] [ref=f3e600]
+        - list [ref=f3e605]:
+          - listitem [ref=f3e606]
+          - listitem [aria-hidden] [ref=f3e609]
+          - listitem [aria-hidden] [ref=f3e612]
+  - generic [ref=f3e616]:
+    - generic [ref=f3e617]:
+      - heading "SHOWCASE" [level=4] [ref=f3e620]
+      - heading "Whirrls in Action" [level=3] [ref=f3e623]
+    - generic [ref=f3e624]:
+      - img "Concept web UI of a charming hand-warmer using whirrls decorative elements" [ref=f3e628]
+      - img "concept web UI for wave faction which makes use of whirrls illustrations" [ref=f3e632]
+      - img "a website landing page for clothing brand which uses funky whirrls graphics" [ref=f3e636]
+      - img "Energy drink landing page using whirrls funky visuals" [ref=f3e640]
+  - generic [ref=f3e647]:
+    - generic [ref=f3e649]:
+      - heading "TESTIMONIALS" [level=4] [ref=f3e652]
+      - heading "What whirrlers say.." [level=3] [ref=f3e655]
+    - generic [ref=f3e659]:
+      - generic [ref=f3e660]:
+        - heading "supercharge.design" [level=5] [ref=f3e664]
+        - paragraph [ref=f3e666]: We love the Whirls pack! It looks so lovely and playful, and I love how consistent it is! I can see using it for web, social media design, or other projects. This is super useful, thank you for creating this!
+        - paragraph [ref=f3e668]: Creative Design Agency
+      - generic [ref=f3e669]:
+        - heading "ux.alok" [level=5] [ref=f3e673]
+        - paragraph [ref=f3e675]: I adore the charming quirkiness of their appearance—highly recommended for individuals seeking to elevate their visuals. I genuinely appreciate the dedication you’ve invested in creating this masterpiece.
+        - paragraph [ref=f3e677]: Product Designer and Creator
+      - generic [ref=f3e678]:
+        - heading "basit.designs" [level=5] [ref=f3e682]
+        - paragraph [ref=f3e684]: Exploring this WHIRLS Figma Illustration pack has been such a joy for me as a content creator and designer! The 1000+ hand-drawn elements are an absolute treasure, injecting a whimsical and swirly charm into my work. It's like having a creative playground at my fingertips, adding so much value to my projects.
+        - paragraph [ref=f3e686]: Freelance Designer and Founder
+      - generic [ref=f3e687] [cursor=pointer]
+      - generic [ref=f3e693] [cursor=pointer]
+  - generic [ref=f3e699]:
+    - generic [ref=f3e700]:
+      - heading "FAQS" [level=4] [ref=f3e703]
+      - heading "Questions you may have" [level=3] [ref=f3e706]
+    - img "hand-drawn flower" [ref=f3e709]
+    - generic [ref=f3e710]:
+      - heading "What is Whirrls and how can I use it?" [level=4] [ref=f3e717] [cursor=pointer]
+      - heading "Who all are this pack for?" [level=4] [ref=f3e730] [cursor=pointer]
+      - heading "Can I use Whirls for commercial purposes?" [level=4] [ref=f3e743] [cursor=pointer]
+      - heading "What file formats are included?" [level=4] [ref=f3e756] [cursor=pointer]
+      - heading "Is this a one time purchase?" [level=4] [ref=f3e769] [cursor=pointer]
+      - heading "Will I get a refund?" [level=4] [ref=f3e782] [cursor=pointer]
+    - img "sparkling stars" [ref=f3e791]
+    - img "hand-drawn visual of glowing heart" [ref=f3e794]
+    - img "hand-drawn doubtful emoji" [ref=f3e797]
+  - contentinfo [ref=f3e800]:
+    - generic [ref=f3e806]:
+      - paragraph [ref=f3e807]: Start
+      - paragraph [ref=f3e808]: Whirling Now!
+    - paragraph [ref=f3e810]: Get your hands on the biggest hand-drawn collection of decorative illustrations.
+    - generic [ref=f3e811]:
+      - link [ref=f3e813] [cursor=pointer]:
+        - /url: https://kailash.lemonsqueezy.com/buy/e86e74e5-2c35-451c-af90-c7b1e803bd95
+        - paragraph [ref=f3e815]: Purchase Now
+      - link [ref=f3e817] [cursor=pointer]:
+        - /url: https://www.figma.com/community/file/1353261969839988938/whirrls-decorative-illustrations-pack-free-version
+        - paragraph [ref=f3e819]: Free Preview
+    - generic [ref=f3e820] [cursor=pointer]
+    - paragraph [ref=f3e823]:
+      - text: A project by
+      - link "Kailash" [ref=f3e824] [cursor=pointer]:
+        - /url: https://www.instagram.com/kail.designs/

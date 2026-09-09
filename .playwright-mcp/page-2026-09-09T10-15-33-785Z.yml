@@ -1,0 +1,44 @@
+- generic [active] [ref=f17e1]:
+  - main [ref=f17e2]:
+    - link "EdgeTap" [ref=f17e3] [cursor=pointer]:
+      - /url: /
+    - generic [ref=f17e14]:
+      - img "Ibraheem Anwar" [ref=f17e17]
+      - heading "Ibraheem Anwar" [level=1] [ref=f17e21]
+      - paragraph [ref=f17e22]: Developer & AI Engineer
+      - paragraph [ref=f17e23]: 📍 Pakistan
+      - paragraph [ref=f17e24]: I Design Software, build Flutter apps, AI integrations, and automation systems that solve real problems. Clean architecture, fast iteration, shipped products.
+    - region "Contact actions" [ref=f17e25]:
+      - link "WhatsApp →" [ref=f17e26] [cursor=pointer]:
+        - /url: https://wa.me/923044149674
+        - generic [ref=f17e31]: WhatsApp
+        - generic [ref=f17e32]: →
+      - link "LinkedIn →" [ref=f17e33] [cursor=pointer]:
+        - /url: https://linkedin.com/sardaribraheem
+        - generic [ref=f17e38]: LinkedIn
+        - generic [ref=f17e39]: →
+      - link "Instagram →" [ref=f17e40] [cursor=pointer]:
+        - /url: https://www.instagram.com/ibraheemr.dev
+        - generic [ref=f17e46]: Instagram
+        - generic [ref=f17e47]: →
+      - link "Portfolio →" [ref=f17e48] [cursor=pointer]:
+        - /url: https://ibraheem.dev
+        - generic [ref=f17e54]: Portfolio
+        - generic [ref=f17e55]: →
+      - link "GitHub →" [ref=f17e56] [cursor=pointer]:
+        - /url: https://github.com/sardaribraheem
+        - generic [ref=f17e60]: GitHub
+        - generic [ref=f17e61]: →
+      - link "Email →" [ref=f17e62] [cursor=pointer]:
+        - /url: mailto:sardaribraheem277@gmail.com
+        - generic [ref=f17e68]: Email
+        - generic [ref=f17e69]: →
+      - link "Save Contact →" [ref=f17e70] [cursor=pointer]:
+        - /url: "#"
+        - generic [ref=f17e76]: Save Contact
+        - generic [ref=f17e77]: →
+    - generic [ref=f17e78]:
+      - generic [ref=f17e79]: Powered by EdgeTap
+      - paragraph [ref=f17e88]: u/ibraheem · One tap. Infinite possibilities.
+  - button "Open Next.js Dev Tools" [ref=f17e94] [cursor=pointer]
+  - alert [ref=f17e98]

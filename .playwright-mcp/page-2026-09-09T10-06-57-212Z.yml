@@ -1,0 +1,392 @@
+- generic [active] [ref=f15e1]:
+  - banner [ref=f15e2]:
+    - navigation [ref=f15e4]:
+      - link "EDGE TAP" [ref=f15e5] [cursor=pointer]:
+        - /url: /
+      - generic [ref=f15e16]:
+        - link "What We Offer" [ref=f15e17] [cursor=pointer]:
+          - /url: "#offer"
+        - link "Solutions" [ref=f15e18] [cursor=pointer]:
+          - /url: "#solutions"
+        - link "How It Works" [ref=f15e19] [cursor=pointer]:
+          - /url: "#how-it-works"
+        - link "About" [ref=f15e20] [cursor=pointer]:
+          - /url: /u/ibraheem
+      - link "Get Started" [ref=f15e22] [cursor=pointer]:
+        - /url: "#get-started"
+        - text: Get Started
+        - generic [aria-hidden] [ref=f15e23]: →
+  - main [ref=f15e24]:
+    - generic [ref=f15e25]:
+      - generic [aria-hidden]:
+        - generic:
+          - generic [aria-hidden]:
+            - generic:
+              - generic: EdgeTap
+              - generic: One tap · Infinite
+            - generic: u/ibraheem
+        - generic:
+          - generic [aria-hidden]:
+            - generic:
+              - generic:
+                - generic:
+                  - generic:
+                    - generic: Ibraheem Anwar
+                    - generic: Developer & AI Engineer
+                    - generic: 📍 Pakistan
+                  - generic:
+                    - generic:
+                      - generic: WhatsApp
+                      - generic: →
+                    - generic:
+                      - generic: LinkedIn
+                      - generic: →
+                    - generic:
+                      - generic: Instagram
+                      - generic: →
+                    - generic:
+                      - generic: Portfolio
+                      - generic: →
+                    - generic:
+                      - generic: Save Contact
+                      - generic: →
+                  - generic: Powered by EdgeTap
+        - generic: Instagram
+        - generic: WhatsApp
+        - generic: LinkedIn
+        - generic: Website
+        - generic: u/you
+      - generic [ref=f15e30]:
+        - generic [ref=f15e31]: Now in Private Beta · Works on iPhone & Android
+        - heading "One tap. Infinite possibilities." [level=1] [ref=f15e35]:
+          - text: One tap.
+          - generic [ref=f15e36]:
+            - text: Infinite
+            - generic [ref=f15e37]: possibilities.
+        - paragraph [ref=f15e44]: Tap a physical EdgeTap card against any phone and watch a digital profile, menu, review or website appear instantly — no app, no searching. Just one tap.
+        - generic [ref=f15e45]:
+          - link "Get Your EdgeTap" [ref=f15e46] [cursor=pointer]:
+            - /url: "#get-started"
+            - text: Get Your EdgeTap
+            - generic [aria-hidden] [ref=f15e47]: →
+          - link "See what we build" [ref=f15e48] [cursor=pointer]:
+            - /url: "#offer"
+    - generic [ref=f15e50]:
+      - generic [ref=f15e51]:
+        - generic [ref=f15e52]:
+          - generic [ref=f15e53]: What we offer
+          - heading "What can we build for you?" [level=2] [ref=f15e54]
+        - paragraph [ref=f15e55]: One card, endless possibilities. Every EdgeTap is a physical key that opens the digital experience you design.
+      - generic [ref=f15e56]:
+        - article [ref=f15e57]:
+          - generic [ref=f15e58]: "01"
+          - generic [ref=f15e65]:
+            - generic [ref=f15e66]: Professionals
+            - heading "NFC Business Cards" [level=3] [ref=f15e67]
+            - paragraph [ref=f15e68]: Share your contact, WhatsApp, Instagram, LinkedIn, portfolio and website with one tap.
+          - generic [ref=f15e69]:
+            - generic [ref=f15e70]: Contact
+            - generic [ref=f15e71]: WhatsApp
+            - generic [ref=f15e72]: Instagram
+            - generic [ref=f15e73]: LinkedIn
+            - generic [ref=f15e74]: Portfolio
+            - generic [ref=f15e75]: Website
+        - article [ref=f15e76]:
+          - generic [ref=f15e77]: "02"
+          - generic [ref=f15e84]:
+            - generic [ref=f15e85]: Offices
+            - heading "Tap-Based Attendance" [level=3] [ref=f15e86]
+            - paragraph [ref=f15e87]: Employees tap to check in, check out and record attendance. Build the office experience around NFC.
+          - generic [ref=f15e88]:
+            - generic [ref=f15e89]: Check in
+            - generic [ref=f15e90]: Check out
+            - generic [ref=f15e91]: Attendance
+        - article [ref=f15e92]:
+          - generic [ref=f15e93]: "03"
+          - generic [ref=f15e100]:
+            - generic [ref=f15e101]: Your Website
+            - heading "Professional Digital Presence" [level=3] [ref=f15e102]
+            - paragraph [ref=f15e103]: A professional website, portfolio, personal profile and digital identity — always up to date.
+          - generic [ref=f15e104]:
+            - generic [ref=f15e105]: Website
+            - generic [ref=f15e106]: Portfolio
+            - generic [ref=f15e107]: Profile
+            - generic [ref=f15e108]: Identity
+        - article [ref=f15e109]:
+          - generic [ref=f15e110]: "04"
+          - generic [ref=f15e119]:
+            - generic [ref=f15e120]: Review Cards
+            - heading "Tap → Google Review" [level=3] [ref=f15e121]
+            - paragraph [ref=f15e122]: For restaurants, shops, businesses and service providers. One tap takes customers straight to leaving a review.
+          - generic [ref=f15e123]:
+            - generic [ref=f15e124]: Restaurants
+            - generic [ref=f15e125]: Shops
+            - generic [ref=f15e126]: Businesses
+            - generic [ref=f15e127]: Services
+        - article [ref=f15e128]:
+          - generic [ref=f15e129]: "05"
+          - generic [ref=f15e134]:
+            - generic [ref=f15e135]: Restaurant Menus
+            - heading "Tap → Menu" [level=3] [ref=f15e136]
+            - paragraph [ref=f15e137]: A physical NFC-enabled card or sign. Customer taps. Menu opens. No app. No searching. Just tap.
+          - generic [ref=f15e138]:
+            - generic [ref=f15e139]: No app
+            - generic [ref=f15e140]: Instant
+            - generic [ref=f15e141]: Always current
+        - link "Custom Needs Have something else in mind? EdgeTap isn't limited to predefined products. We build custom physical → digital experiences. Let's build it" [ref=f15e142] [cursor=pointer]:
+          - /url: "#get-started"
+          - generic [ref=f15e159]:
+            - generic [ref=f15e160]: Custom Needs
+            - heading "Have something else in mind?" [level=3] [ref=f15e161]: Have something elsein mind?
+            - paragraph [ref=f15e162]: EdgeTap isn't limited to predefined products. We build custom physical → digital experiences.
+          - generic [ref=f15e164]:
+            - text: Let's build it
+            - generic [aria-hidden] [ref=f15e165]: →
+    - generic [ref=f15e170]:
+      - generic [ref=f15e181]:
+        - generic [ref=f15e182]:
+          - generic [ref=f15e183]: Use case 01
+          - generic [ref=f15e184]: Tap → Contact
+        - heading "Meet someone." [level=3] [ref=f15e185]
+        - paragraph [ref=f15e186]: Networking event, conference, university, business meeting. Instead of “can I get your number?”, the person taps.
+        - generic [ref=f15e187]:
+          - generic [aria-hidden] [ref=f15e189]:
+            - generic [ref=f15e203]:
+              - generic [ref=f15e204]: EdgeTap
+              - generic [ref=f15e205]: One tap · Infinite
+            - generic [ref=f15e206]: u/ibraheem
+          - generic [ref=f15e214]: Tap
+          - generic [ref=f15e223]:
+            - generic [ref=f15e224]:
+              - generic [ref=f15e226]: Ibraheem Anwar
+              - generic [ref=f15e227]: Developer & AI Engineer
+              - generic [ref=f15e228]: 📍 Pakistan
+            - generic [ref=f15e229]:
+              - generic [ref=f15e230]:
+                - generic [ref=f15e235]: WhatsApp
+                - generic [ref=f15e236]: →
+              - generic [ref=f15e237]:
+                - generic [ref=f15e242]: LinkedIn
+                - generic [ref=f15e243]: →
+              - generic [ref=f15e244]:
+                - generic [ref=f15e250]: Instagram
+                - generic [ref=f15e251]: →
+              - generic [ref=f15e252]:
+                - generic [ref=f15e258]: Portfolio
+                - generic [ref=f15e259]: →
+              - generic [ref=f15e260]:
+                - generic [ref=f15e266]: Save Contact
+                - generic [ref=f15e267]: →
+            - generic [ref=f15e268]: Powered by EdgeTap
+      - generic [ref=f15e280]:
+        - generic [ref=f15e281]:
+          - generic [ref=f15e282]: Use case 02
+          - generic [ref=f15e283]: Tap → Menu
+        - heading "At a restaurant." [level=3] [ref=f15e284]
+        - paragraph [ref=f15e285]: A physical NFC-enabled card on the table. Tap for menu. The digital menu opens — food, drinks, specials.
+        - generic [ref=f15e286]:
+          - generic [aria-hidden] [ref=f15e288]:
+            - generic [ref=f15e302]:
+              - generic [ref=f15e303]: EdgeTap
+              - generic [ref=f15e304]: One tap · Infinite
+            - generic [ref=f15e305]: u/ibraheem
+          - generic [ref=f15e313]: Tap
+          - generic [ref=f15e322]:
+            - generic [ref=f15e323]:
+              - generic [ref=f15e324]: Tap → Menu
+              - generic [ref=f15e325]: Casa Verde
+              - generic [ref=f15e326]: Fresh · Local · Daily
+            - generic [ref=f15e327]:
+              - generic [ref=f15e328]:
+                - generic [ref=f15e329]: Food
+                - generic [ref=f15e332]:
+                  - generic [ref=f15e333]:
+                    - generic [ref=f15e334]: Burger & fries
+                    - generic [ref=f15e335]: ·
+                  - generic [ref=f15e336]:
+                    - generic [ref=f15e337]: Margherita
+                    - generic [ref=f15e338]: ·
+                  - generic [ref=f15e339]:
+                    - generic [ref=f15e340]: Butter chicken
+                    - generic [ref=f15e341]: ·
+              - generic [ref=f15e342]:
+                - generic [ref=f15e343]: Drinks
+                - generic [ref=f15e346]:
+                  - generic [ref=f15e347]:
+                    - generic [ref=f15e348]: Mango lassi
+                    - generic [ref=f15e349]: ·
+                  - generic [ref=f15e350]:
+                    - generic [ref=f15e351]: Cold brew
+                    - generic [ref=f15e352]: ·
+                  - generic [ref=f15e353]:
+                    - generic [ref=f15e354]: Sparkling water
+                    - generic [ref=f15e355]: ·
+              - generic [ref=f15e356]:
+                - generic [ref=f15e357]: Specials
+                - generic [ref=f15e360]:
+                  - generic [ref=f15e361]:
+                    - generic [ref=f15e362]: Chef's board
+                    - generic [ref=f15e363]: ·
+                  - generic [ref=f15e364]:
+                    - generic [ref=f15e365]: Tonight's fish
+                    - generic [ref=f15e366]: ·
+            - generic [ref=f15e367]: Powered by EdgeTap
+      - generic [ref=f15e379]:
+        - generic [ref=f15e380]:
+          - generic [ref=f15e381]: Use case 03
+          - generic [ref=f15e382]: Tap → Review
+        - heading "Love the food?" [level=3] [ref=f15e383]
+        - paragraph [ref=f15e384]: Tap to review. The customer taps the review card and the review experience appears. Tap → Review.
+        - generic [ref=f15e385]:
+          - generic [aria-hidden] [ref=f15e387]:
+            - generic [ref=f15e401]:
+              - generic [ref=f15e402]: EdgeTap
+              - generic [ref=f15e403]: One tap · Infinite
+            - generic [ref=f15e404]: u/ibraheem
+          - generic [ref=f15e412]: Tap
+          - generic [ref=f15e421]:
+            - generic [ref=f15e422]:
+              - generic [ref=f15e423]: G
+              - generic [ref=f15e424]: Loved it? Tap to review
+              - generic [ref=f15e425]: Casa Verde
+            - generic [ref=f15e437]:
+              - generic [ref=f15e438]: Share your experience
+              - generic [ref=f15e439]: The butter chicken was incredible — will definitely be back!
+            - generic [ref=f15e440]: Post review →
+            - generic [ref=f15e441]: Powered by EdgeTap
+      - generic [ref=f15e444]:
+        - generic [ref=f15e448]: The takeaway
+        - heading "And that's just the start." [level=3] [ref=f15e449]: And that'sjust the start.
+        - paragraph [ref=f15e450]: A card, a menu, a review, an idea — EdgeTap turns physical moments into digital experiences.
+        - generic [ref=f15e451]: Keep scrolling →
+    - generic [ref=f15e480]:
+      - generic [ref=f15e481]: Physical → Digital experiences
+      - heading "Got an idea? Let's bring it to life" [level=2] [ref=f15e490]: Got an idea?Let's bring it to life
+      - paragraph [ref=f15e491]: EdgeTap isn't just NFC cards. We design and build custom physical → digital experiences for people and businesses. Tell us what you imagine.
+      - generic [ref=f15e492]:
+        - link "Let's build it" [ref=f15e493] [cursor=pointer]:
+          - /url: "#get-started"
+          - text: Let's build it
+          - generic [aria-hidden] [ref=f15e494]: →
+        - link "business@edgetap.com" [ref=f15e495] [cursor=pointer]:
+          - /url: mailto:business@edgetap.com
+    - generic [ref=f15e500]:
+      - generic [ref=f15e502]:
+        - generic [ref=f15e503]: Testimonials
+        - heading "What people say" [level=2] [ref=f15e504]
+      - generic [ref=f15e507]:
+        - figure "Your first customer Where your story begins" [ref=f15e508]:
+          - blockquote [ref=f15e523]: “Placeholder — share a story of someone meeting at a conference and swapping contacts with one tap.”
+          - generic [ref=f15e524]:
+            - generic [ref=f15e525]: Your first customer
+            - generic [ref=f15e526]: Where your story begins
+        - figure "A restaurant owner Tap → Menu" [ref=f15e529]:
+          - blockquote [ref=f15e544]: “Placeholder — a restaurant owner whose menu updates the moment specials change.”
+          - generic [ref=f15e545]:
+            - generic [ref=f15e546]: A restaurant owner
+            - generic [ref=f15e547]: Tap → Menu
+        - figure "A founder One tap. Infinite possibilities." [ref=f15e550]:
+          - blockquote [ref=f15e565]: “Placeholder — a founder who turned every introduction into a living digital profile.”
+          - generic [ref=f15e566]:
+            - generic [ref=f15e567]: A founder
+            - generic [ref=f15e568]: One tap. Infinite possibilities.
+      - paragraph [ref=f15e571]: Placeholder voices — real stories coming as EdgeTap goes live.
+    - generic [ref=f15e573]:
+      - heading "Questions?" [level=2] [ref=f15e578]
+      - generic [ref=f15e582]:
+        - generic [ref=f15e583]:
+          - button "How does the NFC card work?" [expanded] [ref=f15e584]
+          - paragraph [ref=f15e591]: Tap the physical EdgeTap card against any modern smartphone. It instantly opens your digital profile or experience in the browser — no app, no pairing, no friction.
+        - generic [ref=f15e592]:
+          - button "What if someone's phone doesn't support NFC?" [ref=f15e593]
+          - paragraph [ref=f15e598]: No problem. Every EdgeTap has a QR fallback that points to the same URL, so anyone can still reach your digital experience from any phone.
+        - generic [ref=f15e599]:
+          - button "Can I change my information later?" [ref=f15e600]
+          - paragraph [ref=f15e605]: Yes — your digital profile is always up to date. Update your links, menu, or details whenever you like, and the physical card keeps working exactly the same.
+        - generic [ref=f15e606]:
+          - button "Do I need an app?" [ref=f15e607]
+          - paragraph [ref=f15e612]: No. EdgeTap is an open-web experience. Your visitors tap and land straight in the browser. There's nothing to download on either side.
+        - generic [ref=f15e613]:
+          - button "Can you build custom NFC solutions?" [ref=f15e614]
+          - paragraph [ref=f15e619]: Absolutely. Beyond cards and menus, we design and build custom physical → digital experiences for your business. Tell us your idea and we'll build it.
+        - generic [ref=f15e620]:
+          - button "Can businesses order multiple cards?" [ref=f15e621]
+          - paragraph [ref=f15e626]: Yes. Our Business tier supports multiple NFC cards plus team management, so entire teams and locations can share one consistent experience.
+    - generic [ref=f15e633]:
+      - generic:
+        - generic [ref=f15e644]:
+          - generic [ref=f15e645]: EdgeTap
+          - generic [ref=f15e646]: One tap · Infinite
+        - generic [ref=f15e647]: u/ibraheem
+      - heading "Ready to tap into something better?" [level=2] [ref=f15e655]: Ready to tap intosomething better?
+      - paragraph [ref=f15e656]: Get your EdgeTap and turn every introduction, table and customer moment into a digital experience that matters.
+      - generic [ref=f15e657]:
+        - link "Get Your EdgeTap" [ref=f15e658] [cursor=pointer]:
+          - /url: mailto:hello@edgetap.com
+          - text: Get Your EdgeTap
+          - generic [aria-hidden] [ref=f15e659]: →
+        - link "Back to top" [ref=f15e660] [cursor=pointer]:
+          - /url: "#top"
+      - generic [ref=f15e661]:
+        - generic [ref=f15e662]: One tap
+        - generic [ref=f15e666]: Infinite possibilities
+  - contentinfo [ref=f15e670]:
+    - generic [ref=f15e671]:
+      - generic [ref=f15e672]:
+        - generic [ref=f15e673]:
+          - link "EDGE TAP" [ref=f15e674] [cursor=pointer]:
+            - /url: /
+          - paragraph [ref=f15e685]: One tap. Infinite possibilities. Smart NFC experiences for people and businesses.
+          - generic [ref=f15e686]:
+            - link [ref=f15e687] [cursor=pointer]:
+              - /url: "#"
+            - link [ref=f15e692] [cursor=pointer]:
+              - /url: "#"
+            - link [ref=f15e696] [cursor=pointer]:
+              - /url: "#"
+        - generic [ref=f15e700]:
+          - heading "Products" [level=4] [ref=f15e701]
+          - list [ref=f15e702]:
+            - listitem [ref=f15e703]:
+              - link "NFC Business Cards" [ref=f15e704] [cursor=pointer]:
+                - /url: "#offer"
+            - listitem [ref=f15e705]:
+              - link "Tap Attendance" [ref=f15e706] [cursor=pointer]:
+                - /url: "#offer"
+            - listitem [ref=f15e707]:
+              - link "Digital Profile" [ref=f15e708] [cursor=pointer]:
+                - /url: "#offer"
+            - listitem [ref=f15e709]:
+              - link "Review Cards" [ref=f15e710] [cursor=pointer]:
+                - /url: "#offer"
+            - listitem [ref=f15e711]:
+              - link "Restaurant Menus" [ref=f15e712] [cursor=pointer]:
+                - /url: "#offer"
+        - generic [ref=f15e713]:
+          - heading "Company" [level=4] [ref=f15e714]
+          - list [ref=f15e715]:
+            - listitem [ref=f15e716]:
+              - link "What We Offer" [ref=f15e717] [cursor=pointer]:
+                - /url: "#top"
+            - listitem [ref=f15e718]:
+              - link "Solutions" [ref=f15e719] [cursor=pointer]:
+                - /url: "#top"
+            - listitem [ref=f15e720]:
+              - link "How It Works" [ref=f15e721] [cursor=pointer]:
+                - /url: "#top"
+            - listitem [ref=f15e722]:
+              - link "About" [ref=f15e723] [cursor=pointer]:
+                - /url: "#top"
+            - listitem [ref=f15e724]:
+              - link "Contact" [ref=f15e725] [cursor=pointer]:
+                - /url: "#top"
+      - generic [ref=f15e726]:
+        - paragraph [ref=f15e727]:
+          - text: © 2026 EdgeTap ·
+          - link "Privacy" [ref=f15e728] [cursor=pointer]:
+            - /url: "#"
+          - text: ·
+          - link "Terms" [ref=f15e729] [cursor=pointer]:
+            - /url: "#"
+        - paragraph [ref=f15e730]: Made in Pakistan 🇵🇰
+  - button "Open Next.js Dev Tools" [ref=f15e736] [cursor=pointer]
