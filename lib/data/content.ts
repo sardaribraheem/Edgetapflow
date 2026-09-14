@@ -6,6 +6,7 @@ export const nav = {
     { label: "What We Offer", href: "#offer" },
     { label: "Solutions", href: "#solutions" },
     { label: "How It Works", href: "#how-it-works" },
+    { label: "Pricing", href: "/pricing" },
     { label: "About", href: "/u/ibraheem" },
   ],
   cta: { label: "Get Started", href: "#get-started" },

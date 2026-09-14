@@ -20,6 +20,7 @@ export type Profile = {
   location: string;
   avatar: string;
   links: ProfileLink[];
+  ownerUid?: string; // Firebase Auth UID of the profile owner
 };
 
 export const ibraheemProfile: Profile = {

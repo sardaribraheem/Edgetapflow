@@ -1,5 +1,12 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { ibraheemProfile } from "@/lib/data/profile";
+import { ibraheemProfile, Profile } from "@/lib/data/profile";
+import { getProfile } from "@/lib/firestore";
+import { auth, db } from "@/lib/firebase";
+import { onAuthStateChanged, User } from "firebase/auth";
+import { doc, updateDoc } from "firebase/firestore";
 import DoodleField from "./DoodleField";
 import {
   NfcWaves,
@@ -39,18 +46,55 @@ const iconFor = (type: string, className: string) => {
 // The profile page, framed like the EdgeTap home page: cream paper,
 // floating doodles, display type. Mobile-first card that opens into
 // a two-column "business card" on desktop.
-export default function ProfilePage() {
+export default function ProfilePage({ initialProfile = ibraheemProfile }: { initialProfile?: Profile }) {
+  const [profile, setProfile] = useState<Profile>(initialProfile);
+  const [user, setUser] = useState<User | null>(null);
+  const [isOwner, setIsOwner] = useState(false);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    async function loadDynamicProfile() {
+      const dynamicProfile = await getProfile(initialProfile.username);
+      setProfile(dynamicProfile);
+    }
+    loadDynamicProfile();
+  }, [initialProfile.username]);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+      if (currentUser && profile.ownerUid) {
+        setIsOwner(currentUser.uid === profile.ownerUid);
+      }
+    });
+    return () => unsubscribe();
+  }, [profile.ownerUid]);
+
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      const docRef = doc(db, "profiles", profile.username);
+      await updateDoc(docRef, profile);
+      alert("Profile updated successfully!");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      alert("Error updating profile. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
-    <div className="relative flex min-h-screen flex-col justify-center overflow-hidden">
+    <div className="relative flex min-h-screen flex-col justify-start overflow-y-auto py-12">
       {/* soft washes */}
-      <div className="absolute inset-0" aria-hidden="true">
+      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
         <div className="absolute left-1/4 top-16 h-72 w-72 rounded-full bg-[--yellow-soft] opacity-60 blur-3xl" />
         <div className="absolute bottom-10 right-10 h-80 w-80 rounded-full bg-[--sky-soft] opacity-50 blur-3xl" />
         <div className="absolute -left-16 top-1/2 h-72 w-72 rounded-full bg-[--coral-soft] opacity-40 blur-3xl" />
       </div>
 
       {/* floating doodles around the card (desktop) */}
-      <DoodleField parallax={-40} className="hidden md:block">
+      <DoodleField parallax={-40} className="hidden md:block pointer-events-none">
         <QrDoodle className="absolute left-[6%] top-[18%] h-14 w-14 rotate-[-8deg] text-[--ink] animate-float-slow" />
         <StarDoodle className="absolute right-[7%] top-[16%] h-8 w-8 text-[--sky] animate-wobble" />
         <ReviewStars className="absolute bottom-[16%] left-[10%] w-24 rotate-[-4deg] text-[--yellow] animate-float" />
@@ -59,7 +103,7 @@ export default function ProfilePage() {
         <SparkleDoodle className="absolute left-[28%] top-[78%] h-7 w-7 text-[--coral] animate-pulse-soft" />
       </DoodleField>
 
-      <main className="container-x relative mx-auto w-full max-w-5xl py-10">
+      <main className="container-x relative mx-auto w-full max-w-5xl py-6 my-auto">
         {/* edge badge — pill back to home */}
         <Link
           href="/"
@@ -82,8 +126,8 @@ export default function ProfilePage() {
               <div className="relative">
                 <div className="grid h-28 w-28 place-items-center overflow-hidden rounded-full bg-[--yellow] ring-4 ring-white shadow-[var(--shadow-card)] md:h-32 md:w-32">
                   <img
-                    src={ibraheemProfile.avatar}
-                    alt={`${ibraheemProfile.displayName} — profile photo`}
+                    src={profile.avatar}
+                    alt={`${profile.displayName} — profile photo`}
                     className="h-full w-full object-cover"
                     draggable={false}
                   />
@@ -92,16 +136,52 @@ export default function ProfilePage() {
               </div>
 
               <h1 className="mt-5 font-display text-[clamp(2rem,5vw,3rem)] font-semibold leading-none text-[--ink]">
-                {ibraheemProfile.displayName}
+                {isOwner ? (
+                  <input
+                    type="text"
+                    value={profile.displayName}
+                    onChange={(e) => setProfile({ ...profile, displayName: e.target.value })}
+                    className="w-full bg-transparent border-b-2 border-[--ink]/20 focus:border-[--ink] outline-none text-center md:text-left"
+                  />
+                ) : (
+                  profile.displayName
+                )}
               </h1>
               <p className="mt-2 text-[16px] font-medium text-[--ink-soft]">
-                {ibraheemProfile.title}
+                {isOwner ? (
+                  <input
+                    type="text"
+                    value={profile.title}
+                    onChange={(e) => setProfile({ ...profile, title: e.target.value })}
+                    className="w-full bg-transparent border-b-2 border-[--ink]/20 focus:border-[--ink] outline-none text-center md:text-left"
+                  />
+                ) : (
+                  profile.title
+                )}
               </p>
               <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[--ink]/5 px-3 py-1 text-[13px] text-[--ink-mid] ring-1 ring-[--ink]/8">
-                📍 {ibraheemProfile.location}
+                📍 {isOwner ? (
+                  <input
+                    type="text"
+                    value={profile.location}
+                    onChange={(e) => setProfile({ ...profile, location: e.target.value })}
+                    className="bg-transparent border-b border-[--ink]/20 focus:border-[--ink] outline-none w-24"
+                  />
+                ) : (
+                  profile.location
+                )}
               </span>
               <p className="mt-4 max-w-sm text-[15px] leading-relaxed text-[--ink-soft]">
-                {ibraheemProfile.bio}
+                {isOwner ? (
+                  <textarea
+                    value={profile.bio}
+                    onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
+                    className="w-full bg-transparent border-b-2 border-[--ink]/20 focus:border-[--ink] outline-none resize-none"
+                    rows={3}
+                  />
+                ) : (
+                  profile.bio
+                )}
               </p>
 
               <div className="mt-6 flex flex-wrap justify-center gap-2 md:justify-start">
@@ -117,9 +197,9 @@ export default function ProfilePage() {
             {/* actions */}
             <section className="flex flex-col gap-2.5 pt-1" aria-label="Contact actions">
               <div className="eyebrow mb-1 text-[--ink-mid]">Reach me</div>
-              {ibraheemProfile.links.map((l) => (
+              {profile.links.filter(l => l.url && l.url.trim() !== "" && l.url !== "https://").map((l) => (
                 <a
-                  key={l.type}
+                  key={l.type + l.url}
                   href={l.url}
                   target={l.url.startsWith("mailto") ? undefined : "_blank"}
                   rel="noreferrer"
@@ -153,7 +233,7 @@ export default function ProfilePage() {
 
               <div className="mt-3 flex items-center justify-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[--ink-faint]">
                 <span className="h-1.5 w-1.5 rounded-full bg-[--mint]" />
-                u/{ibraheemProfile.username} · One tap. Infinite possibilities.
+                u/{profile.username} · One tap. Infinite possibilities.
               </div>
             </section>
           </div>
@@ -164,12 +244,30 @@ export default function ProfilePage() {
               <NfcWaves className="h-4 w-4 text-[--yellow]" />
               Powered by EdgeTap
             </div>
-            <Link
-              href="/"
-              className="font-display text-[12px] font-bold text-[--ink] transition-opacity hover:opacity-70"
-            >
-              Get your own →
-            </Link>
+            <div className="flex items-center gap-3">
+              {isOwner ? (
+                <button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="btn bg-[--mint] px-4 py-2 text-[12px] font-bold text-[--ink] hover:bg-[--mint-soft] disabled:opacity-50"
+                >
+                  {saving ? "Saving..." : "Save Changes 💾"}
+                </button>
+              ) : (
+                <Link
+                  href="/admin"
+                  className="btn bg-white px-4 py-2 text-[12px] font-bold text-[--ink] ring-1 ring-[--ink]/15 hover:bg-[--cream]"
+                >
+                  Login 🔐
+                </Link>
+              )}
+              <Link
+                href="/"
+                className="font-display text-[12px] font-bold text-[--ink] transition-opacity hover:opacity-70"
+              >
+                Get your own →
+              </Link>
+            </div>
           </footer>
         </div>
       </main>

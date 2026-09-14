@@ -43,6 +43,9 @@ export default function Navbar() {
               <a href={nav.cta.href} className="btn btn-ink hidden px-5 py-2.5 text-[13px] sm:inline-flex">
                 {nav.cta.label} <span aria-hidden="true">→</span>
               </a>
+              <Link href="/admin" className="btn bg-white px-5 py-2.5 text-[13px] ring-1 ring-[--ink]/15 hover:bg-[--cream] sm:inline-flex">
+                Login 🔐
+              </Link>
 
               {/* mobile menu button */}
               <button

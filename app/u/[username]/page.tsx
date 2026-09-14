@@ -34,5 +34,5 @@ export default async function ProfileRoute({
   const { username } = await params;
   if (!known.has(username)) notFound();
 
-  return <ProfilePage />;
+  return <ProfilePage initialProfile={ibraheemProfile} />;
 }
