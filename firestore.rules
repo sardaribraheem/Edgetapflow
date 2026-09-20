@@ -1,0 +1,80 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Admin = any auth UID listed in config/admin_uids.
+    // get() from within rules bypasses normal read permissions, so the doc
+    // itself is never public-readable.
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.uid in get(/databases/$(database)/documents/config/admin_uids).data.uids;
+    }
+
+    // ── Profiles ─────────────────────────────────────────────────
+    // Public read for all published profiles; write restricted to the
+    // authenticated profile owner (or an admin building a client profile).
+    match /profiles/{username} {
+      allow read: if true;
+
+      allow create: if (request.auth != null
+                        && request.resource.data.ownerUid == request.auth.uid
+                        && !resource.data.keys().hasAny(['ownerUid']))
+                    || isAdmin();
+
+      allow update: if (request.auth != null
+                        && resource.data.ownerUid == request.auth.uid
+                        && request.resource.data.ownerUid == resource.data.ownerUid)
+                    || isAdmin();
+
+      allow delete: if (request.auth != null
+                        && resource.data.ownerUid == request.auth.uid)
+                    || isAdmin();
+    }
+
+    // ── Handles ─────────────────────────────────────────────────
+    // Collision-prevention: a handle can only be created when absent, and
+    // only by an admin (or the profile owner claiming it for their uid).
+    match /handles/{username} {
+      allow create: if isAdmin()
+        || (request.auth != null && request.resource.data.ownerUid == request.auth.uid);
+      allow read, update, delete: if false;
+    }
+
+    // ── profilesById (stable-ID mapping) ─────────────────────────
+    match /profilesById/{profileId} {
+      allow read, write: if isAdmin();
+    }
+
+    // ── Orders ──────────────────────────────────────────────────
+    // Public users create orders (guest checkout). Anything about an order
+    // after that — including the private delivery address and payment — is
+    // admin-only. Order documents never surface on /u/<username>.
+    match /orders/{orderId} {
+      // Guest checkout — anyone may place an order.
+      allow create: if true;
+      // After creation, everything (incl. private delivery + payment) is admin-only.
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ── Reviews ─────────────────────────────────────────────────
+    // Public read (they're public praise); create by a signed-in user only.
+    match /reviews/{reviewId} {
+      allow read: if true;
+      allow create: if request.auth != null
+                    && request.resource.data.rating is int
+                    && request.resource.data.rating >= 1
+                    && request.resource.data.rating <= 5;
+      allow update, delete: if false;
+    }
+
+    // ── Admin config (never public-readable) ────────────────────
+    match /config/{doc} {
+      allow read, write: if false;
+    }
+
+    // ── Catch-all deny ──────────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

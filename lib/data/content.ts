@@ -9,7 +9,7 @@ export const nav = {
     { label: "Pricing", href: "/pricing" },
     { label: "About", href: "/u/ibraheem" },
   ],
-  cta: { label: "Get Started", href: "#get-started" },
+  cta: { label: "Get Started", href: "/order" },
 };
 
 // SECTION 02 — "What can we build for you?"

@@ -1,6 +1,6 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { NfcWaves, SparkleDoodle, StarDoodle } from "@/components/doodles";
+import { NfcWaves } from "@/components/doodles";
 import Link from "next/link";
 
 export const metadata = {
@@ -127,12 +127,12 @@ export default function PricingPage() {
                   </div>
                 </div>
 
-                <a
-                  href="#get-started"
+                <Link
+                  href={`/order?plan=${p.name.toLowerCase().split(" ")[0]}`}
                   className={`btn w-full py-4 text-center font-display font-bold ${p.btnTone}`}
                 >
                   Get Started →
-                </a>
+                </Link>
               </div>
             ))}
           </div>

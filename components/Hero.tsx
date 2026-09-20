@@ -164,7 +164,7 @@ export default function Hero() {
 
         {/* CTAs */}
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <Link href="#get-started" className="btn btn-ink px-7 py-3.5 text-[15px]">
+          <Link href="/order" className="btn btn-ink px-7 py-3.5 text-[15px]">
             Get Your EdgeTap <span aria-hidden="true">→</span>
           </Link>
           <Link href="#offer" className="btn btn-ghost px-7 py-3.5 text-[15px]">

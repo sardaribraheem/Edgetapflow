@@ -1,18 +1,42 @@
 import { db } from "./firebase";
-import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  addDoc,
+  collection,
+  getDocs,
+  query,
+  orderBy,
+  limit,
+  runTransaction,
+  serverTimestamp,
+} from "firebase/firestore";
 import { Profile, ibraheemProfile } from "./data/profile";
+import {
+  Order,
+  FulfillmentStatus,
+  canTransition,
+  CustomerInfo,
+} from "./data/order";
+import { Review, ClientProfileMeta } from "./models";
+
+// ── Profiles ──────────────────────────────────────────────────────
 
 export async function getProfile(username: string = "ibraheem"): Promise<Profile> {
-  try {
-    const docRef = doc(db, "profiles", username);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-      return docSnap.data() as Profile;
-    }
-  } catch (error) {
-    console.warn("Firestore fetch failed, falling back to static profile:", error);
+  const docRef = doc(db, "profiles", username);
+  const docSnap = await getDoc(docRef);
+  if (docSnap.exists()) {
+    return docSnap.data() as Profile;
   }
-  return ibraheemProfile;
+  // Document doesn't exist yet — return the static seed for known profiles.
+  // Once Firestore is seeded, this path only hits for unknown usernames.
+  if (username === "ibraheem") {
+    console.info("[EdgeTap] Firestore doc profiles/ibraheem not found; returning static seed data.");
+    return ibraheemProfile;
+  }
+  throw new Error(`Profile not found: profiles/${username}`);
 }
 
 export async function saveProfile(username: string = "ibraheem", profile: Profile): Promise<void> {
@@ -21,5 +45,188 @@ export async function saveProfile(username: string = "ibraheem", profile: Profil
     profile.links = profile.links.slice(0, 10);
   }
   const docRef = doc(db, "profiles", username);
-  await setDoc(docRef, profile, { merge: true });
+  await setDoc(docRef, { ...profile, updatedAt: serverTimestamp() }, { merge: true });
 }
+
+// ── Orders ────────────────────────────────────────────────────────
+
+export function orderNumber(from = new Date()): string {
+  const y = from.getFullYear();
+  const m = String(from.getMonth() + 1).padStart(2, "0");
+  const d = String(from.getDate()).padStart(2, "0");
+  const time = Date.now().toString(36).toUpperCase().slice(-6);
+  return `ET-${y}${m}${d}-${time}`;
+}
+
+/**
+ * Create an order (guest checkout — customer is not signed in).
+ * Throws the raw Firestore error upward so the UI can show it honestly.
+ */
+export async function createOrder(order: Order): Promise<string> {
+  const now = Date.now();
+  const data = {
+    ...order,
+    createdAt: now,
+    updatedAt: now,
+    fulfillment: order.fulfillment || { status: "new", history: [{ status: "new", at: now }] },
+  };
+  const ref = await addDoc(collection(db, "orders"), data);
+  return ref.id;
+}
+
+export async function getOrders(): Promise<Order[]> {
+  const q = query(collection(db, "orders"), orderBy("createdAt", "desc"), limit(200));
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => ({ id: d.id, ...(d.data() as Order) }));
+}
+
+export async function getOrder(orderId: string): Promise<Order> {
+  const snap = await getDoc(doc(db, "orders", orderId));
+  if (!snap.exists()) throw new Error(`Order not found: ${orderId}`);
+  return { id: snap.id, ...(snap.data() as Order) };
+}
+
+export async function adminUpdateOrder(orderId: string, patch: Partial<Order>): Promise<void> {
+  await updateDoc(doc(db, "orders", orderId), { ...patch, updatedAt: Date.now() });
+}
+
+/**
+ * Advance an order's fulfillment status with a valid-transition guard.
+ * `expect` is the status the admin UI believed the order was in — if the
+ * doc moved underneath us we surface a conflict instead of clobbering it.
+ */
+export async function advanceFulfillment(
+  orderId: string,
+  expect: FulfillmentStatus,
+  to: FulfillmentStatus
+): Promise<void> {
+  if (!canTransition(expect, to)) {
+    throw new Error(`Invalid transition: ${expect} → ${to}`);
+  }
+  await runTransaction(db, async (tx) => {
+    const ref = doc(db, "orders", orderId);
+    const snap = await tx.get(ref);
+    if (!snap.exists()) throw new Error(`Order not found: ${orderId}`);
+    const current = (snap.data() as Order).fulfillment.status;
+    if (current !== expect) {
+      throw new Error(`Order moved to "${current}" meanwhile — refresh and try again.`);
+    }
+    const now = Date.now();
+    tx.update(ref, {
+      fulfillment: {
+        status: to,
+        history: [...((snap.data() as Order).fulfillment?.history || []), { status: to as string, at: now }],
+      },
+      updatedAt: now,
+    });
+  });
+}
+
+// ── Reviews ───────────────────────────────────────────────────────
+
+export async function createReview(review: Review): Promise<void> {
+  await addDoc(collection(db, "reviews"), {
+    ...review,
+    createdAt: review.createdAt || Date.now(),
+  });
+}
+
+export async function listReviews(max = 20): Promise<Review[]> {
+  const q = query(collection(db, "reviews"), orderBy("createdAt", "desc"), limit(max));
+  const snap = await getDocs(q);
+  return snap.docs.map((d) => ({ id: d.id, ...(d.data() as Review) }));
+}
+
+// ── Username / handles ────────────────────────────────────────────
+
+export async function usernameAvailable(username: string): Promise<boolean> {
+  const clean = username.toLowerCase().replace(/[^a-z0-9._-]/g, "").slice(0, 30);
+  if (!clean) return false;
+  // Reserved: the existing brand profile.
+  if (clean === "ibraheem") return false;
+  const [profileSnap, handleSnap] = await Promise.all([
+    getDoc(doc(db, "profiles", clean)),
+    getDoc(doc(db, "handles", clean)),
+  ]);
+  return !profileSnap.exists() && !handleSnap.exists();
+}
+
+/** Suggest a handle from the customer's name. Best-effort without Firestore,
+ * then refines the number suffix if the base is taken. */
+export async function suggestUsername(firstName?: string, lastName?: string): Promise<string> {
+  const base = ((firstName || "").trim().toLowerCase() + (lastName ? lastName.trim().toLowerCase() : ""))
+    .replace(/[^a-z0-9]/g, "")
+    .slice(0, 24);
+  const start = base || "profile";
+  if (await usernameAvailable(start)) return start;
+  for (let i = 2; i < 100; i++) {
+    if (await usernameAvailable(`${start}${i}`)) return `${start}${i}`;
+  }
+  return start;
+}
+
+// ── Create Client Profile (admin) ─────────────────────────────────
+
+/**
+ * Admin action: turn an order's profileDraft into a live EdgeTap profile.
+ * Creates (in one transaction):
+ *   profiles/{username}   → the public profile
+ *   handles/{username}    → claims the handle (collision-safe)
+ *   profilesById/{id}     → stable-ID → username mapping
+ * then updates the order with the profile link + fulfillment status.
+ */
+export async function createClientProfileFromOrder(
+  order: Order,
+  username: string
+): Promise<{ profileId: string; profileUrl: string }> {
+  const clean = username.toLowerCase().replace(/[^a-z0-9._-]/g, "").slice(0, 30);
+  if (!clean) throw new Error("Username must be at least one letter, number, dot, dash or underscore.");
+  if (!(await usernameAvailable(clean)) && clean !== order.usernameFinal) {
+    throw new Error(`Username "/${clean}" is already taken.`);
+  }
+
+  const { profileUrl } = await import("./site");
+  const profileId = crypto.randomUUID();
+  const now = Date.now();
+  const avatar = order.profileDraft.avatarUrl?.startsWith("http")
+    ? order.profileDraft.avatarUrl
+    : "/ibraheem.png"; // placeholder until a real avatar is uploaded
+
+  const profile: Profile = {
+    username: clean,
+    displayName: order.profileDraft.displayName,
+    firstName: order.customer.fullName.split(" ")[0] || "",
+    lastName: order.customer.fullName.split(" ").slice(1).join(" "),
+    title: "EdgeTap Profile",
+    bio: order.profileDraft.bio || "",
+    location: order.customer.city || "Pakistan",
+    avatar,
+    links: (order.profileDraft.links || []).filter((l) => l.url && l.url.trim() !== "" && l.url !== "https://").slice(0, 10),
+    profileId,
+    active: true,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  await runTransaction(db, async (tx) => {
+    tx.set(doc(db, "profiles", clean), profile);
+    tx.set(doc(db, "handles", clean), { profileId, createdAt: now });
+    const meta: ClientProfileMeta = { profileId, username: clean, active: true, createdAt: now };
+    tx.set(doc(db, "profilesById", profileId), meta);
+    tx.update(doc(db, "orders", order.id!), {
+      profileId,
+      usernameFinal: clean,
+      nfcUrl: profileUrl(clean),
+      fulfillment: {
+        status: "profile_created",
+        history: [...(order.fulfillment?.history || []), { status: "profile_created", at: now }],
+      },
+      updatedAt: now,
+    });
+  });
+
+  return { profileId, profileUrl: profileUrl(clean) };
+}
+
+// Re-export CustomerInfo type for callers that build order payloads.
+export type { CustomerInfo };

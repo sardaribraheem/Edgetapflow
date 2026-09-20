@@ -6,7 +6,7 @@ import { ibraheemProfile, Profile } from "@/lib/data/profile";
 import { getProfile } from "@/lib/firestore";
 import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged, User } from "firebase/auth";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 import DoodleField from "./DoodleField";
 import {
   NfcWaves,
@@ -46,21 +46,29 @@ const iconFor = (type: string, className: string) => {
 // The profile page, framed like the EdgeTap home page: cream paper,
 // floating doodles, display type. Mobile-first card that opens into
 // a two-column "business card" on desktop.
-export default function ProfilePage({ initialProfile = ibraheemProfile }: { initialProfile?: Profile }) {
+export default function ProfilePage({
+  initialProfile = ibraheemProfile,
+  previewOnly = false,
+}: {
+  initialProfile?: Profile;
+  previewOnly?: boolean;
+}) {
   const [profile, setProfile] = useState<Profile>(initialProfile);
   const [user, setUser] = useState<User | null>(null);
   const [isOwner, setIsOwner] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
+    if (previewOnly) return;
     async function loadDynamicProfile() {
       const dynamicProfile = await getProfile(initialProfile.username);
       setProfile(dynamicProfile);
     }
     loadDynamicProfile();
-  }, [initialProfile.username]);
+  }, [initialProfile.username, previewOnly]);
 
   useEffect(() => {
+    if (previewOnly) return;
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
       if (currentUser && profile.ownerUid) {
@@ -68,13 +76,19 @@ export default function ProfilePage({ initialProfile = ibraheemProfile }: { init
       }
     });
     return () => unsubscribe();
-  }, [profile.ownerUid]);
+  }, [profile.ownerUid, previewOnly]);
 
   const handleSave = async () => {
     setSaving(true);
     try {
       const docRef = doc(db, "profiles", profile.username);
-      await updateDoc(docRef, profile);
+      const toSave = { ...profile };
+      // Stamp the authenticated owner's UID if missing so the Firestore
+      // create/update rules (ownerUid == request.auth.uid) pass on first save.
+      if (!toSave.ownerUid && user) {
+        toSave.ownerUid = user.uid;
+      }
+      await setDoc(docRef, toSave, { merge: true });
       alert("Profile updated successfully!");
     } catch (error) {
       console.error("Error updating profile:", error);
@@ -238,8 +252,8 @@ export default function ProfilePage({ initialProfile = ibraheemProfile }: { init
             </section>
           </div>
 
-          {/* foot bar */}
-          <footer className="flex items-center justify-between gap-3 border-t border-[--ink]/8 bg-[--paper-2]/60 px-7 py-4 sm:px-10 md:px-12">
+          {/* foot bar (hidden in preview mode — the /order shell provides Edit/Continue) */}
+          <footer className={`flex items-center justify-between gap-3 border-t border-[--ink]/8 bg-[--paper-2]/60 px-7 py-4 sm:px-10 md:px-12 ${previewOnly ? "hidden" : ""}`}>
             <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[--ink-faint]">
               <NfcWaves className="h-4 w-4 text-[--yellow]" />
               Powered by EdgeTap

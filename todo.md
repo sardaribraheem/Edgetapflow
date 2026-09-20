@@ -17,6 +17,22 @@ Covers the marketing site + `/u/[username]` profile experience. Adapted from the
 - [x] Multi-breakpoint Playwright QA (1440/390) — hero overlap fixes applied
 - [x] Production build passes (`npm run build`), all routes static
 - [x] Fix profile title duplication / broken avatar URL
+- [x] Firebase SDK wired (`firebase ^12.19.0`), `.env.local` → `edgetapflow` project
+- [x] `/order` — 7-step customer purchase wizard (Card → Profile → Links → Preview → Delivery → Payment → Done)
+- [x] `/admin` — secure sign-in gate + full AdminApp shell (Dashboard/Orders/Clients/Profiles/Reviews/Settings)
+- [x] Fulfillment state machine (`lib/data/order.ts`) — `canTransition()` guard + `runTransaction` race prevention
+- [x] Order creation → Firestore (guest checkout, no auth required)
+- [x] Admin: order detail, fulfillment transitions, Create Client Profile from order
+- [x] Admin: QR code + NFC destination + production summary block
+- [x] `profileId` (stable UUID) → mutable username via `profilesById` collection
+- [x] Dynamic `/u/[username]` — client-side Firestore resolution (no static per-customer pages)
+- [x] Firebase Hosting rewrite `/u/**` → `/u/ibraheem` for client-side boot
+- [x] Review data model (reviews collection, public read/auth create)
+- [x] Firestore security rules — profiles, handles, orders, reviews, config/admin_uids
+- [x] Storage rules — avatars, avatarInbox (guest), orderInbox (custom designs)
+- [x] `lib/site.ts` — `APP_URL` single source for NFC/QR base
+- [x] `lib/qr.ts` — client-side QR data URL generation
+- [x] `BUILD.md` updated with complete workflow architecture + data model
 
 ---
 
@@ -57,49 +73,61 @@ Covers the marketing site + `/u/[username]` profile experience. Adapted from the
 
 ## 🌱 Firebase Implementation Plan
 
-Current site: fully static, no Firebase. The old project had Firebase wired but **no credentials/deployed rules**. Don't re-wire until the following is done or profile editing is actually needed.
+> **Status (2026-09-15):** All code, rules, and UI are **fully implemented** but blocked at the GCP billing layer. The `edgetapflow` project has `billingEnabled: false` — Firestore DB is not active, Auth is not provisioned, Storage is not provisioned. One Firebase Console session is needed to go live.
 
-### Phase 0 — Decide whether you need Firebase yet
-- The marketing site + static `/u/ibraheem` profile need **no backend**.
-- Firebase becomes worth wiring when: users need to **create/edit** their own profiles, or NFC taps need per-card analytics.
-- If you're launching the MVP with just Ibraheem's card: **do not add Firebase yet** — keep it static (simpler, faster, more secure).
+### Phase 0 — Project setup ✅ DONE
+- [x] Firebase web app registered for `edgetapflow`
+- [x] `npm i firebase` (v12.19.0) — SDK wired in `lib/firebase.ts`
+- [x] `.env.local` with real `edgetapflow` API key, auth domain, storage bucket, sender ID, app ID
+- [x] `lib/firebase.ts` — fails loudly if env vars are missing
 
-### Phase 1 — Project setup (if/when proceeding)
-- [ ] Create separate Firebase project (or Dev/Prod setup) at console.firebase.google.com
-- [ ] `npm i firebase` + generate `lib/firebase/app.ts` (no manual config blob — use `firebase_options.ts` via FlutterFire-style web config or env vars)
-- [ ] Set up `NEXT_PUBLIC_FIREBASE_*` env vars; **never** commit secrets
-- [ ] Add `lib/firebase/firestore.ts` with typed helpers, and `lib/data/profile.ts` stays the static fallback
-- [ ] Deploy **Firestore Security Rules** before first client read/write (rules disabled = wide open data)
+### Phase 1 — Data model ✅ DONE (code + rules)
+- [x] `profiles/{username}` — public read, owner+admin write
+- [x] `handles/{username}` — collision-safe handle registry
+- [x] `profilesById/{profileId}` — stable UUID → mutable username
+- [x] `orders/{orderId}` — guest create, admin read/update/delete
+- [x] `reviews/{id}` — public read, authenticated create
+- [x] `config/admin_uids` — deny-all (used by rules `get()`)
+- [x] Firestore security rules deployed to `firestore.rules`
+- [x] Storage rules: `avatars/`, `avatarInbox/`, `orderInbox/`
 
-### Phase 2 — Data model (minimal)
-- [ ] `profiles/{username}` — public read for `u/:username`, write only by owner (Auth UID)
-- [ ] `users/{uid}` — email, displayName, createdAt, plan (private)
-- [ ] `analytics/taps/{profileId}/{tapId}` — device type, timestamp, location (agg) — collect **only** with consent
-- [ ] Future: `businesses/`, `experiences/`, `menus/`, `reviews/`
+### Phase 2 — Auth + Admin ✅ DONE (code, blocked by billing)
+- [x] Firebase Auth wired (email/password)
+- [x] Admin sign-in gate — honest error surfaces (no fallback)
+- [x] AdminApp shell: Dashboard, Orders, Clients, Profiles, Reviews, Settings
+- [x] Order management: list, detail, fulfillment transitions, Create Client Profile
+- [x] QR/NFC production summary
 
-### Phase 3 — Auth + profile editor (v1.0)
-- [ ] Firebase Auth (email/password + Google)
-- [ ] Dashboard route `/dashboard` — sign in, manage profile
-- [ ] Visual editor: reorder links, edit bio/avatar, set accent color
-- [ ] Image upload to Firebase Storage with size/type validation + signed CORS
-- [ ] QR code generator per profile (server-side, cached)
-- [ ] Custom domains (`profile.example.com`)
+### Phase 3 — Customer workflow ✅ DONE (code, blocked by billing)
+- [x] `/order` — 7-step purchase wizard (card → profile → links → preview → delivery → payment → done)
+- [x] Guest checkout (no auth required for order creation)
+- [x] Profile preview reuses real `ProfilePage` component
+- [x] Avatar upload to `avatarInbox/` (public read for profile display)
+- [x] Custom card design upload to `orderInbox/` (admin-only)
 
-### Phase 4 — Analytics (only with consent + privacy policy live)
+### Phase 4 — Post-billing (do this in Firebase Console)
+- [ ] **Enable billing** on `edgetapflow` project (Spark free tier is fine)
+- [ ] **Create Firestore database** (Database → Create → production mode → `(default)`)
+- [ ] **Enable Authentication** (Authentication → Get started → Email/Password)
+- [ ] **Create owner account** (Auth → Users → Add user → record UID)
+- [ ] **Seed `config/admin_uids`** with the owner UID
+- [ ] **Deploy rules**: `npx firebase-tools deploy --only firestore:rules,storage:rules --project edgetapflow`
+- [ ] **Verify**: create an order via `/order`, see it in `/admin`, create profile, check `/u/<username>`
+
+### Phase 5 — Analytics (only with consent + privacy policy live)
 - [ ] Tap events: log to `analytics/taps` on profile load (load "1" tap per URL hit)
 - [ ] Dashboard to view taps/clicks per profile
 - [ ] Aggregate data — never raw falls into logs
 
-### Phase 5 — Monetization & scale (v2.0)
-- [ ] Stripe subscriptions (Business tier), order/inventory/fulfillment flow
+### Phase 6 — Monetization & scale (v2.0)
+- [ ] Real online payment provider (Stripe, JazzCash, etc.) — currently placeholder `pending` status
 - [ ] Team/workspace management for businesses
 - [ ] Public API + webhooks for tap events
 
-### Firebase Security checklist
-- [ ] Firestore rules locked to `request.auth != null` + ownership checks
-- [ ] Storage rules: authenticated write, size/type restriction, thumbnails only where needed
-- [ ] Enable App Check (reCAPTCHA) before relying on anything sensitive
-- [ ] Never ship demo/expo API keys
+### Firebase Security checklist ✅
+- [x] Firestore rules: profiles public read/owner+admin write; orders guest create/admin-only read; reviews public read/auth-create; config deny-all
+- [x] Storage rules: avatars owner-write/public-read; avatarInbox public-read/anonymous-create; orderInbox admin-only
+- [ ] Enable App Check (reCAPTCHA) after billing is enabled
 
 ---
 
@@ -144,13 +172,14 @@ Current site: fully static, no Firebase. The old project had Firebase wired but 
 ## ⚠️ Risks & Open Questions
 
 1. **NFC on iOS** — "Works on iPhone & Android" needs the iOS App Store universal-link/background-NFC caveat or an adjustment to the claim until it's demonstrably true.
-2. **Domain placeholder** — `edgetap.com` in env isn't owned/verified yet; publishing with the wrong domain in meta would leak into share cards.
-3. **Legal pages currently absent** — cannot launch publicly without Privacy + Terms + Cookie notice. This is the top blocker.
+2. **Domain placeholder** — `edgetapflow.web.app` is the live domain; `edgetap.com` in env isn't owned/verified yet. Publishing with the wrong domain in meta would leak into share cards.
+3. **Legal pages currently absent** — Privacy, Terms, Cookie, and Refund pages are all needed before public launch. This is the top launch blocker.
 4. **Fake reviews** — shipping labeled placeholders as testimonials is a brand-integrity (and, in some jurisdictions, consumer-law) risk. Remove or go real.
 5. **Analytics creep** — the temptation to add GA "real quick" before a consent flow lands is the most common GDPR mistake. Resist until the cookie inventory + banner exist.
-6. **Firebase premature wiring** — adding Firebase to a static site adds attack surface and compile-time complexity with zero benefit until user-editable profiles exist. Keep static.
+6. **Firebase billing** — all code is implemented and ready; one Firebase Console session (enable billing → create Firestore → enable Auth → seed admin) brings everything to life.
 7. **Pakistan data-protection bill** — pending law should be the compliance target even outside the EU; "GDPR-minded" practice is the safe baseline.
+8. **Refund policy** — required before accepting payment; document order-cancellation, replacement/defective-card policy.
 
 ---
 
-*Last updated: 2026-09-09*
+*Last updated: 2026-09-15*

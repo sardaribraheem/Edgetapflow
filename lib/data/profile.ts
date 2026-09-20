@@ -21,6 +21,10 @@ export type Profile = {
   avatar: string;
   links: ProfileLink[];
   ownerUid?: string; // Firebase Auth UID of the profile owner
+  profileId?: string; // stable internal profile ID (username is a mutable public handle)
+  active?: boolean; // published / hidden
+  createdAt?: number; // epoch ms
+  updatedAt?: number; // epoch ms
 };
 
 export const ibraheemProfile: Profile = {

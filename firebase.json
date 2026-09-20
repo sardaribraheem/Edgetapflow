@@ -8,11 +8,22 @@
     ],
     "rewrites": [
       {
+        "source": "/u/**",
+        "destination": "/u/ibraheem"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }
     ],
     "cleanUrls": true,
     "trailingSlash": false
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
   }
 }

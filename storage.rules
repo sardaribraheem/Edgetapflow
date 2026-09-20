@@ -1,0 +1,52 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ── Profile avatars ───────────────────────────────────────
+    // path: avatars/{uid}/{filename}
+    // Public read so anyone can display the profile photo.
+    // Write restricted to the authenticated user's own folder.
+    match /avatars/{uid}/{allPaths=**} {
+      allow read: if true;
+
+      allow write: if request.auth != null
+                   && request.auth.uid == uid
+                   && request.resource.size < 5 * 1024 * 1024  // max 5 MB
+                   && request.resource.contentType.matches('image/.*'); // images only
+    }
+
+    // ── Public avatar inbox (guest checkout) ───────────────────
+    // path: avatarInbox/{clientToken}/{filename}
+    // Guests upload their profile picture during checkout with no account.
+    // The clientToken is a cryptographically-random folder name generated
+    // client-side, so a guest can only write to folders they own. Read is
+    // public because the file becomes the public profile photo on /u/<name>.
+    // No delete rule: nothing (not even admins) may delete via rules alone —
+    // a backend is the right place for that, and isn't wired in yet.
+    match /avatarInbox/{clientToken}/{filename} {
+      allow create, update: if request.resource.size < 5 * 1024 * 1024   // ≤ 5 MB
+                             && request.resource.contentType.matches('image/.*');
+      allow read: if true;
+    }
+
+    // ── Custom card designs / order artwork ───────────────────
+    // path: orderInbox/{clientToken}/{filename}
+    // Guests upload their Custom artwork during checkout. The clientToken is
+    // a cryptographically-random folder name generated client-side, so a guest
+    // can write only to folders they own (nobody can guess another token) and
+    // can never read anyone's upload. Admin may read/write for production.
+    function isAdmin() {
+      return request.auth != null
+        && request.auth.uid in firestore.get(/databases/$(database)/documents/config/admin_uids).data.uids;
+    }
+    match /orderInbox/{clientToken}/{filename} {
+      allow create, update: if request.resource.size < 25 * 1024 * 1024; // art ≤ 25 MB
+      allow read, delete: if isAdmin();
+    }
+
+    // ── Catch-all deny ────────────────────────────────────────
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

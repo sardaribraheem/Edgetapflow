@@ -7,7 +7,6 @@ import ReviewExperience from "./ReviewExperience";
 import {
   ArrowCurveDoodle,
   ArrowDoodle,
-  NfcWaves,
   SparkleDoodle,
   StarDoodle,
 } from "./doodles";
