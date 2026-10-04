@@ -147,7 +147,7 @@ export default function PricingPage() {
               <Link href="/admin" className="btn btn-ink px-6 py-3">
                 Admin Dashboard →
               </Link>
-              <a href="mailto:support@edgetap.flow" className="btn bg-white px-6 py-3 ring-1 ring-[--ink]/15 hover:bg-[--cream]">
+              <a href="mailto:sardaribraheem277@gmail.com" className="btn bg-white px-6 py-3 text-[--ink] ring-1 ring-[--ink]/15 hover:bg-[--cream]">
                 Contact Sales ✉️
               </a>
             </div>

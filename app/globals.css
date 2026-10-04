@@ -238,6 +238,20 @@ body {
   will-change: transform;
   cursor: pointer;
 }
+.btn:focus-visible,
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid var(--yellow);
+  outline-offset: 3px;
+}
+.btn:disabled,
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
 .btn:active {
   transform: translateY(1px) scale(0.99);
 }
@@ -251,6 +265,10 @@ body {
   transform: translateY(-2px);
   background: var(--ink-2);
 }
+.btn-ink:hover,
+.btn-ink:focus-visible {
+  color: var(--cream);
+}
 
 .btn-yellow {
   background: var(--yellow);
@@ -259,6 +277,22 @@ body {
 }
 .btn-yellow:hover {
   transform: translateY(-2px);
+}
+.btn-yellow:hover,
+.btn-yellow:focus-visible {
+  color: var(--ink);
+}
+
+.admin-nav-button {
+  color: var(--ink-soft);
+}
+.admin-nav-button:hover,
+.admin-nav-button:focus-visible {
+  color: var(--ink);
+}
+.admin-nav-button[aria-current="page"] {
+  background: var(--ink);
+  color: #fff;
 }
 
 .btn-ghost {

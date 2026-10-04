@@ -1,5 +1,3 @@
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import OrderWizard from "@/components/order/OrderWizard";
 
 export const metadata = {
@@ -9,13 +7,5 @@ export const metadata = {
 };
 
 export default function OrderPage() {
-  return (
-    <div className="flex min-h-screen flex-col bg-[--cream]">
-      <Navbar />
-      <main className="flex-1">
-        <OrderWizard />
-      </main>
-      <Footer />
-    </div>
-  );
+  return <OrderWizard />;
 }

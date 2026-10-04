@@ -15,17 +15,13 @@ service firebase.storage {
                    && request.resource.contentType.matches('image/.*'); // images only
     }
 
-    // ── Public avatar inbox (guest checkout) ───────────────────
-    // path: avatarInbox/{clientToken}/{filename}
-    // Guests upload their profile picture during checkout with no account.
-    // The clientToken is a cryptographically-random folder name generated
-    // client-side, so a guest can only write to folders they own. Read is
-    // public because the file becomes the public profile photo on /u/<name>.
+    // ── Legacy avatar inbox ───────────────────────────────────
+    // Kept read-only for previously uploaded files. New checkout uploads use
+    // avatars/{uid} after Firebase Authentication.
     // No delete rule: nothing (not even admins) may delete via rules alone —
     // a backend is the right place for that, and isn't wired in yet.
     match /avatarInbox/{clientToken}/{filename} {
-      allow create, update: if request.resource.size < 5 * 1024 * 1024   // ≤ 5 MB
-                             && request.resource.contentType.matches('image/.*');
+      allow create, update: if false;
       allow read: if true;
     }
 
@@ -37,11 +33,22 @@ service firebase.storage {
     // can never read anyone's upload. Admin may read/write for production.
     function isAdmin() {
       return request.auth != null
-        && request.auth.uid in firestore.get(/databases/$(database)/documents/config/admin_uids).data.uids;
+        && request.auth.uid in firestore.get(/databases/(default)/documents/config/admin_uids).data.uids;
     }
-    match /orderInbox/{clientToken}/{filename} {
-      allow create, update: if request.resource.size < 25 * 1024 * 1024; // art ≤ 25 MB
+    match /orderInbox/{uid}/{filename} {
+      allow create, update: if request.auth != null
+                             && request.auth.uid == uid
+                             && request.resource.size < 25 * 1024 * 1024
+                             && request.resource.contentType.matches('image/.*'); // art ≤ 25 MB
       allow read, delete: if isAdmin();
+    }
+
+    match /paymentReceipts/{uid}/{filename} {
+      allow write: if request.auth != null
+                   && request.auth.uid == uid
+                   && request.resource.size < 8 * 1024 * 1024
+                   && request.resource.contentType.matches('image/.*');
+      allow read: if isAdmin() || (request.auth != null && request.auth.uid == uid);
     }
 
     // ── Catch-all deny ────────────────────────────────────────

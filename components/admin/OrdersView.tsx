@@ -6,6 +6,7 @@ import type { Order, FulfillmentStatus, CardTemplateId } from "@/lib/data/order"
 import { CARD_TEMPLATES, canTransition, FULFILLMENT_FLOW } from "@/lib/data/order";
 import {
   advanceFulfillment,
+  confirmPayment,
   createClientProfileFromOrder,
   getOrders,
   usernameAvailable,
@@ -84,12 +85,26 @@ export default function OrdersView({ orders, onChanged }: Props) {
     }
   };
 
+  const confirm = async (o: Order) => {
+    setBusy(o.id!);
+    setError("");
+    try {
+      await confirmPayment(o);
+      setToast(`${o.orderNumber} payment confirmed`);
+      onChanged();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Couldn't confirm payment.");
+    } finally {
+      setBusy(null);
+    }
+  };
+
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-2xl font-bold text-[--ink]">Orders</h1>
-          <p className="text-sm text-[--ink-soft]">{orders.length} total · guest checkout.</p>
+          <p className="text-sm text-[--ink-soft]">{orders.length} total · authenticated checkout.</p>
         </div>
         <button
           onClick={async () => {
@@ -181,6 +196,7 @@ export default function OrdersView({ orders, onChanged }: Props) {
               order={selected}
               busy={busy === selected.id}
               onAdvance={(next) => advance(selected, next)}
+              onConfirmPayment={() => confirm(selected)}
               onCreateProfile={() => setCreatingProfileFor(selected)}
             />
           ) : (
@@ -246,11 +262,13 @@ function OrderDetail({
   busy,
   onAdvance,
   onCreateProfile,
+  onConfirmPayment,
 }: {
   order: Order;
   busy: boolean;
   onAdvance: (next: FulfillmentStatus) => void;
   onCreateProfile: () => void;
+  onConfirmPayment: () => void;
 }) {
   const validNext = FULFILLMENT_FLOW.filter((s) => canTransition(order.fulfillment.status, s));
   const inProductionPhase = ["profile_created", "production_ready", "printing", "ready_for_nfc", "nfc_programmed", "qa_passed"].includes(
@@ -316,9 +334,14 @@ function OrderDetail({
             <p className="text-[12px] text-[--ink-faint]">No further transitions for this state.</p>
           )}
         </div>
-        {!order.profileId && (
+        {order.payment.status !== "paid" && (
+          <button onClick={onConfirmPayment} disabled={busy} className="rounded-xl bg-[--mint] px-5 py-2.5 text-[13px] font-bold text-[--ink]">
+            Confirm Payment
+          </button>
+        )}
+        {!order.profileId && order.payment.status === "paid" && (
           <button onClick={onCreateProfile} className="btn btn-ink px-5 py-2.5 text-[13px]">
-            {order.fulfillment.status === "cancelled" ? "Create Profile (cancelled?)" : "+ Create Client Profile"}
+            Generate Profile
           </button>
         )}
       </div>
@@ -333,7 +356,7 @@ function OrderDetail({
 
         <Section title="CARD" eye={`qty ×${order.card.quantity}`}>
           <Row k="Template" v={templateName} />
-          {order.card.template === "custom" && order.card.customDesignUrl ? (
+          {order.card.template === "upload" && order.card.customDesignUrl ? (
             <Row k="Custom art" v={<span className="break-all">{order.card.customDesignUrl}</span>} />
           ) : (
             <Row k="Custom art" v="—" />
@@ -360,7 +383,7 @@ function OrderDetail({
           )}
           <div className="min-w-0">
             <p className="font-display font-bold text-[--ink]">{order.profileDraft.displayName || "—"}</p>
-            <p className="text-[13px] text-[--ink-soft]">{order.profileDraft.bio || "No bio."}</p>
+            <p className="text-[13px] text-[--ink-soft]">{order.profileDraft.title || ""}{order.profileDraft.title && order.profileDraft.bio ? " · " : ""}{order.profileDraft.bio || ""}</p>
             {order.profileDraft.usernameSuggested && (
               <p className="text-[12px] text-[--ink-faint]">Suggested handle: /u/{order.profileDraft.usernameSuggested}</p>
             )}
@@ -389,8 +412,8 @@ function OrderDetail({
         <Row k="Postal code" v={order.customer.postalCode || "—"} />
       </Section>
 
-      <Section title="PAYMENT" eye={order.payment.method === "cod" ? "cash on delivery" : "online"}>
-        <Row k="Method" v={order.payment.method === "cod" ? "Cash on delivery" : "Online"} />
+      <Section title="PAYMENT" eye="manual verification">
+          <Row k="Method" v={order.payment.method} />
         <Row
           k="Status"
           v={
@@ -400,9 +423,10 @@ function OrderDetail({
           }
         />
         {order.payment.providerRef && <Row k="Provider ref" v={order.payment.providerRef} />}
+        {order.payment.reference && <Row k="Transaction/reference" v={order.payment.reference} />}
+        {order.payment.receiptUrl && <Row k="Receipt" v={<a href={order.payment.receiptUrl} target="_blank" rel="noreferrer" className="text-[--sky] underline">Open receipt</a>} />}
         <p className="mt-2 text-[11px] leading-relaxed text-[--ink-faint]">
-          Online payment is a placeholder today — no provider is connected, so status stays <span className="font-semibold">&quot;pending&quot;</span> until one is integrated
-          (never faked as paid).
+          Confirm the receipt manually before moving this order to paid.
         </p>
       </Section>
 
@@ -427,6 +451,9 @@ function OrderDetail({
 
 function CardThumb({ template }: { template: CardTemplateId }) {
   const art = CARD_TEMPLATE_ART[template] ?? CARD_TEMPLATE_ART.classic;
+  if (["simple", "lux", "wood", "inverted"].includes(template)) {
+    return <img src={`/card-designs/${template}.png`} alt={`${template} card design`} className="h-20 w-32 rounded-xl object-cover ring-1 ring-[--ink]/10" />;
+  }
   return (
     <div className={`grid h-20 w-32 place-items-center rounded-xl ring-1 ring-[--ink]/10 ${art.bg}`}>
       <div className="text-center">
@@ -454,7 +481,7 @@ function ProductionSummary({ order }: { order: Order }) {
     `Card: ${order.card.template} ×${order.card.quantity}\n` +
     `Profile URL: ${url}\n` +
     `NFC destination: ${url}\n` +
-    (order.card.template === "custom" && order.card.customDesignUrl ? `Custom art: ${order.card.customDesignUrl}\n` : "") +
+          (order.card.template === "upload" && order.card.customDesignUrl ? `Custom art: ${order.card.customDesignUrl}\n` : "") +
     `Status: ${order.fulfillment.status}`;
 
   return (

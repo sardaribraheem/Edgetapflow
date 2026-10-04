@@ -46,12 +46,21 @@ service cloud.firestore {
     }
 
     // ── Orders ──────────────────────────────────────────────────
-    // Public users create orders (guest checkout). Anything about an order
+    // Authenticated customers create orders. Anything about an order
     // after that — including the private delivery address and payment — is
     // admin-only. Order documents never surface on /u/<username>.
     match /orders/{orderId} {
-      // Guest checkout — anyone may place an order.
-      allow create: if true;
+      // Checkout requires a Firebase customer account so the created profile
+      // can be owned and edited by that customer later.
+      allow create: if request.auth != null
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.card.quantity is int
+        && request.resource.data.card.quantity >= 1
+        && request.resource.data.card.quantity <= 20
+        && request.resource.data.subtotal == request.resource.data.card.quantity * 999
+        && request.resource.data.deliveryFee == null
+        && request.resource.data.total == null
+        && request.resource.data.payment.status == 'pending';
       // After creation, everything (incl. private delivery + payment) is admin-only.
       allow read, update, delete: if isAdmin();
     }

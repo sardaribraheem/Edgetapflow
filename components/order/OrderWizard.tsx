@@ -10,42 +10,52 @@ import {
   Order,
   CustomerInfo,
   PaymentInfo,
+  DeliveryMethod,
   LINK_PRESETS,
   LINK_ACCENTS,
-  FULFILLMENT_STATES,
+  calculateSubtotal,
 } from "@/lib/data/order";
 import type { Profile, ProfileLink } from "@/lib/data/profile";
-import { createOrder } from "@/lib/firestore";
-import { uploadCustomDesign, uploadInboxAvatar, fileToDataUrl } from "@/lib/storage";
-import { APP_URL } from "@/lib/site";
+import { createOrder, orderNumber } from "@/lib/firestore";
+import { uploadCustomDesign, uploadPublicAvatar, uploadPaymentReceipt, fileToDataUrl } from "@/lib/storage";
+import { auth } from "@/lib/firebase";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 
 const STEPS = ["Card", "Profile", "Links", "Preview", "Delivery", "Payment", "Done"];
-
-const PLACEHOLDER_AVATAR = `${APP_URL}/ibraheem.png`;
 
 type WizardDraft = {
   plan: Order["plan"];
   cardTemplate: CardTemplateId;
+  quantity: number;
   customDesignUrl?: string;
   customDesignPreview?: string; // client-side data URL for instant preview
   avatarUrl?: string;
   avatarPreview?: string; // client-side data URL for instant preview
+  avatarUploadPending: boolean;
   displayName: string;
+  title: string;
   bio: string;
   links: ProfileLink[];
   customer: CustomerInfo;
+  deliveryMethod: DeliveryMethod;
   payment: PaymentInfo;
 };
+
+type AccountMode = "create" | "signIn";
 
 function blankDraft(): WizardDraft {
   return {
     plan: "standard",
-    cardTemplate: "classic",
+    cardTemplate: "simple",
+    quantity: 1,
     displayName: "",
+    title: "",
     bio: "",
     links: [],
-    customer: { fullName: "", phone: "", email: "", address: "", city: "" },
-    payment: { method: "online", status: "pending" },
+    avatarUploadPending: false,
+    customer: { fullName: "", phone: "", email: "", address: "" },
+    deliveryMethod: "delivery",
+    payment: { method: "raast", status: "pending" },
   };
 }
 
@@ -56,10 +66,11 @@ export default function OrderWizard() {
   const [submitting, setSubmitting] = useState(false);
   const [placed, setPlaced] = useState<Order | null>(null);
   const [resubmitKey, setResubmitKey] = useState(0); // bump to retry a failed submit
-  // Random inbox token per mount — the storage rule lets anonymous uploads
-  // into orderInbox/<this token>/ so anyone can send card artwork.
-  const [clientToken] = useState(() => (typeof crypto !== "undefined" ? crypto.randomUUID() : "token"));
-
+  const [accountMode, setAccountMode] = useState<AccountMode>("create");
+  const [accountPassword, setAccountPassword] = useState("");
+  const [paymentReceipt, setPaymentReceipt] = useState<File | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [customDesignFile, setCustomDesignFile] = useState<File | null>(null);
   // Seed plan from /order?plan=…  (query read client-side — static-export safe).
   // Deferred so the plan applies after mount without a hydration mismatch.
   useEffect(() => {
@@ -83,10 +94,10 @@ export default function OrderWizard() {
       displayName: draft.displayName || "Your Name",
       firstName,
       lastName,
-      title: "EdgeTap Profile",
-      bio: draft.bio || "Your short bio will appear here.",
-      location: draft.customer.city || "Your city",
-      avatar: draft.avatarPreview || draft.avatarUrl || PLACEHOLDER_AVATAR,
+      title: draft.title,
+      bio: draft.bio,
+      location: draft.customer.city || "",
+      avatar: draft.avatarPreview || draft.avatarUrl || "",
       links: draft.links.filter((l) => l.url && l.url.trim() !== "" && l.url !== "https://"),
     };
   }, [draft]);
@@ -94,15 +105,17 @@ export default function OrderWizard() {
   const validateStep = (): string => {
     switch (step) {
       case 0:
-        if (draft.cardTemplate === "custom" && !draft.customDesignUrl) {
-          return "Choose Custom, then upload your card design (or paste an image URL).";
+        if (draft.cardTemplate === "upload" && !customDesignFile) {
+          return "Upload your card design before continuing.";
         }
         return "";
       case 1:
         if (!draft.displayName.trim()) return "Please add your name.";
-        if (!draft.bio.trim()) return "Please add a short bio.";
-        if (!draft.avatarUrl && !draft.avatarPreview) {
-          return "Please add a profile picture (upload an image or paste a URL).";
+        if (draft.avatarUploadPending) return "Please wait for the profile picture upload to finish.";
+        return "";
+      case 2:
+        if (draft.links.filter((link) => link.url && !["https://", "mailto:", "https://wa.me/"].includes(link.url.trim())).length < 1) {
+          return "Add at least one way for people to contact you.";
         }
         return "";
       case 4: {
@@ -110,10 +123,13 @@ export default function OrderWizard() {
         if (!c.fullName.trim()) return "Please add your full name.";
         if (!c.phone.trim()) return "Please add your phone number.";
         if (!/.+@.+\..+/.test(c.email)) return "Please add a valid email.";
-        if (!c.address.trim()) return "Please add your delivery address.";
-        if (!c.city.trim()) return "Please add your city.";
+        if (draft.deliveryMethod === "delivery" && !c.address.trim()) return "Please add your delivery address.";
         return "";
       }
+      case 5:
+        if (!auth.currentUser && accountPassword.length < 6) return "Use a password with at least 6 characters.";
+        if (!paymentReceipt) return "Upload your payment receipt before placing the order.";
+        return "";
       default:
         return "";
     }
@@ -137,26 +153,59 @@ export default function OrderWizard() {
     if (err) return setError(err);
     setSubmitting(true);
     try {
+      const email = draft.customer.email.trim().toLowerCase();
+      let customerUser = auth.currentUser;
+
+      if (!customerUser) {
+        if (accountMode === "create") {
+          try {
+            customerUser = (await createUserWithEmailAndPassword(auth, email, accountPassword)).user;
+          } catch (createErr) {
+            if ((createErr as { code?: string }).code === "auth/email-already-in-use") {
+              try {
+                customerUser = (await signInWithEmailAndPassword(auth, email, accountPassword)).user;
+              } catch {
+                throw new Error(
+                  "An account with this email already exists. Please select 'I already have one' and enter your password, or use a different email."
+                );
+              }
+            } else {
+              throw createErr;
+            }
+          }
+        } else {
+          customerUser = (await signInWithEmailAndPassword(auth, email, accountPassword)).user;
+        }
+      }
       const now = Date.now();
+      if (!paymentReceipt) throw new Error("Payment receipt is required.");
+      const [receiptUrl, avatarUrl, customDesignUrl] = await Promise.all([
+        uploadPaymentReceipt(customerUser.uid, paymentReceipt),
+        avatarFile ? uploadPublicAvatar(customerUser.uid, avatarFile) : Promise.resolve(undefined),
+        customDesignFile ? uploadCustomDesign(customerUser.uid, customDesignFile) : Promise.resolve(undefined),
+      ]);
       const order: Order = {
-        orderNumber: `ET-${now.toString(36).toUpperCase().slice(-6)}-${new Date().getFullYear()}`,
+        ownerUid: customerUser.uid,
+        orderNumber: orderNumber(),
         plan: draft.plan,
         card: {
           template: draft.cardTemplate,
-          quantity: 1,
-          customDesignUrl: draft.customDesignUrl,
+          quantity: draft.quantity,
+          ...(customDesignUrl ? { customDesignUrl } : {}),
         },
         profileDraft: {
-          avatarUrl: draft.avatarUrl,
+          ...(avatarUrl ? { avatarUrl } : {}),
           displayName: draft.displayName.trim(),
-          bio: draft.bio.trim(),
+          ...(draft.title.trim() ? { title: draft.title.trim() } : {}),
+          ...(draft.bio.trim() ? { bio: draft.bio.trim() } : {}),
           links: draft.links.slice(0, 10),
         },
         customer: draft.customer,
-        payment:
-          draft.payment.method === "cod"
-            ? { method: "cod", status: "cod_pending_confirmation" }
-            : { method: "online", status: "pending" }, // provider not integrated — honest placeholder
+        deliveryMethod: draft.deliveryMethod,
+        subtotal: calculateSubtotal(draft.quantity),
+        deliveryFee: null,
+        total: null,
+        payment: { ...draft.payment, status: "pending", receiptUrl },
         fulfillment: { status: "new", history: [{ status: "new", at: now }] },
         createdAt: now,
         updatedAt: now,
@@ -166,7 +215,7 @@ export default function OrderWizard() {
     } catch (e) {
       console.error("[EdgeTap] Order submit failed:", e);
       setError(
-        e instanceof Error ? e.message : "We couldn't place your order right now. Please try again — if this persists, email support@edgetap.flow."
+        e instanceof Error ? e.message : "We couldn't place your order right now. Please try again."
       );
       setResubmitKey((k) => k + 1);
     } finally {
@@ -222,12 +271,32 @@ export default function OrderWizard() {
           </div>
         )}
 
-        {step === 0 && <CardStep draft={draft} onChange={patch} />}
-        {step === 1 && <ProfileStep draft={draft} onChange={patch} clientToken={clientToken} />}
+        {step === 0 && <CardStep draft={draft} onChange={patch} onFileChange={setCustomDesignFile} />}
+        {step === 1 && <ProfileStep draft={draft} onChange={patch} onFileChange={setAvatarFile} />}
         {step === 2 && <LinksStep links={draft.links} onChange={(links) => patch({ links })} />}
         {step === 3 && <PreviewStep profile={previewProfile} />}
-        {step === 4 && <DeliveryStep customer={draft.customer} onChange={(customer) => patch({ customer })} />}
-        {step === 5 && <PaymentStep payment={draft.payment} onChange={(payment) => patch({ payment })} />}
+        {step === 4 && (
+          <DeliveryStep
+            customer={draft.customer}
+            deliveryMethod={draft.deliveryMethod}
+            onDeliveryMethodChange={(deliveryMethod) => patch({ deliveryMethod })}
+            onChange={(customer) => patch({ customer })}
+          />
+        )}
+        {step === 5 && (
+          <PaymentStep
+            payment={draft.payment}
+            onChange={(payment) => patch({ payment })}
+            subtotal={calculateSubtotal(draft.quantity)}
+            deliveryMethod={draft.deliveryMethod}
+            email={draft.customer.email}
+            accountMode={accountMode}
+            password={accountPassword}
+            onAccountModeChange={setAccountMode}
+            onPasswordChange={setAccountPassword}
+            onReceiptChange={setPaymentReceipt}
+          />
+        )}
 
         {step === 6 && (
           <SubmitStep
@@ -261,9 +330,11 @@ export default function OrderWizard() {
 function CardStep({
   draft,
   onChange,
+  onFileChange,
 }: {
   draft: WizardDraft;
   onChange: (p: Partial<WizardDraft>) => void;
+  onFileChange: (file: File | null) => void;
 }) {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
@@ -273,11 +344,8 @@ function CardStep({
     setUploading(true);
     try {
       const preview = await fileToDataUrl(file);
-      const url = await uploadCustomDesign(
-        typeof crypto !== "undefined" ? crypto.randomUUID() : "draft",
-        file
-      );
-      onChange({ customDesignUrl: url, customDesignPreview: `${preview}::${url}` });
+      onFileChange(file);
+      onChange({ customDesignPreview: preview, customDesignUrl: "pending" });
     } catch (e) {
       setUploadError(e instanceof Error ? e.message : "Couldn't upload the design. You can paste an image URL instead.");
     } finally {
@@ -293,19 +361,27 @@ function CardStep({
       </h1>
       <p className="mt-2 text-[15px] text-[--ink-soft]">The design that gets tapped. We&apos;ll print it on real NFC material.</p>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2">
+      <div className="mt-4 rounded-xl bg-[--mint-soft]/60 px-4 py-3 text-sm font-bold text-[--ink]">
+        Your EdgeTap card · {draft.cardTemplate ? "40% complete" : "0% complete"}
+      </div>
+
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {CARD_TEMPLATES.map((t) => (
           <button
             key={t.id}
             type="button"
+            aria-pressed={draft.cardTemplate === t.id}
             onClick={() => onChange({ cardTemplate: t.id })}
-            className={`group relative flex flex-col items-start gap-2 rounded-2xl p-5 text-left ring-2 transition-all hover:-translate-y-0.5 ${
-              draft.cardTemplate === t.id ? "ring-[--ink] shadow-[var(--shadow-card)]" : "ring-[--ink]/10"
+            className={`group relative flex flex-col items-start gap-2 rounded-xl border-2 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-[--ink]/50 ${
+              draft.cardTemplate === t.id ? "border-[--ink] bg-[--yellow-soft]/30 shadow-[var(--shadow-card)]" : "border-[--ink]/10 bg-white"
             }`}
           >
-            <span className={`grid h-24 w-full place-items-center rounded-xl ring-1 ring-[--ink]/10 ${t.tone}`}>
-              <NfcWaves className={`h-9 w-9 ${t.id === "bold" ? "text-[--yellow]" : "text-[--ink]"}`} />
-              <span className="mx-auto -mt-1 block font-display text-[13px] font-bold text-[--ink]">EDGE TAP</span>
+            <span className={`relative grid h-32 w-full place-items-center overflow-hidden rounded-md ring-1 ring-[--ink]/10 ${t.tone}`}>
+              {(["simple", "lux", "wood", "inverted"] as CardTemplateId[]).includes(t.id) ? (
+                <img src={`/card-designs/${t.id}.png`} alt={`${t.name} card design`} className="h-full w-full object-cover" />
+              ) : (
+                <NfcWaves className={`h-9 w-9 ${t.id === "inverted" ? "text-[--yellow]" : "text-[--ink]"}`} />
+              )}
             </span>
             <span className="font-display text-lg font-bold text-[--ink]">{t.name}</span>
             <span className="text-[13px] font-medium text-[--ink-soft]">{t.tagline}</span>
@@ -318,29 +394,32 @@ function CardStep({
         ))}
       </div>
 
-      {draft.cardTemplate === "custom" && (
+      {draft.cardTemplate === "upload" && (
         <div className="mt-6 rounded-2xl bg-[--sky-soft]/40 p-5 ring-1 ring-[--sky]/30">
-          <p className="text-sm font-bold text-[--ink]">Upload your own card design (front artwork)</p>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])}
-            className="mt-3 block w-full text-sm text-[--ink-mid] file:mr-3 file:rounded-full file:border-0 file:bg-[--ink] file:px-4 file:py-2 file:text-[12px] file:font-bold file:text-white"
-          />
+          <p className="text-sm font-bold text-[--ink]">Upload your own card design</p>
+          <input type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])} className="mt-3 block w-full text-sm" />
           {uploading && <p className="mt-2 text-sm text-[--ink-soft]">Uploading…</p>}
           {uploadError && <p className="mt-2 text-sm font-semibold text-[--coral]">{uploadError}</p>}
-          {draft.customDesignUrl && (
-            <p className="mt-2 text-sm font-semibold text-[--mint]">✓ Design uploaded for production.</p>
-          )}
-          <input
-            type="text"
-            placeholder="…or paste an image URL"
-            value={draft.customDesignUrl || ""}
-            onChange={(e) => onChange({ customDesignUrl: e.target.value })}
-            className="mt-3 w-full rounded-xl border border-[--ink]/15 bg-white px-4 py-2.5 text-sm text-[--ink]"
-          />
+          {draft.customDesignUrl && <p className="mt-2 text-sm font-semibold text-[--mint]">Design uploaded for production.</p>}
         </div>
       )}
+
+      {draft.cardTemplate === "designer" && (
+        <div className="mt-6 rounded-2xl bg-[--mint-soft]/60 p-5">
+          <p className="text-sm font-bold text-[--ink]">Need a custom design?</p>
+          <p className="mt-1 text-sm text-[--ink-soft]">We&apos;ll contact you about a professional design request and any additional fee before proceeding.</p>
+          <a href="mailto:sardaribraheem277@gmail.com?subject=EdgeTap%20custom%20design%20request" className="btn btn-ink mt-4 inline-flex px-4 py-2 text-sm">Request a designer</a>
+        </div>
+      )}
+
+      <div className="mt-6 flex items-center justify-between rounded-xl bg-white p-4 ring-1 ring-[--ink]/10">
+        <span className="text-sm font-bold text-[--ink]">Quantity</span>
+        <div className="flex items-center gap-3">
+          <button type="button" onClick={() => onChange({ quantity: Math.max(1, draft.quantity - 1) })} className="grid h-8 w-8 place-items-center rounded-full bg-[--ink]/8 font-bold">−</button>
+          <span className="w-6 text-center font-display font-bold">{draft.quantity}</span>
+          <button type="button" onClick={() => onChange({ quantity: Math.min(20, draft.quantity + 1) })} className="grid h-8 w-8 place-items-center rounded-full bg-[--ink] text-white font-bold">+</button>
+        </div>
+      </div>
     </section>
   );
 }
@@ -349,11 +428,11 @@ function CardStep({
 function ProfileStep({
   draft,
   onChange,
-  clientToken,
+  onFileChange,
 }: {
   draft: WizardDraft;
   onChange: (p: Partial<WizardDraft>) => void;
-  clientToken: string;
+  onFileChange: (file: File | null) => void;
 }) {
   const [preview, setPreview] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -362,22 +441,15 @@ function ProfileStep({
   const handleUpload = async (file: File) => {
     setUploadError("");
     setUploading(true);
+    onChange({ avatarUploadPending: true });
     try {
       const dataUrl = await fileToDataUrl(file);
       setPreview(dataUrl);
-      let url: string;
-      try {
-        url = await uploadInboxAvatar(clientToken, file);
-      } catch (uploadErr) {
-        // Storage may not be configured (billing) — keep the local preview and
-        // surface the honest error, but don't block typing a URL.
-        const msg = uploadErr instanceof Error ? uploadErr.message : "Upload failed";
-        setUploadError(msg + " — you can paste an image URL below instead for now.");
-        return;
-      }
-      onChange({ avatarUrl: url, avatarPreview: dataUrl });
+      onFileChange(file);
+      onChange({ avatarPreview: dataUrl, avatarUploadPending: false });
     } finally {
       setUploading(false);
+      onChange({ avatarUploadPending: false });
     }
   };
 
@@ -394,7 +466,7 @@ function ProfileStep({
       <div className="mt-8 space-y-6">
         {/* avatar */}
         <div>
-          <label className="block text-sm font-bold text-[--ink]">Profile picture</label>
+          <label className="block text-sm font-bold text-[--ink]">Profile picture <span className="font-normal text-[--ink-faint]">(optional)</span></label>
           <div className="mt-3 flex items-center gap-4">
             <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-full bg-[--yellow] ring-2 ring-white shadow-[var(--shadow-card)]">
               {draft.avatarPreview || preview ? (
@@ -418,13 +490,6 @@ function ProfileStep({
             </label>
           </div>
           {uploadError && <p className="mt-2 text-[13px] font-semibold text-[--coral]">{uploadError}</p>}
-          <input
-            type="text"
-            placeholder="…or paste an image URL"
-            value={draft.avatarUrl || ""}
-            onChange={(e) => onChange({ avatarUrl: e.target.value })}
-            className="mt-3 w-full rounded-xl border border-[--ink]/15 bg-white px-4 py-2.5 text-sm text-[--ink]"
-          />
         </div>
 
         <div>
@@ -442,8 +507,22 @@ function ProfileStep({
         </div>
 
         <div>
+          <label htmlFor="ow-title" className="block text-sm font-bold text-[--ink]">
+            Title <span className="font-normal text-[--ink-faint]">(optional)</span>
+          </label>
+          <input
+            id="ow-title"
+            type="text"
+            value={draft.title}
+            onChange={(e) => onChange({ title: e.target.value })}
+            placeholder="e.g. Software Developer · Founder"
+            className="mt-2 w-full rounded-xl border border-[--ink]/15 bg-white px-4 py-3 text-[--ink] focus:outline-none focus:ring-2 focus:ring-[--ink]"
+          />
+        </div>
+
+        <div>
           <label htmlFor="ow-bio" className="block text-sm font-bold text-[--ink]">
-            Short bio
+            Bio <span className="font-normal text-[--ink-faint]">(optional)</span>
           </label>
           <textarea
             id="ow-bio"
@@ -475,11 +554,22 @@ function LinksStep({
       {
         type,
         label: preset?.label || "New Link",
-        url: type === "mail" ? "mailto:" : "https://",
+        url: type === "email" ? "mailto:" : type === "whatsapp" ? "https://wa.me/" : "https://",
         icon: type,
         accent: LINK_ACCENTS[type] || LINK_ACCENTS.globe,
       },
     ]);
+  };
+
+  const updateUrl = (index: number, value: string) => {
+    const link = links[index];
+    let url = value.trim();
+    if (link.type === "email" && url && !url.startsWith("mailto:")) url = `mailto:${url}`;
+    if (link.type === "whatsapp") {
+      const digits = value.replace(/\D/g, "");
+      url = digits ? `https://wa.me/${digits}` : "https://wa.me/";
+    }
+    update(index, "url", url);
   };
 
   const update = (index: number, field: keyof ProfileLink, value: string) => {
@@ -495,7 +585,7 @@ function LinksStep({
         What do you want people to find?
       </h1>
       <p className="mt-2 text-[15px] text-[--ink-soft]">
-        Optional — you can change these anytime later. The card never changes.
+      Add at least one useful way for people to connect with you. You can add more anytime.
       </p>
 
       <div className="mt-6 flex flex-wrap gap-2">
@@ -530,9 +620,9 @@ function LinksStep({
             />
             <input
               type="text"
-              placeholder="URL (https://…)"
-              value={l.url}
-              onChange={(e) => update(i, "url", e.target.value)}
+              placeholder={l.type === "email" ? "example@gmail.com" : l.type === "whatsapp" ? "+92 300 1234567" : "URL (https://…)"}
+              value={l.type === "email" ? l.url.replace(/^mailto:/, "") : l.type === "whatsapp" ? l.url.replace("https://wa.me/", "") : l.url}
+              onChange={(e) => updateUrl(i, e.target.value)}
               className="flex-1 rounded-xl border border-[--ink]/15 px-3 py-2 text-sm text-[--ink]"
             />
             <select
@@ -542,13 +632,16 @@ function LinksStep({
               aria-label={`Link ${i + 1} type`}
             >
               {[
+                ["email", "Email"],
                 ["whatsapp", "WhatsApp"],
                 ["instagram", "Instagram"],
                 ["linkedin", "LinkedIn"],
                 ["github", "GitHub"],
                 ["portfolio", "Website/Portfolio"],
-                ["mail", "Email"],
-                ["phone", "Phone"],
+                ["telegram", "Telegram"],
+                ["facebook", "Facebook"],
+                ["tiktok", "TikTok"],
+                ["youtube", "YouTube"],
               ].map(([val, lab]) => (
                 <option key={val} value={val}>{lab}</option>
               ))}
@@ -564,11 +657,7 @@ function LinksStep({
         ))}
       </div>
 
-      {links.length === 0 && (
-        <p className="mt-6 text-sm font-semibold text-[--ink-soft]">
-          No links yet — that&apos;s fine, you can skip this step.
-        </p>
-      )}
+      {links.length === 0 && <p className="mt-6 text-sm font-semibold text-[--coral]">Add Email to continue.</p>}
       <p className="mt-2 text-[12px] text-[--ink-faint]">{links.length} / 10 links</p>
     </section>
   );
@@ -590,18 +679,21 @@ function PreviewStep({ profile }: { profile: Profile }) {
 // ── Step 5: Delivery ─────────────────────────────────────────────
 function DeliveryStep({
   customer,
+  deliveryMethod,
+  onDeliveryMethodChange,
   onChange,
 }: {
   customer: CustomerInfo;
+  deliveryMethod: DeliveryMethod;
+  onDeliveryMethodChange: (method: DeliveryMethod) => void;
   onChange: (c: CustomerInfo) => void;
 }) {
   const FIELDS: { key: keyof CustomerInfo; placeholder: string; type: string; span?: boolean }[] = [
     { key: "fullName", placeholder: "Full name", type: "text" },
     { key: "phone", placeholder: "Phone number", type: "tel" },
     { key: "email", placeholder: "Email (for order updates)", type: "email" },
-    { key: "city", placeholder: "City", type: "text" },
     { key: "address", placeholder: "Delivery address", type: "text", span: true },
-    { key: "postalCode", placeholder: "Postal / ZIP code (optional)", type: "text" },
+    { key: "city", placeholder: "City (optional)", type: "text" },
   ];
   return (
     <section className="card-paper mb-6 p-7 sm:p-10">
@@ -610,10 +702,21 @@ function DeliveryStep({
         Where should we send your card?
       </h1>
       <p className="mt-2 text-[15px] text-[--ink-soft]">
-        This stays private. It will <strong>never</strong> appear on your public profile.
+        Your address stays private. Delivery charges are calculated separately based on your location.
       </p>
+      <div className="mt-6 grid gap-3 sm:grid-cols-2">
+        {([
+          ["pickup", "Pickup", "Free pickup at NASTP Lahore · Monday–Sunday, 9 AM–5 PM"],
+          ["delivery", "Delivery", "We will arrange delivery manually based on your location."],
+        ] as const).map(([value, label, description]) => (
+          <button type="button" key={value} aria-pressed={deliveryMethod === value} onClick={() => onDeliveryMethodChange(value)} className={`rounded-xl border-2 p-4 text-left transition-colors hover:border-[--ink]/50 ${deliveryMethod === value ? "border-[--ink] bg-[--yellow-soft]/30" : "border-[--ink]/10 bg-white"}`}>
+            <span className="flex items-center justify-between font-display font-bold text-[--ink]"><span>{label}</span>{deliveryMethod === value && <span aria-hidden="true">✓</span>}</span>
+            <span className="mt-1 block text-[12px] text-[--ink-soft]">{description}</span>
+          </button>
+        ))}
+      </div>
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
-        {FIELDS.map(({ key, placeholder, type, span }) => (
+        {FIELDS.filter(({ key }) => deliveryMethod === "delivery" || key !== "address").map(({ key, placeholder, type, span }) => (
           <div key={key} className={span ? "sm:col-span-2" : ""}>
             <label className="block text-sm font-bold text-[--ink]">{placeholder}</label>
             <input
@@ -633,46 +736,111 @@ function DeliveryStep({
 function PaymentStep({
   payment,
   onChange,
+  subtotal,
+  deliveryMethod,
+  email,
+  accountMode,
+  password,
+  onAccountModeChange,
+  onPasswordChange,
+  onReceiptChange,
 }: {
   payment: PaymentInfo;
   onChange: (p: PaymentInfo) => void;
+  subtotal: number;
+  deliveryMethod: DeliveryMethod;
+  email: string;
+  accountMode: AccountMode;
+  password: string;
+  onAccountModeChange: (mode: AccountMode) => void;
+  onPasswordChange: (password: string) => void;
+  onReceiptChange: (file: File | null) => void;
 }) {
+  const paymentDetails: Record<string, string> = {
+    raast: "Raast Account: PK08JCMA1811923044149674. Please include your order number as reference.",
+    easypaisa: "JazzCash / Easypaisa Account: 03044149674. Please include your order number as reference.",
+    jazzcash: "JazzCash Account: 03044149674. Please include your order number as reference.",
+  };
   return (
     <section className="card-paper mb-6 p-7 sm:p-10">
       <p className="eyebrow mb-1 text-[--ink-mid]">Step 6 · Payment</p>
       <h1 className="font-display text-[clamp(1.8rem,4vw,2.6rem)] font-semibold leading-tight text-[--ink]">
         How would you like to pay?
       </h1>
-      <div className="mt-8 grid gap-4 sm:grid-cols-2">
-        <button
-          type="button"
-          onClick={() => onChange({ method: "online", status: "pending" })}
-          className={`rounded-2xl p-5 text-left ring-2 transition-all hover:-translate-y-0.5 ${
-            payment.method === "online" ? "ring-[--ink] shadow-[var(--shadow-card)]" : "ring-[--ink]/10"
-          }`}
-        >
-          <span className="font-display text-lg font-bold text-[--ink]">Online Payment</span>
-          <p className="mt-1 text-sm text-[--ink-soft]">
-            Pay by card or wallet. We&apos;re enabling online payments — for now, choosing this
-            marks your order as pending payment confirmation.
-          </p>
-        </button>
-        <button
-          type="button"
-          onClick={() => onChange({ method: "cod", status: "cod_pending_confirmation" })}
-          className={`rounded-2xl p-5 text-left ring-2 transition-all hover:-translate-y-0.5 ${
-            payment.method === "cod" ? "ring-[--ink] shadow-[var(--shadow-card)]" : "ring-[--ink]/10"
-          }`}
-        >
-          <span className="font-display text-lg font-bold text-[--ink]">Cash on Delivery</span>
-          <p className="mt-1 text-sm text-[--ink-soft]">
-            Pay when your card arrives. Order may require confirmation before production.
-          </p>
-        </button>
+      <div className="mt-8 grid gap-4 sm:grid-cols-3">
+        {(["raast", "easypaisa", "jazzcash"] as const).map((method) => (
+          <button type="button" key={method} aria-pressed={payment.method === method} onClick={() => onChange({ method, status: "pending" })} className={`rounded-xl border-2 p-5 text-left transition-colors hover:border-[--ink]/50 ${payment.method === method ? "border-[--ink] bg-[--yellow-soft]/30" : "border-[--ink]/10 bg-white"}`}>
+            <span className="font-display text-lg font-bold capitalize text-[--ink]">{method}</span>
+            <p className="mt-1 text-sm text-[--ink-soft]">Manual verification</p>
+            {payment.method === method && <span className="mt-3 block text-xs font-bold text-[--ink]">✓ Selected</span>}
+          </button>
+        ))}
       </div>
+      <dl className="mt-6 space-y-2 rounded-xl bg-white p-4 text-sm ring-1 ring-[--ink]/10">
+        <div className="flex justify-between"><dt className="text-[--ink-soft]">Card subtotal</dt><dd className="font-bold text-[--ink]">Rs. {subtotal.toLocaleString()}</dd></div>
+        <div className="flex justify-between"><dt className="text-[--ink-soft]">Delivery</dt><dd className="font-bold capitalize text-[--ink]">{deliveryMethod}</dd></div>
+        <div className="flex justify-between"><dt className="text-[--ink-soft]">Delivery fee</dt><dd className="font-bold text-[--ink]">{deliveryMethod === "pickup" ? "Rs. 0" : "Calculated separately"}</dd></div>
+        <div className="flex justify-between border-t border-[--ink]/10 pt-2"><dt className="font-display font-bold text-[--ink]">Total</dt><dd className="font-display font-bold text-[--ink]">{deliveryMethod === "pickup" ? `Rs. ${subtotal.toLocaleString()}` : "Calculated separately"}</dd></div>
+      </dl>
+      <div className="mt-4 rounded-xl bg-[--yellow-soft] p-4 text-sm text-[--ink]">
+        <p className="font-bold">{paymentDetails[payment.method]}</p>
+        <p className="mt-2">Meezan Bank IBAN: <strong>PK46MEZN0000300116179673</strong></p>
+      </div>
+      <label className="mt-4 block text-sm font-bold text-[--ink]">Payment receipt screenshot
+        <input type="file" accept="image/*" required onChange={(event) => onReceiptChange(event.target.files?.[0] || null)} className="mt-2 block w-full text-sm" />
+      </label>
+      <label className="mt-4 block text-sm font-bold text-[--ink]">Transaction/reference ID <span className="font-normal text-[--ink-faint]">(optional)</span>
+        <input value={payment.reference || ""} onChange={(event) => onChange({ ...payment, reference: event.target.value })} className="mt-2 w-full rounded-xl border border-[--ink]/15 bg-white px-4 py-3 text-[--ink]" />
+      </label>
       <p className="mt-4 rounded-xl bg-[--mint-soft]/60 p-3 text-[13px] text-[--ink]">
-        🔒 We never store card details here, and your payment method is kept private.
+        🔒 Payment status is pending verification until an admin confirms the receipt.
       </p>
+
+      <div className="mt-6 rounded-2xl border border-[--ink]/10 bg-white p-5">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <p className="font-display text-base font-bold text-[--ink]">Create your profile login</p>
+            <p className="mt-1 text-[13px] leading-relaxed text-[--ink-soft]">
+              Use this account to edit your live profile after your card is shipped.
+            </p>
+          </div>
+          <div className="flex rounded-full bg-[--ink]/5 p-1 text-[12px] font-bold text-[--ink]">
+            <button
+              type="button"
+              onClick={() => onAccountModeChange("create")}
+              className={`rounded-full px-3 py-1.5 ${accountMode === "create" ? "bg-[--ink] text-white" : ""}`}
+            >
+              New account
+            </button>
+            <button
+              type="button"
+              onClick={() => onAccountModeChange("signIn")}
+              className={`rounded-full px-3 py-1.5 ${accountMode === "signIn" ? "bg-[--ink] text-white" : ""}`}
+            >
+              I already have one
+            </button>
+          </div>
+        </div>
+        <label className="mt-4 block text-[12px] font-bold uppercase tracking-wider text-[--ink-faint]">
+          Account email
+          <input
+            value={email}
+            readOnly
+            className="mt-1.5 w-full rounded-xl border border-[--ink]/10 bg-[--cream] px-3 py-2.5 text-sm text-[--ink]"
+          />
+        </label>
+        <label className="mt-3 block text-[12px] font-bold uppercase tracking-wider text-[--ink-faint]">
+          Password
+          <input
+            type="password"
+            value={password}
+            onChange={(event) => onPasswordChange(event.target.value)}
+            autoComplete={accountMode === "create" ? "new-password" : "current-password"}
+            placeholder="At least 6 characters"
+            className="mt-1.5 w-full rounded-xl border border-[--ink]/10 bg-[--cream] px-3 py-2.5 text-sm text-[--ink]"
+          />
+        </label>
+      </div>
     </section>
   );
 }
@@ -693,11 +861,11 @@ function SubmitStep({
     <section className="card-paper mb-6 p-7 sm:p-10 text-center">
       <p className="eyebrow mb-1 text-[--ink-mid]">Final step</p>
       <h1 className="font-display text-[clamp(1.8rem,4vw,2.6rem)] font-semibold leading-tight text-[--ink]">
-        {submitting ? "Placing your order…" : "Ready to tap in."}
+        {submitting ? "Placing your order…" : "Ready to place order"}
       </h1>
       <p className="mx-auto mt-2 max-w-md text-[15px] text-[--ink-soft]">
         {draft.displayName || "Your profile"} · {CARD_TEMPLATES.find((t) => t.id === draft.cardTemplate)?.name} card ·{" "}
-        {draft.payment.method === "cod" ? "Cash on Delivery" : "Online payment (pending)"}
+        {draft.payment.method} payment · Payment pending verification
       </p>
       <button
         onClick={onSubmit}
@@ -708,17 +876,13 @@ function SubmitStep({
       </button>
       {resubmitKey > 0 && !submitting && (
         <p className="mt-3 text-[12px] text-[--ink-faint]">
-          A previous attempt failed — you can retry above, or email support@edgetap.flow.
+          A previous attempt failed — you can retry above.
         </p>
       )}
       <div className="mx-auto mt-8 max-w-md">
-        <p className="text-[12px] font-bold uppercase tracking-widest text-[--ink-faint]">Progress</p>
-        <div className="mt-2 flex flex-wrap justify-center gap-1.5">
-          {FULFILLMENT_STATES.slice(0, 3).map((s) => (
-            <span key={s.status} className="rounded-full bg-[--ink]/6 px-2.5 py-1 text-[11px] font-semibold text-[--ink-soft]">
-              {s.status === "new" ? "✓ Order received" : s.label}
-            </span>
-          ))}
+        <p className="text-[12px] font-bold uppercase tracking-widest text-[--ink-faint]">Status</p>
+        <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-[--yellow-soft] px-4 py-1.5 text-xs font-bold text-[--ink]">
+          Order received · Payment pending verification
         </div>
       </div>
     </section>
@@ -743,7 +907,7 @@ function Confirmation({ order }: { order: Order }) {
             Order received!
           </h1>
           <p className="mt-2 text-[15px] text-[--ink-soft]">
-            Thank you, {order.customer.fullName.split(" ")[0]}. We&apos;ll email updates to{" "}
+            Thank you, {order.customer.fullName.split(" ")[0]}. Your order has been received and payment is pending verification. We&apos;ll email updates to{" "}
             <strong className="text-[--ink]">{order.customer.email}</strong>.
           </p>
 
@@ -759,9 +923,7 @@ function Confirmation({ order }: { order: Order }) {
             <div className="flex justify-between gap-4">
               <dt className="text-sm font-semibold text-[--ink-soft]">Payment</dt>
               <dd className="font-display font-bold text-[--ink]">
-                {order.payment.method === "cod"
-                  ? "Cash on Delivery"
-                  : `Online · ${order.payment.status === "paid" ? "Paid" : "Payment pending"}`}
+                {order.payment.method.toUpperCase()} · Pending verification
               </dd>
             </div>
             <div className="flex justify-between gap-4">
@@ -775,7 +937,7 @@ function Confirmation({ order }: { order: Order }) {
               What happens next
             </p>
             <div className="mx-auto mt-3 flex flex-wrap items-center justify-center gap-2">
-              {["Order received", "Design prep", "Production", "Shipped", "Delivered"].map((s, i) => (
+              {["Order received", "Payment verification", "Production", "Shipped", "Delivered"].map((s, i) => (
                 <span key={s} className="flex items-center gap-2">
                   <span
                     className={`rounded-full px-3 py-1 text-[11px] font-bold ${
@@ -793,9 +955,6 @@ function Confirmation({ order }: { order: Order }) {
           <div className="mt-8 flex flex-wrap justify-center gap-4">
             <Link href="/" className="btn btn-ink px-6 py-3">
               Back to Homepage
-            </Link>
-            <Link href="/" className="btn bg-white px-6 py-3 ring-1 ring-[--ink]/15 hover:bg-[--cream]">
-              See how it works →
             </Link>
           </div>
           <div className="mt-6 flex items-center justify-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[--ink-faint]">

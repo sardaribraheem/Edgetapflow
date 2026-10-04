@@ -92,10 +92,11 @@ export default function AdminApp({ user, onLogout }: { user: User; onLogout: () 
                 <button
                   key={v.id}
                   onClick={() => setView(v.id)}
-                  className={`rounded-xl px-4 py-2.5 text-left text-[13px] font-bold transition-colors ${
+                  aria-current={view === v.id ? "page" : undefined}
+                  className={`admin-nav-button rounded-xl px-4 py-2.5 text-left text-[13px] font-bold transition-colors ${
                     view === v.id
                       ? "bg-[--ink] text-white"
-                      : "text-[--ink-soft] hover:bg-[--ink]/5 hover:text-[--ink]"
+                      : "hover:bg-[--ink]/5"
                   }`}
                 >
                   {v.label}
@@ -347,9 +348,8 @@ function SettingsView({ user }: { user: User }) {
       <div className="card-paper mt-4 p-6">
         <p className="text-sm font-bold text-[--ink]">Firebase readiness</p>
         <p className="mt-2 text-[13px] leading-relaxed text-[--ink-soft]">
-          Orders, profiles, reviews and QR all write to <strong>Firestore</strong>. The project currently has billing disabled, so live
-          Firestore/Auth/Storage calls fail until you enable billing and create the database in the Firebase Console (Database → Create database,
-          Authentication → Get started → Email/Password). <Link className="font-bold text-[--sky] hover:underline" href="/pricing">See pricing</Link> for the product tiers.
+          Orders, profiles, reviews and QR all write to <strong>Firestore</strong>. Firebase Authentication, Firestore and Storage are live;
+          customer checkout requires an account so profile ownership remains secure. <Link className="font-bold text-[--sky] hover:underline" href="/pricing">See pricing</Link> for the product tiers.
         </p>
       </div>
     </div>

@@ -139,12 +139,16 @@ export default function ProfilePage({
             <header className="flex flex-col items-center text-center md:items-start md:text-left">
               <div className="relative">
                 <div className="grid h-28 w-28 place-items-center overflow-hidden rounded-full bg-[--yellow] ring-4 ring-white shadow-[var(--shadow-card)] md:h-32 md:w-32">
-                  <img
-                    src={profile.avatar}
-                    alt={`${profile.displayName} — profile photo`}
-                    className="h-full w-full object-cover"
-                    draggable={false}
-                  />
+                  {profile.avatar ? (
+                    <img
+                      src={profile.avatar}
+                      alt={`${profile.displayName} — profile photo`}
+                      className="h-full w-full object-cover"
+                      draggable={false}
+                    />
+                  ) : (
+                    <SparkleDoodle className="h-8 w-8 text-[--ink]" />
+                  )}
                 </div>
                 <SparkleDoodle className="absolute -right-3 -top-2 h-8 w-8 text-[--yellow]" />
               </div>
@@ -198,14 +202,6 @@ export default function ProfilePage({
                 )}
               </p>
 
-              <div className="mt-6 flex flex-wrap justify-center gap-2 md:justify-start">
-                <span className="rounded-full bg-[--mint-soft] px-3 py-1 text-[12px] font-semibold text-[--ink]">
-                  Open to opportunities
-                </span>
-                <span className="rounded-full bg-[--yellow-soft] px-3 py-1 text-[12px] font-semibold text-[--ink]">
-                  Flutter · AI · Automation
-                </span>
-              </div>
             </header>
 
             {/* actions */}
@@ -269,18 +265,12 @@ export default function ProfilePage({
                 </button>
               ) : (
                 <Link
-                  href="/admin"
+                  href={`/account?next=${encodeURIComponent(`/u/${profile.username}`)}`}
                   className="btn bg-white px-4 py-2 text-[12px] font-bold text-[--ink] ring-1 ring-[--ink]/15 hover:bg-[--cream]"
                 >
-                  Login 🔐
+                  Sign in to edit
                 </Link>
               )}
-              <Link
-                href="/"
-                className="font-display text-[12px] font-bold text-[--ink] transition-opacity hover:opacity-70"
-              >
-                Get your own →
-              </Link>
             </div>
           </footer>
         </div>

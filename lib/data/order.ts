@@ -4,7 +4,7 @@
 import type { ProfileLink } from "./profile";
 
 // ── Card templates ────────────────────────────────────────────────
-export type CardTemplateId = "classic" | "bold" | "executive" | "custom";
+export type CardTemplateId = "simple" | "lux" | "wood" | "inverted" | "upload" | "designer";
 
 export type CardTemplate = {
   id: CardTemplateId;
@@ -16,32 +16,46 @@ export type CardTemplate = {
 
 export const CARD_TEMPLATES: CardTemplate[] = [
   {
-    id: "classic",
-    name: "Classic",
+    id: "simple",
+    name: "Simple",
     tagline: "Clean & timeless",
     tone: "bg-white",
-    description: "The standard EdgeTap card. Simple, professional, works everywhere.",
+    description: "A clean everyday EdgeTap card.",
   },
   {
-    id: "bold",
-    name: "Bold",
-    tagline: "Make a statement",
+    id: "lux",
+    name: "Lux",
+    tagline: "Premium and understated",
+    tone: "bg-[--yellow-soft]",
+    description: "A premium finish for a sharper first impression.",
+  },
+  {
+    id: "wood",
+    name: "Wood",
+    tagline: "Warm and distinctive",
+    tone: "bg-[#d6a36a]",
+    description: "A natural-looking card with a tactile feel.",
+  },
+  {
+    id: "inverted",
+    name: "Inverted",
+    tagline: "High contrast",
     tone: "bg-[--ink]",
-    description: "Deep ink card with a high-contrast yellow NFC mark. For people who stand out.",
+    description: "A dark, high-contrast EdgeTap card.",
   },
   {
-    id: "executive",
-    name: "Executive",
-    tagline: "Premium & understated",
-    tone: "bg-[--mint-soft]",
-    description: "A refined look for managers, founders, and senior professionals.",
-  },
-  {
-    id: "custom",
-    name: "Custom",
-    tagline: "Your own design",
+    id: "upload",
+    name: "Upload your card design",
+    tagline: "Use your own artwork",
     tone: "bg-[--sky-soft]",
-    description: "Upload your own card artwork. We'll print it on the NFC card.",
+    description: "Upload a design for the admin and printer to review.",
+  },
+  {
+    id: "designer",
+    name: "Need a custom design?",
+    tagline: "Request graphic design help",
+    tone: "bg-[--mint-soft]",
+    description: "Request a professional design consultation. We will contact you manually.",
   },
 ];
 
@@ -54,9 +68,11 @@ export type CustomerInfo = {
   phone: string;
   email: string;
   address: string;
-  city: string;
+  city?: string;
   postalCode?: string;
 };
+
+export type DeliveryMethod = "pickup" | "delivery";
 
 // ── Card selection on an order ────────────────────────────────────
 export type OrderCard = {
@@ -69,13 +85,14 @@ export type OrderCard = {
 export type ProfileDraft = {
   avatarUrl?: string; // Storage ref — "https://" placeholders are treated as empty
   displayName: string;
-  bio: string;
+  title?: string;
+  bio?: string;
   usernameSuggested?: string;
   links: ProfileLink[];
 };
 
 // ── Payment (state kept separate from order/fulfillment) ──────────
-export type PaymentMethod = "online" | "cod";
+export type PaymentMethod = "raast" | "easypaisa" | "jazzcash";
 export type PaymentStatus =
   | "pending" // online chosen but no provider integrated yet
   | "paid"
@@ -85,8 +102,10 @@ export type PaymentStatus =
   | "cancelled";
 
 export type PaymentInfo = {
-  method: PaymentMethod;
+  method: "raast" | "easypaisa" | "jazzcash";
   status: PaymentStatus;
+  receiptUrl?: string;
+  reference?: string;
   providerRef?: string; // future provider reference (provider not integrated yet)
 };
 
@@ -153,9 +172,14 @@ export const FULFILLMENT_STATES: FulfillmentState[] = FULFILLMENT_FLOW.map((s) =
 // ── Order ─────────────────────────────────────────────────────────
 export type Order = {
   id?: string; // Firestore doc id
+  ownerUid?: string; // Firebase Auth UID for the customer account
   orderNumber: string;
   plan: OrderPlanId;
   card: OrderCard;
+  deliveryMethod: DeliveryMethod;
+  subtotal: number;
+  deliveryFee: number | null;
+  total: number | null;
   profileDraft: ProfileDraft;
   customer: CustomerInfo; // PRIVATE
   payment: PaymentInfo;
@@ -168,17 +192,22 @@ export type Order = {
 };
 
 export const LINK_PRESETS: { type: string; label: string }[] = [
+  { type: "email", label: "Email" },
   { type: "whatsapp", label: "WhatsApp" },
   { type: "instagram", label: "Instagram" },
   { type: "linkedin", label: "LinkedIn" },
   { type: "portfolio", label: "Website" },
   { type: "portfolio", label: "Portfolio" },
-  { type: "mail", label: "Email" },
-  { type: "phone", label: "Phone" },
+  { type: "telegram", label: "Telegram" },
+  { type: "facebook", label: "Facebook" },
+  { type: "tiktok", label: "TikTok" },
+  { type: "youtube", label: "YouTube" },
+  { type: "portfolio", label: "Website" },
 ];
 
 // Default accents for the common link types (matches ProfilePage icons).
 export const LINK_ACCENTS: Record<string, string> = {
+  email: "#FF6B5B",
   whatsapp: "#25D366",
   linkedin: "#0A66C2",
   instagram: "#E1306C",
@@ -186,5 +215,15 @@ export const LINK_ACCENTS: Record<string, string> = {
   github: "#100B4A",
   mail: "#FF6B5B",
   phone: "#25D366",
+  telegram: "#229ED9",
+  facebook: "#1877F2",
+  tiktok: "#100B4A",
+  youtube: "#FF0000",
   globe: "#7FA8FF",
 };
+
+export const CARD_PRICE = 999;
+
+export function calculateSubtotal(quantity: number): number {
+  return CARD_PRICE * Math.max(1, Math.min(20, Math.floor(quantity)));
+}

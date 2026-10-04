@@ -19,6 +19,7 @@ import {
   FulfillmentStatus,
   canTransition,
   CustomerInfo,
+  calculateSubtotal,
 } from "./data/order";
 import { Review, ClientProfileMeta } from "./models";
 
@@ -59,13 +60,17 @@ export function orderNumber(from = new Date()): string {
 }
 
 /**
- * Create an order (guest checkout — customer is not signed in).
+ * Create an order after the customer has authenticated with Firebase.
  * Throws the raw Firestore error upward so the UI can show it honestly.
  */
 export async function createOrder(order: Order): Promise<string> {
   const now = Date.now();
   const data = {
     ...order,
+    orderNumber: order.orderNumber || orderNumber(),
+    subtotal: calculateSubtotal(order.card.quantity),
+    deliveryFee: null,
+    total: null,
     createdAt: now,
     updatedAt: now,
     fulfillment: order.fulfillment || { status: "new", history: [{ status: "new", at: now }] },
@@ -88,6 +93,27 @@ export async function getOrder(orderId: string): Promise<Order> {
 
 export async function adminUpdateOrder(orderId: string, patch: Partial<Order>): Promise<void> {
   await updateDoc(doc(db, "orders", orderId), { ...patch, updatedAt: Date.now() });
+}
+
+export async function confirmPayment(order: Order): Promise<void> {
+  if (!order.id) throw new Error("Order is missing its Firestore ID.");
+  if (order.payment.status === "paid") return;
+  await runTransaction(db, async (tx) => {
+    const ref = doc(db, "orders", order.id!);
+    const snap = await tx.get(ref);
+    if (!snap.exists()) throw new Error("Order not found.");
+    const current = snap.data() as Order;
+    if (current.payment.status === "paid") return;
+    const now = Date.now();
+    const status = current.fulfillment.status === "new" || current.fulfillment.status === "payment_pending" ? "paid" : current.fulfillment.status;
+    tx.update(ref, {
+      payment: { ...current.payment, status: "paid" },
+      fulfillment: status === current.fulfillment.status
+        ? current.fulfillment
+        : { status, history: [...(current.fulfillment.history || []), { status, at: now }] },
+      updatedAt: now,
+    });
+  });
 }
 
 /**
@@ -188,21 +214,20 @@ export async function createClientProfileFromOrder(
   const { profileUrl } = await import("./site");
   const profileId = crypto.randomUUID();
   const now = Date.now();
-  const avatar = order.profileDraft.avatarUrl?.startsWith("http")
-    ? order.profileDraft.avatarUrl
-    : "/ibraheem.png"; // placeholder until a real avatar is uploaded
+  const avatar = order.profileDraft.avatarUrl;
 
   const profile: Profile = {
     username: clean,
     displayName: order.profileDraft.displayName,
     firstName: order.customer.fullName.split(" ")[0] || "",
     lastName: order.customer.fullName.split(" ").slice(1).join(" "),
-    title: "EdgeTap Profile",
+    title: order.profileDraft.title || "",
     bio: order.profileDraft.bio || "",
     location: order.customer.city || "Pakistan",
-    avatar,
+    avatar: avatar?.startsWith("http") ? avatar : "",
     links: (order.profileDraft.links || []).filter((l) => l.url && l.url.trim() !== "" && l.url !== "https://").slice(0, 10),
     profileId,
+    ...(order.ownerUid ? { ownerUid: order.ownerUid } : {}),
     active: true,
     createdAt: now,
     updatedAt: now,

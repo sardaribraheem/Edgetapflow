@@ -3,16 +3,17 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { auth } from "@/lib/firebase";
-import { signInWithEmailAndPassword, signOut, onAuthStateChanged, User } from "firebase/auth";
+import { sendPasswordResetEmail, signInWithEmailAndPassword, signOut, onAuthStateChanged, User } from "firebase/auth";
 import { NfcWaves } from "@/components/doodles";
 import AdminApp from "@/components/admin/AdminApp";
 
 export default function AdminPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [email, setEmail] = useState("admin@edgetap.flow");
+  const [email, setEmail] = useState("sardaribraheem277@gmail.com");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
+  const [resetMessage, setResetMessage] = useState("");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
@@ -50,6 +51,18 @@ export default function AdminPage() {
   const handleLogout = async () => {
     await signOut(auth);
     setUser(null);
+  };
+
+  const handlePasswordReset = async () => {
+    setLoginError("");
+    setResetMessage("");
+    try {
+      await sendPasswordResetEmail(auth, email.trim().toLowerCase());
+      setResetMessage("Password reset instructions sent. Check your email.");
+    } catch (err) {
+      const e = err as { message?: string };
+      setLoginError(e.message || "Could not send password reset instructions.");
+    }
   };
 
   if (loading) {
@@ -94,6 +107,7 @@ export default function AdminPage() {
               />
             </div>
             {loginError && <p className="text-sm text-[--coral]">{loginError}</p>}
+            {resetMessage && <p className="rounded-xl bg-[--mint-soft] p-3 text-sm font-semibold text-[--ink]">{resetMessage}</p>}
             <button
               type="submit"
               className="w-full rounded-xl bg-[--ink] py-3.5 font-display font-semibold text-white shadow-[0_4px_0_0_rgba(16,11,74,0.3)] transition-transform hover:-translate-y-0.5"
@@ -101,6 +115,10 @@ export default function AdminPage() {
               Sign In to Dashboard
             </button>
           </form>
+
+          <button onClick={handlePasswordReset} type="button" className="mt-4 w-full text-center text-sm font-semibold text-[--ink-soft] hover:text-[--ink] hover:underline">
+            Reset admin password
+          </button>
 
           <div className="mt-6 text-center">
             <Link href="/" className="text-sm font-semibold text-[--ink-soft] hover:underline">
