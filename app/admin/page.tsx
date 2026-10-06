@@ -2,22 +2,32 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { auth } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "@/lib/firebase";
 import { sendPasswordResetEmail, signInWithEmailAndPassword, signOut, onAuthStateChanged, User } from "firebase/auth";
 import { NfcWaves } from "@/components/doodles";
 import AdminApp from "@/components/admin/AdminApp";
 
 export default function AdminPage() {
   const [user, setUser] = useState<User | null>(null);
+  const [authorized, setAuthorized] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [email, setEmail] = useState("sardaribraheem277@gmail.com");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loginError, setLoginError] = useState("");
   const [resetMessage, setResetMessage] = useState("");
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setAuthorized(false);
       setUser(currentUser);
+      if (currentUser) {
+        setLoading(true);
+        try {
+          const config = await getDoc(doc(db, "config", "admin_uids"));
+          if (auth.currentUser?.uid === currentUser.uid) setAuthorized(config.exists() && config.data().uids.includes(currentUser.uid));
+        } catch { setLoginError("This account does not have staff access, or access could not be verified."); }
+      }
       setLoading(false);
     });
     return () => unsubscribe();
@@ -32,17 +42,7 @@ export default function AdminPage() {
     } catch (err) {
       const e = err as { code?: string; message?: string };
       const code = e?.code || "";
-      if (code === "auth/configuration-not-found" || code === "auth/api-key-not-valid.-please-pass-a-valid-api-key.") {
-        setLoginError(
-          "Firebase Auth is not configured for this project. Enable Email/Password sign-in in the Firebase Console (Authentication → Get Started → Email/Password)."
-        );
-      } else if (code === "auth/user-not-found") {
-        setLoginError("No account found with this email. Create the owner account in Firebase Console → Authentication → Users → Add User.");
-      } else if (code === "auth/wrong-password" || code === "auth/invalid-credential") {
-        setLoginError("Incorrect password. Please try again.");
-      } else {
-        setLoginError(e.message || "Login failed — check Firebase Auth configuration.");
-      }
+      setLoginError(code === "auth/too-many-requests" ? "Too many attempts. Please try again later." : "Sign-in failed. Check your credentials or contact the account owner.");
     } finally {
       setLoading(false);
     }
@@ -60,8 +60,8 @@ export default function AdminPage() {
       await sendPasswordResetEmail(auth, email.trim().toLowerCase());
       setResetMessage("Password reset instructions sent. Check your email.");
     } catch (err) {
-      const e = err as { message?: string };
-      setLoginError(e.message || "Could not send password reset instructions.");
+      void err;
+      setLoginError("Could not send password reset instructions. Please try again.");
     }
   };
 
@@ -130,5 +130,15 @@ export default function AdminPage() {
     );
   }
 
+  if (!authorized) return (
+    <main className="min-h-screen grid place-items-center p-6">
+      <section className="card-paper p-8 text-center">
+        <h1 className="font-display text-2xl">Staff access required</h1>
+        <p className="mt-4">{loginError || "Your account is not authorized for this dashboard."}</p>
+        <button onClick={handleLogout} className="btn btn-ink mt-6 px-6 py-3">Sign out</button>
+        <Link href="/" className="block mt-4 underline">Return home</Link>
+      </section>
+    </main>
+  );
   return <AdminApp user={user} onLogout={handleLogout} />;
 }

@@ -46,3 +46,14 @@ firebase-debug.*.log
 next-env.d.ts
 
 .png
+# Launch QA and local agent artifacts
+.playwright-mcp/
+.kilo/
+test-results/
+playwright-report/
+blob-report/
+!/.env.example
+!public/social-card.png
+!public/apple-touch-icon.png
+firestore-debug.log
+ui-debug.log

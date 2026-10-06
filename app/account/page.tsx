@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
 import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
 import { NfcWaves } from "@/components/doodles";
+import { profileReturnPath } from "@/lib/site";
 import { auth } from "@/lib/firebase";
 
 export default function AccountPage() {
@@ -28,7 +29,7 @@ export default function AccountPage() {
     try {
       await signInWithEmailAndPassword(auth, email.trim().toLowerCase(), password);
       const requestedPath = new URLSearchParams(window.location.search).get("next");
-      window.location.assign(requestedPath?.startsWith("/") ? requestedPath : "/");
+      window.location.assign(profileReturnPath(requestedPath));
     } catch (caught) {
       const code = (caught as { code?: string }).code || "";
       if (code === "auth/invalid-credential" || code === "auth/wrong-password" || code === "auth/user-not-found") {
@@ -36,7 +37,7 @@ export default function AccountPage() {
       } else if (code === "auth/too-many-requests") {
         setError("Too many attempts. Wait a moment and try again.");
       } else {
-        setError(caught instanceof Error ? caught.message : "Sign-in failed.");
+        setError("Sign-in is unavailable right now. Please try again or contact EdgeTap.");
       }
     } finally {
       setBusy(false);

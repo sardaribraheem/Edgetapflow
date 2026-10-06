@@ -27,14 +27,14 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     name: "Lux",
     tagline: "Premium and understated",
     tone: "bg-[--yellow-soft]",
-    description: "A premium finish for a sharper first impression.",
+    description: "A gold-toned design for a sharper first impression.",
   },
   {
     id: "wood",
     name: "Wood",
     tagline: "Warm and distinctive",
     tone: "bg-[#d6a36a]",
-    description: "A natural-looking card with a tactile feel.",
+    description: "A wood-inspired printed card design.",
   },
   {
     id: "inverted",
@@ -48,15 +48,9 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     name: "Upload your card design",
     tagline: "Use your own artwork",
     tone: "bg-[--sky-soft]",
-    description: "Upload a design for the admin and printer to review.",
+    description: "Upload a design for EdgeTap to review before printing.",
   },
-  {
-    id: "designer",
-    name: "Need a custom design?",
-    tagline: "Request graphic design help",
-    tone: "bg-[--mint-soft]",
-    description: "Request a professional design consultation. We will contact you manually.",
-  },
+
 ];
 
 // The plan (from /pricing) that seeded an order.
@@ -138,23 +132,17 @@ export type FulfillmentInfo = {
   history: FulfillmentEvent[];
 };
 
-// The ordered "main line" — a status is only reachable from a status that
-// precedes it in this list (or from its own immediate branch for paid/COD).
-// "cancelled" is a valid target from almost anywhere.
-const MAIN_LINE_ORDER: Record<string, number> = FULFILLMENT_FLOW.reduce(
-  (acc, s, i) => ({ ...acc, [s]: i }),
-  {}
-);
-
+// Explicit steps prevent marking an unproduced card shipped or skipping QA.
+const NEXT: Partial<Record<FulfillmentStatus, FulfillmentStatus[]>> = {
+  new: ["payment_pending", "paid"], payment_pending: ["paid"],
+  paid: ["profile_created"], profile_created: ["production_ready"],
+  production_ready: ["printing"], printing: ["ready_for_nfc"],
+  ready_for_nfc: ["nfc_programmed"], nfc_programmed: ["qa_passed"],
+  qa_passed: ["ready_to_ship"], ready_to_ship: ["shipped"], shipped: ["delivered"],
+};
 export function canTransition(from: FulfillmentStatus, to: FulfillmentStatus): boolean {
-  if (from === to) return false;
-  if (to === "cancelled") return from !== "delivered";
-  if (from === "cancelled") return false;
-  // Both must be on the main line, and `to` must come strictly after `from`.
-  const f = MAIN_LINE_ORDER[from];
-  const t = MAIN_LINE_ORDER[to];
-  if (f === undefined || t === undefined) return false;
-  return t > f;
+  if (to === "cancelled") return from !== "cancelled" && from !== "delivered";
+  return NEXT[from]?.includes(to) || false;
 }
 
 export type FulfillmentState = {

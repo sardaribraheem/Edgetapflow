@@ -134,7 +134,7 @@ export default function Hero() {
         <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-1.5 ring-1 ring-[--ink]/8 backdrop-blur">
           <span className="h-2 w-2 animate-pulse-soft rounded-full bg-[--mint]" />
           <span className="text-[12px] font-medium text-[--ink-soft]">
-            Now in Private Beta · Works on iPhone & Android
+            Physical NFC card + QR fallback
           </span>
         </div>
 
@@ -157,9 +157,10 @@ export default function Hero() {
 
         {/* sub */}
         <p className="mt-6 max-w-xl text-[17px] leading-relaxed text-[--ink-soft]">
-          Tap a physical EdgeTap card against most modern smartphones and watch a digital
-          profile, menu, review or website appear instantly — no app, no
-          searching. Just one tap.
+          Your physical EdgeTap card opens your digital profile on a compatible
+          NFC phone. Visitors can also scan its QR code to reach your contact
+          details and links — no app required. Rs. 999 per card, plus delivery
+          quoted for your location.
         </p>
 
         {/* CTAs */}
@@ -167,8 +168,8 @@ export default function Hero() {
           <Link href="/order" className="btn btn-ink px-7 py-3.5 text-[15px]">
             Get Your EdgeTap <span aria-hidden="true">→</span>
           </Link>
-          <Link href="#offer" className="btn btn-ghost px-7 py-3.5 text-[15px]">
-            See what we build
+          <Link href="/u/ibraheem" className="btn btn-ghost px-7 py-3.5 text-[15px]">
+            View an example profile
           </Link>
         </div>
 

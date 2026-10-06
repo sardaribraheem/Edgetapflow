@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Fredoka, Inter } from "next/font/google";
 import "./globals.css";
+import { APP_URL } from "@/lib/site";
 
 const fredoka = Fredoka({
   variable: "--font-display",
@@ -13,7 +14,6 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "https://edgetap.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     template: "%s · EdgeTap",
   },
   description:
-    "Smart NFC experiences for people and businesses. Tap a physical EdgeTap card and open a digital profile, menu, review, or website instantly — no app required.",
+    "Physical NFC business cards with a QR fallback and an editable digital profile. Rs. 999 per card plus delivery. One tap. Infinite possibilities.",
   keywords: [
     "NFC",
     "digital business card",
@@ -36,15 +36,17 @@ export const metadata: Metadata = {
   ],
   openGraph: {
     type: "website",
+    images: [{ url: "/social-card.png", width: 1200, height: 630, alt: "EdgeTap — One tap. Infinite possibilities." }],
     url: APP_URL,
     siteName: "EdgeTap",
     title: "EdgeTap — One Tap. Infinite Possibilities.",
     description:
       "Smart NFC experiences for people and businesses. One tap. Infinite possibilities.",
   },
+  icons: { icon: "/brand-icon.svg", apple: "/apple-touch-icon.png" },
   twitter: {
     card: "summary_large_image",
-    creator: "@edgetap",
+    images: ["/social-card.png"],
     title: "EdgeTap — One Tap. Infinite Possibilities.",
     description:
       "Smart NFC experiences for people and businesses. One tap. Infinite possibilities.",

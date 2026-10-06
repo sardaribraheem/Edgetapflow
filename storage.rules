@@ -1,59 +1,36 @@
 rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
-
-    // ── Profile avatars ───────────────────────────────────────
-    // path: avatars/{uid}/{filename}
-    // Public read so anyone can display the profile photo.
-    // Write restricted to the authenticated user's own folder.
-    match /avatars/{uid}/{allPaths=**} {
-      allow read: if true;
-
-      allow write: if request.auth != null
-                   && request.auth.uid == uid
-                   && request.resource.size < 5 * 1024 * 1024  // max 5 MB
-                   && request.resource.contentType.matches('image/.*'); // images only
-    }
-
-    // ── Legacy avatar inbox ───────────────────────────────────
-    // Kept read-only for previously uploaded files. New checkout uploads use
-    // avatars/{uid} after Firebase Authentication.
-    // No delete rule: nothing (not even admins) may delete via rules alone —
-    // a backend is the right place for that, and isn't wired in yet.
-    match /avatarInbox/{clientToken}/{filename} {
-      allow create, update: if false;
-      allow read: if true;
-    }
-
-    // ── Custom card designs / order artwork ───────────────────
-    // path: orderInbox/{clientToken}/{filename}
-    // Guests upload their Custom artwork during checkout. The clientToken is
-    // a cryptographically-random folder name generated client-side, so a guest
-    // can write only to folders they own (nobody can guess another token) and
-    // can never read anyone's upload. Admin may read/write for production.
     function isAdmin() {
-      return request.auth != null
-        && request.auth.uid in firestore.get(/databases/(default)/documents/config/admin_uids).data.uids;
+      return request.auth != null && request.auth.uid in firestore.get(/databases/(default)/documents/config/admin_uids).data.uids;
+    }
+    function owner(uid) { return request.auth != null && request.auth.uid == uid; }
+    function image(max) {
+      return request.resource.size > 0 && request.resource.size <= max
+        && request.resource.contentType.matches('image/(jpeg|png|webp)');
+    }
+    match /avatars/{uid}/{filename} {
+      allow get: if true;
+      allow create: if owner(uid) && image(5 * 1024 * 1024);
+      allow update: if owner(uid) && image(5 * 1024 * 1024);
+      allow delete: if owner(uid) || isAdmin();
+    }
+    match /avatarInbox/{token}/{filename} {
+      allow get: if true;
+      allow write: if false;
     }
     match /orderInbox/{uid}/{filename} {
-      allow create, update: if request.auth != null
-                             && request.auth.uid == uid
-                             && request.resource.size < 25 * 1024 * 1024
-                             && request.resource.contentType.matches('image/.*'); // art ≤ 25 MB
-      allow read, delete: if isAdmin();
+      allow create: if owner(uid) && image(25 * 1024 * 1024);
+      allow get: if owner(uid) || isAdmin();
+      allow update: if false;
+      allow delete: if owner(uid) || isAdmin();
     }
-
     match /paymentReceipts/{uid}/{filename} {
-      allow write: if request.auth != null
-                   && request.auth.uid == uid
-                   && request.resource.size < 8 * 1024 * 1024
-                   && request.resource.contentType.matches('image/.*');
-      allow read: if isAdmin() || (request.auth != null && request.auth.uid == uid);
+      allow create: if owner(uid) && image(8 * 1024 * 1024);
+      allow get: if owner(uid) || isAdmin();
+      allow update: if false;
+      allow delete: if owner(uid) || isAdmin();
     }
-
-    // ── Catch-all deny ────────────────────────────────────────
-    match /{allPaths=**} {
-      allow read, write: if false;
-    }
+    match /{path=**} { allow read, write: if false; }
   }
 }

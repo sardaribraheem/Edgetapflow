@@ -23,8 +23,8 @@ export default function FinalCTA() {
         </h2>
 
         <p className="mt-6 max-w-xl text-[17px] leading-relaxed text-[--ink-soft]">
-          Get your EdgeTap and turn every introduction, table and customer
-          moment into a digital experience that matters.
+          Order a physical NFC card with a QR fallback and your own digital profile.
+          Rs. 999 per card. Delivery cost and timing are confirmed for your location.
         </p>
 
         <div className="mt-9 flex flex-wrap items-center justify-center gap-4">

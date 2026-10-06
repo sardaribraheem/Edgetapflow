@@ -12,13 +12,10 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Fail loudly if env vars are missing (they're baked at build time for static export)
-if (!firebaseConfig.apiKey || !firebaseConfig.projectId) {
-  console.error(
-    "[EdgeTap] Missing Firebase env vars — check .env.local (NEXT_PUBLIC_FIREBASE_*). " +
-    "Static export will use undefined values and Firebase calls will fail."
-  );
-}
+// Static exports bake NEXT_PUBLIC values into the JS bundle.
+// Web API keys identify a Firebase project; security relies on deployed rules.
+const missing = Object.entries(firebaseConfig).filter(([, value]) => !value).map(([key]) => key);
+if (missing.length) throw new Error(`Missing Firebase build configuration: ${missing.join(", ")}`);
 
 // Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();

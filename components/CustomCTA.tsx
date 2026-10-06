@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SUPPORT_URL } from "@/lib/site";
 import {
   SparkleDoodle,
   ScribbleDoodle,
@@ -27,23 +28,22 @@ export default function CustomCTA() {
         </div>
 
         <h2 className="text-display max-w-4xl text-[clamp(2.6rem,7vw,5.5rem)]">
-          Got an idea?
+          Your card.
           <br />
-          <span className="text-[--yellow]">Let&apos;s bring it to life</span>
+          <span className="text-[--yellow]">Your style.</span>
         </h2>
 
         <p className="mt-6 max-w-xl text-[17px] leading-relaxed text-[--cream]/75">
-          EdgeTap isn&apos;t just NFC cards. We design and build custom
-          physical → digital experiences for people and businesses. Tell us
-          what you imagine.
+          Have a question about your card design or a larger order?
+          Contact us to discuss the details before placing your order.
         </p>
 
         <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
-          <Link href="#get-started" className="btn btn-yellow px-8 py-4 text-[16px]">
-            Let&apos;s build it <span aria-hidden="true">→</span>
+          <Link href="/order" className="btn btn-yellow px-8 py-4 text-[16px]">
+            Order your card <span aria-hidden="true">→</span>
           </Link>
-          <a href="mailto:business@edgetap.com" className="btn btn-ghost px-8 py-4 text-[16px] text-[--cream] [&]:border-[--cream]/25 [&]:text-[--cream] hover:bg-[--cream]/5">
-            business@edgetap.com
+          <a href={SUPPORT_URL} target="_blank" rel="noreferrer" className="btn btn-ghost px-8 py-4 text-[16px] text-[--cream] [&]:border-[--cream]/25 [&]:text-[--cream] hover:bg-[--cream]/5">
+            WhatsApp EdgeTap
           </a>
         </div>
 

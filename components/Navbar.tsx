@@ -43,12 +43,13 @@ export default function Navbar() {
               <a href={nav.cta.href} className="btn btn-ink hidden px-5 py-2.5 text-[13px] sm:inline-flex">
                 {nav.cta.label} <span aria-hidden="true">→</span>
               </a>
-              <Link href="/admin" className="btn bg-white px-5 py-2.5 text-[13px] ring-1 ring-[--ink]/15 hover:bg-[--cream] sm:inline-flex">
-                Login 🔐
+              <Link href="/account" className="btn bg-white px-5 py-2.5 text-[13px] ring-1 ring-[--ink]/15 hover:bg-[--cream] sm:inline-flex">
+                Sign in
               </Link>
 
               {/* mobile menu button */}
               <button
+                aria-expanded={menuOpen}
                 onClick={() => setMenuOpen(true)}
                 aria-label="Open menu"
                 className="grid h-11 w-11 place-items-center rounded-full bg-[--ink]/6 text-[--ink] lg:hidden"

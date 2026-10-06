@@ -13,6 +13,7 @@ import {
   suggestUsername,
 } from "@/lib/firestore";
 import { qrDataUrl } from "@/lib/qr";
+import { downloadPrivateUpload } from "@/lib/storage";
 import { profileUrl } from "@/lib/site";
 import { NfcWaves, QrDoodle, ProfileDoodle } from "@/components/doodles";
 import { CARD_TEMPLATE_ART } from "@/lib/data/cardArt";
@@ -270,7 +271,7 @@ function OrderDetail({
   onCreateProfile: () => void;
   onConfirmPayment: () => void;
 }) {
-  const validNext = FULFILLMENT_FLOW.filter((s) => canTransition(order.fulfillment.status, s));
+  const validNext = FULFILLMENT_FLOW.filter((s) => s !== "paid" && s !== "profile_created" && canTransition(order.fulfillment.status, s));
   const inProductionPhase = ["profile_created", "production_ready", "printing", "ready_for_nfc", "nfc_programmed", "qa_passed"].includes(
     order.fulfillment.status
   );
@@ -334,7 +335,7 @@ function OrderDetail({
             <p className="text-[12px] text-[--ink-faint]">No further transitions for this state.</p>
           )}
         </div>
-        {order.payment.status !== "paid" && (
+        {order.payment.status !== "paid" && order.fulfillment.status !== "cancelled" && (
           <button onClick={onConfirmPayment} disabled={busy} className="rounded-xl bg-[--mint] px-5 py-2.5 text-[13px] font-bold text-[--ink]">
             Confirm Payment
           </button>
@@ -357,7 +358,7 @@ function OrderDetail({
         <Section title="CARD" eye={`qty ×${order.card.quantity}`}>
           <Row k="Template" v={templateName} />
           {order.card.template === "upload" && order.card.customDesignUrl ? (
-            <Row k="Custom art" v={<span className="break-all">{order.card.customDesignUrl}</span>} />
+            <Row k="Custom art" v={<PrivateUpload path={order.card.customDesignUrl} label="Download artwork" />} />
           ) : (
             <Row k="Custom art" v="—" />
           )}
@@ -424,7 +425,7 @@ function OrderDetail({
         />
         {order.payment.providerRef && <Row k="Provider ref" v={order.payment.providerRef} />}
         {order.payment.reference && <Row k="Transaction/reference" v={order.payment.reference} />}
-        {order.payment.receiptUrl && <Row k="Receipt" v={<a href={order.payment.receiptUrl} target="_blank" rel="noreferrer" className="text-[--sky] underline">Open receipt</a>} />}
+        {order.payment.receiptUrl && <Row k="Receipt" v={<PrivateUpload path={order.payment.receiptUrl} label="Download receipt" />} />}
         <p className="mt-2 text-[11px] leading-relaxed text-[--ink-faint]">
           Confirm the receipt manually before moving this order to paid.
         </p>
@@ -630,4 +631,17 @@ function CreateClientProfileModal({
       </div>
     </div>
   );
+}
+function PrivateUpload({ path, label }: { path: string; label: string }) {
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  if (path.startsWith("https://")) return <a href={path} target="_blank" rel="noreferrer" className="text-[--sky] underline">{label} (legacy link)</a>;
+  return <span>
+    <button type="button" disabled={busy} className="text-[--sky] underline disabled:opacity-50" onClick={async () => {
+      setBusy(true); setError("");
+      try { await downloadPrivateUpload(path); } catch { setError("Download failed. Check staff permissions and Storage CORS configuration."); }
+      finally { setBusy(false); }
+    }}>{busy ? "Downloading…" : label}</button>
+    {error && <span role="alert" className="block text-sm text-[--coral]">{error}</span>}
+  </span>;
 }

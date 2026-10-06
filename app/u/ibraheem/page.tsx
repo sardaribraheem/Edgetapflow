@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ibraheemProfile } from "@/lib/data/profile";
-import ProfilePage from "@/components/ProfilePage";
+import ProfileRoute from "@/components/ProfileRoute";
 
 export const metadata: Metadata = {
   title: ibraheemProfile.displayName,
@@ -21,5 +21,5 @@ export const metadata: Metadata = {
 };
 
 export default function IbraheemPage() {
-  return <ProfilePage />;
+  return <ProfileRoute />;
 }

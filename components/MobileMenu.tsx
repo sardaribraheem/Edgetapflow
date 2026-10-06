@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { nav } from "@/lib/data/content";
 import { NfcWaves, SparkleDoodle } from "./doodles";
@@ -12,15 +12,28 @@ type Props = {
 
 // Side drawer for mobile navigation — visually consistent with EdgeTap.
 export default function MobileMenu({ open, onClose }: Props) {
+  const dialogRef = useRef<HTMLDivElement>(null);
   // lock scroll + Escape to close
   useEffect(() => {
     if (!open) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    const previousFocus = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    const nodes = () => Array.from(dialogRef.current?.querySelectorAll<HTMLElement>('a[href], button') || []);
+    nodes()[0]?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      if (e.key === "Tab") {
+        const items = nodes();
+        if (e.shiftKey && document.activeElement === items[0]) { e.preventDefault(); items.at(-1)?.focus(); }
+        else if (!e.shiftKey && document.activeElement === items.at(-1)) { e.preventDefault(); items[0]?.focus(); }
+      }
+    };
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
     return () => {
       document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
+      document.body.style.overflow = previousOverflow;
+      previousFocus?.focus();
     };
   }, [open, onClose]);
 
@@ -38,6 +51,9 @@ export default function MobileMenu({ open, onClose }: Props) {
 
       {/* drawer */}
       <div
+        ref={dialogRef}
+        inert={!open}
+        aria-hidden={!open}
         role="dialog"
         aria-modal="true"
         aria-label="Menu"

@@ -1,89 +1,124 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    // Admin = any auth UID listed in config/admin_uids.
-    // get() from within rules bypasses normal read permissions, so the doc
-    // itself is never public-readable.
     function isAdmin() {
       return request.auth != null
         && request.auth.uid in get(/databases/$(database)/documents/config/admin_uids).data.uids;
     }
-
-    // ── Profiles ─────────────────────────────────────────────────
-    // Public read for all published profiles; write restricted to the
-    // authenticated profile owner (or an admin building a client profile).
+    function text(value, max) { return value is string && value.size() <= max; }
+    function link(value) {
+      let label = value.label;
+      let url = value.url;
+      return value.keys().hasOnly(['type','label','url','icon','accent'])
+        && value.type is string
+        && label is string && label.size() <= 80
+        && url.size() <= 2048
+        && url.matches('^(https?://[^ /]+[^ ]*|mailto:[^ @]+@[^ @]+[.][^ @]+|tel:[+]?[0-9()-]{5,25})$');
+    }
+    function links(values) {
+      let count = values.size();
+      return values is list && count <= 10
+        && (count < 1 || link(values[0]))
+        && (count < 2 || link(values[1]))
+        && (count < 3 || link(values[2]))
+        && (count < 4 || link(values[3]))
+        && (count < 5 || link(values[4]))
+        && (count < 6 || link(values[5]))
+        && (count < 7 || link(values[6]))
+        && (count < 8 || link(values[7]))
+        && (count < 9 || link(values[8]))
+        && (count < 10 || link(values[9]));
+    }
+    // Checkout drafts validate fields consumed by staff. Publication normalizes
+    // icon/accent and applies the complete public-profile validation above.
+    function draftLink(value) {
+      return value.type is string && value.label is string && value.url.size() <= 2048
+        && value.url.matches('^(https?://[^ /]+[^ ]*|mailto:[^ @]+@[^ @]+[.][^ @]+|tel:[+]?[0-9()-]{5,25})$');
+    }
+    function draftLinks(values) {
+      let count = values.size();
+      return values is list && count <= 10
+        && (count < 1 || draftLink(values[0]))
+        && (count < 2 || draftLink(values[1]))
+        && (count < 3 || draftLink(values[2]))
+        && (count < 4 || draftLink(values[3]))
+        && (count < 5 || draftLink(values[4]))
+        && (count < 6 || draftLink(values[5]))
+        && (count < 7 || draftLink(values[6]))
+        && (count < 8 || draftLink(values[7]))
+        && (count < 9 || draftLink(values[8]))
+        && (count < 10 || draftLink(values[9]));
+    }
+    function profile(data, username) {
+      return data.keys().hasOnly(['username','displayName','firstName','lastName','title','bio','location','avatar','links','ownerUid','profileId','active','createdAt','updatedAt'])
+        && data.username == username && username.matches('^[a-z0-9._-]{1,30}$')
+        && text(data.displayName, 120) && data.displayName.size() > 0
+        && text(data.firstName, 120) && text(data.lastName, 120)
+        && text(data.title, 160) && text(data.bio, 2000) && text(data.location, 160)
+        && text(data.avatar, 2048) && links(data.links);
+    }
     match /profiles/{username} {
-      allow read: if true;
-
-      allow create: if (request.auth != null
-                        && request.resource.data.ownerUid == request.auth.uid
-                        && !resource.data.keys().hasAny(['ownerUid']))
-                    || isAdmin();
-
-      allow update: if (request.auth != null
-                        && resource.data.ownerUid == request.auth.uid
-                        && request.resource.data.ownerUid == resource.data.ownerUid)
-                    || isAdmin();
-
-      allow delete: if (request.auth != null
-                        && resource.data.ownerUid == request.auth.uid)
-                    || isAdmin();
+      allow get: if !exists(/databases/$(database)/documents/profiles/$(username)) || resource.data.get('active', true) == true || isAdmin();
+      allow list: if isAdmin();
+      allow create: if isAdmin() && profile(request.resource.data, username);
+      allow update: if (isAdmin() || (
+        request.auth != null && resource.data.ownerUid == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName','title','bio','location','links','updatedAt'])
+      )) && profile(request.resource.data, username);
+      allow delete: if isAdmin();
     }
-
-    // ── Handles ─────────────────────────────────────────────────
-    // Collision-prevention: a handle can only be created when absent, and
-    // only by an admin (or the profile owner claiming it for their uid).
     match /handles/{username} {
-      allow create: if isAdmin()
-        || (request.auth != null && request.resource.data.ownerUid == request.auth.uid);
-      allow read, update, delete: if false;
-    }
-
-    // ── profilesById (stable-ID mapping) ─────────────────────────
-    match /profilesById/{profileId} {
-      allow read, write: if isAdmin();
-    }
-
-    // ── Orders ──────────────────────────────────────────────────
-    // Authenticated customers create orders. Anything about an order
-    // after that — including the private delivery address and payment — is
-    // admin-only. Order documents never surface on /u/<username>.
-    match /orders/{orderId} {
-      // Checkout requires a Firebase customer account so the created profile
-      // can be owned and edited by that customer later.
-      allow create: if request.auth != null
-        && request.resource.data.ownerUid == request.auth.uid
-        && request.resource.data.card.quantity is int
-        && request.resource.data.card.quantity >= 1
-        && request.resource.data.card.quantity <= 20
-        && request.resource.data.subtotal == request.resource.data.card.quantity * 999
-        && request.resource.data.deliveryFee == null
-        && request.resource.data.total == null
-        && request.resource.data.payment.status == 'pending';
-      // After creation, everything (incl. private delivery + payment) is admin-only.
-      allow read, update, delete: if isAdmin();
-    }
-
-    // ── Reviews ─────────────────────────────────────────────────
-    // Public read (they're public praise); create by a signed-in user only.
-    match /reviews/{reviewId} {
-      allow read: if true;
-      allow create: if request.auth != null
-                    && request.resource.data.rating is int
-                    && request.resource.data.rating >= 1
-                    && request.resource.data.rating <= 5;
+      allow read: if isAdmin();
+      allow create: if isAdmin() && username.matches('^[a-z0-9._-]{1,30}$');
       allow update, delete: if false;
     }
-
-    // ── Admin config (never public-readable) ────────────────────
-    match /config/{doc} {
-      allow read, write: if false;
+    match /profilesById/{profileId} { allow read, write: if isAdmin(); }
+    match /orders/{orderId} {
+      function validOrder(data) {
+        let card = data.card;
+        let customer = data.customer;
+        let draft = data.profileDraft;
+        let payment = data.payment;
+        let uid = request.auth.uid;
+        return data.keys().hasOnly(['ownerUid','orderNumber','plan','card','profileDraft','customer','deliveryMethod','subtotal','deliveryFee','total','payment','fulfillment','createdAt','updatedAt'])
+          && data.ownerUid == uid && data.plan == 'standard'
+          && text(data.orderNumber, 50)
+          && card.keys().hasOnly(['template','quantity','customDesignUrl'])
+          && card.template in ['simple','wood','inverted','lux','upload']
+          && card.quantity is int && card.quantity >= 1 && card.quantity <= 20
+          && (!card.keys().hasAny(['customDesignUrl']) || card.customDesignUrl.matches('^orderInbox/' + uid + '/[^/]+$'))
+          && data.subtotal == card.quantity * 999 && data.deliveryFee == null && data.total == null
+          && data.deliveryMethod == 'delivery'
+          && customer.keys().hasOnly(['fullName','phone','email','address','city','postalCode'])
+          && text(customer.fullName, 120) && customer.fullName.size() > 0
+          && text(customer.phone, 30) && customer.phone.matches('^[+]?[0-9 ()-]{7,30}$')
+          && text(customer.email, 254) && customer.email == request.auth.token.email
+          && text(customer.address, 1000) && customer.address.size() > 0
+          && text(customer.get('city', ''), 120) && text(customer.get('postalCode', ''), 20)
+          && draft.keys().hasOnly(['avatarUrl','displayName','title','bio','links'])
+          && text(draft.displayName, 120) && draft.displayName.size() > 0
+          && text(draft.get('title', ''), 160) && text(draft.get('bio', ''), 2000)
+          && text(draft.get('avatarUrl', ''), 2048) && draftLinks(draft.links)
+          && draft.links.size() >= 1
+          && payment.keys().hasOnly(['method','status','reference','receiptUrl'])
+          && payment.method == 'jazzcash' && payment.status == 'pending'
+          && text(payment.get('reference', ''), 200)
+          && payment.receiptUrl.matches('^paymentReceipts/' + uid + '/[^/]+$')
+          && data.fulfillment == {'status': 'new', 'history': [{'status': 'new', 'at': data.createdAt}]}
+          && data.createdAt is int && data.updatedAt == data.createdAt;
+      }
+      allow create: if request.auth != null && validOrder(request.resource.data);
+      allow read, update, delete: if isAdmin();
     }
-
-    // ── Catch-all deny ──────────────────────────────────────────
-    match /{document=**} {
-      allow read, write: if false;
+    match /reviews/{reviewId} {
+      allow read: if true;
+      // No public submission experience exists yet; do not expose a spam-write endpoint.
+      allow write: if isAdmin();
     }
+    match /config/{document} {
+      allow get: if document == 'admin_uids' && isAdmin();
+      allow list, write: if false;
+    }
+    match /{document=**} { allow read, write: if false; }
   }
 }

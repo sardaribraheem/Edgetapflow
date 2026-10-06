@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Solution } from "@/lib/data/content";
 import {
   BusinessCardDoodle,
@@ -82,9 +83,9 @@ export default function SolutionCard({ solution }: { solution: Solution }) {
       </div>
 
       <div className="mt-6 flex items-center gap-2 font-display text-sm font-semibold text-[--ink]">
-        <span className="transition-transform group-hover:translate-x-1">
-          Explore this experience
-        </span>
+        <Link href="/order" className="min-h-11 inline-flex items-center underline">
+          Build your card
+        </Link>
         <ArrowCurveDoodle className="h-5 w-5 text-[--ink-faint] transition-transform group-hover:rotate-12" />
       </div>
     </article>

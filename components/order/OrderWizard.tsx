@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState, useRef } from "react";
 import Link from "next/link";
 import { NfcWaves, SparkleDoodle, StarDoodle } from "@/components/doodles";
 import ProfilePage from "@/components/ProfilePage";
@@ -16,6 +16,8 @@ import {
   calculateSubtotal,
 } from "@/lib/data/order";
 import type { Profile, ProfileLink } from "@/lib/data/profile";
+import { isSafeContactUrl } from "@/lib/links";
+import { SUPPORT_URL } from "@/lib/site";
 import { createOrder, orderNumber } from "@/lib/firestore";
 import { uploadCustomDesign, uploadPublicAvatar, uploadPaymentReceipt, fileToDataUrl } from "@/lib/storage";
 import { auth } from "@/lib/firebase";
@@ -55,7 +57,7 @@ function blankDraft(): WizardDraft {
     avatarUploadPending: false,
     customer: { fullName: "", phone: "", email: "", address: "" },
     deliveryMethod: "delivery",
-    payment: { method: "raast", status: "pending" },
+    payment: { method: "jazzcash", status: "pending" },
   };
 }
 
@@ -63,6 +65,7 @@ export default function OrderWizard() {
   const [step, setStep] = useState(0);
   const [draft, setDraft] = useState<WizardDraft>(blankDraft);
   const [error, setError] = useState("");
+  const submissionLock = useRef(false);
   const [submitting, setSubmitting] = useState(false);
   const [placed, setPlaced] = useState<Order | null>(null);
   const [resubmitKey, setResubmitKey] = useState(0); // bump to retry a failed submit
@@ -71,18 +74,6 @@ export default function OrderWizard() {
   const [paymentReceipt, setPaymentReceipt] = useState<File | null>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [customDesignFile, setCustomDesignFile] = useState<File | null>(null);
-  // Seed plan from /order?plan=…  (query read client-side — static-export safe).
-  // Deferred so the plan applies after mount without a hydration mismatch.
-  useEffect(() => {
-    const t = window.setTimeout(() => {
-      const plan = new URLSearchParams(window.location.search).get("plan");
-      if (plan === "standard" || plan === "business" || plan === "enterprise") {
-        setDraft((d) => ({ ...d, plan }));
-      }
-    }, 0);
-    return () => window.clearTimeout(t);
-  }, []);
-
   const patch = (p: Partial<WizardDraft>) => setDraft((d) => ({ ...d, ...p }));
 
   // Build the public profile this draft will become (live preview, Step 4).
@@ -98,7 +89,7 @@ export default function OrderWizard() {
       bio: draft.bio,
       location: draft.customer.city || "",
       avatar: draft.avatarPreview || draft.avatarUrl || "",
-      links: draft.links.filter((l) => l.url && l.url.trim() !== "" && l.url !== "https://"),
+      links: draft.links.filter((l) => isSafeContactUrl(l.url)),
     };
   }, [draft]);
 
@@ -114,6 +105,7 @@ export default function OrderWizard() {
         if (draft.avatarUploadPending) return "Please wait for the profile picture upload to finish.";
         return "";
       case 2:
+        if (draft.links.some((link) => !isSafeContactUrl(link.url))) return "Use a complete http(s), email or phone contact URL for every link.";
         if (draft.links.filter((link) => link.url && !["https://", "mailto:", "https://wa.me/"].includes(link.url.trim())).length < 1) {
           return "Add at least one way for people to contact you.";
         }
@@ -121,14 +113,16 @@ export default function OrderWizard() {
       case 4: {
         const c = draft.customer;
         if (!c.fullName.trim()) return "Please add your full name.";
-        if (!c.phone.trim()) return "Please add your phone number.";
+        if (!/^[+\d ()-]{7,30}$/.test(c.phone)) return "Please add a valid phone number.";
         if (!/.+@.+\..+/.test(c.email)) return "Please add a valid email.";
         if (draft.deliveryMethod === "delivery" && !c.address.trim()) return "Please add your delivery address.";
         return "";
       }
       case 5:
+      case 6:
         if (!auth.currentUser && accountPassword.length < 6) return "Use a password with at least 6 characters.";
         if (!paymentReceipt) return "Upload your payment receipt before placing the order.";
+        if (!["image/jpeg", "image/png", "image/webp"].includes(paymentReceipt.type) || paymentReceipt.size > 8 * 1024 * 1024) return "Use a JPEG, PNG or WebP receipt no larger than 8 MB.";
         return "";
       default:
         return "";
@@ -148,9 +142,11 @@ export default function OrderWizard() {
   };
 
   const handleSubmit = async () => {
+    if (submissionLock.current) return;
     setError("");
     const err = validateStep();
     if (err) return setError(err);
+    submissionLock.current = true;
     setSubmitting(true);
     try {
       const email = draft.customer.email.trim().toLowerCase();
@@ -177,6 +173,7 @@ export default function OrderWizard() {
           customerUser = (await signInWithEmailAndPassword(auth, email, accountPassword)).user;
         }
       }
+      if (customerUser.email?.toLowerCase() !== email) throw new Error("Sign out first or use your signed-in account email for the order.");
       const now = Date.now();
       if (!paymentReceipt) throw new Error("Payment receipt is required.");
       const [receiptUrl, avatarUrl, customDesignUrl] = await Promise.all([
@@ -187,7 +184,7 @@ export default function OrderWizard() {
       const order: Order = {
         ownerUid: customerUser.uid,
         orderNumber: orderNumber(),
-        plan: draft.plan,
+        plan: "standard",
         card: {
           template: draft.cardTemplate,
           quantity: draft.quantity,
@@ -198,7 +195,7 @@ export default function OrderWizard() {
           displayName: draft.displayName.trim(),
           ...(draft.title.trim() ? { title: draft.title.trim() } : {}),
           ...(draft.bio.trim() ? { bio: draft.bio.trim() } : {}),
-          links: draft.links.slice(0, 10),
+          links: draft.links.filter((l) => isSafeContactUrl(l.url)).slice(0, 10),
         },
         customer: draft.customer,
         deliveryMethod: draft.deliveryMethod,
@@ -212,13 +209,11 @@ export default function OrderWizard() {
       };
       const id = await createOrder(order);
       setPlaced({ ...order, id });
-    } catch (e) {
-      console.error("[EdgeTap] Order submit failed:", e);
-      setError(
-        e instanceof Error ? e.message : "We couldn't place your order right now. Please try again."
-      );
+    } catch {
+      setError("We could not place your order. Check your account email, password and uploads, then try again. If you already paid, contact EdgeTap on WhatsApp before retrying.");
       setResubmitKey((k) => k + 1);
     } finally {
+      submissionLock.current = false;
       setSubmitting(false);
     }
   };
@@ -230,7 +225,7 @@ export default function OrderWizard() {
 
   return (
     <div className="relative flex min-h-screen flex-col items-center bg-[--cream] px-4 py-24">
-      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
         <div className="absolute left-1/4 top-16 h-72 w-72 rounded-full bg-[--yellow-soft] opacity-60 blur-3xl" />
         <div className="absolute bottom-10 right-10 h-80 w-80 rounded-full bg-[--sky-soft] opacity-50 blur-3xl" />
       </div>
@@ -304,6 +299,7 @@ export default function OrderWizard() {
             submitting={submitting}
             resubmitKey={resubmitKey}
             onSubmit={handleSubmit}
+            onBack={back}
           />
         )}
 
@@ -317,7 +313,7 @@ export default function OrderWizard() {
               ← Back
             </button>
             <button onClick={next} className="btn btn-ink px-8 py-3 font-bold">
-              {step === 5 ? "Place Order →" : "Continue →"}
+              {step === 5 ? "Review order →" : "Continue →"}
             </button>
           </div>
         )}
@@ -397,10 +393,10 @@ function CardStep({
       {draft.cardTemplate === "upload" && (
         <div className="mt-6 rounded-2xl bg-[--sky-soft]/40 p-5 ring-1 ring-[--sky]/30">
           <p className="text-sm font-bold text-[--ink]">Upload your own card design</p>
-          <input type="file" accept="image/*" onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])} className="mt-3 block w-full text-sm" />
+          <input type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])} className="mt-3 block w-full text-sm" />
           {uploading && <p className="mt-2 text-sm text-[--ink-soft]">Uploading…</p>}
           {uploadError && <p className="mt-2 text-sm font-semibold text-[--coral]">{uploadError}</p>}
-          {draft.customDesignUrl && <p className="mt-2 text-sm font-semibold text-[--mint]">Design uploaded for production.</p>}
+          {draft.customDesignUrl && <p className="mt-2 text-sm font-semibold text-[--mint]">Design selected. Uploaded when you place the order.</p>}
         </div>
       )}
 
@@ -408,7 +404,7 @@ function CardStep({
         <div className="mt-6 rounded-2xl bg-[--mint-soft]/60 p-5">
           <p className="text-sm font-bold text-[--ink]">Need a custom design?</p>
           <p className="mt-1 text-sm text-[--ink-soft]">We&apos;ll contact you about a professional design request and any additional fee before proceeding.</p>
-          <a href="mailto:sardaribraheem277@gmail.com?subject=EdgeTap%20custom%20design%20request" className="btn btn-ink mt-4 inline-flex px-4 py-2 text-sm">Request a designer</a>
+          <a href={SUPPORT_URL} target="_blank" rel="noreferrer" className="btn btn-ink mt-4 inline-flex px-4 py-2 text-sm">Request a designer</a>
         </div>
       )}
 
@@ -483,7 +479,7 @@ function ProfileStep({
               {uploading ? "Uploading…" : "Upload photo"}
               <input
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png,image/webp"
                 className="hidden"
                 onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])}
               />
@@ -498,6 +494,7 @@ function ProfileStep({
           </label>
           <input
             id="ow-name"
+            maxLength={120}
             type="text"
             value={draft.displayName}
             onChange={(e) => onChange({ displayName: e.target.value })}
@@ -512,6 +509,7 @@ function ProfileStep({
           </label>
           <input
             id="ow-title"
+            maxLength={160}
             type="text"
             value={draft.title}
             onChange={(e) => onChange({ title: e.target.value })}
@@ -526,6 +524,7 @@ function ProfileStep({
           </label>
           <textarea
             id="ow-bio"
+            maxLength={2000}
             rows={3}
             value={draft.bio}
             onChange={(e) => onChange({ bio: e.target.value })}
@@ -613,6 +612,8 @@ function LinksStep({
           <div key={i} className="flex flex-col gap-2 rounded-2xl bg-white p-4 ring-1 ring-[--ink]/10 sm:flex-row sm:items-center">
             <input
               type="text"
+              aria-label={`Link ${i + 1} label`}
+              maxLength={80}
               placeholder="Label"
               value={l.label}
               onChange={(e) => update(i, "label", e.target.value)}
@@ -620,6 +621,8 @@ function LinksStep({
             />
             <input
               type="text"
+              aria-label={`Link ${i + 1} URL`}
+              maxLength={2048}
               placeholder={l.type === "email" ? "example@gmail.com" : l.type === "whatsapp" ? "+92 300 1234567" : "URL (https://…)"}
               value={l.type === "email" ? l.url.replace(/^mailto:/, "") : l.type === "whatsapp" ? l.url.replace("https://wa.me/", "") : l.url}
               onChange={(e) => updateUrl(i, e.target.value)}
@@ -691,7 +694,7 @@ function DeliveryStep({
   const FIELDS: { key: keyof CustomerInfo; placeholder: string; type: string; span?: boolean }[] = [
     { key: "fullName", placeholder: "Full name", type: "text" },
     { key: "phone", placeholder: "Phone number", type: "tel" },
-    { key: "email", placeholder: "Email (for order updates)", type: "email" },
+    { key: "email", placeholder: "Account email", type: "email" },
     { key: "address", placeholder: "Delivery address", type: "text", span: true },
     { key: "city", placeholder: "City (optional)", type: "text" },
   ];
@@ -706,8 +709,7 @@ function DeliveryStep({
       </p>
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
         {([
-          ["pickup", "Pickup", "Free pickup at NASTP Lahore · Monday–Sunday, 9 AM–5 PM"],
-          ["delivery", "Delivery", "We will arrange delivery manually based on your location."],
+          ["delivery", "Delivery", "Delivery within Pakistan. Contact us to confirm cost and timing for your location before paying."],
         ] as const).map(([value, label, description]) => (
           <button type="button" key={value} aria-pressed={deliveryMethod === value} onClick={() => onDeliveryMethodChange(value)} className={`rounded-xl border-2 p-4 text-left transition-colors hover:border-[--ink]/50 ${deliveryMethod === value ? "border-[--ink] bg-[--yellow-soft]/30" : "border-[--ink]/10 bg-white"}`}>
             <span className="flex items-center justify-between font-display font-bold text-[--ink]"><span>{label}</span>{deliveryMethod === value && <span aria-hidden="true">✓</span>}</span>
@@ -718,8 +720,10 @@ function DeliveryStep({
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
         {FIELDS.filter(({ key }) => deliveryMethod === "delivery" || key !== "address").map(({ key, placeholder, type, span }) => (
           <div key={key} className={span ? "sm:col-span-2" : ""}>
-            <label className="block text-sm font-bold text-[--ink]">{placeholder}</label>
+            <label htmlFor={`delivery-${key}`} className="block text-sm font-bold text-[--ink]">{placeholder}</label>
             <input
+              id={`delivery-${key}`}
+              maxLength={key === "address" ? 1000 : key === "email" ? 254 : key === "phone" ? 30 : 120}
               type={type}
               value={customer[key] || ""}
               onChange={(e) => onChange({ ...customer, [key]: e.target.value })}
@@ -757,9 +761,7 @@ function PaymentStep({
   onReceiptChange: (file: File | null) => void;
 }) {
   const paymentDetails: Record<string, string> = {
-    raast: "Raast Account: PK08JCMA1811923044149674. Please include your order number as reference.",
-    easypaisa: "JazzCash / Easypaisa Account: 03044149674. Please include your order number as reference.",
-    jazzcash: "JazzCash Account: 03044149674. Please include your order number as reference.",
+    jazzcash: "JazzCash: 0304 4149674. Confirm the recipient and complete cost with EdgeTap on WhatsApp before transferring funds.",
   };
   return (
     <section className="card-paper mb-6 p-7 sm:p-10">
@@ -768,7 +770,7 @@ function PaymentStep({
         How would you like to pay?
       </h1>
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
-        {(["raast", "easypaisa", "jazzcash"] as const).map((method) => (
+        {(["jazzcash"] as const).map((method) => (
           <button type="button" key={method} aria-pressed={payment.method === method} onClick={() => onChange({ method, status: "pending" })} className={`rounded-xl border-2 p-5 text-left transition-colors hover:border-[--ink]/50 ${payment.method === method ? "border-[--ink] bg-[--yellow-soft]/30" : "border-[--ink]/10 bg-white"}`}>
             <span className="font-display text-lg font-bold capitalize text-[--ink]">{method}</span>
             <p className="mt-1 text-sm text-[--ink-soft]">Manual verification</p>
@@ -784,16 +786,16 @@ function PaymentStep({
       </dl>
       <div className="mt-4 rounded-xl bg-[--yellow-soft] p-4 text-sm text-[--ink]">
         <p className="font-bold">{paymentDetails[payment.method]}</p>
-        <p className="mt-2">Meezan Bank IBAN: <strong>PK46MEZN0000300116179673</strong></p>
+        <a href={SUPPORT_URL} target="_blank" rel="noreferrer" className="mt-3 inline-block underline">Confirm order details on WhatsApp</a>
       </div>
       <label className="mt-4 block text-sm font-bold text-[--ink]">Payment receipt screenshot
-        <input type="file" accept="image/*" required onChange={(event) => onReceiptChange(event.target.files?.[0] || null)} className="mt-2 block w-full text-sm" />
+        <input type="file" accept="image/jpeg,image/png,image/webp" required onChange={(event) => onReceiptChange(event.target.files?.[0] || null)} className="mt-2 block w-full text-sm" />
       </label>
       <label className="mt-4 block text-sm font-bold text-[--ink]">Transaction/reference ID <span className="font-normal text-[--ink-faint]">(optional)</span>
-        <input value={payment.reference || ""} onChange={(event) => onChange({ ...payment, reference: event.target.value })} className="mt-2 w-full rounded-xl border border-[--ink]/15 bg-white px-4 py-3 text-[--ink]" />
+        <input maxLength={200} value={payment.reference || ""} onChange={(event) => onChange({ ...payment, reference: event.target.value })} className="mt-2 w-full rounded-xl border border-[--ink]/15 bg-white px-4 py-3 text-[--ink]" />
       </label>
       <p className="mt-4 rounded-xl bg-[--mint-soft]/60 p-3 text-[13px] text-[--ink]">
-        🔒 Payment status is pending verification until an admin confirms the receipt.
+        🔒 Payment status is pending verification until EdgeTap confirms the receipt.
       </p>
 
       <div className="mt-6 rounded-2xl border border-[--ink]/10 bg-white p-5">
@@ -851,11 +853,13 @@ function SubmitStep({
   submitting,
   resubmitKey,
   onSubmit,
+  onBack,
 }: {
   draft: WizardDraft;
   submitting: boolean;
   resubmitKey: number;
   onSubmit: () => void;
+  onBack: () => void;
 }) {
   return (
     <section className="card-paper mb-6 p-7 sm:p-10 text-center">
@@ -874,6 +878,7 @@ function SubmitStep({
       >
         {submitting ? "Submitting…" : "Place Order 🚀"}
       </button>
+      <button type="button" onClick={onBack} disabled={submitting} className="btn btn-ghost mt-4 px-6 py-3">Edit order</button>
       {resubmitKey > 0 && !submitting && (
         <p className="mt-3 text-[12px] text-[--ink-faint]">
           A previous attempt failed — you can retry above.
@@ -882,7 +887,7 @@ function SubmitStep({
       <div className="mx-auto mt-8 max-w-md">
         <p className="text-[12px] font-bold uppercase tracking-widest text-[--ink-faint]">Status</p>
         <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-[--yellow-soft] px-4 py-1.5 text-xs font-bold text-[--ink]">
-          Order received · Payment pending verification
+          Not submitted yet · Payment will be verified after submission
         </div>
       </div>
     </section>
@@ -894,7 +899,7 @@ function Confirmation({ order }: { order: Order }) {
   const template = CARD_TEMPLATES.find((t) => t.id === order.card.template);
   return (
     <div className="relative flex min-h-screen items-center justify-center bg-[--cream] px-4 py-16">
-      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
         <div className="absolute left-1/4 top-16 h-72 w-72 rounded-full bg-[--mint-soft] opacity-60 blur-3xl" />
         <div className="absolute bottom-10 right-10 h-80 w-80 rounded-full bg-[--yellow-soft] opacity-50 blur-3xl" />
       </div>
@@ -907,7 +912,7 @@ function Confirmation({ order }: { order: Order }) {
             Order received!
           </h1>
           <p className="mt-2 text-[15px] text-[--ink-soft]">
-            Thank you, {order.customer.fullName.split(" ")[0]}. Your order has been received and payment is pending verification. We&apos;ll email updates to{" "}
+            Thank you, {order.customer.fullName.split(" ")[0]}. Your order has been received and payment is pending verification. For updates, contact us on WhatsApp. Your account email is{" "}
             <strong className="text-[--ink]">{order.customer.email}</strong>.
           </p>
 
@@ -953,7 +958,8 @@ function Confirmation({ order }: { order: Order }) {
           </div>
 
           <div className="mt-8 flex flex-wrap justify-center gap-4">
-            <Link href="/" className="btn btn-ink px-6 py-3">
+            <a href={SUPPORT_URL} target="_blank" rel="noreferrer" className="btn btn-ink px-6 py-3">Contact on WhatsApp</a>
+            <Link href="/" className="btn btn-ghost px-6 py-3">
               Back to Homepage
             </Link>
           </div>

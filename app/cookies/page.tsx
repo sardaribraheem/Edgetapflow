@@ -1,84 +1,17 @@
-import type { Metadata } from "next";
 import Link from "next/link";
-
-export const metadata: Metadata = {
-  title: "Cookie Policy",
-  description: "EdgeTap Cookie Policy — how we use cookies on edgetap.com.",
-};
-
-export default function CookiesPage() {
-  return (
-    <main className="min-h-screen bg-[--cream]">
-      <div className="container-x py-20 max-w-3xl">
-        <Link href="/" className="eyebrow mb-6 inline-block text-[--ink-mid] hover:text-[--ink]">
-          ← Back to EdgeTap
-        </Link>
-        <h1 className="text-display text-[clamp(2.4rem,6vw,4rem)] text-[--ink] mt-4">
-          Cookie Policy
-        </h1>
-        <p className="mt-2 text-[13px] text-[--ink-faint]">Last updated: September 2026</p>
-
-        <div className="mt-10 flex flex-col gap-8 text-[15px] leading-relaxed text-[--ink-soft]">
-          <section>
-            <h2 className="font-display text-xl font-semibold text-[--ink] mb-3">What Are Cookies?</h2>
-            <p>
-              Cookies are small text files stored on your device when you visit a website. They help the site
-              remember your preferences and function correctly.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="font-display text-xl font-semibold text-[--ink] mb-3">Cookies We Use</h2>
-            <p>
-              EdgeTap uses <strong>only essential cookies</strong> required for the website to function.
-              These include session cookies that ensure the site loads correctly and remembers your
-              preferences during your visit.
-            </p>
-            <p className="mt-2">
-              We <strong>do not</strong> use:
-            </p>
-            <ul className="list-disc pl-5 flex flex-col gap-1 mt-2">
-              <li>Analytics cookies (no Google Analytics, Vercel Analytics, or similar)</li>
-              <li>Advertising or marketing cookies</li>
-              <li>Social media tracking cookies</li>
-              <li>Third-party embed cookies</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="font-display text-xl font-semibold text-[--ink] mb-3">Third-Party Services</h2>
-            <p>
-              EdgeTap does not embed third-party scripts, analytics trackers, or social media widgets that
-              set cookies. All fonts are self-hosted via Next.js and do not make external requests.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="font-display text-xl font-semibold text-[--ink] mb-3">Managing Cookies</h2>
-            <p>
-              Since we only use essential cookies, there is no opt-out mechanism needed. You can clear
-              cookies at any time through your browser settings. Disabling essential cookies may affect
-              site functionality.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="font-display text-xl font-semibold text-[--ink] mb-3">Changes to This Policy</h2>
-            <p>
-              If we add any non-essential cookies in the future (e.g., analytics), we will update this
-              policy and provide a consent mechanism before any such cookies are set.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="font-display text-xl font-semibold text-[--ink] mb-3">Contact</h2>
-            <p>
-              Questions about cookies? Email{" "}
-              <a href="mailto:hello@edgetap.com" className="underline hover:text-[--ink]">hello@edgetap.com</a>.
-            </p>
-          </section>
-        </div>
-      </div>
-    </main>
-  );
+import { SUPPORT_URL } from "@/lib/site";
+export const metadata = { alternates: { canonical: "/cookies" }, title: "Cookies & Browser Storage", description: "EdgeTap account, product and service information." };
+export default function PolicyPage() {
+  return <main className="container-x max-w-3xl min-h-screen py-16">
+    <Link href="/" className="underline">← Back to EdgeTap</Link>
+    <h1 className="text-display text-4xl text-[--ink] mt-6">Cookies & Browser Storage</h1>
+    <p className="mt-3 text-sm text-[--ink-soft]">Updated 6 October 2026</p>
+    <div className="mt-10 space-y-8 text-[15px] leading-relaxed text-[--ink-soft]">
+<section><h2 className="font-display text-xl font-semibold text-[--ink]">Sign-in persistence</h2><p className="mt-3">Firebase Authentication uses browser storage, including IndexedDB or local storage depending on browser support, to remember your signed-in session. This enables customer profile editing and staff access. The marketing website does not implement preference or analytics cookies.</p></section>
+<section><h2 className="font-display text-xl font-semibold text-[--ink]">Tracking</h2><p className="mt-3">This application does not include advertising trackers, analytics scripts or embedded social media widgets. Profile links navigate to other websites, whose privacy and storage practices may differ.</p></section>
+<section><h2 className="font-display text-xl font-semibold text-[--ink]">Managing your session</h2><p className="mt-3">Sign out to end your account session on a shared device. You can also clear site data through your browser settings. Blocking browser storage may prevent sign-in from persisting.</p></section>
+<section><h2 className="font-display text-xl font-semibold text-[--ink]">Contact</h2><p className="mt-3">Contact EdgeTap on WhatsApp if you have questions about your account or browser storage.</p></section>
+    </div>
+    <a href={SUPPORT_URL} target="_blank" rel="noreferrer" className="btn btn-ink mt-10 px-6 py-3">Contact EdgeTap on WhatsApp</a>
+  </main>;
 }

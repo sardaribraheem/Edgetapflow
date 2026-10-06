@@ -3,10 +3,11 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ibraheemProfile, Profile } from "@/lib/data/profile";
-import { getProfile } from "@/lib/firestore";
-import { auth, db } from "@/lib/firebase";
+import { saveProfile } from "@/lib/firestore";
+import { isSafeContactUrl } from "@/lib/links";
+import { contactVCard } from "@/lib/contact";
+import { auth } from "@/lib/firebase";
 import { onAuthStateChanged, User } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
 import DoodleField from "./DoodleField";
 import {
   NfcWaves,
@@ -53,46 +54,39 @@ export default function ProfilePage({
   initialProfile?: Profile;
   previewOnly?: boolean;
 }) {
-  const [profile, setProfile] = useState<Profile>(initialProfile);
+  const [savedProfile, setProfile] = useState<Profile>(initialProfile);
+  const profile = previewOnly ? initialProfile : savedProfile;
   const [user, setUser] = useState<User | null>(null);
-  const [isOwner, setIsOwner] = useState(false);
+  const isOwner = !previewOnly && !!user && user.uid === profile.ownerUid;
+  const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (previewOnly) return;
-    async function loadDynamicProfile() {
-      const dynamicProfile = await getProfile(initialProfile.username);
-      setProfile(dynamicProfile);
-    }
-    loadDynamicProfile();
-  }, [initialProfile.username, previewOnly]);
+    return onAuthStateChanged(auth, setUser);
+  }, [previewOnly]);
 
-  useEffect(() => {
-    if (previewOnly) return;
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      if (currentUser && profile.ownerUid) {
-        setIsOwner(currentUser.uid === profile.ownerUid);
-      }
-    });
-    return () => unsubscribe();
-  }, [profile.ownerUid, previewOnly]);
+  const downloadContact = () => {
+    const url = URL.createObjectURL(new Blob([contactVCard(profile)], { type: "text/vcard;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${profile.username}.vcf`;
+    link.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      const docRef = doc(db, "profiles", profile.username);
-      const toSave = { ...profile };
-      // Stamp the authenticated owner's UID if missing so the Firestore
-      // create/update rules (ownerUid == request.auth.uid) pass on first save.
-      if (!toSave.ownerUid && user) {
-        toSave.ownerUid = user.uid;
+      if (!isOwner) throw new Error("Sign in as the profile owner.");
+      if (!profile.displayName.trim() || profile.links.length > 10 || profile.links.some((l) => !isSafeContactUrl(l.url))) {
+        setMessage("Add a name and valid contact URLs, with no more than ten links.");
+        return;
       }
-      await setDoc(docRef, toSave, { merge: true });
-      alert("Profile updated successfully!");
-    } catch (error) {
-      console.error("Error updating profile:", error);
-      alert("Error updating profile. Please try again.");
+      await saveProfile(profile.username, profile);
+      setMessage("Profile updated.");
+    } catch {
+      setMessage("Could not save your profile. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -101,7 +95,7 @@ export default function ProfilePage({
   return (
     <div className="relative flex min-h-screen flex-col justify-start overflow-y-auto py-12">
       {/* soft washes */}
-      <div className="absolute inset-0 pointer-events-none" aria-hidden="true">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
         <div className="absolute left-1/4 top-16 h-72 w-72 rounded-full bg-[--yellow-soft] opacity-60 blur-3xl" />
         <div className="absolute bottom-10 right-10 h-80 w-80 rounded-full bg-[--sky-soft] opacity-50 blur-3xl" />
         <div className="absolute -left-16 top-1/2 h-72 w-72 rounded-full bg-[--coral-soft] opacity-40 blur-3xl" />
@@ -157,6 +151,7 @@ export default function ProfilePage({
                 {isOwner ? (
                   <input
                     type="text"
+                    aria-label="Display name"
                     value={profile.displayName}
                     onChange={(e) => setProfile({ ...profile, displayName: e.target.value })}
                     className="w-full bg-transparent border-b-2 border-[--ink]/20 focus:border-[--ink] outline-none text-center md:text-left"
@@ -169,6 +164,7 @@ export default function ProfilePage({
                 {isOwner ? (
                   <input
                     type="text"
+                    aria-label="Professional title"
                     value={profile.title}
                     onChange={(e) => setProfile({ ...profile, title: e.target.value })}
                     className="w-full bg-transparent border-b-2 border-[--ink]/20 focus:border-[--ink] outline-none text-center md:text-left"
@@ -181,6 +177,7 @@ export default function ProfilePage({
                 📍 {isOwner ? (
                   <input
                     type="text"
+                    aria-label="Location"
                     value={profile.location}
                     onChange={(e) => setProfile({ ...profile, location: e.target.value })}
                     className="bg-transparent border-b border-[--ink]/20 focus:border-[--ink] outline-none w-24"
@@ -192,6 +189,7 @@ export default function ProfilePage({
               <p className="mt-4 max-w-sm text-[15px] leading-relaxed text-[--ink-soft]">
                 {isOwner ? (
                   <textarea
+                    aria-label="Bio"
                     value={profile.bio}
                     onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
                     className="w-full bg-transparent border-b-2 border-[--ink]/20 focus:border-[--ink] outline-none resize-none"
@@ -207,7 +205,7 @@ export default function ProfilePage({
             {/* actions */}
             <section className="flex flex-col gap-2.5 pt-1" aria-label="Contact actions">
               <div className="eyebrow mb-1 text-[--ink-mid]">Reach me</div>
-              {profile.links.filter(l => l.url && l.url.trim() !== "" && l.url !== "https://").map((l) => (
+              {profile.links.filter(l => isSafeContactUrl(l.url)).map((l) => (
                 <a
                   key={l.type + l.url}
                   href={l.url}
@@ -227,9 +225,28 @@ export default function ProfilePage({
                 </a>
               ))}
 
+              {isOwner && (
+                <div className="space-y-3 rounded-xl bg-white p-4">
+                  <p className="font-bold text-sm">Edit contact links ({profile.links.length}/10)</p>
+                  {profile.links.map((link, index) => (
+                    <div key={index} className="space-y-2 border-b pb-3">
+                      <label className="block text-sm">Link label
+                        <input aria-label={`Link ${index + 1} label`} value={link.label} maxLength={80} className="w-full rounded border p-2" onChange={(e) => setProfile({ ...profile, links: profile.links.map((item, i) => i === index ? { ...item, label: e.target.value } : item) })} />
+                      </label>
+                      <label className="block text-sm">Contact URL
+                        <input aria-label={`Link ${index + 1} URL`} value={link.url} maxLength={2048} className="w-full rounded border p-2" onChange={(e) => setProfile({ ...profile, links: profile.links.map((item, i) => i === index ? { ...item, url: e.target.value } : item) })} />
+                      </label>
+                      <button type="button" className="min-h-11 text-sm underline" onClick={() => setProfile({ ...profile, links: profile.links.filter((_, i) => i !== index) })}>Remove link {index + 1}</button>
+                    </div>
+                  ))}
+                  <button type="button" disabled={profile.links.length >= 10} className="btn btn-ghost min-h-11 px-4 disabled:opacity-50" onClick={() => setProfile({ ...profile, links: [...profile.links, { type: "website", label: "Website", url: "", icon: "globe", accent: "#7FA8FF" }] })}>Add link</button>
+                </div>
+              )}
+              {message && <p role="status" className="text-sm">{message}</p>}
               {/* save contact */}
-              <a
-                href="#"
+              <button
+                type="button"
+                onClick={downloadContact}
                 className="group mt-1 flex items-center gap-3 rounded-2xl bg-[--ink] px-4 py-3.5 text-white shadow-[0_6px_0_-3px_rgba(16,11,74,0.35)] transition-transform hover:-translate-y-0.5"
               >
                 <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[--yellow] text-[--ink]">
@@ -239,7 +256,7 @@ export default function ProfilePage({
                 <span className="text-[16px] text-white/60 transition-transform group-hover:translate-x-1">
                   →
                 </span>
-              </a>
+              </button>
 
               <div className="mt-3 flex items-center justify-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[--ink-faint]">
                 <span className="h-1.5 w-1.5 rounded-full bg-[--mint]" />

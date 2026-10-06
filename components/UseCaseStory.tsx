@@ -2,8 +2,6 @@ import { useCases } from "@/lib/data/content";
 import EdgeTapCard from "./EdgeTapCard";
 import PhoneMockup from "./PhoneMockup";
 import PhoneProfile from "./PhoneProfile";
-import RestaurantMenu from "./RestaurantMenu";
-import ReviewExperience from "./ReviewExperience";
 import {
   ArrowCurveDoodle,
   ArrowDoodle,
@@ -11,14 +9,12 @@ import {
   StarDoodle,
 } from "./doodles";
 
-function PhoneScreen({ kind }: { kind: string }) {
-  if (kind === "menu") return <RestaurantMenu />;
-  if (kind === "review") return <ReviewExperience />;
+function PhoneScreen() {
   return <PhoneProfile />;
 }
 
 // Physical card -> TAP -> phone sequence used inside each panel.
-function TapSequence({ kind }: { kind: string }) {
+function TapSequence() {
   return (
     <div className="mt-6 flex items-center justify-center gap-3 md:gap-6">
       <div className="w-[104px] rotate-[-6deg] md:w-[150px]">
@@ -31,7 +27,7 @@ function TapSequence({ kind }: { kind: string }) {
         <ArrowDoodle className="h-7 w-7 rotate-[-20deg] text-[--ink-faint]" />
       </div>
       <PhoneMockup className="w-[96px] md:w-[150px]">
-        <PhoneScreen kind={kind} />
+        <PhoneScreen />
       </PhoneMockup>
     </div>
   );
@@ -60,11 +56,7 @@ export default function UseCaseStory() {
               <div className="flex flex-col items-center gap-2">
                 <span className="eyebrow text-[--ink-mid]">{uc.kicker}</span>
                 <span className={`font-display text-lg ${toneText[uc.tone]}`}>
-                  {uc.id === "meet"
-                    ? "Tap → Contact"
-                    : uc.id === "restaurant"
-                      ? "Tap → Menu"
-                      : "Tap → Review"}
+                  {uc.id === "scan" ? "Scan → Profile" : "Tap → Contact"}
                 </span>
               </div>
 
@@ -75,7 +67,7 @@ export default function UseCaseStory() {
                 {uc.context}
               </p>
 
-              <TapSequence kind={uc.phone} />
+              <TapSequence />
             </div>
           </div>
         ))}
@@ -91,8 +83,8 @@ export default function UseCaseStory() {
               just the <span className="text-[--sky]">start.</span>
             </h3>
             <p className="mt-4 max-w-md text-[16px] text-[--ink-soft]">
-              A card, a menu, a review, an idea — EdgeTap turns physical
-              moments into digital experiences.
+              One card. Your contact details and links.
+              A profile you can update as your work grows.
             </p>
             <span className="scroll-hint mt-6">
               Keep scrolling <ArrowCurveDoodle className="h-4 w-4 -rotate-45" />

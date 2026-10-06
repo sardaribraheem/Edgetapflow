@@ -348,8 +348,8 @@ function SettingsView({ user }: { user: User }) {
       <div className="card-paper mt-4 p-6">
         <p className="text-sm font-bold text-[--ink]">Firebase readiness</p>
         <p className="mt-2 text-[13px] leading-relaxed text-[--ink-soft]">
-          Orders, profiles, reviews and QR all write to <strong>Firestore</strong>. Firebase Authentication, Firestore and Storage are live;
-          customer checkout requires an account so profile ownership remains secure. <Link className="font-bold text-[--sky] hover:underline" href="/pricing">See pricing</Link> for the product tiers.
+          Orders, profiles, reviews and QR all write to <strong>Firestore</strong>. Firebase Authentication, Firestore and Storage must be configured;
+          customer checkout requires an account so profile ownership remains secure. <Link className="font-bold text-[--sky] hover:underline" href="/pricing">See pricing</Link> for the available card.
         </p>
       </div>
     </div>

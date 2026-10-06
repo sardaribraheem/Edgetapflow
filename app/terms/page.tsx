@@ -1,87 +1,18 @@
-import type { Metadata } from "next";
 import Link from "next/link";
-
-export const metadata: Metadata = {
-  title: "Terms & Conditions",
-  description: "EdgeTap Terms & Conditions — service description, acceptable use, and liability.",
-};
-
-export default function TermsPage() {
-  return (
-    <main className="min-h-screen bg-[--cream]">
-      <div className="container-x py-20 max-w-3xl">
-        <Link href="/" className="eyebrow mb-6 inline-block text-[--ink-mid] hover:text-[--ink]">
-          ← Back to EdgeTap
-        </Link>
-        <h1 className="text-display text-[clamp(2.4rem,6vw,4rem)] text-[--ink] mt-4">
-          Terms &amp; Conditions
-        </h1>
-        <p className="mt-2 text-[13px] text-[--ink-faint]">Last updated: September 2026</p>
-
-        <div className="mt-10 flex flex-col gap-8 text-[15px] leading-relaxed text-[--ink-soft]">
-          <section>
-            <h2 className="font-display text-xl font-semibold text-[--ink] mb-3">1. Service Description</h2>
-            <p>
-              EdgeTap provides NFC-enabled cards and digital profile experiences. When a physical EdgeTap card
-              is tapped against a compatible smartphone, it opens a digital profile, menu, review page, or
-              other web experience in the browser — no app required.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="font-display text-xl font-semibold text-[--ink] mb-3">2. Acceptable Use</h2>
-            <p>You agree not to:</p>
-            <ul className="list-disc pl-5 flex flex-col gap-1 mt-2">
-              <li>Use EdgeTap for any unlawful purpose.</li>
-              <li>Upload content that is misleading, harmful, or violates third-party rights.</li>
-              <li>Attempt to reverse-engineer, exploit, or disrupt the platform.</li>
-              <li>Use automated tools to access or scrape EdgeTap profiles.</li>
-            </ul>
-          </section>
-
-          <section>
-            <h2 className="font-display text-xl font-semibold text-[--ink] mb-3">3. Intellectual Property</h2>
-            <p>
-              The EdgeTap brand, NFC card designs, website, and software are owned by EdgeTap. Profile
-              content (text, images, links) remains the property of the profile owner. By uploading content,
-              you grant EdgeTap a limited licence to display it on your profile.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="font-display text-xl font-semibold text-[--ink] mb-3">4. Limitation of Liability</h2>
-            <p>
-              EdgeTap is provided &quot;as is&quot; without warranties of any kind. We are not liable for any
-              indirect, incidental, or consequential damages arising from use of the platform or NFC cards.
-              Our total liability shall not exceed the amount you paid for the service.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="font-display text-xl font-semibold text-[--ink] mb-3">5. Changes to Terms</h2>
-            <p>
-              We reserve the right to update these terms at any time. Material changes will be communicated
-              via the website. Continued use of EdgeTap after changes constitutes acceptance.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="font-display text-xl font-semibold text-[--ink] mb-3">6. Governing Law</h2>
-            <p>
-              These terms are governed by the laws of Pakistan. Any disputes shall be resolved in the courts
-              of Pakistan.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="font-display text-xl font-semibold text-[--ink] mb-3">7. Contact</h2>
-            <p>
-              Questions about these terms? Email{" "}
-              <a href="mailto:hello@edgetap.com" className="underline hover:text-[--ink]">hello@edgetap.com</a>.
-            </p>
-          </section>
-        </div>
-      </div>
-    </main>
-  );
+import { SUPPORT_URL } from "@/lib/site";
+export const metadata = { alternates: { canonical: "/terms" }, title: "Terms", description: "EdgeTap account, product and service information." };
+export default function PolicyPage() {
+  return <main className="container-x max-w-3xl min-h-screen py-16">
+    <Link href="/" className="underline">← Back to EdgeTap</Link>
+    <h1 className="text-display text-4xl text-[--ink] mt-6">Terms</h1>
+    <p className="mt-3 text-sm text-[--ink-soft]">Updated 6 October 2026</p>
+    <div className="mt-10 space-y-8 text-[15px] leading-relaxed text-[--ink-soft]">
+<section><h2 className="font-display text-xl font-semibold text-[--ink]">The product</h2><p className="mt-3">EdgeTap is a physical NFC card linked to a digital profile. The card costs Rs. 999. Its QR code opens the same profile as NFC. NFC compatibility depends on the phone and its settings; visitors need internet access to open the profile.</p></section>
+<section><h2 className="font-display text-xl font-semibold text-[--ink]">Orders and payment</h2><p className="mt-3">Checkout submits an order request. Payments use the confirmed JazzCash account and are reviewed manually using your receipt. An uploaded receipt does not automatically confirm payment. Contact EdgeTap on WhatsApp before paying to confirm the recipient, full cost and order details.</p></section>
+<section><h2 className="font-display text-xl font-semibold text-[--ink]">Delivery and service terms</h2><p className="mt-3">The initial launch focuses on Pakistan. Delivery charges, timing and availability must be confirmed with EdgeTap for your location before payment. Contact EdgeTap to confirm current profile hosting and update terms, and return or refund terms, before placing your order.</p></section>
+<section><h2 className="font-display text-xl font-semibold text-[--ink]">Profile content</h2><p className="mt-3">You control the contact details and links you publish. Keep your account credentials private and share only content you have permission to publish. Do not submit unlawful content or attempt to access another customer’s private information.</p></section>
+<section><h2 className="font-display text-xl font-semibold text-[--ink]">Support</h2><p className="mt-3">For order, delivery, account or payment questions, contact EdgeTap on WhatsApp and provide your order number if available.</p></section>
+    </div>
+    <a href={SUPPORT_URL} target="_blank" rel="noreferrer" className="btn btn-ink mt-10 px-6 py-3">Contact EdgeTap on WhatsApp</a>
+  </main>;
 }
