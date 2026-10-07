@@ -14,6 +14,7 @@ export function profileUrl(username: string): string {
   if (!/^[a-z0-9._-]{1,30}$/.test(username) || username === "." || username === "..") throw new Error("Invalid profile handle.");
   return `${APP_URL}/u/${encodeURIComponent(username)}`;
 }
+export const SUPPORT_EMAIL = "sardaribraheem277@gmail.com";
 export const SUPPORT_URL = "https://wa.me/923044149674";
 
 export function profileReturnPath(value: string | null): string {

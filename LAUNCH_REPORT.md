@@ -1,4 +1,4 @@
-> **Confirmed product/fulfillment update — 7 October 2026:** All designs are PVC/NFC, 85.60 × 53.98 mm; Wood is printed artwork. Staff manually prepares final designs. Every personalized card requires an emailed proof with a 10-hour reply window starting only after real sending. SMTP is pending; printing stays held. NASTP Delta 3 pickup: Mon–Fri 9 am–5 pm, contact +92 304 414 9674 after arrival once ready. Delivery costs extra, paid directly to the rider; staff records the actual booked fare/message. Hosting and updates have no separate fee for now. **007–009 are local only; hosted remains 001–006.** See [BUSINESS_CONFIGURATION.md](BUSINESS_CONFIGURATION.md). Earlier conflicting claims below are historical and superseded. Launch remains on hold.
+> **Confirmed product/fulfillment update — 7 October 2026:** All designs are PVC/NFC, 85.60 × 53.98 mm; Wood is printed artwork. Staff manually prepares final designs. Every personalized card requires an emailed proof with a 10-hour reply window starting only after real sending. SMTP is pending; printing stays held. NASTP Delta 3 pickup: Mon–Fri 9 am–5 pm, contact +92 304 414 9674 after arrival once ready. Delivery costs extra, paid directly to the rider; staff records the actual booked fare/message. Standard profile hosting and updates have no separate fee for now. **007–009 are local only; hosted remains 001–006.** See [BUSINESS_CONFIGURATION.md](BUSINESS_CONFIGURATION.md). Earlier conflicting claims below are historical and superseded. Launch remains on hold.
 
 ## Current application workflow status — 7 October 2026
 
@@ -6,19 +6,25 @@
 
 See [ORDER_WORKFLOW_REPORT.md](ORDER_WORKFLOW_REPORT.md) for history findings, schema/RLS changes, every customer/admin/payment/fulfillment step, configuration locations, exact implementation files and limitations.
 
+### Latest guest/pricing update
+
+New card builders now start without an account, with device-only drafts/images until authenticated saving before payment. Main card CTAs go to Pricing; standard Rs. 999 is self-service, website/four-card Rs. 18,999 (first year included, Rs. 3,000 annually from year two) and custom NFC are contact-only. The owner-approved public email is sardaribraheem277@gmail.com. See [GUEST_ORDERING_REPORT.md](GUEST_ORDERING_REPORT.md) for device privacy/recovery, confirmation/handoff and manual-package boundaries.
+
+Fresh read-only readiness checks: web.app HTTP 200; hosted settings/order-read RPCs HTTP 404/PGRST202; no application/proof tables/new rider RPC; zero Auth users/Storage objects and absent founder profile. Twenty-one public API boundary checks passed, but the new hosted workflow is unavailable. Deployment is conditional on readiness and is **not performed**. SMTP/real proof transport and real customer/admin/physical tests remain blockers.
+
 ### LOCAL VERIFIED
 
-- Account-owned progressive cloud drafts/new-session recovery; desired handle and fixed standard PVC size, original and staff-prepared private artwork; private manual JazzCash proof/reference; delivery and NASTP pickup; submitted staff inbox; customer corrections to the same order; independent payment/specification/application approval; public profile/QR; actual operator printing/NFC/QA and delivery/pickup completion; customer messages/history and private staff notes.
+- Device-only guest details/images, pre-payment signup/sign-in and retry-safe handoff; account-owned progressive cloud drafts/new-session recovery; desired handle and fixed standard PVC size, original and staff-prepared private artwork; private manual JazzCash proof/reference; delivery and NASTP pickup; submitted staff inbox; customer corrections to the same order; independent payment/specification/application approval; public profile/QR; actual operator printing/NFC/QA and delivery/pickup completion; customer messages/history and private staff notes.
 - 24 baseline SQL/RLS + 29 application/administration checks pass. Includes owner isolation, stale review/payment denial, private notes/proofs, revoked staff, both lifecycle branches, proof approval/revision/10-hour guards, rider-direct fare/dispatch, unsent email and verified-only owner enrollment safeguards.
-- 67 browser checks pass against isolated PostgreSQL/RLS with Auth/Storage HTTP simulated: complete customer/staff workflows at 320/390/1440px, invalid prepared-artwork proportions, actual-send-only proof clock (local simulated transport), printing hold and customer confirmation, rider fare/messages and NASTP arrival contact, settings, refresh-safe unfinished staff notes/messages, public profiles, owner editing, confirmation-required signup and recovery guards. No production fixtures/payments/emails are created.
-- Typecheck and real public-config static export pass. Lint has zero errors and six static-image warnings. Final export contains the approved project, no fixture backend/key or privileged credential patterns.
+- 75 workflow browser checks plus 13 guest/pricing boundary checks pass against isolated PostgreSQL/RLS with Auth/Storage HTTP simulated: complete customer/staff workflows at 320/390/1440px, invalid prepared-artwork proportions, actual-send-only proof clock (local simulated transport), printing hold and customer confirmation, rider fare/messages and NASTP arrival contact, settings, refresh-safe unfinished staff notes/messages, public profiles, owner editing, confirmation-required signup and recovery guards. No production fixtures/payments/emails are created.
+- Typecheck and real public-config static export pass. Lint has zero errors and seven static-image warnings. Final export contains the approved project, no fixture backend/key or privileged credential patterns.
 - 344 broader responsive/route/link/metadata/menu/error assertions pass at 320/360/390/768/1440px. Offline migration preservation regression passes; no Firebase extraction runs.
 
 ### HOSTED VERIFIED
 
-- Existing 001–006 foundation only. Previous verification: twenty-one read-only API boundary checks and twelve anonymous real-backend browser checks passed. No real signup/login/email/order/existing-file/payment success is inferred.
+- Existing 001–006 foundation only. Twenty-one read-only API boundary checks and twelve fresh anonymous real-backend browser checks passed (final local real-config export). No real signup/login/email/order/existing-file/payment success is inferred.
 - At the last read-only inspection, `sardaribraheem277@gmail.com` was not registered/verified/enrolled. No user/membership was created. The owner will register/verify normally; deliberate enrollment then uses `scripts/enroll-edgetap-admin.mjs`, protected UUID staff membership, no runtime email gate.
-- Empty public profiles correctly render missing; a real published example remains required. Production website is still the previous Firebase client because release is forbidden.
+- Empty public profiles correctly render missing; a real published example remains required. Production still serves the previous Firebase client; the conditional release has not met readiness prerequisites.
 
 ### TECHNICAL BLOCKERS
 

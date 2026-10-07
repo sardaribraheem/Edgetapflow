@@ -11,22 +11,24 @@ export function CardStep({
   draft,
   onChange,
   onFileChange,
+  localOnly = false,
 }: {
   draft: WizardDraft;
   onChange: (p: Partial<WizardDraft>) => void;
-  onFileChange: (file: File | null) => void;
+  onFileChange: (file: File | null) => Promise<void> | void;
+  localOnly?: boolean;
 }) {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
 
   const handleUpload = async (file: File) => {
     setUploadError("");
-    if (!["image/jpeg","image/png","image/webp"].includes(file.type) || file.size > 25*1024*1024) { setUploadError("Use a JPEG, PNG or WebP image within the upload limit."); return; }
+    if (!["image/jpeg","image/png","image/webp"].includes(file.type) || file.size <= 0 || file.size > 25*1024*1024) { setUploadError("Use a JPEG, PNG or WebP image within the upload limit."); return; }
     setUploading(true);
     try {
       const preview = await fileToDataUrl(file);
-      onFileChange(file);
       onChange({ customDesignPreview: preview, customDesignUrl: "pending" });
+      await onFileChange(file);
     } catch (e) {
       setUploadError(e instanceof Error ? e.message : "Could not read the design image. Choose a supported file and try again.");
     } finally {
@@ -79,9 +81,9 @@ export function CardStep({
         <div className="mt-6 rounded-2xl bg-[--sky-soft]/40 p-5 ring-1 ring-[--sky]/30">
           <p className="text-sm font-bold text-[--ink]">Upload your own card design</p><p className="mt-2 text-sm">Your original is kept private. Staff will manually prepare the final layout for the standard PVC card size.</p>
           <input aria-label="Card artwork image" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])} className="mt-3 block w-full text-sm" />
-          {uploading && <p className="mt-2 text-sm text-[--ink-soft]">Uploading…</p>}
+          {uploading && <p className="mt-2 text-sm text-[--ink-soft]">{localOnly ? "Saving on this device…" : "Uploading…"}</p>}
           {uploadError && <p className="mt-2 text-sm font-semibold text-[--coral]">{uploadError}</p>}
-          {draft.customDesignUrl && <p className="mt-2 text-sm font-semibold text-[--ink]">{draft.customDesignUrl === 'pending' ? 'Design upload in progress.' : 'Private artwork uploaded. Wait for the draft save before leaving.'}</p>}
+          {draft.customDesignUrl && <p className="mt-2 text-sm font-semibold text-[--ink]">{draft.customDesignUrl === 'pending' ? 'Design save in progress.' : localOnly ? 'Artwork selected on this device. Check the draft save status before leaving.' : 'Private artwork uploaded. Wait for the draft save before leaving.'}</p>}
         </div>
       )}
 
@@ -110,10 +112,12 @@ export function ProfileStep({
   draft,
   onChange,
   onFileChange,
+  localOnly = false,
 }: {
   draft: WizardDraft;
   onChange: (p: Partial<WizardDraft>) => void;
-  onFileChange: (file: File | null) => void;
+  onFileChange: (file: File | null) => Promise<void> | void;
+  localOnly?: boolean;
 }) {
   const [preview, setPreview] = useState("");
   const [uploading, setUploading] = useState(false);
@@ -121,13 +125,19 @@ export function ProfileStep({
 
   const handleUpload = async (file: File) => {
     setUploadError("");
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type) || file.size <= 0 || file.size > 5 * 1024 * 1024) {
+      setUploadError("Use a JPEG, PNG or WebP image within 5 MB.");
+      return;
+    }
     setUploading(true);
     onChange({ avatarUploadPending: true });
     try {
       const dataUrl = await fileToDataUrl(file);
       setPreview(dataUrl);
-      onFileChange(file);
-      onChange({ avatarPreview: dataUrl, avatarUploadPending: false });
+      onChange({ avatarPreview: dataUrl, avatarUploadPending: true });
+      await onFileChange(file);
+    } catch (e) {
+      setUploadError(e instanceof Error ? e.message : "Could not save your photo.");
     } finally {
       setUploading(false);
       onChange({ avatarUploadPending: false });
@@ -147,7 +157,7 @@ export function ProfileStep({
       <div className="mt-8 space-y-6">
         {/* avatar */}
         <div>
-          <p className="mb-2 text-sm">Avatar images are publicly accessible after upload, even before profile publication. Upload only an image you intend to share.</p><label className="block text-sm font-bold text-[--ink]">Profile picture <span className="font-normal text-[--ink-faint]">(optional)</span></label>
+          <p className="mb-2 text-sm">{localOnly ? "Your photo stays on this device until you save to your account. It becomes publicly accessible after account upload, even before profile publication. Choose a photo you intend to share." : "Avatar images are publicly accessible after upload, even before profile publication. Upload only an image you intend to share."}</p><label className="block text-sm font-bold text-[--ink]">Profile picture <span className="font-normal text-[--ink-faint]">(optional)</span></label>
           <div className="mt-3 flex items-center gap-4">
             <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-full bg-[--yellow] ring-2 ring-white shadow-[var(--shadow-card)]">
               {draft.avatarPreview || draft.avatarUrl || preview ? (
@@ -161,7 +171,7 @@ export function ProfileStep({
               )}
             </div>
             <label className="btn cursor-pointer bg-white px-4 py-2.5 text-[13px] font-bold ring-1 ring-[--ink]/15 hover:bg-[--cream]">
-              {uploading ? "Uploading…" : "Upload photo"}
+              {uploading ? (localOnly ? "Saving…" : "Uploading…") : "Upload photo"}
               <input
                 type="file"
                 accept="image/jpeg,image/png,image/webp"
@@ -372,7 +382,9 @@ export function DeliveryStep({
   onChange,
   pickupDetails,
   deliveryDetails,
+  collectEmail = true,
 }: {
+  collectEmail?: boolean;
   pickupDetails: string;
   deliveryDetails: string;
   customer: CustomerInfo;
@@ -394,7 +406,7 @@ export function DeliveryStep({
         Where should we send your card?
       </h1>
       <p className="mt-2 text-[15px] text-[--ink-soft]">
-        Your address stays private. Delivery charges are calculated separately based on your location.
+        Your address stays private. Delivery costs extra and is paid directly to the booked rider. The actual fare is provided when your card is ready.
       </p>
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
         {([
@@ -408,7 +420,7 @@ export function DeliveryStep({
         ))}
       </div>
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
-        {FIELDS.filter(({ key }) => deliveryMethod === "delivery" || !["address","city","postalCode"].includes(key)).map(({ key, placeholder, type, span }) => (
+        {FIELDS.filter(({ key }) => (collectEmail || key !== "email") && (deliveryMethod === "delivery" || !["address","city","postalCode"].includes(key))).map(({ key, placeholder, type, span }) => (
           <div key={key} className={span ? "sm:col-span-2" : ""}>
             <label htmlFor={`delivery-${key}`} className="block text-sm font-bold text-[--ink]">{placeholder}</label>
             <input

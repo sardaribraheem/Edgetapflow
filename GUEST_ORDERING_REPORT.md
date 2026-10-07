@@ -1,0 +1,40 @@
+# Guest ordering and pricing update — 7 October 2026
+
+Implemented locally on `launch-readiness`. No database migration, hosted data change, billing, deployment or push is performed by this update. The prior conditional request to deploy remains blocked by hosted prerequisites.
+
+## Customer journey
+
+Primary card CTAs, navigation/mobile menu, home sections, footer and account “start another” links now lead to `/pricing`. Existing owned-draft/correction links still reopen the exact private application.
+
+- **Standard card: Rs. 999/card.** Pricing → card design → profile/handle → contact links → preview → delivery/NASTP pickup → account saving → manual JazzCash → private proof → application submission.
+- **Custom website + cards: Rs. 18,999.** Custom website/portfolio, four linked cards requested now or during the first year, first-year hosting/domain services included. **Rs. 3,000 annually from year two**, confirmed by owner. Contact-only arrangement, no premium checkout, subscription, redemption ledger, website builder or automated renewal is implemented.
+- **Custom NFC solution.** Discuss attendance, employee/event cards or another NFC idea; feasibility/scope/quote is agreed directly. These are custom-project examples, not claims that the standard app implements attendance or event management.
+- Premium/custom contact buttons lead to the visible contact section: WhatsApp **+92 304 414 9674**, owner-approved public email **sardaribraheem277@gmail.com**. This does not configure or verify an SMTP sender.
+
+The account step explains the benefit: save profile details, manage the activated profile and follow order progress. Signed-in visitors also build a NEW card locally until they choose account saving before payment. Private cloud drafts/corrections keep their existing authenticated recovery flow.
+
+## Device and account boundaries
+
+`lib/guest-draft.ts` uses browser IndexedDB, including original artwork/photo bytes. No anonymous cloud draft, customer row, Storage upload, public profile, order, payment or email is created. No password, session token or payment receipt is cached in a guest draft. Contact details/images are personal data on the device, not an encrypted account vault; the UI/privacy copy explains trusted devices and clearing.
+
+A seven-day recovery window is checked on return; expired guest records are deleted on access, not by a background guaranteed eraser. Browser eviction/clearing and storage settings can remove/prevent recovery. IndexedDB supports device storage; storage availability is browser-dependent ([MDN IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API/Using_IndexedDB), [MDN storage quotas/eviction](https://developer.mozilla.org/en-US/docs/Web/API/Storage_API/Storage_quotas_and_eviction_criteria)). Initial blocked storage falls back to memory with an explicit warning; no saved success is invented. Write conflicts/full-storage failures retain the page state and require recovery/retry. Revision checks prevent a stale tab overwriting the current device draft. Internal builder links flush the latest edit before leaving; failed saves hold navigation. Memory-only navigation warns of draft loss. Clear device draft removes only the matching draft.
+
+Before payment, explicit signup/sign-in associates the handoff with that email. Confirmation-required signup keeps the device draft and clears the password; it does not bypass Supabase confirmation or upload using a user without a session. Same-device account/confirmation navigation offers a resume link. Another device cannot recover a guest-only draft; authenticated account drafts support that later.
+
+After actual authentication, the handoff checks the current account and server offer, uploads selected files using that account’s paths, saves ONE account-owned application at the JazzCash step, then removes the device copy where deletion succeeds. The anonymous builder uses the confirmed static public offer/instructions; staff settings are read after authentication. Changing public offer wording requires updating the pricing/guest copy and rebuilding alongside staff settings. Transfer paths are checkpointed against the authenticated UUID so a failed cloud save can retry without duplicate file uploads. The original UUID supplies cloud save/submission recovery. An account change blocks handoff; an unrelated account cannot automatically claim a checkout previously linked to another email. Public photo upload notice appears before the user chooses account saving. No order is created by account saving; profile publication still requires the manual payment/review/staff workflow.
+
+If file upload succeeds but cloud saving never completes, owned uploaded files may remain; cleanup/retention requires a later reviewed operator process. No file deletion or destructive cleanup is introduced. Failure to delete a device copy after successful cloud saving does not pretend that account saving failed or create another order.
+
+## Design audit and pre-flight
+
+Pricing update preserves the existing routes/canonical metadata, Fredoka/Inter brand fonts, deep ink `#100b4a`, cream `#faf8f0`, yellow `#f6be2c`, paper cards and pill buttons. Existing actual card-design imagery is reused; no fake website mockup, logo, customer or testimonial is generated. Asymmetric standard/website panels plus a full-width custom-project panel collapse on mobile. Signature homepage interactions are unchanged. Pricing introduces no animation or extra UI dependency.
+
+Applicable skill dials: `DESIGN_VARIANCE=6`, `MOTION_INTENSITY=2`, `VISUAL_DENSITY=4`; preserve-mode, existing Tailwind/token system. The frontend design skill applies to pricing, not to the multi-step builder. Checks cover legible ink/light backgrounds, clear CTA destinations, non-wrapping desktop labels, real imagery, visible loading/error/blocked-storage states, mobile overflow and existing reduced-motion/navigation behavior. Desktop (1440px) and narrow mobile (320px) pricing screenshots were inspected. The existing brand’s light theme is retained rather than introducing a partial new theme. Package text is owner-confirmed; no invented first-year charge, domain guarantee, delivery fare, automatic email or already-built custom system.
+
+## Verification
+
+LOCAL VERIFIED: 53 SQL/RLS/workflow checks, 75 full customer/staff browser checks, 13 guest/pricing boundary checks and 344 responsive assertions pass. Typecheck, real-public-config static export (130 text assets checked for fixture/privileged patterns) and lint pass (zero errors, seven static-image warnings). Browser workflow Auth/Storage/transport acknowledgement is simulated around actual local SQL/RLS; no email, payment or physical printing success is inferred. SQL pricing/RLS and private-file boundaries remain unchanged by this frontend update; migrations 007–009 are still local only.
+
+HOSTED VERIFIED: fresh read-only pre-deployment checks found `edgetapflow.web.app` HTTP 200, but `get_order_settings` and `get_my_orders` return HTTP 404/PGRST202. Metadata confirms no application/proof tables or new rider RPC, zero Auth users and zero Storage objects; founder public-profile lookup returns null. Twenty-one existing read-only API/anonymous boundary probes and twelve fresh anonymous browser checks against the real backend passed. The locally served final real-config export opens the guest builder without requiring sign-in; hosted missing profiles correctly show missing. No successful hosted login/order/profile/email is inferred.
+
+REMAINING BLOCKERS: inspect/apply already-prepared 007–009 separately before any release; configure verified Auth SMTP and implement/test the required real final-design sender/reply process; register/verify and deliberately enroll the real admin; complete hosted customer/private-byte/payment/publication and physical NFC/QR tests. Delivery coverage, cancellation/defect process, standard-profile duration/future changes and legal review remain open. The website package’s manual project scope/domain/service arrangements must be agreed with each customer. Launch is not ready and no deployment is performed.

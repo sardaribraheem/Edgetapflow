@@ -39,7 +39,7 @@ export default function CustomCTA() {
         </p>
 
         <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
-          <Link href="/order" className="btn btn-yellow px-8 py-4 text-[16px]">
+          <Link href="/pricing" className="btn btn-yellow px-8 py-4 text-[16px]">
             Order your card <span aria-hidden="true">→</span>
           </Link>
           <a href={SUPPORT_URL} target="_blank" rel="noreferrer" className="btn btn-ghost px-8 py-4 text-[16px] text-[--cream] [&]:border-[--cream]/25 [&]:text-[--cream] hover:bg-[--cream]/5">

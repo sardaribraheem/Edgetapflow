@@ -7,8 +7,10 @@ import { usesSupabase } from "@/lib/backend";
 import { NfcWaves } from "@/components/doodles";
 import { profileReturnPath } from "@/lib/site";
 import { auth } from "@/lib/auth";
+import { readGuestDraft } from "@/lib/guest-draft";
 
 export default function AccountPage() {
+  const [checkoutPending, setCheckoutPending] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -17,6 +19,7 @@ export default function AccountPage() {
   const [mode, setMode] = useState<"signIn" | "create">("signIn");
 
   useEffect(() => {
+    void readGuestDraft().then(draft => setCheckoutPending(!!draft?.claimEmail)).catch(() => {});
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) setMessage(`Signed in as ${user.email || "your EdgeTap account"}.`);
     });
@@ -66,11 +69,12 @@ export default function AccountPage() {
           </span>
           <span className="font-display text-xl font-bold text-[--ink]">EdgeTap</span>
         </Link>
+        {checkoutPending && <Link href="/order" className="btn btn-ink mb-5 px-5 py-3">Continue your saved card</Link>}
         <section className="card-paper p-7 sm:p-9">
           <p className="eyebrow text-[--ink-mid]">Customer account</p>
           <h1 className="mt-1 font-display text-3xl font-bold text-[--ink]">{mode === "create" ? "Create your account" : "Edit your profile"}</h1>
           <p className="mt-2 text-sm leading-relaxed text-[--ink-soft]">
-            {mode === "create" ? "Create a login for ordering and for editing your profile after EdgeTap activates it. Registration does not place an order or create a public profile." : "Sign in to order or update your activated profile. You can create an account here before ordering."}
+            {mode === "create" ? "Create a login to save your profile, follow your order and edit your profile after EdgeTap activates it. Registration does not place an order or create a public profile." : "Sign in to view your orders or update your activated profile. You can build a new card before creating an account."}
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
             {(["signIn", "create"] as const).map(value => <button type="button" key={value} aria-pressed={mode === value} disabled={busy} onClick={() => { setMode(value); setPassword(""); setError(""); setMessage(""); }} className="text-sm font-bold underline disabled:opacity-50">
@@ -119,7 +123,7 @@ export default function AccountPage() {
         </section>
         <p className="mt-5 text-center text-xs text-[--ink-faint]">
           <Link href="/account/orders" className="block mb-3 font-bold text-[--ink] underline">My orders & saved applications</Link>
-          Ordering an EdgeTap card? <Link href="/order" className="font-bold text-[--ink] underline">Prepare your card and profile</Link>.
+          Ordering an EdgeTap card? <Link href="/pricing" className="font-bold text-[--ink] underline">Prepare your card and profile</Link>.
         </p>
       </div>
     </main>

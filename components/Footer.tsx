@@ -12,7 +12,7 @@ export default function Footer() {
         <p className="mt-3 text-sm text-[--ink-soft]">One tap. Infinite possibilities. Physical NFC cards with a QR fallback.</p>
         <nav aria-label="Footer" className="mt-6 flex flex-wrap gap-x-6 gap-y-4 text-sm text-[--ink]">
           <Link href="/pricing">Pricing</Link>
-          <Link href="/order">Order your card</Link>
+          <Link href="/pricing">Order your card</Link>
           <Link href="/u/ibraheem">Example profile</Link>
           <Link href="/account">Customer sign in</Link>
           <Link href="/account/orders">My orders</Link>

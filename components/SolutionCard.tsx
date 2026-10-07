@@ -83,7 +83,7 @@ export default function SolutionCard({ solution }: { solution: Solution }) {
       </div>
 
       <div className="mt-6 flex items-center gap-2 font-display text-sm font-semibold text-[--ink]">
-        <Link href="/order" className="min-h-11 inline-flex items-center underline">
+        <Link href="/pricing" className="min-h-11 inline-flex items-center underline">
           Build your card
         </Link>
         <ArrowCurveDoodle className="h-5 w-5 text-[--ink-faint] transition-transform group-hover:rotate-12" />

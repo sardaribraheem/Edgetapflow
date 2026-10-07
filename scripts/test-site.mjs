@@ -65,9 +65,9 @@ try {
     }
     expectedNetworkErrors = false;
     await page.goto(baseUrl+"/order");
-    await page.getByRole("heading",{name:"Start your EdgeTap application",exact:true}).waitFor();
-    assert.equal(await page.getByRole("link",{name:"Sign in or create account",exact:true}).getAttribute("href"),"/account?next=/order"); checks++;
-    assert((await page.locator("body").innerText()).includes("NASTP pickup")); checks++;
+    await page.getByRole("heading",{name:"Choose your card",exact:true}).waitFor();
+    assert.equal(await page.getByLabel("Password",{exact:true}).count(),0); checks++;
+    assert((await page.locator("body").innerText()).includes("No account needed yet")); checks++;
     assert.equal(await page.getByLabel("Payment receipt screenshot").count(),0); checks++;
     assert.equal(errors.length,0,errors.join("\n")); checks++;
     await context.close();

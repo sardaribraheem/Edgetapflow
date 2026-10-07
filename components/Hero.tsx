@@ -160,12 +160,12 @@ export default function Hero() {
           Your physical EdgeTap card opens your digital profile on a compatible
           NFC phone. Visitors can also scan its QR code to reach your contact
           details and links — no app required. Rs. 999 per card, plus delivery
-          quoted for your location.
+          paid directly to the rider.
         </p>
 
         {/* CTAs */}
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <Link href="/order" className="btn btn-ink px-7 py-3.5 text-[15px]">
+          <Link href="/pricing" className="btn btn-ink px-7 py-3.5 text-[15px]">
             Get Your EdgeTap <span aria-hidden="true">→</span>
           </Link>
           <Link href="/u/ibraheem" className="btn btn-ghost px-7 py-3.5 text-[15px]">

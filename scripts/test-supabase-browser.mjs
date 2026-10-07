@@ -1,2 +1,3 @@
 // Complete workflow suite; refuses any real-project export.
-import './test-order-workflow-browser.mjs';
+await import('./test-order-workflow-browser.mjs');
+await import('./test-guest-browser.mjs');

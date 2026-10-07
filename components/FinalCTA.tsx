@@ -28,7 +28,7 @@ export default function FinalCTA() {
         </p>
 
         <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
-          <Link href="/order" className="btn btn-ink px-9 py-4 text-[17px]">
+          <Link href="/pricing" className="btn btn-ink px-9 py-4 text-[17px]">
             Get Your EdgeTap <span aria-hidden="true">→</span>
           </Link>
           <Link href="#top" className="btn btn-ghost px-7 py-4 text-[15px]">

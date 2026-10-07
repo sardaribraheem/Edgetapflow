@@ -11,10 +11,14 @@
 - **SMTP/provider/verified sender are pending.** Queuing a proof does not send email or start a deadline. Printing is held until proof approval; no working sender is claimed.
 - **NASTP Delta 3**, Monday–Friday **9 am–5 pm, Pakistan time**. Once the card is ready, customer contacts **+92 304 414 9674 after reaching NASTP**. No street address, access permission or holiday arrangement is invented.
 - Delivery costs **extra, paid directly to the rider**, separately from Rs. 999 per card. When the paid card is ready, EdgeTap manually books a rider/ride app. Staff enters the actual booked fare and customer message in the admin dashboard; My orders shows “rider is on the way” and the exact amount to pay. No invented fare, radius, dispatch time or automatic booking/payment verification.
-- Digital-profile hosting and customer updates have **no separate fee for now**. No fixed duration or lifetime/unlimited promise.
-- Intended first administrator **sardaribraheem277@gmail.com**: normal registration/verification, deliberate protected UUID membership. Email is not a runtime authorization mechanism or verified SMTP sender.
+- Standard digital-profile hosting and customer updates have **no separate fee for now**. No fixed duration or lifetime/unlimited promise.
+- Intended first administrator **sardaribraheem277@gmail.com**: normal registration/verification, deliberate protected UUID membership. The owner also approves this as the public contact email; it is not a runtime authorization mechanism or verified SMTP sender.
 - Primary support WhatsApp +92 304 414 9674. Manual JazzCash **0304 4149674**, private proof and actual staff verification.
 - Owner-directed personalized-card non-returnability after production starts, applicable-law exceptions, and assessment of damage/defects/EdgeTap production errors/wrong cards. No blanket refund or automatic remedy for customer-supplied errors. This is business direction, not verified legal advice.
+
+## Newly confirmed offers and ordering
+
+Standard builder starts without signup and uses device drafts until account saving before payment. Website/portfolio + four linked cards costs **Rs. 18,999**, with first-year hosting/domain services included and **Rs. 3,000 annually from year two**. Cards may be requested now or within the first year. Website and custom NFC projects are contact-only, using the owner-approved phone and public email; no premium/custom checkout logic is implemented. See [GUEST_ORDERING_REPORT.md](GUEST_ORDERING_REPORT.md).
 
 ## Configuration and operations
 
@@ -24,7 +28,7 @@
 | Dimension wording | Admin → Settings → Standard card dimensions | Editable text; cannot introduce another physical size |
 | Pickup instructions/hours | Admin → Settings → NASTP pickup details | Confirmed Delta 3 / weekday hours / arrival contact; editable for real updates |
 | Delivery coverage wording | Admin → Settings → Delivery instructions | Coverage pending; direct rider-payment disclosure included |
-| Hosting/update wording | Admin → Settings → Profile hosting / update instructions | No separate fee for now; duration remains unspecified |
+| Standard profile hosting/update wording | Admin → Settings → Profile hosting / update instructions | No separate fee for now; duration remains unspecified |
 | Final-design scope | Admin → Settings → Final-design email policy | Default **Every personalized card**; change only with owner confirmation |
 | Approved design/specification | Admin → Orders → Confirm card specification | Per-order staff approval; original request preserved |
 | Final artwork/proof | Admin → Orders → Staff-prepared final artwork / Final-design email review | Private original + separate prepared file; queue/actual reply/inbox-check controls |
@@ -32,6 +36,8 @@
 | Card payment | Admin → Orders → Verify/reject card payment | Actual JazzCash transfer review, never screenshot automation |
 | Auth SMTP | Correct Supabase project → Authentication → Email/SMTP settings | Pending provider/verified sender; credentials stay protected |
 | Final-design email transport | Future private worker/operator service | Queue + restricted completion hook ready; no sender implemented or running |
+
+The guest builder/pricing use static owner-confirmed public instructions. Admin settings are read after account saving; changing the public offer/hours also requires updating the guest/pricing copy and rebuilding. No anonymous draft details are uploaded for configuration reads.
 
 Future ignored, protected `.env.notifications.local` contract: `EDGETAP_SMTP_HOST`, `EDGETAP_SMTP_PORT`, `EDGETAP_SMTP_USER`, `EDGETAP_SMTP_PASSWORD`, `EDGETAP_SMTP_FROM`, `EDGETAP_SMTP_SENDER_NAME`, `EDGETAP_TRANSACTIONAL_EMAIL_ENABLED=false`. These names do not activate email. Auth emails and order-proof emails are separate systems. Never use `NEXT_PUBLIC_*` for SMTP or privileged secrets.
 
@@ -48,4 +54,4 @@ Legal review remains separate: personalized-card cancellation/remedy wording, th
 
 ## Verification
 
-53 SQL/RLS/workflow checks, 67 complete local browser checks and 344 responsive assertions pass. Typecheck, real-public-config static build, lint (zero errors/six existing static-image warnings), exact minor-unit RPC checks, offline migration regression and isolated forward-preservation checks pass. Auth/Storage HTTP and proof-transport acknowledgement are simulated in the workflow browser; no actual email, hosted record, payment or physical printing is verified. Earlier hosted evidence covers only 001–006 (21 API / 12 anonymous browser checks).
+53 SQL/RLS/workflow checks, 75 complete local workflow browser checks plus 13 guest/pricing checks and 344 responsive assertions pass. Typecheck, real-public-config static build, lint (zero errors/seven static-image warnings), exact minor-unit RPC checks, offline migration regression and isolated forward-preservation checks pass. Auth/Storage HTTP and proof-transport acknowledgement are simulated in the workflow browser; no actual email, hosted record, payment or physical printing is verified. Earlier hosted evidence covers only 001–006 (21 API / 12 anonymous browser checks).
