@@ -83,7 +83,7 @@ export async function listReviews(max = 20): Promise<Review[]> {
 }
 export async function usernameAvailable(username: string): Promise<boolean> {
   const clean = username.toLowerCase().replace(/[^a-z0-9._-]/g,'').slice(0,30);
-  if (!clean) return false;
+  if (!clean || clean === '.' || clean === '..') return false;
   return usesSupabase ? rpc('username_available', { p_username: clean }) : (await firebase()).usernameAvailable(clean);
 }
 export async function suggestUsername(firstName?: string, lastName?: string): Promise<string> {

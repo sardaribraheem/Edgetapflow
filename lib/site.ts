@@ -11,10 +11,11 @@ export const APP_URL = origin.origin;
 // The NFC/QR destination for a profile handle — ALWAYS the EdgeTap profile,
 // never a social platform directly (the customer can change links later).
 export function profileUrl(username: string): string {
+  if (!/^[a-z0-9._-]{1,30}$/.test(username) || username === "." || username === "..") throw new Error("Invalid profile handle.");
   return `${APP_URL}/u/${encodeURIComponent(username)}`;
 }
 export const SUPPORT_URL = "https://wa.me/923044149674";
 
 export function profileReturnPath(value: string | null): string {
-  return value === "/order" || (value && /^\/u\/[a-z0-9._-]{1,30}$/.test(value)) ? value : "/";
+  return value === "/order" || (value && /^\/u\/[a-z0-9._-]{1,30}$/.test(value) && !["/u/.", "/u/.."].includes(value)) ? value : "/";
 }

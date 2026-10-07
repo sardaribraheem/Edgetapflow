@@ -2,7 +2,7 @@
 
 The owner approved a clean production data layer. Existing Firebase Firestore records, the Auth user and four legacy images are TEST DATA and are intentionally NOT imported. Leave Firebase untouched; do not retry extraction, recover files, migrate passwords, enable Blaze or delete anything. Historical source inventory remains in `SUPABASE_MIGRATION_AUDIT.md`.
 
-The application defaults to Supabase. Hosted setup is incomplete: the current CLI login exposes only the inactive unlinked DukanKhata project, not a confirmed EdgeTap destination. Read [../SUPABASE_MIGRATION_REPORT.md](../SUPABASE_MIGRATION_REPORT.md) for verified evidence and remaining blockers. Do not use an unrelated project by inference.
+The application defaults to Supabase. The hosted foundation is now initialized in the ONLY approved project, `dxyxvervvlxhwwbcbttd` (Edgetap, region `ap-southeast-2`). Six migrations, RLS/RPCs and buckets are applied; Auth callbacks/security are configured. Anonymous/API boundaries pass; real account/email/customer/staff success workflows remain pending. DukanKhata is untouched. Read [../SUPABASE_MIGRATION_REPORT.md](../SUPABASE_MIGRATION_REPORT.md) for verified evidence and remaining blockers. Do not use an unrelated project by inference.
 
 ## Local verification
 
@@ -32,18 +32,18 @@ Auth/Storage HTTP are simulated; RPCs run against real local SQL/RLS. A passing 
 
 The existing Supabase CLI login supplies operator account access. Do not pass tokens/passwords on command lines or print `projects api-keys` unfiltered; that response can contain privileged keys. Keep credentials outside Git/browser configuration.
 
-First confirm the exact active EdgeTap project reference. The prepared inspection command is:
+The public destination lock is in `supabase/project.json`. Setup/hosted-check scripts refuse any other project. The clean installer was already successfully run; DO NOT rerun `--apply` on this initialized destination. For future schema changes, inspect history and apply only reviewed additive forward migrations. The prepared inspection command is:
 
 ```sh
-node scripts/setup-clean-supabase.mjs <confirmed-project-ref> --inspect
+node scripts/setup-clean-supabase.mjs dxyxvervvlxhwwbcbttd --inspect
 ```
 
-It uses `supabase projects list --output json` internally to confirm access/active status, then `supabase db query --project-ref <ref> --file supabase/inspect-target.sql`. Output is schema/grant/policy/bucket metadata and aggregate counts, not customer records or credentials. It never resumes or creates projects.
+It uses `supabase projects list --output json` internally to confirm access/active status, then `supabase db query --linked --project-ref dxyxvervvlxhwwbcbttd --file supabase/inspect-target.sql`. Output is schema/grant/policy/bucket metadata and aggregate counts, not customer records or credentials. It never resumes or creates projects.
 
 To apply the authorized clean setup after reviewing inspection:
 
 ```sh
-node scripts/setup-clean-supabase.mjs <confirmed-project-ref> --apply
+node scripts/setup-clean-supabase.mjs dxyxvervvlxhwwbcbttd --apply
 ```
 
 Exact sequence: inspect; `require-clean-target.sql`; `supabase link --project-ref <ref>`; `supabase db push --dry-run`; `supabase db push`; `verify-clean-bootstrap.sql`. The preflight refuses existing custom application tables/views/functions, a private schema or any existing Auth users/buckets/objects. It does not clear an existing project to make it empty. Existing unrelated policies/objects need review too. No reset, source import, seed, role overwrite, paid plan or Firebase command is run.
@@ -52,13 +52,14 @@ The migrations are individually transactional and deliberately fail on conflicti
 
 ## Schema / Storage / RLS
 
-Apply the five existing migrations in order:
+Apply the six existing migrations in order:
 
 1. `202610070001_core.sql`: relational customers/profiles/ordered links/handles/orders/contact+draft snapshots/payments/fulfillment/reviews, private ownership/staff/provenance, indexes/constraints and SELECT RLS.
 2. `202610070002_rpc.sql`: narrow read/transactional-write RPCs, explicit execution grants, server pricing and lifecycle gates.
 3. `202610070003_storage.sql`: bucket configuration and account-owned upload/read policies.
 4. `202610070004_submission_recovery.sql`: exact account/request receipt lookup for interrupted submissions.
 5. `202610070005_manual_payment_quote.sql`: quote required before staff confirmation; null/stale/verified-total changes rejected.
+6. `202610070006_profile_handle_paths.sql`: additive constraints and availability guard reject browser-normalized dot handles so NFC/QR destinations remain valid.
 
 There is no production seed. The `ibraheem` reservation is configuration only, with no profile/customer attached. New customers are created when a real authenticated user submits an order; paid orders are published by staff. Signup itself does not create fabricated orders/profiles. `private` remains outside the exposed Data API schemas, with no app usage grants.
 
@@ -79,7 +80,9 @@ JPEG/PNG/WebP only, UUID account paths, no app update/delete/upsert. Receipts/ar
 
 `supabase/config.toml` describes LOCAL development. It exposes `public`, enables email signup/confirmation, requires eight-character passwords, disables anonymous sign-in and automatic seeds, and allowlists explicit callback paths. Do not blindly push local development settings to a production project.
 
-Production Auth must use:
+Production Auth is configured with the reviewed minimal `supabase/config.production.toml` and actual CLI declared-property diff. Only three settings changed: site URL, two redirects and password minimum. Email signup/confirmation remain enabled and anonymous sign-in remains disabled. Ten undeclared remote settings were preserved. No custom SMTP was configured. For future changes, copy that minimal file into a protected operator workdir, review `supabase config diff --project-ref dxyxvervvlxhwwbcbttd`, then push only an approved exact diff. Never push the full local development config blindly.
+
+Required production Auth settings:
 
 - Site URL `https://edgetapflow.web.app`.
 - Redirect allowlist `https://edgetapflow.web.app/account` and `https://edgetapflow.web.app/account/recovery`.
@@ -87,7 +90,7 @@ Production Auth must use:
 - Verified custom SMTP/sender and suitable rate limits. [Default Supabase SMTP](https://supabase.com/docs/guides/auth/auth-smtp) is restricted to project-team addresses; it is not an operational commercial email service. No sender/provider is assumed or purchased here.
 - Confirmation/recovery templates using the generated confirmation URL, with real approved mailbox/callback verification. The SPA handles Supabase URL sessions; no server callback route is required for this client-only Auth integration. See [redirect configuration](https://supabase.com/docs/guides/auth/redirect-urls).
 
-No Firebase user/password/session transfers. New production users register and confirm normally. A signup response without a session cannot upload or submit. Recovery requires a PASSWORD_RECOVERY session event and signs out after successful password update.
+No Firebase user/password/session transfers. New production users register and confirm normally. The account page now offers independent signup while checkout is paused; signup itself creates no order/profile or staff membership. A signup response without a session cannot upload or submit. Recovery requires a PASSWORD_RECOVERY session event and signs out after successful password update.
 
 A real staff member must register and confirm first. An authorized operator must verify their exact Auth UUID, then deliberately insert `private.admin_members(user_id,active,provenance)` for that user. No automatic administrator exists. Use truthful provenance identifying owner authorization. Never select the old test account, auto-promote the first signup or rely on `raw_user_meta_data`.
 
@@ -97,7 +100,7 @@ Provide locally:
 
 ```dotenv
 NEXT_PUBLIC_DATA_BACKEND=supabase
-NEXT_PUBLIC_SUPABASE_URL=<real HTTPS project URL>
+NEXT_PUBLIC_SUPABASE_URL=https://dxyxvervvlxhwwbcbttd.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<public key only>
 NEXT_PUBLIC_APP_URL=https://edgetapflow.web.app
 NEXT_PUBLIC_ONLINE_CHECKOUT_ENABLED=false
@@ -115,7 +118,26 @@ Lost-response order retry uses the original request UUID and fingerprint. This t
 npm run check:supabase:hosted
 ```
 
-This command is read-only with the public key. It verifies RPC availability, absent-profile null, anonymous table/staff denials and absent-object public URL failures. It creates no user/profile/order/file and cannot prove access to an existing private file is denied. Missing config fails before requests. A verified real owner/profile or separately identified development destination is needed for real profile/signup/order/storage/manual-payment/QR tests; do not seed fictitious production data to claim readiness.
+This command is read-only with the public key. It now passes 21 checks for exact-profile/review RPC availability, anonymous table/staff/mutation denials, private schema exclusion, malformed JWT rejection, Auth settings/JWKS and absent-object public URL failures. It creates no user/profile/order/file and cannot prove access to an existing private file is denied. Missing config fails before requests. A verified real owner/profile or separately identified development destination is needed for real profile/signup/order/storage/manual-payment/QR tests; do not seed fictitious production data to claim readiness.
+
+Hosted PostgreSQL negative permission probes can be rerun without fixtures:
+
+```sh
+supabase db query --linked --project-ref dxyxvervvlxhwwbcbttd --file supabase/test-hosted-boundaries.sql
+```
+
+These probes simulate SQL roles (not real Auth sessions), expect every mutation to be denied and roll back. `update_profile` takes a row lock, so the transaction permits locks; no records are inserted. Post-check with `verify-clean-bootstrap.sql` while the production database is intentionally empty. After real accounts/records exist, that clean assertion should fail rather than deleting anything.
+
+A fresh real-hosted browser suite is available:
+
+```sh
+npm run build -- --webpack
+PORT=4173 npm run serve:qa
+# Separate terminal; real hosted requests, no interception or data creation:
+QA_BASE_URL=http://127.0.0.1:4173 npm run test:supabase:hosted-browser
+```
+
+Ten anonymous checks pass against the actual EdgeTap backend and real-config local export. Empty profiles correctly render missing; successful public profile/account/order/payment/Storage flows are not inferred. Production callbacks currently point to the old deployed Firebase client; full new confirmation/recovery UX needs separately approved release/preview or a reviewed testing callback arrangement. No email was sent or fictitious user created. Rotate the secret key shared in chat; it is not used by the app or saved locally.
 
 Keep Firebase Hosting/NFC URLs. Do not deploy/push until separately approved. Verify schema, Auth emails/sessions, Storage bytes, private denials, real payment handling and all customer acceptance checks first. Resolve delivery/hosting policies and legal/privacy review. Rebuild with real public configuration and test Hosting rewrites/headers on an approved preview before release.
 

@@ -14,7 +14,8 @@
     "test:supabase": "node scripts/test-supabase-config.mjs && node scripts/test-supabase.mjs",
     "test:migration": "node scripts/test-migration.mjs",
     "test:supabase:browser": "node scripts/test-supabase-browser.mjs",
-    "check:supabase:hosted": "node scripts/check-hosted-supabase.mjs"
+    "check:supabase:hosted": "node scripts/check-hosted-supabase.mjs",
+    "test:supabase:hosted-browser": "node scripts/test-hosted-supabase-browser.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

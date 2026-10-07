@@ -1,0 +1,14 @@
+# Targeted hosted configuration. Undeclared properties must remain unchanged.
+# Use a protected operator workdir; review config diff before config push.
+project_id = "edgetap-production-auth"
+
+[auth]
+site_url = "https://edgetapflow.web.app"
+additional_redirect_urls = ["https://edgetapflow.web.app/account", "https://edgetapflow.web.app/account/recovery"]
+enable_signup = true
+enable_anonymous_sign_ins = false
+minimum_password_length = 8
+
+[auth.email]
+enable_signup = true
+enable_confirmations = true

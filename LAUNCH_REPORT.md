@@ -1,3 +1,5 @@
+> **Current hosted setup update:** Supabase foundation is configured in the confirmed Edgetap project `dxyxvervvlxhwwbcbttd`. Real public config/build and anonymous/API boundaries are verified; account/email/staff/customer/payment success paths and website release remain blocked. Firebase test-data recovery is permanently waived and Firebase is untouched. See the current hosted-state section below and [SUPABASE_MIGRATION_REPORT.md](SUPABASE_MIGRATION_REPORT.md). Earlier missing-destination/source-preservation requirements are historical and superseded.
+
 > **Current Supabase clean-start update — 7 October 2026:** Firebase test data/user/images are intentionally NOT migrated and remain untouched. Their 403/extraction/password-preservation issues are waived. Supabase is now the local default backend, with no automatic Firebase fallback. Hosted setup is pending the correct project: current CLI login exposes only inactive unlinked `DukanKhata`, not a confirmed EdgeTap destination. No remote schema/Auth/Storage changes or deployments occurred. See [SUPABASE_MIGRATION_REPORT.md](SUPABASE_MIGRATION_REPORT.md) for current evidence; source-preservation requirements below are historical and superseded.
 
 # EdgeTap launch report — updated 7 October 2026
@@ -209,22 +211,26 @@ Personalized-card policy review remains required. Review processor/region/privac
 
 No production deployment or customer-data migration is claimed. The outstanding source/destination access requests are necessary to finish, not permission to delete/disable Firebase or incur charges.
 
-## Current clean Supabase launch blockers
+## Current hosted Supabase launch state — 7 October 2026
+
+The ONLY approved project `dxyxvervvlxhwwbcbttd` (Edgetap, ACTIVE_HEALTHY, region ap-southeast-2) passed clean inspection and guard. Six migrations were applied after reviewed dry runs, including additive dot-path handle safeguards; no seeds/role overwrites/reset/deletion. Hosted state: 11 public + 6 private tables, all 17 RLS-enabled, 31 indexes, 18 public RPCs/8 private helpers, 14 public/2 Storage policies and four buckets. No accounts/customers/orders/profiles/payments/reviews/staff/assets were created. Firebase test data is permanently waived and untouched; DukanKhata/billing/production Hosting are unchanged.
+
+LOCAL VERIFIED: typecheck, lint (zero errors/five image warnings), real-config static export and 24 SQL/RLS regressions. Responsive suite passed 364 assertions. Updated 21 integration browser checks with local SQL/simulated Auth/Storage include standalone signup without a dummy order; these remain local evidence. The final real-config export has no privileged credentials or fixture URL/key matches.
+
+HOSTED VERIFIED: correct project/clean bootstrap/schema/grants/buckets/history; 21 HTTP permission/Auth/JWKS checks; negative hosted PostgreSQL role/RPC probes without fixtures; ten fresh anonymous browser checks from local real-config export to actual hosted Supabase, with no interception or Firebase data-service requests. Missing profiles return null/render missing. Auth production Site URL/callbacks/minimum password configured by reviewed three-property diff; confirmations/signup enabled, anonymous sign-in disabled. No real signup/email/login, owner editing, existing private bytes, authorized staff/order/payment/publication or physical card success is claimed.
 
 ### TECHNICAL BLOCKERS
 
-Apply/review the prepared five migrations in the confirmed clean hosted destination; verify actual anonymous profile lookup, new-user signup/confirmation/login/recovery, owner edits, private byte denial, secure staff/manual JazzCash/quote/publication and physical NFC/QR flow. Production remains the undeployed older Firebase-backed release. A real approved owner/customer profile is needed for a public example; no fake production data is seeded. Online checkout stays paused until hosted checks pass. Interrupted-order refresh reconciliation and staff agreed-price UI are now implemented and locally verified.
-
-LOCAL VERIFIED: typecheck; lint (zero errors/five image warnings); enabled/paused Supabase fixture static exports; 23 PostgreSQL/RLS checks plus clean-bootstrap guard; 20 browser integration checks with real local SQL and simulated Auth/Storage; 364 responsive assertions. The normal unconfigured Supabase build and read-only hosted verifier correctly stop for missing public config. These are not HOSTED VERIFIED application services. Test exports are isolated from the deployable `out/` path after QA.
+Approved real mailbox/signup/confirmation/recovery/password-session verification; deliberate verified real staff UUID enrollment; real avatar/artwork/receipt and existing-file private denial; successful order/quote/manual JazzCash/profile publication/owner edit/handle-concurrency/fulfillment walkthrough using approved actual operational data or a separately approved test destination. Publish an approved real public example; check NFC/QR on physical devices. Online checkout remains paused. Production callbacks still lead to the old Firebase frontend until separately approved release/preview or a reviewed testing callback arrangement. See [SUPABASE_MIGRATION_REPORT.md](SUPABASE_MIGRATION_REPORT.md).
 
 ### BUSINESS DECISIONS
 
-Delivery coverage/fee/dispatch; digital-profile hosting/update terms; cancellation before printing, print-detail approval and defect handling. Until confirmed, agree specific delivery/full-price terms during ordering; no fee/estimate is invented.
+Delivery coverage/fee/dispatch; digital-profile hosting/update terms; cancellation before printing, print-detail approval and defect handling. Specific delivery/full-price terms are agreed during ordering; no delivery fee/time is invented.
 
 ### BILLING/INFRASTRUCTURE BLOCKERS
 
-Correct active EdgeTap Supabase project reference/operator access; real public URL/publishable key; verified Auth sender/custom SMTP/callbacks; explicitly authorized real staff enrollment. Current authenticated CLI exposes only inactive unrelated `DukanKhata`; do not reuse/resume it by inference. Firebase source-data extraction and old Auth/file migration are explicitly waived, with no billing change or deletion. Firebase Hosting/domain remain. No deployment or push is authorized.
+Verified custom SMTP sender/provider and actual email delivery; rotation of the secret key shared in chat (not saved/used by the app); separate approval for website release/Hosting/device checks. Correct destination/public configuration are resolved. No paid plan/add-on/payment method was enabled or changed. Firebase recovery/Blaze is permanently waived; Firebase Hosting/domain remain.
 
 ### LEGAL/POLICY REVIEW
 
-Review owner-directed personalized-card cancellation/remedies and actual Supabase processing region/privacy/retention. Local implementation does not establish legal compliance. **NOT READY TO LAUNCH** until the eight real customer acceptance outcomes are demonstrated.
+Review owner-directed personalized-card cancellation/remedies and actual Supabase processing region/privacy/retention and pre-payment disclosures. No compliance claim is invented. **NOT READY TO LAUNCH** until all eight real customer acceptance outcomes are demonstrated.

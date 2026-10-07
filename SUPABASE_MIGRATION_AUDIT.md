@@ -1,3 +1,5 @@
+> **Hosted setup follow-up:** the confirmed project `dxyxvervvlxhwwbcbttd` is initialized clean. Schema/RLS/buckets/Auth settings and anonymous/API boundaries are hosted-verified; real accounts/emails/order/payment success flows are still pending. See [SUPABASE_MIGRATION_REPORT.md](SUPABASE_MIGRATION_REPORT.md).
+
 > **Current decision (7 October 2026):** the owner explicitly waived source preservation: Firebase records/user/images are disposable TEST DATA. Start clean in Supabase; do not recover, migrate or delete them. This is the historical read-only inventory, not the current setup requirement. See [SUPABASE_MIGRATION_REPORT.md](SUPABASE_MIGRATION_REPORT.md) for current clean-start status and hosted verification blockers.
 
 # EdgeTap Firebase → Supabase audit and proposal
