@@ -1,4 +1,4 @@
-# EdgeTap launch audit — 6 October 2026
+# EdgeTap launch audit — 6 October 2026; follow-up 7 October
 
 Audit of actual source on `main` at `4ce757b`, before implementation. Existing user changes: `.gitignore` modified and root QA screenshots deleted; preserve them. Work branch: `launch-readiness`. Historical README/BUILD claims are not verification.
 
@@ -96,6 +96,41 @@ Payment gateway, order tracking/email automation, staff client-profile managemen
 
 ## Owner-confirmed launch facts
 
-Confirmed during this audit: canonical `https://edgetapflow.web.app`; WhatsApp +92 304 414 9674 as primary support; physical card Rs. 999; Pakistan-focused delivery; JazzCash 0304 4149674 only. No verified business email, pickup offer, lifetime hosting, delivery fee/time or refund policy. Three remaining policy decisions: hosting/update terms; delivery coverage/cost/dispatch; returns/refunds.
+Confirmed during this audit: canonical `https://edgetapflow.web.app`; WhatsApp +92 304 414 9674 as primary support; physical card Rs. 999; Pakistan-focused delivery; JazzCash 0304 4149674 only. No verified business email, pickup offer, lifetime hosting or delivery fee/time. On 7 October the owner confirmed the personalized-card policy framework: non-returnable/non-refundable after production begins except required law; damage/defect/EdgeTap printing error/wrong card assessed for remedy, with no automatic remedy for customer-provided errors. Hosting/update terms, delivery coverage/cost/dispatch and pre-production cancellation/approval/claim procedure remain decisions. Legal applicability is not certified.
 
-Read-only live check on 6 October 2026: Auth public configuration HTTP 200 and launch host authorized; public founder Firestore read HTTP 403 PERMISSION_DENIED (also with the confirmed launch referrer); anonymous order and Storage listing HTTP 403. The private-list denials are expected but do not prove staff/customer operations. The public-profile denial is a live launch blocker. No production write or deployment was performed.
+Read-only live check on 6 October 2026: Auth public configuration HTTP 200 and launch host authorized; public founder Firestore read HTTP 403 PERMISSION_DENIED (also with the confirmed launch referrer); anonymous order and Storage listing HTTP 403. The denials do not prove staff/customer operations or production private-data isolation; follow-up identified a billing gate for Firestore. The public-profile denial is a live launch blocker. No production write or deployment was performed.
+
+
+## Follow-up investigation — 7 October 2026
+
+The actual unauthenticated production browser targets `(default)` through Firestore WebChannel. The exact failing document is `projects/edgetapflow/databases/(default)/documents/profiles/ibraheem`. Its REST read returns HTTP 403 `PERMISSION_DENIED` with “This API method requires billing to be enabled.” An authenticated operator read is denied too. Cloud Billing metadata confirms `billingEnabled: false`. No billing change was attempted.
+
+Database metadata identifies two distinct IDs: `(default)` has `freeTier: false`; `default` has `freeTier: true`. The deployed `(default)` profile rule permits public reads, so this 403 is not a profile authorization failure. App Check is unenforced for Firestore, Storage and Auth. Hosting `/`, `/order` and `/u/ibraheem` return 200, Auth config responds and the host is authorized. The named free-tier database instead returns a genuine rules denial: its deployed catch-all rule denies all reads/writes; privileged founder read is 404 and a bounded order listing is empty. Inaccessible paid-database data was not inventoried or assumed empty.
+
+The live founder UI masks failure with old static fallback; a missing arbitrary profile URL returns 404. Neither proves functional public customer profiles. The branch has already corrected fallback/routing, but no release was deployed. A live-SDK check against the local export also exposed loading beyond 30 seconds; customer profile loading now times out after 15 seconds with a sanitized unavailable state, never founder fallback. Public-profile access does not call Storage or Cloud Functions. A Functions API listing was denied, so there is no claim that console-managed functions are absent.
+
+[Firestore free quota applies to one database](https://firebase.google.com/docs/firestore/pricing). [Database selection is explicit for named databases](https://firebase.google.com/docs/firestore/manage-databases). Source now supports `NEXT_PUBLIC_FIRESTORE_DATABASE_ID`, preserving `(default)` by default, plus a prepared `firebase.spark.json` for the existing named `default`. No selection/migration/deployment was executed; `.env.local` is intact.
+
+[Cloud Storage requires Blaze](https://firebase.google.com/docs/storage/faqs-storage-changes-announced-sept-2024), including the configured `*.firebasestorage.app` bucket. Anonymous Storage listing returns generic permission denial, not a diagnostic billing message; the dependency comes from current service requirements and verified inactive billing. Mandatory receipt upload makes existing online checkout incompatible with Spark; artwork/avatar uploads and staff downloads share that dependency. Manual JazzCash transfer and WhatsApp discussion need no external gateway or Firebase paid service. A complete receipt-free website checkout has not been implemented or claimed.
+
+Source checkout defaults to paused via `NEXT_PUBLIC_ONLINE_CHECKOUT_ENABLED=false`. Card/profile preparation and all underlying services remain intact; WhatsApp handoff explicitly states selections are not submitted. No password/receipt collection or online submit action appears in paused mode. Terms, FAQ and ordering copy disclose the owner-directed personalized-card policy and separately confirmed delivery/hosting terms. Legal review is required; no blanket 30-day guarantee or customer-error remedy is invented.
+
+### TECHNICAL BLOCKERS
+
+Reviewed rules/profile routing/copy remain undeployed. Verify real public profiles, safe private-data denial, staff/owner operations, order persistence/manual payment acceptance and physical NFC/QR on customer devices. The free-tier database requires verified public data and staff setup, not just a changed database ID. Old deployed rules remain less restrictive than branch rules.
+
+### BUSINESS DECISIONS
+
+Hosting duration/update terms; delivery coverage/fee/dispatch; cancellation before production and production approval/defect claim process. Exact delivery information must be agreed during ordering before payment; no pickup is advertised.
+
+### BILLING/INFRASTRUCTURE BLOCKERS
+
+Current `(default)` is billing-gated. Existing free-tier `default` is deny-all and lacks the founder document. Safely prepare its data/rules or use another explicitly approved infrastructure path; do not delete/migrate inaccessible customer data blindly. Website receipt/artwork/avatar Storage needs Blaze. Keep payment collection paused. No billing activation, payment method changes, paid provisioning, deployments or push authorized.
+
+### LEGAL/POLICY REVIEW
+
+Owner-directed personalized-card terms are business policy, not a legal opinion. Verify applicable Pakistan/provincial requirements, pre-payment disclosure, mandatory remedies, cancellation/production consent, claim handling and privacy retention/deletion. [Official Punjab Consumer Protection Act publication](https://pccmdpunjab.gov.pk/custom/mateen/pdf/ruleregulation/20-Punjab%20Consumer%20Protection%20Act%202005.pdf) demonstrates why disclosure/remedies need review; it does not certify applicability or EdgeTap compliance.
+
+**NOT READY TO LAUNCH:** all eight customer acceptance outcomes in `LAUNCH_REPORT.md` must be demonstrated, including actual unauthenticated backend profile access and completed supported ordering/payment handling.
+
+Follow-up validation: production export build and typecheck passed; lint zero errors/five existing image warnings; 364 browser assertions across five viewport widths, 57 Firebase rules checks and 36 actual-service emulator assertions passed. After bounding profile loading, a fresh local export browser using live Firebase verified sanitized unavailable state within 23 seconds, without founder fallback. Final personalized-card Terms export checks passed. These are not a successful live order or backend profile access.

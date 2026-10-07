@@ -95,6 +95,17 @@ try {
     await page.getByLabel("Account email",{exact:true}).fill("launch-qa@example.com");
     await page.getByLabel("Delivery address",{exact:true}).fill("QA only address");
     await page.getByRole("button",{name:"Continue →"}).click();
+    if (await page.getByRole("heading",{name:"Arrange your order on WhatsApp"}).isVisible()) {
+      assert.equal(await page.getByRole("link",{name:"Contact EdgeTap to arrange an order"}).getAttribute("href"),"https://wa.me/923044149674"); checks++;
+      assert.equal(await page.getByLabel("Payment receipt screenshot").count(),0); checks++;
+      assert.equal(await page.getByRole("button",{name:"Review order →"}).count(),0); checks++;
+      assert(await page.getByText(/Your selections have not been submitted/).isVisible()); checks++;
+      assert(await page.getByRole("link",{name:"personalized-card terms"}).isVisible()); checks++;
+      assert.equal(errors.length,0,errors.join("\n")); checks++;
+      await context.close();
+      console.log(`PASS: production browser QA at ${width}px (WhatsApp ordering; online payment paused)`);
+      continue;
+    }
     assert(await page.getByRole("button",{name:/Jazzcash/i}).isVisible()); checks++;
     assert.equal(await page.getByRole("button",{name:/Raast|Easypaisa|Meezan/i}).count(),0); checks++;
     await page.getByRole("button",{name:"Review order →"}).click();

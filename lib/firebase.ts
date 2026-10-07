@@ -20,6 +20,9 @@ if (missing.length) throw new Error(`Missing Firebase build configuration: ${mis
 // Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 export const auth = getAuth(app);
-export const db = getFirestore(app);
+// Explicit selection supports the existing free-tier named database without
+// silently switching an installation to an empty database. Rules/data must be
+// prepared for the selected database before changing this build setting.
+export const db = getFirestore(app, process.env.NEXT_PUBLIC_FIRESTORE_DATABASE_ID || "(default)");
 export const storage = getStorage(app);
 export default app;

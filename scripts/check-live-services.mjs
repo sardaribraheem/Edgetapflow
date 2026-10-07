@@ -11,6 +11,7 @@ async function check(label,url) {
     if (!response.ok) {
       const reasons=(data.error?.details || []).map(detail=>detail.reason).filter(Boolean);
       console.log(`${label}: ${data.error?.status || "denied"}${reasons.length ? " ("+reasons.join(", ")+")" : ""}`);
+      if (/requires billing to be enabled/i.test(data.error?.message || "")) console.log(`${label}: billing gate, not evidence of a rules denial`);
     }
     return { response, data };
   } catch { console.log(`${label}: connection failed`); return null; }
@@ -18,6 +19,7 @@ async function check(label,url) {
 const config=await check("Firebase Auth public configuration",`https://identitytoolkit.googleapis.com/v1/projects?key=${encodeURIComponent(env.NEXT_PUBLIC_FIREBASE_API_KEY)}`);
 if (config?.response.ok) console.log("Launch host authorized:",config.data.authorizedDomains?.includes("edgetapflow.web.app")===true);
 const project=encodeURIComponent(env.NEXT_PUBLIC_FIREBASE_PROJECT_ID);
-await check("Public founder profile read",`https://firestore.googleapis.com/v1/projects/${project}/databases/(default)/documents/profiles/ibraheem?key=${encodeURIComponent(env.NEXT_PUBLIC_FIREBASE_API_KEY)}`);
-await check("Anonymous order list (must be denied)",`https://firestore.googleapis.com/v1/projects/${project}/databases/(default)/documents/orders?pageSize=1&key=${encodeURIComponent(env.NEXT_PUBLIC_FIREBASE_API_KEY)}`);
+const database=encodeURIComponent(env.NEXT_PUBLIC_FIRESTORE_DATABASE_ID || "(default)");
+await check("Public founder profile read",`https://firestore.googleapis.com/v1/projects/${project}/databases/${database}/documents/profiles/ibraheem?key=${encodeURIComponent(env.NEXT_PUBLIC_FIREBASE_API_KEY)}`);
+await check("Anonymous order list (must be denied)",`https://firestore.googleapis.com/v1/projects/${project}/databases/${database}/documents/orders?pageSize=1&key=${encodeURIComponent(env.NEXT_PUBLIC_FIREBASE_API_KEY)}`);
 await check("Anonymous Storage list (must be denied)",`https://firebasestorage.googleapis.com/v0/b/${encodeURIComponent(env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET)}/o?maxResults=1`);

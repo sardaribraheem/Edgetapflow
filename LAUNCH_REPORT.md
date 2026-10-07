@@ -1,6 +1,6 @@
-# EdgeTap launch report — 6 October 2026
+# EdgeTap launch report — updated 7 October 2026
 
-**Verdict: NOT READY TO LAUNCH.** The repository is substantially improved and local verification passes. Public Firebase profile reads still fail, live release/physical-card verification remains outstanding, and three commercial policies are undecided.
+**Verdict: NOT READY TO LAUNCH.** The public-profile failure is traced to the billing-gated `(default)` Firestore database. Mandatory receipt uploads also depend on Blaze-only Cloud Storage. Online submission now defaults to paused, with an honest WhatsApp ordering handoff. No production configuration has been changed.
 
 Work is on `launch-readiness`, starting from `main` at `4ce757b`. Existing user edits to `.gitignore` and root screenshot deletions were preserved. Implementation commit: `fa2372a`. Nothing was pushed, deployed, charged or written to production Firebase.
 
@@ -63,86 +63,117 @@ Private-beta wording; fake testimonial data; admin navigation from customer page
 | `npm run typecheck` | Passed |
 | `npm run build -- --webpack` | Passed with Next.js 16.3.8; static export includes marketing, policies, checkout, staff/account, profile shell, robots and sitemap |
 | Default Turbopack build | Failed on this machine: sandboxed worker port binding. Google font network access also required escalation. Webpack is the installed Next.js-supported fallback; no code completion is inferred from the failed command |
-| Production browser suite | 374 assertions passed in Chromium at 320, 360, 390, 768 and 1440px; screenshots in ignored `test-results/`; reviewed mobile homepage, desktop pricing and narrow checkout images |
-| Browser coverage | Public/staff/account/policy route status; actual 404; canonical/noindex metadata; branded assets; absent leaks/dead anchors; width overflow; mobile drawer/Escape; profile-shell failure without founder flash or raw errors; all checkout steps through final review/edit; invalid name/link/account/receipt; actual vCard download |
+| Production browser suite | Follow-up: 364 assertions passed in Chromium at 320, 360, 390, 768 and 1440px in paused mode. Prior enabled-mode build passed 374. Screenshots in ignored `test-results/` |
+| Browser coverage | Public/staff/account/policy route status; actual 404; canonical/noindex metadata; branded assets; absent leaks/dead anchors; width overflow; mobile drawer/Escape; profile-shell failure without founder flash or raw errors; card/profile/link/preview/delivery steps; honest WhatsApp handoff with no receipt or submit action; actual vCard download. Prior run covered enabled checkout through final review/edit; no production submission |
 | Browser console | No unexpected console/page errors in covered flow. Deliberate Firestore network failures and 404 are isolated as expected errors; this does not mean live Firebase is healthy |
 | Firebase rules | 57 allow/deny/collision checks passed, including anonymous/private access, staff gate, owner field restrictions, unsafe URLs, ten-link create/update, price/payment/lifecycle injection, upload isolation and SVG rejection |
 | Actual service functions | 36 emulator assertions passed: real Auth signup/sign-in, private receipt/artwork uploads, order persistence, customer denial, staff payment confirmation, concurrent profile creation, QR generation, all production steps, owner save/logout, URL/vCard/redirect safeguards |
 | Emulator environment | Firebase CLI 15.23.0; temporary Java 21 in `/tmp` because installed Java 20 was unsupported; `demo-edgetap-qa` only. No emulator code/configuration is imported into the production app |
-| Read-only live checks | Auth configuration HTTP 200 and launch host authorized; public founder Firestore read HTTP 403 PERMISSION_DENIED even with the confirmed launch referrer; anonymous order and Storage listing HTTP 403 |
+| Read-only live checks | Fresh production browser and configuration reads traced `(default)` billing gate, distinct free-tier `default` deny-all rules, unenforced App Check, old founder fallback and missing-profile Hosting 404. Full evidence below; no production writes |
+| Final live-SDK check on local export | Passed: fresh unauthenticated browser using real Firebase shows sanitized profile unavailable within 23 seconds, without founder fallback or raw billing message, after the 15-second wait bound. This verifies error handling, not successful production profile access. Final Terms export assertions also passed |
 | Physical/external checks | Not performed: live paid order, real card programming/tap/QR scan, iOS Safari/Android physical-device QA, WhatsApp response, courier fulfillment, live staff/member operations, legacy-file migration or Hosting preview |
 
 The local export server mirrors clean URLs, profile fallback and 404 routing. It is not proof that Firebase Hosting itself applies the rewrite/headers correctly. Final preview-channel testing is required. QR generation returned a PNG for the verified profile destination; a real camera scan is still required.
 
+## Production 403 investigation — 7 October 2026
+
+Read-only production browser and authenticated configuration inspection were performed using the existing Firebase CLI session. No data, rules, deployment, billing or payment settings were changed. Configuration values and credentials were not printed. `scripts/diagnose-live-profile.mjs` reproduces the unauthenticated probes and browser route trace.
+
+| Layer/resource | Observed evidence | Conclusion |
+|---|---|---|
+| Firebase Hosting `/`, `/u/ibraheem`, `/order` | HTTP 200 in a fresh Chromium context | Hosting serves the existing release; the profile 403 is downstream |
+| Browser → Firestore WebChannel | Target is `projects/edgetapflow/databases/(default)`; transport responses can be HTTP 200 | A transport 200 is not proof of a successful document read |
+| Unauthenticated REST `.../databases/(default)/documents/profiles/ibraheem` | HTTP 403 `PERMISSION_DENIED`: “This API method requires billing to be enabled.” Same with launch referrer; privileged document read also denied | Exact failing resource: `(default)` database. Billing gate, not a profile rule rejection |
+| Cloud Billing project metadata | `billingEnabled: false` | Confirms the owner's Spark state; no activation attempted |
+| Firestore database metadata | `(default)`: `freeTier: false`; separate database `default`: `freeTier: true` | App selects the database without free quota; these IDs are different |
+| Active `(default)` rule release | Updated 4 October; `/profiles/{username}` has `allow read: if true` | Current denial is not caused by that read rule. Existing deployed rules still need the reviewed security hardening |
+| Named `default` database | Public read: 403 “Missing or insufficient permissions.” Active rules dated 14 September: catch-all `allow read, write: if false`. Privileged founder read: 404; bounded order listing empty | A switch alone would fail: safely publish reviewed rules, provision staff and seed/recover verified data first |
+| App Check | Firestore, Storage and Auth all `UNENFORCED` | Not the cause; no enforcement disabled during diagnosis |
+| Firebase Auth public configuration | HTTP 200, canonical launch host authorized | Not an Auth/referrer problem for public reads; no authenticated production checkout was tested |
+| Founder production UI | Displays founder despite failed backend access | Old release falls back to static founder content, masking the failure. Branch already removed this error fallback |
+| Production `/u/launch-audit-missing` | HTTP 404 | Old Hosting release does not provide the branch's arbitrary-profile shell; Hosting rewrite release still needed |
+| Anonymous Storage listing | HTTP 403 “Permission denied.” | Expected under private/list rules; this alone does not identify a billing denial or prove uploads work |
+
+There is no Cloud Functions import, backend, or functions deployment configuration in the application. A read-only Functions API listing was itself denied; that is **not** proof that the project has zero externally managed functions. The public-profile request uses Firestore directly and does not call Functions or Storage. Existing avatar availability is a separate Storage dependency. A final local export browser check using live Firebase initially remained loading beyond 30 seconds: the SDK retries service failures. `ProfileRoute` now bounds the customer wait at 15 seconds and shows the sanitized unavailable state without substituting founder data.
+
+The previous anonymous order-list 403 also hits billing-gated `(default)` and **does not prove deployed order privacy**. Local rules tests prove the reviewed source denies private reads; production privacy must be rechecked once the chosen database is accessible.
+
+## Firebase dependencies and Spark-compatible path
+
+[Firestore allows one free-quota database per project](https://firebase.google.com/docs/firestore/pricing); [SDKs select `(default)` unless another ID is specified](https://firebase.google.com/docs/firestore/manage-databases). This project's free-quota database is the existing named `default`, according to live metadata. Do not delete either database, create a replacement, or assume inaccessible `(default)` data is empty. Recover/migrate customer data with a reviewed operator procedure when access permits.
+
+`lib/firebase.ts` now supports `NEXT_PUBLIC_FIRESTORE_DATABASE_ID`; absence still selects `(default)` to preserve existing installations. `.env.local` was not edited. `firebase.spark.json` prepares the reviewed rules/index configuration specifically for named `default`; it does not publish anything or alter the free-quota assignment. If using that database, inventory available data, seed verified public profiles, configure staff UIDs, review/deploy its rules, rebuild with `NEXT_PUBLIC_FIRESTORE_DATABASE_ID=default`, then verify unauthenticated profiles and private-data denials. These steps await release authorization. Do not simply relax catch-all rules.
+
+| Feature | Spark / billing requirement | Current status |
+|---|---|---|
+| Static Firebase Hosting, email/password Auth | Spark supported within quotas | Hosting and public Auth config respond; real login remains to verify |
+| Public profiles, owner updates, orders, staff transactions | Firestore free-quota database can support these within quotas | Existing named `default` needs reviewed rules/data; current `(default)` access requires active billing |
+| Receipt/custom artwork uploads, hosted avatars, staff downloads | [Cloud Storage for Firebase requires Blaze](https://firebase.google.com/docs/storage/faqs-storage-changes-announced-sept-2024) | Mandatory online receipt upload is incompatible with current Spark state; cannot fix this by weakening Storage rules |
+| Manual JazzCash transfer and WhatsApp order discussion | No Firebase paid service or payment gateway needed | External customer transfer and human verification; end-to-end operational handling not demonstrated |
+| Automatic payment processing/webhooks/notifications | Gateway and trusted infrastructure would be needed; Firebase Functions require Blaze | Not implemented or advertised; not required for manual JazzCash handling |
+
+Storage's current requirement applies to the configured `*.firebasestorage.app` bucket; the 3 February 2026 maintenance cutoff specifically also affected legacy `*.appspot.com` buckets. No billing activation, new paid service, bucket migration or gateway integration was attempted. Storage rules' staff lookup currently targets `(default)`; a named-database migration must review the supported cross-service authorization design before re-enabling uploads. The Firestore-only Spark config deliberately excludes Storage.
+
+## Checkout: implemented behavior and blockers
+
+The seven-step wizard is real code, not a fake payment processor. In enabled mode: account signup/sign-in → mandatory private receipt upload (plus optional avatar/artwork) → pending Firestore order → success only after persistence → staff manual JazzCash verification → atomic profile creation → physical production/NFC/QR/dispatch stages. It never sends money, automatically verifies a receipt, quotes final delivery cost or sends email. Preview and uploaded-file previews are local; they are not submitted orders. Emulator tests verify these services, not production payment receipt or courier behavior.
+
+Currently the Storage upload fails the Spark compatibility requirement before an order can be saved; the chosen Firestore database is independently billing-blocked. Delivery fee and total are intentionally null, so a complete quote must be agreed before payment. The user can now prepare selections and open the approved WhatsApp contact; the site explicitly says selections are not submitted. It does not fabricate an order number, successful payment, receipt upload or order acceptance. The operator must collect details, confirm quote/hosting/production terms, verify the JazzCash transfer, record and fulfill the order. That human workflow still needs a controlled customer walkthrough.
+
+`NEXT_PUBLIC_ONLINE_CHECKOUT_ENABLED` defaults to false. This preserves all checkout functionality behind an explicit release setting while hiding receipt/password/payment collection at the payment step and guarding submission. Enable it only after the actual supported infrastructure and real order persistence are verified. A complete no-Storage website checkout (transaction-reference submission plus receipt sharing over WhatsApp, revised schema/rules/staff workflow) would require additional implementation; it has not been invented or declared ready.
+
 ## Remaining launch blockers
 
-1. **Live Firebase/release verification:** public founder read currently returns HTTP 403. Identify whether deployed rules, project/database/API configuration or API-key restrictions cause this; publish reviewed rules, provision authorized staff and verify real customer Auth, Storage, order, profile and owner-edit operations. Confirm Storage CORS and any legacy upload migration. Then verify Firebase Hosting preview and a programmed physical NFC/QR card.
-2. **Hosting/update terms:** duration included with the Rs. 999 card, update limits/fees and what happens on expiry or service closure.
-3. **Delivery terms:** supported Pakistan locations, delivery charge/quotation process and dispatch expectations communicated before payment. No pickup offer is confirmed.
-4. **Returns/refunds:** eligibility, cancellation and damaged/misprinted-card handling, process and customer-facing policy. Finalize order/privacy terms with the actual operating practices, including retention/deletion.
+### TECHNICAL BLOCKERS
 
-## Final manual QA checklist
+- Release the reviewed profile shell, Hosting rewrite, rules and truthful policy/ordering copy when authorized. No deployment is permitted in this task.
+- Provision verified public profiles/staff authorization in the chosen database; verify unauthenticated public read, missing/inactive profiles, owner edit and private order/config denial against production.
+- Demonstrate a real supported ordering/payment workflow, including operator acceptance, agreed total, JazzCash verification and persistent order record. WhatsApp link opening alone is not completion.
+- Verify physical NFC/QR on iPhone and Android; live profile destinations, delivery operations, authenticated downloads/CORS if enabled, legacy tokens and private-data handling remain to check.
 
-- Confirm the three policies below and update pricing, FAQ, terms/privacy and checkout consistently. Have one person outside the project explain what Rs. 999 buys and the complete delivered cost.
-- Open the production preview on an actual iPhone and Android phone. Check navigation, text, quantity, uploads, keyboard, login, edit/logout, focus visibility and error recovery.
-- With an approved QA account, place a controlled order (do not send funds merely to test). Ensure the UI confirms only after Firestore persistence and retains its order number. Check the address/receipt is not available anonymously or to a second customer.
-- Confirm staff authorization; unauthorized customer must not enter the dashboard or read orders. Complete manual payment confirmation and profile creation; try duplicate username and stale order actions.
-- Verify new custom-art/receipt authenticated downloads and bucket CORS in a browser. Check legacy token links and file types before retaining them.
-- Program an actual NFC card with the final profile URL. Print/scan the generated QR on both phones and ensure identical customer identity. Update that profile, retap/rescan and download its contact file; verify links, then logout.
-- Test unknown/inactive profile, backend failure, invalid credentials, upload rejection and an unknown site route. Check no founder profile appears for another handle.
-- Check share previews and branded icons, support WhatsApp availability, payment recipient/account and complete delivery quote. Confirm no unapproved business promises or emails remain.
+### BUSINESS DECISIONS
 
-## Exact deployment/release steps
+- Profile hosting duration, update terms/limits/fees and expiry/closure handling.
+- Delivery coverage, delivery charges and credible dispatch estimate; communicate and agree these during ordering before payment. No pickup is advertised.
+- Cancellation options before production, production-approval procedure and damage/defect claim handling. The personalized-card non-returnability framework is confirmed; no blanket 30-day refund or automatic remedy for customer-supplied errors is offered.
 
-These are reviewable operator steps, not actions already performed. Do not publish before the blockers are resolved.
+### BILLING/INFRASTRUCTURE BLOCKERS
 
-1. Review the `launch-readiness` diff. Preserve pre-existing user work and inspect changes to Firebase rules, routing and policies. Record the previous Hosting release and export backup before replacing it.
-2. In the Firebase Console for project `edgetapflow`, verify the `(default)` Firestore database is active, the configured Storage bucket exists, Email/Password Authentication is enabled, and the launch domain is authorized. Enable required billing/services if the Console actually requests them; historical docs are not current billing evidence. Check public API-key HTTP-referrer restrictions support the launch host.
-3. Create/confirm staff accounts through the trusted Console. Set `config/admin_uids` to `{ uids: [<approved staff Firebase UID>, ...] }` using privileged access. Do not expose credentials or broaden rules to make the app work. Seed/validate `profiles/ibraheem` with the actual founder content and approved owner UID. Review any existing profile/handle reservations and legacy orders/uploads before changing rules.
-4. Confirm the exact bucket name from `.env.local` without copying it to public reports. For authenticated staff blob downloads, apply `storage.cors.json` to that bucket with `gcloud storage buckets update gs://<configured-bucket> --cors-file=storage.cors.json`. Add a temporary exact preview origin only if testing authenticated downloads there; remove it after QA. Enable the Storage rules service agent's Firestore access if Firebase's deployment prompt requires it.
-5. After rule review and console readiness, deploy rules and indexes:
+- Billing is inactive. Current `(default)` database is not free-tier and returns a billing-required 403. Existing named `default` is free-tier but deny-all/unseeded for the founder. Choose and execute a reviewed data/rules setup without deleting inaccessible data.
+- Mandatory website receipt uploads and optional artwork/avatars use Blaze-only Cloud Storage. Keep online collection paused until an explicitly approved infrastructure path works. No billing/payment-method changes or charges are authorized.
 
-   ```sh
-   firebase deploy --only firestore:rules,firestore:indexes,storage --project edgetapflow
-   ```
+### LEGAL/POLICY REVIEW
 
-6. Supply real public web configuration in `.env.local` or CI; set `NEXT_PUBLIC_APP_URL=https://edgetapflow.web.app`. Install and verify:
+- Personalized-card terms are an owner-directed business-policy draft, not a legal compliance opinion. Qualified Pakistan counsel must check applicable provincial/jurisdictional consumer rights, mandatory remedies and how the policy is disclosed before payment. [Punjab's official Consumer Protection Act publication](https://pccmdpunjab.gov.pk/custom/mateen/pdf/ruleregulation/20-Punjab%20Consumer%20Protection%20Act%202005.pdf) contains return/refund disclosure and consumer-remedy provisions; it does not establish which law applies to every EdgeTap sale or validate a blanket personalized-product exemption.
+- Review cancellation/production approval, evidence/claim process, customer-error treatment, order receipts, business identification and privacy retention/deletion. Do not treat “except where required by law” as proof of legal compliance.
 
-   ```sh
-   npm ci
-   npm run lint
-   npm run typecheck
-   npm run test:rules
-   npm run build -- --webpack
-   ```
+## Customer launch acceptance checklist
 
-   Rules tests require Java 21+ and Firebase CLI. For local production QA, in separate terminals:
+| Required customer outcome | Current evidence / remaining condition |
+|---|---|
+| Visit production | Production homepage HTTP 200 |
+| Understand the product | Branch copy explains physical NFC card, QR fallback and internet/phone requirements; reviewed release still pending |
+| View a public example/profile | Founder displays static fallback in old production; live Firestore read fails. Genuine unauthenticated backend success required |
+| Understand pricing | Rs. 999 physical card; total delivery quote still must be agreed |
+| Start a real order | Branch links to approved WhatsApp and preserves selections without claiming submission; production release pending |
+| Complete supported payment/order | Manual JazzCash + operator acceptance/record/verification needs a controlled walkthrough. Website submission paused |
+| Understand delivery expectations | Coverage, fee and dispatch estimate confirmed during ordering; owner must settle operational terms |
+| Understand personalized-card policy | Branch Terms, FAQ and payment/handoff copy updated; legal review and production release pending |
 
-   ```sh
-   PORT=4173 npm run serve:qa
-   QA_BASE_URL=http://127.0.0.1:4173 npm run test:browser
-   ```
+All eight must pass before declaring launch readiness. Also complete physical-device responsiveness/accessibility and NFC/QR checks, staff/customer authorization checks and private-file migration/CORS checks where relevant. No production order, transfer, deployment, billing activation or push was performed.
 
-7. Check the read-only probes again with `node scripts/check-live-services.mjs`: the public founder must become readable and private lists must remain denied. This still does not replace a real authenticated order/fulfillment test.
-8. Create a Hosting preview (publishes preview assets; obtain release approval when ready):
+## Release procedure — deferred, not authorization
 
-   ```sh
-   firebase hosting:channel:deploy launch-qa --expires 7d --project edgetapflow
-   ```
-
-   Test arbitrary `/u/<handle>` deep links/reloads, missing routes, metadata/headers and the manual checklist. Keep actual NFC/QR destinations on the canonical launch origin, not a preview URL. Auth/upload preview tests need the preview origin explicitly authorized; do not substitute permissive domains/CORS.
-9. After policies and end-to-end QA pass, publish the reviewed build:
-
-   ```sh
-   firebase deploy --only hosting --project edgetapflow
-   ```
-
-   Recheck the actual launch origin, the programmed card, staff/customer operations, private-data denials and support. If failures appear, restore the recorded previous Hosting version through the Console; rules/data rollback requires its own reviewed migration, not a blind restoration.
+1. Preserve and review the `launch-readiness` changes and record existing Hosting/rules releases. Do not deploy or push under this task.
+2. Resolve the database/data path and Storage incompatibility first. Never enable billing/services or incur charges merely to make tests pass. Keep `NEXT_PUBLIC_ONLINE_CHECKOUT_ENABLED=false` until actual uploads and order persistence work.
+3. For a reviewed Firestore-only Spark path, use `firebase.spark.json` for the existing named `default` and `NEXT_PUBLIC_FIRESTORE_DATABASE_ID=default` for the build, after staff/profile data and safe rules are prepared. Current `firebase.json` still preserves the original `(default)` deployment target. No data migration was executed.
+4. Build/lint/typecheck, run the demo-only rules/services tests and export browser QA. After separate release authorization, test Hosting routing and live read-only probes, then a controlled order without sending funds merely for testing. If Storage is ever enabled, separately review database-dependent staff authorization, CORS and legacy tokens.
+5. Record all eight customer acceptance outcomes, physical-card checks and legal/policy sign-off before production publication. Keep rollback plans for Hosting and separately reviewed data/rules changes.
 
 ## Business decisions for the owner
 
-- What profile hosting and update service is included, for how long, and with what later fees/limits?
-- Which Pakistan locations can you deliver to, how are charges confirmed, and what dispatch expectations can you support?
-- What are the cancellation, return, refund and defective-card replacement terms?
+- Hosting duration and update terms/fees.
+- Delivery coverage, fee and dispatch estimate.
+- Cancellation before production and the production approval/defect-claim process.
 
-**NOT READY TO LAUNCH** — remaining blockers are live Firebase/release/physical-card verification and those three policy decisions.
+**NOT READY TO LAUNCH.** Production profile access and website checkout remain blocked; the safe source fixes and documented Spark path have not been deployed.

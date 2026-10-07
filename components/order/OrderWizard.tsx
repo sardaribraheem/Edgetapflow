@@ -24,6 +24,7 @@ import { auth } from "@/lib/firebase";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 
 const STEPS = ["Card", "Profile", "Links", "Preview", "Delivery", "Payment", "Done"];
+const ONLINE_CHECKOUT_ENABLED = process.env.NEXT_PUBLIC_ONLINE_CHECKOUT_ENABLED === "true";
 
 type WizardDraft = {
   plan: Order["plan"];
@@ -120,6 +121,7 @@ export default function OrderWizard() {
       }
       case 5:
       case 6:
+        if (!ONLINE_CHECKOUT_ENABLED) return "Please contact EdgeTap on WhatsApp to arrange your order. Online submission is currently unavailable.";
         if (!auth.currentUser && accountPassword.length < 6) return "Use a password with at least 6 characters.";
         if (!paymentReceipt) return "Upload your payment receipt before placing the order.";
         if (!["image/jpeg", "image/png", "image/webp"].includes(paymentReceipt.type) || paymentReceipt.size > 8 * 1024 * 1024) return "Use a JPEG, PNG or WebP receipt no larger than 8 MB.";
@@ -260,6 +262,11 @@ export default function OrderWizard() {
       </ol>
 
       <div className="w-full max-w-3xl">
+        {!ONLINE_CHECKOUT_ENABLED && step < 5 && (
+          <p className="mb-6 rounded-xl bg-white p-4 text-sm text-[--ink] ring-1 ring-[--ink]/10">
+            Choose your card and prepare your profile below. To arrange an order, <a href={SUPPORT_URL} target="_blank" rel="noreferrer" className="font-bold underline">contact EdgeTap on WhatsApp</a>. Online submission is currently unavailable. Confirm the complete cost and terms before paying.
+          </p>
+        )}
         {error && (
           <div className="mb-6 rounded-2xl border border-[--coral]/40 bg-[--coral]/10 p-4 text-sm font-semibold text-[--ink]" role="alert">
             {error}
@@ -278,7 +285,14 @@ export default function OrderWizard() {
             onChange={(customer) => patch({ customer })}
           />
         )}
-        {step === 5 && (
+        {step === 5 && !ONLINE_CHECKOUT_ENABLED && (
+          <section className="card-paper mb-6 p-7 sm:p-10">
+            <h1 className="font-display text-3xl font-semibold text-[--ink]">Arrange your order on WhatsApp</h1>
+            <p className="mt-4 text-sm leading-relaxed text-[--ink-soft]">Your selections have not been submitted. Send EdgeTap your card choice, quantity and requested printed details on WhatsApp. Confirm delivery availability, fee, dispatch estimate, profile hosting and update terms, and the complete price before paying. The supported payment method is a manual JazzCash transfer; EdgeTap must confirm the recipient and review payment.</p>
+            <a href={SUPPORT_URL} target="_blank" rel="noreferrer" className="btn btn-ink mt-6 px-6 py-3">Contact EdgeTap to arrange an order</a>
+          </section>
+        )}
+        {step === 5 && ONLINE_CHECKOUT_ENABLED && (
           <PaymentStep
             payment={draft.payment}
             onChange={(payment) => patch({ payment })}
@@ -292,6 +306,8 @@ export default function OrderWizard() {
             onReceiptChange={setPaymentReceipt}
           />
         )}
+
+        {step >= 5 && <p className="mt-4 text-sm leading-relaxed text-[--ink-soft]">Personalized cards are non-returnable and non-refundable once production starts, except where applicable law requires otherwise. Contact EdgeTap about damage, defects, an EdgeTap printing error or a wrongly supplied card so we can assess a remedy. Check your supplied details before approving production; customer-provided errors do not automatically qualify for replacement or refund. Read the <Link href="/terms" className="underline">personalized-card terms</Link> before paying.</p>}
 
         {step === 6 && (
           <SubmitStep
@@ -312,9 +328,9 @@ export default function OrderWizard() {
             >
               ← Back
             </button>
-            <button onClick={next} className="btn btn-ink px-8 py-3 font-bold">
+            {(step !== 5 || ONLINE_CHECKOUT_ENABLED) && <button onClick={next} className="btn btn-ink px-8 py-3 font-bold">
               {step === 5 ? "Review order →" : "Continue →"}
-            </button>
+            </button>}
           </div>
         )}
       </div>
@@ -709,7 +725,7 @@ function DeliveryStep({
       </p>
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
         {([
-          ["delivery", "Delivery", "Delivery within Pakistan. Contact us to confirm cost and timing for your location before paying."],
+          ["delivery", "Delivery", "Pakistan delivery: confirm coverage, charges and dispatch estimate for your location during ordering, before paying."],
         ] as const).map(([value, label, description]) => (
           <button type="button" key={value} aria-pressed={deliveryMethod === value} onClick={() => onDeliveryMethodChange(value)} className={`rounded-xl border-2 p-4 text-left transition-colors hover:border-[--ink]/50 ${deliveryMethod === value ? "border-[--ink] bg-[--yellow-soft]/30" : "border-[--ink]/10 bg-white"}`}>
             <span className="flex items-center justify-between font-display font-bold text-[--ink]"><span>{label}</span>{deliveryMethod === value && <span aria-hidden="true">✓</span>}</span>

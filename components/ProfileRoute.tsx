@@ -26,13 +26,23 @@ function ProfileRouteInner({ username }: { username: string }) {
   useEffect(() => {
     let active = true;
     (async () => {
+      let timeout: ReturnType<typeof setTimeout> | undefined;
       try {
-        const profile = await getProfile(username);
+        // Service/transport failures can leave the SDK retrying indefinitely.
+        // Bound the customer-facing wait without substituting another profile.
+        const profile = await Promise.race([
+          getProfile(username),
+          new Promise<never>((_, reject) => {
+            timeout = setTimeout(() => reject(new Error("Profile request timed out")), 15000);
+          }),
+        ]);
         if (active) setResult({ profile });
       } catch (e) {
         if (!active) return;
         const message = String(e instanceof Error ? e.message : e);
         setResult({ error: { missing: message.includes("not found") || message.includes("NotFoundException"), message } });
+      } finally {
+        clearTimeout(timeout);
       }
     })();
     return () => {
