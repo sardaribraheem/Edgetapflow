@@ -17,3 +17,11 @@ for(const name of ['.','..','../admin','bad/handle'])assert.throws(()=>profileUr
 for(const path of ['/u/.','/u/..','//outside.example','/admin'])assert.equal(profileReturnPath(path),'/account/orders');
 assert.equal(new URL(profileUrl('real-owner')).pathname,'/u/real-owner');assert.equal(profileReturnPath('/order'),'/order');
 console.log('PASS NFC/QR handles reject browser-normalized dot paths and retain safe internal account redirects.');
+
+// Verify money crossing the app/RPC boundary, including normal floating-point rupees.
+const applicationJS=transpileModule(await readFile('lib/application.ts','utf8'),{compilerOptions:{module:ModuleKind.ES2022}}).outputText.replace(/^import .*;$/gm,'');
+const stubs="const STANDARD_CARD_SIZE='Local fixture'; const getSupabase=()=>({rpc:async(name,args)=>({data:{name,args},error:null})});\n";
+const {dispatchRider}=await import(`data:text/javascript;base64,${Buffer.from(stubs+applicationJS).toString('base64')}`);
+for(const [rupees,minor] of [[250,25000],[250.10,25010],[1.10,110],[0,0]]){const sent=await dispatchRider({id:'local-order',version:7},rupees,'Local booked fare');assert.equal(sent.name,'dispatch_rider');assert.equal(sent.args.p_fee_minor,minor);assert.equal(sent.args.p_version,7);}
+for(const invalid of [NaN,Infinity,250.123])assert.throws(()=>dispatchRider({id:'local-order',version:7},invalid,''));
+console.log('PASS rider fare RPC receives exact minor units for whole/decimal rupees and rejects non-money values. No network call.');

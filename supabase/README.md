@@ -2,7 +2,7 @@
 
 The owner approved a clean production data layer. Existing Firebase Firestore records, the Auth user and four legacy images are TEST DATA and are intentionally NOT imported. Leave Firebase untouched; do not retry extraction, recover files, migrate passwords, enable Blaze or delete anything. Historical source inventory remains in `SUPABASE_MIGRATION_AUDIT.md`.
 
-The application defaults to Supabase. The hosted foundation is now initialized in the ONLY approved project, `dxyxvervvlxhwwbcbttd` (Edgetap, region `ap-southeast-2`). Migrations 001–006, RLS/RPCs and buckets are applied; application workflow/dimension migrations 007–008 are prepared locally and unapplied; Auth callbacks/security are configured. Anonymous/API boundaries pass; real account/email/customer/staff success workflows remain pending. DukanKhata is untouched. Read [../SUPABASE_MIGRATION_REPORT.md](../SUPABASE_MIGRATION_REPORT.md) for verified evidence and remaining blockers. Do not use an unrelated project by inference.
+The application defaults to Supabase. The hosted foundation is now initialized in the ONLY approved project, `dxyxvervvlxhwwbcbttd` (Edgetap, region `ap-southeast-2`). Migrations 001–006, RLS/RPCs and buckets are applied; application workflow/dimension migrations 007–009 are prepared locally and unapplied; Auth callbacks/security are configured. Anonymous/API boundaries pass; real account/email/customer/staff success workflows remain pending. DukanKhata is untouched. Read [../SUPABASE_MIGRATION_REPORT.md](../SUPABASE_MIGRATION_REPORT.md) for verified evidence and remaining blockers. Do not use an unrelated project by inference.
 
 ## Local verification
 
@@ -52,7 +52,7 @@ The migrations are individually transactional and deliberately fail on conflicti
 
 ## Schema / Storage / RLS
 
-The first six migrations are already hosted. Migration 007 is a locally tested forward change and awaits separately authorized database release:
+The first six migrations are already hosted. Migrations 007–009 are locally tested forward changes and awaits separately authorized database release:
 
 1. `202610070001_core.sql`: relational customers/profiles/ordered links/handles/orders/contact+draft snapshots/payments/fulfillment/reviews, private ownership/staff/provenance, indexes/constraints and SELECT RLS.
 2. `202610070002_rpc.sql`: narrow read/transactional-write RPCs, explicit execution grants, server pricing and lifecycle gates.
@@ -65,6 +65,8 @@ The first six migrations are already hosted. Migration 007 is a locally tested f
 
 8. `202610070008_confirmed_card_dimensions.sql` (**LOCAL ONLY**): owner-confirmed standard dimension text and labelled size option; preserves custom settings/existing orders, extends staff configuration RPCs, retains all RLS/grants. See [../BUSINESS_CONFIGURATION.md](../BUSINESS_CONFIGURATION.md).
 
+9. `202610070009_confirmed_pvc_rider_fulfillment.sql` (**LOCAL ONLY**): fixed standard PVC/NFC size; original + staff-prepared private artwork; caller-owned prepared-file read policy; direct rider fares/dispatch messages and card-only EdgeTap total for new orders; confirmed pickup/free-for-now hosting instruction defaults; every-personalized-card final-design email queue, restricted real-send completion hook, actual ten-hour reply/revision/inbox-checked approval and printing gate. No SMTP sender or fake sent-email action. Preserves existing IDs, legacy fee/spec/settlement and operator-written instructions. No seeded records.
+
 There is no production seed. The `ibraheem` reservation is configuration only, with no profile/customer attached. With migration 007, a customer record is created when the real user first saves a private draft; paid orders are published by staff. Signup itself does not create fabricated orders/profiles. `private` remains outside the exposed Data API schemas, with no app usage grants.
 
 Public profile access is exact-handle/active-only through `get_public_profile`; anonymous table enumeration/private orders are denied. Owner display/link edits use an authenticated bounded RPC. Staff authorization comes only from active rows in protected `private.admin_members`, not user metadata/email domains. Payment, quote, publication and fulfillment are separate staff RPCs; customer payloads cannot choose price/owner/payment status.
@@ -74,7 +76,7 @@ Buckets contain no placeholder files:
 | Bucket | Visibility | Limit | Access |
 |---|---|---|---|
 | avatars | Public bytes | 5 MB | Owner upload; owner/staff metadata |
-| order-artwork | Private | 25 MB | Owner upload/read; staff read |
+| order-artwork | Private | 25 MB | Owner upload/read; staff read; prepared staff file readable only by its order owner |
 | payment-receipts | Private | 8 MB | Owner upload/read; staff read |
 | migration-quarantine | Private | 25 MB | Operator upload; staff read; empty in clean setup |
 

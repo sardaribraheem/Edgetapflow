@@ -12,7 +12,7 @@ export type ApplicationPayload = {
   payment: { method: 'jazzcash'; receiptUrl?: string; reference?: string };
 };
 export type ApplicationDraft = { id: string; orderId?: string; payload: ApplicationPayload; step: number; version: number; state: 'draft' | 'changes_required'; updatedAt: number };
-export type OrderSettings = { pickupDetails: string; deliveryDetails: string; hostingDetails: string; cardSizes: string[]; cardDimensions: string; jazzcashNumber: string; cardPrice: number; emailNotificationsEnabled: boolean; version: number };
+export type OrderSettings = { pickupDetails: string; deliveryDetails: string; hostingDetails: string; cardSizes: string[]; cardDimensions: string; designProofScope: 'pending'|'all_personalized'|'uploaded_only'; jazzcashNumber: string; cardPrice: number; emailNotificationsEnabled: boolean; version: number };
 export type WizardDraft = {
   cardTemplate: CardTemplateId; quantity: number; size: string;
   customDesignUrl?: string; customDesignPreview?: string; avatarUrl?: string; avatarPreview?: string;
@@ -26,7 +26,7 @@ export function applicationPayload(d: WizardDraft): ApplicationPayload {
   return {customerNotes:d.customerNotes,card:{template:d.cardTemplate,quantity:d.quantity,size:d.size,...(d.customDesignUrl && d.customDesignUrl !== 'pending' ? {customDesignUrl:d.customDesignUrl}: {})},customer:{...d.customer,...(d.deliveryMethod==='nastp_pickup'?{address:'',city:'',postalCode:''}:{})},profileDraft:{displayName:d.displayName,title:d.title,bio:d.bio,usernameSuggested:d.usernameSuggested,links:d.links,...(d.avatarUrl?{avatarUrl:d.avatarUrl}:{})},deliveryMethod:d.deliveryMethod,payment:{method:'jazzcash',...(d.payment.receiptUrl?{receiptUrl:d.payment.receiptUrl}:{}),reference:d.payment.reference||''}};
 }
 export function wizardFromApplication(p: ApplicationPayload): WizardDraft {
-  return {...blankApplication(p.customer.email),cardTemplate:p.card.template,quantity:p.card.quantity,size:p.card.size,customDesignUrl:p.card.customDesignUrl,...p.profileDraft,avatarUrl:p.profileDraft.avatarUrl,customer:p.customer,customerNotes:p.customerNotes||'',deliveryMethod:p.deliveryMethod,payment:{...p.payment,status:'pending'}};
+  return {...blankApplication(p.customer.email),cardTemplate:p.card.template,quantity:p.card.quantity,size:STANDARD_CARD_SIZE,customDesignUrl:p.card.customDesignUrl,...p.profileDraft,avatarUrl:p.profileDraft.avatarUrl,customer:p.customer,customerNotes:p.customerNotes||'',deliveryMethod:p.deliveryMethod,payment:{...p.payment,status:'pending'}};
 }
 async function rpc<T>(name:string,args:Record<string,unknown>={}):Promise<T>{
   const {data,error}=await getSupabase().rpc(name,args); if(error) throw new Error(error.message); return data as T;
@@ -41,6 +41,11 @@ export const reviewApplication=(order:Order,action:string,message:string)=>rpc<v
 export const rejectPayment=(order:Order,reason:string)=>rpc<void>('reject_payment',{p_id:order.id,p_reason:reason,p_version:order.version});
 export const confirmCardSpec=(order:Order,size:string,template:string)=>rpc<void>('confirm_card_spec',{p_id:order.id,p_size:size,p_template:template,p_version:order.version});
 export const confirmDeliveryPayment=(order:Order,reference:string)=>rpc<void>('confirm_delivery_payment',{p_id:order.id,p_reference:reference,p_version:order.version});
+export const queueDesignProofEmail=(o:Order)=>rpc<void>('queue_design_proof_email',{p_id:o.id,p_version:o.version});
+export const recordDesignReply=(o:Order,action:string,note:string,receivedAt:string)=>rpc<void>('record_design_reply',{p_id:o.id,p_action:action,p_note:note,p_received_at:new Date(receivedAt).toISOString(),p_version:o.version});
+export const confirmDesignNoReply=(o:Order)=>rpc<void>('confirm_design_no_reply',{p_id:o.id,p_version:o.version});
+export const prepareOrderArtwork=(order:Order,path:string)=>rpc<void>('prepare_order_artwork',{p_id:order.id,p_path:path,p_version:order.version});
+export const dispatchRider=(order:Order,fee:number,message:string)=>{const minor=Math.round(fee*100);if(!Number.isFinite(fee)||!Number.isSafeInteger(minor)||Math.abs(fee*100-minor)>0.000001)throw new Error('Enter the actual rider fare in rupees, with at most two decimal places.');return rpc<void>('dispatch_rider',{p_id:order.id,p_fee_minor:minor,p_message:message,p_version:order.version});};
 export const addCustomerMessage=(order:Order,message:string)=>rpc<void>('add_customer_message',{p_id:order.id,p_message:message,p_version:order.version});
 export const addOrderNote=(order:Order,note:string)=>rpc<void>('add_order_note',{p_id:order.id,p_note:note});
 
@@ -49,11 +54,14 @@ export const FULFILLMENT_LABELS:Record<string,string>={new:'Awaiting review',pai
 export function nextOrderAction(o:Order):string{
   if(o.applicationStatus==='changes_required')return 'Read the EdgeTap message, update your saved application and resubmit it.';
   if(o.applicationStatus==='rejected'||o.applicationStatus==='cancelled')return 'This application is closed. Contact EdgeTap about any payment or remedy questions.';
-  if(o.applicationStatus!=='accepted')return 'EdgeTap is reviewing your information, requested card specification and manual JazzCash card payment. Delivery fees are confirmed separately afterward.';
-  if(o.fulfillment.status==='ready_for_pickup')return 'Contact EdgeTap to confirm the NASTP collection point and time before collecting your card.';
-  if(o.fulfillment.status==='shipped')return 'Your card has been marked dispatched. EdgeTap will confirm delivery details.';
+  if(o.applicationStatus!=='accepted')return 'EdgeTap is reviewing your information, requested card specification and manual JazzCash card payment. For delivery, the rider fare is extra and paid directly to the rider when arranged.';
+  if(o.fulfillment.status==='ready_for_pickup')return o.fulfillmentInstructions||'Your card is ready at NASTP Delta 3. Pickup Monday–Friday, 9 am–5 pm. Contact +92 304 414 9674 after reaching NASTP.';
+  if(o.fulfillment.status==='shipped')return o.deliveryPaymentRecipient==='rider_direct'?'Your rider is on the way. Pay the recorded delivery fare directly to the rider; it is separate from your card payment.':'Your card has been marked dispatched. EdgeTap will confirm delivery details.';
   if(['completed','delivered','picked_up'].includes(o.fulfillment.status))return 'Your card has been marked received. Contact EdgeTap if you need help.';
-  return 'Your order is accepted. EdgeTap will update the production, NFC programming and quality-check stages here.';
+  if(o.designProofStatus==='changes_requested')return 'EdgeTap is revising your final design based on your email reply. Printing is on hold.';
+ if(o.designProofStatus==='awaiting_email')return 'Your final design is prepared, but its email has not been sent yet. The 10-hour reply window has not started. Printing is on hold.';
+ if(o.designProofStatus==='awaiting_response')return 'Reply to the final-design email within 10 hours to confirm or request changes. The actual deadline appears below. Printing is on hold until review is complete.';
+ return 'Your order is accepted. EdgeTap will update the production, NFC programming and quality-check stages here.';
 }
 export function nextFulfillment(o:Order):string|undefined{
   if(o.applicationStatus!=='accepted')return;

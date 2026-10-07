@@ -20,6 +20,17 @@ do $$ declare t text; fn text; begin
    if has_function_privilege('anon','public.'||fn,'EXECUTE') or not exists(select 1 from pg_proc where oid=to_regprocedure('public.'||fn) and prosecdef and 'search_path=""'=any(proconfig)) then raise exception 'Unsafe application RPC: %',fn; end if;
   end loop;
  end if;
+ if to_regclass('private.design_proof_emails') is not null then
+  if not (select relrowsecurity from pg_class where oid='private.design_proof_emails'::regclass)
+   or has_table_privilege('anon','private.design_proof_emails','SELECT,INSERT,UPDATE,DELETE')
+   or has_table_privilege('authenticated','private.design_proof_emails','SELECT,INSERT,UPDATE,DELETE') then raise exception 'Unsafe design email queue grants/RLS'; end if;
+  if exists(select 1 from private.design_proof_emails) then raise exception 'Proof queue contains operational records; inspect, never clear'; end if;
+  if has_function_privilege('anon','private.design_proof_email_sent(uuid,text)','EXECUTE') or has_function_privilege('authenticated','private.design_proof_email_sent(uuid,text)','EXECUTE') then raise exception 'Transport completion hook exposed to app roles'; end if;
+  foreach fn in array array['can_read_prepared_artwork(text)','prepare_order_artwork(text,text,bigint)','dispatch_rider(text,bigint,text,bigint)','queue_design_proof_email(text,bigint)','record_design_reply(text,text,text,timestamptz,bigint)','confirm_design_no_reply(text,bigint)'] loop
+   if has_function_privilege('anon','public.'||fn,'EXECUTE') or not has_function_privilege('authenticated','public.'||fn,'EXECUTE')
+    or not exists(select 1 from pg_proc where oid=to_regprocedure('public.'||fn) and prosecdef and 'search_path=""'=any(proconfig)) then raise exception 'Unsafe fulfillment/proof RPC: %',fn; end if;
+  end loop;
+ end if;
  foreach fn in array array['get_public_profile(text)','list_reviews(integer)','create_order(jsonb,uuid)','find_order_submission(uuid)','confirm_payment(text)','update_order_quote(text,bigint,bigint)','publish_order_profile(text,text,bigint)','update_profile(text,jsonb)'] loop
   if not exists(select 1 from pg_proc where oid=to_regprocedure('public.'||fn) and prosecdef and 'search_path=""'=any(proconfig)) then
    raise exception 'Missing or unsafe RPC: %',fn;

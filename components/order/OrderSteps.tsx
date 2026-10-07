@@ -40,7 +40,7 @@ export function CardStep({
       <h1 className="font-display text-[clamp(1.8rem,4vw,2.6rem)] font-semibold leading-tight text-[--ink]">
         Choose your card
       </h1>
-      <p className="mt-2 text-[15px] text-[--ink-soft]">The design that gets tapped. We&apos;ll print it on real NFC material.</p>
+      <p className="mt-2 text-[15px] text-[--ink-soft]">The design that gets tapped. Every design is printed on a PVC card with embedded NFC, 85.60 × 53.98 mm.</p>
 
       <div className="mt-4 rounded-xl bg-[--mint-soft]/60 px-4 py-3 text-sm font-bold text-[--ink]">
         Your EdgeTap card · Design selected for review
@@ -77,7 +77,7 @@ export function CardStep({
 
       {draft.cardTemplate === "upload" && (
         <div className="mt-6 rounded-2xl bg-[--sky-soft]/40 p-5 ring-1 ring-[--sky]/30">
-          <p className="text-sm font-bold text-[--ink]">Upload your own card design</p>
+          <p className="text-sm font-bold text-[--ink]">Upload your own card design</p><p className="mt-2 text-sm">Your original is kept private. Staff will manually prepare the final layout for the standard PVC card size.</p>
           <input aria-label="Card artwork image" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])} className="mt-3 block w-full text-sm" />
           {uploading && <p className="mt-2 text-sm text-[--ink-soft]">Uploading…</p>}
           {uploadError && <p className="mt-2 text-sm font-semibold text-[--coral]">{uploadError}</p>}

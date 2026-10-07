@@ -16,6 +16,8 @@ const other='33333333-3333-4333-8333-333333333333';
 const image=await readFile('public/apple-touch-icon.png');
 await db.query('insert into auth.users values($1,$2),($3,$4),($5,$6)',[owner,'customer@example.test',staff,'staff@example.test',other,'other@example.test']);
 await db.query('insert into private.admin_members(user_id,provenance) values($1,$2)',[staff,'local browser fixture only']);
+// Migration default matches the confirmed every-personalized-card proof policy.
+
 const profileId='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
 await db.query('insert into public.customers(id,auth_user_id) values($1,$2)',[owner,owner]);
 await db.query('insert into public.profiles(id,username,display_name,first_name,title,bio,location,avatar) values($1,$2,$3,$4,$5,$6,$7,$8)',[profileId,'real-fixture','Fixture Customer','Fixture','Original title','Fixture bio','Test only location','']);

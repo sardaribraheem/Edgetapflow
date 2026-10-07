@@ -37,7 +37,7 @@ export const CARD_TEMPLATES: CardTemplate[] = [
     name: "Wood",
     tagline: "Warm and distinctive",
     tone: "bg-[#d6a36a]",
-    description: "A wood-inspired printed card design.",
+    description: "A wood-inspired printed design on a PVC card with embedded NFC.",
   },
   {
     id: "inverted",
@@ -76,7 +76,7 @@ export type OrderCard = {
   template: CardTemplateId;
   quantity: number;
   size?: string;
-  customDesignUrl?: string; // Storage ref for uploaded Custom artwork
+  customDesignUrl?: string; // Original customer artwork, private and preserved
 };
 
 // What the customer built during onboarding (draft of the future profile).
@@ -173,6 +173,16 @@ export type Order = {
   approvedCardTemplate?: CardTemplateId;
   customerNotes?: string;
   cardVerifiedAmount?: number;
+  designProofScope?: 'pending' | 'all_personalized' | 'uploaded_only';
+  designProofStatus?: 'not_required'|'preparing'|'awaiting_email'|'awaiting_response'|'changes_requested'|'approved'|'approved_no_response';
+  designProofSentAt?: number;
+  designProofDeadlineAt?: number;
+  deliveryPaymentRecipient?: 'edgetap' | 'rider_direct';
+  fixedCardFormat?: boolean;
+  riderFee?: number | null;
+  fulfillmentInstructions?: string;
+  preparedArtworkUrl?: string;
+  artworkPreparedAt?: number;
   deliveryPaymentStatus?: "pending" | "verified" | "not_required";
   deliveryPaymentReference?: string;
   deliveryVerifiedAmount?: number;
