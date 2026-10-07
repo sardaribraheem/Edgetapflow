@@ -1,3 +1,5 @@
+> **Owner dimensions confirmed — 7 October 2026:** Standard card dimensions are 85.60 × 53.98 mm (imperial quotation 3.375″ × 2.125″, shown approximately). Local migration 008 and the configurable customer/admin size UI are prepared; neither 007 nor 008 is hosted. Variant applicability, materials and remaining business answers are pending. See [BUSINESS_CONFIGURATION.md](BUSINESS_CONFIGURATION.md). Earlier “dimensions undecided” statements below are historical. Launch remains on hold.
+
 # EdgeTap application workflow — 7 October 2026
 
 **Implemented and verified locally; NOT READY TO LAUNCH.** Work stays on `launch-readiness`. No deployment/push, hosted migration 007, billing change, fake production record, Firebase extraction/deletion or DukanKhata operation was performed. Existing user changes to `.gitignore` and deleted root screenshots are preserved and excluded from this implementation commit.

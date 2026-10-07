@@ -1,3 +1,4 @@
+import { STANDARD_CARD_SIZE } from './data/order';
 import { getSupabase } from './supabase';
 import type { Order, CardTemplateId, CustomerInfo, DeliveryMethod, PaymentInfo } from './data/order';
 import type { ProfileLink } from './data/profile';
@@ -11,7 +12,7 @@ export type ApplicationPayload = {
   payment: { method: 'jazzcash'; receiptUrl?: string; reference?: string };
 };
 export type ApplicationDraft = { id: string; orderId?: string; payload: ApplicationPayload; step: number; version: number; state: 'draft' | 'changes_required'; updatedAt: number };
-export type OrderSettings = { pickupDetails: string; deliveryDetails: string; hostingDetails: string; cardSizes: string[]; jazzcashNumber: string; cardPrice: number; emailNotificationsEnabled: boolean; version: number };
+export type OrderSettings = { pickupDetails: string; deliveryDetails: string; hostingDetails: string; cardSizes: string[]; cardDimensions: string; jazzcashNumber: string; cardPrice: number; emailNotificationsEnabled: boolean; version: number };
 export type WizardDraft = {
   cardTemplate: CardTemplateId; quantity: number; size: string;
   customDesignUrl?: string; customDesignPreview?: string; avatarUrl?: string; avatarPreview?: string;
@@ -19,7 +20,7 @@ export type WizardDraft = {
   links: ProfileLink[]; customer: CustomerInfo; deliveryMethod: DeliveryMethod; payment: PaymentInfo; customerNotes: string;
 };
 export function blankApplication(email: string): WizardDraft {
-  return { customerNotes:'', cardTemplate:'simple', quantity:1, size:'Standard', avatarUploadPending:false, displayName:'', title:'', bio:'', usernameSuggested:'', links:[], customer:{fullName:'',phone:'',email,address:'',city:''},deliveryMethod:'delivery',payment:{method:'jazzcash',status:'pending'} };
+  return { customerNotes:'', cardTemplate:'simple', quantity:1, size:STANDARD_CARD_SIZE, avatarUploadPending:false, displayName:'', title:'', bio:'', usernameSuggested:'', links:[], customer:{fullName:'',phone:'',email,address:'',city:''},deliveryMethod:'delivery',payment:{method:'jazzcash',status:'pending'} };
 }
 export function applicationPayload(d: WizardDraft): ApplicationPayload {
   return {customerNotes:d.customerNotes,card:{template:d.cardTemplate,quantity:d.quantity,size:d.size,...(d.customDesignUrl && d.customDesignUrl !== 'pending' ? {customDesignUrl:d.customDesignUrl}: {})},customer:{...d.customer,...(d.deliveryMethod==='nastp_pickup'?{address:'',city:'',postalCode:''}:{})},profileDraft:{displayName:d.displayName,title:d.title,bio:d.bio,usernameSuggested:d.usernameSuggested,links:d.links,...(d.avatarUrl?{avatarUrl:d.avatarUrl}:{})},deliveryMethod:d.deliveryMethod,payment:{method:'jazzcash',...(d.payment.receiptUrl?{receiptUrl:d.payment.receiptUrl}:{}),reference:d.payment.reference||''}};

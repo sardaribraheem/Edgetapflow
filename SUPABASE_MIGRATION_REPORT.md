@@ -1,3 +1,5 @@
+> **Owner dimensions confirmed — 7 October 2026:** Standard card dimensions are 85.60 × 53.98 mm (imperial quotation 3.375″ × 2.125″, shown approximately). Local migration 008 and the configurable customer/admin size UI are prepared; neither 007 nor 008 is hosted. Variant applicability, materials and remaining business answers are pending. See [BUSINESS_CONFIGURATION.md](BUSINESS_CONFIGURATION.md). Earlier “dimensions undecided” statements below are historical. Launch remains on hold.
+
 # Latest application workflow update — 7 October 2026
 
 The owner requested full manual application operations after the clean Supabase setup. Migration **007 is prepared and verified locally only**; hosted history remains **001–006**. No database/frontend release, user creation, staff enrollment, payment, billing, Firebase or DukanKhata change was made in this follow-up. See [ORDER_WORKFLOW_REPORT.md](ORDER_WORKFLOW_REPORT.md) and current [LAUNCH_REPORT.md](LAUNCH_REPORT.md) for the complete workflow/configuration/tests and separated blockers.

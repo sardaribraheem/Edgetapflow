@@ -1,3 +1,5 @@
+> **Owner dimensions confirmed — 7 October 2026:** Standard card dimensions are 85.60 × 53.98 mm (imperial quotation 3.375″ × 2.125″, shown approximately). Local migration 008 and the configurable customer/admin size UI are prepared; neither 007 nor 008 is hosted. Variant applicability, materials and remaining business answers are pending. See [BUSINESS_CONFIGURATION.md](BUSINESS_CONFIGURATION.md). Earlier “dimensions undecided” statements below are historical. Launch remains on hold.
+
 ## Current application workflow status — 7 October 2026
 
 **NOT READY TO LAUNCH.** The complete application workflow is implemented and verified locally on `launch-readiness`; no frontend or hosted database release was made in this task. The hosted Edgetap project remains on migrations 001–006. Migration 007 is prepared locally and NOT applied under the owner's no-deploy instruction. Firebase test-data migration stays waived; Firebase and DukanKhata are untouched.

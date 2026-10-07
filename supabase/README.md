@@ -2,7 +2,7 @@
 
 The owner approved a clean production data layer. Existing Firebase Firestore records, the Auth user and four legacy images are TEST DATA and are intentionally NOT imported. Leave Firebase untouched; do not retry extraction, recover files, migrate passwords, enable Blaze or delete anything. Historical source inventory remains in `SUPABASE_MIGRATION_AUDIT.md`.
 
-The application defaults to Supabase. The hosted foundation is now initialized in the ONLY approved project, `dxyxvervvlxhwwbcbttd` (Edgetap, region `ap-southeast-2`). Migrations 001–006, RLS/RPCs and buckets are applied; application workflow migration 007 is prepared locally and unapplied; Auth callbacks/security are configured. Anonymous/API boundaries pass; real account/email/customer/staff success workflows remain pending. DukanKhata is untouched. Read [../SUPABASE_MIGRATION_REPORT.md](../SUPABASE_MIGRATION_REPORT.md) for verified evidence and remaining blockers. Do not use an unrelated project by inference.
+The application defaults to Supabase. The hosted foundation is now initialized in the ONLY approved project, `dxyxvervvlxhwwbcbttd` (Edgetap, region `ap-southeast-2`). Migrations 001–006, RLS/RPCs and buckets are applied; application workflow/dimension migrations 007–008 are prepared locally and unapplied; Auth callbacks/security are configured. Anonymous/API boundaries pass; real account/email/customer/staff success workflows remain pending. DukanKhata is untouched. Read [../SUPABASE_MIGRATION_REPORT.md](../SUPABASE_MIGRATION_REPORT.md) for verified evidence and remaining blockers. Do not use an unrelated project by inference.
 
 ## Local verification
 
@@ -62,6 +62,8 @@ The first six migrations are already hosted. Migration 007 is a locally tested f
 6. `202610070006_profile_handle_paths.sql`: additive constraints and availability guard reject browser-normalized dot handles so NFC/QR destinations remain valid.
 
 7. `202610070007_application_workflow.sql` (**LOCAL ONLY**): private progressive drafts, separate application review and requested/approved card specification, independently verified card/delivery amounts, staff/customer notes/history, disabled notification outbox, NASTP pickup lifecycle, version-aware payment verification, staff-controlled instructions. Adds five RLS tables and order/payment columns; preserves existing rows and IDs. Legacy id-only payment RPC execution is revoked so stale receipt review cannot bypass the new version check.
+
+8. `202610070008_confirmed_card_dimensions.sql` (**LOCAL ONLY**): owner-confirmed standard dimension text and labelled size option; preserves custom settings/existing orders, extends staff configuration RPCs, retains all RLS/grants. See [../BUSINESS_CONFIGURATION.md](../BUSINESS_CONFIGURATION.md).
 
 There is no production seed. The `ibraheem` reservation is configuration only, with no profile/customer attached. With migration 007, a customer record is created when the real user first saves a private draft; paid orders are published by staff. Signup itself does not create fabricated orders/profiles. `private` remains outside the exposed Data API schemas, with no app usage grants.
 

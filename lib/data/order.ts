@@ -3,6 +3,9 @@
 
 import type { ProfileLink } from "./profile";
 
+// Owner-confirmed standard size; other size/design availability needs review.
+export const STANDARD_CARD_SIZE = 'Standard — 85.60 × 53.98 mm';
+
 // ── Card templates ────────────────────────────────────────────────
 export type CardTemplateId = "simple" | "lux" | "wood" | "inverted" | "upload" | "designer";
 
