@@ -177,3 +177,32 @@ All eight must pass before declaring launch readiness. Also complete physical-de
 - Cancellation before production and the production approval/defect-claim process.
 
 **NOT READY TO LAUNCH.** Production profile access and website checkout remain blocked; the safe source fixes and documented Spark path have not been deployed.
+
+## Supabase implementation status — 7 October 2026
+
+**Still NOT READY TO LAUNCH.** After owner approval, the branch contains an additive Supabase implementation and offline migration safeguards. Firebase is retained/default-selected; online checkout remains paused in normal configuration. No source data or production services were modified, no target project was provisioned/applied, no billing was enabled and nothing was deployed or pushed. See [SUPABASE_MIGRATION_REPORT.md](SUPABASE_MIGRATION_REPORT.md) for implementation evidence and [supabase/README.md](supabase/README.md) for the guarded procedure.
+
+The local schema separates public profile display from private ownership, contacts, drafts, receipts, staff and provenance. Database RPCs control ownership/pricing/status and atomic payment/publication/fulfillment; anon visitors get one active public profile without customer/owner/payment data. Bucket policies protect artwork/receipts/quarantine; only avatars are public. Auth adapters handle session restoration, confirmation-required signup and a static recovery route. Original Firestore helpers/rules remain available; backend selection is explicit and missing/privileged Supabase build configuration is rejected before bundling.
+
+Verification: TypeScript and both backend build selections passed; lint has zero errors/five existing image warnings. The Firebase-selected responsive suite passed 364 assertions. Twenty local SQL/RLS checks and configuration security checks passed. Offline migration fixtures preserve original IDs, relationships, source timestamps, null totals, legacy payment/product states, history and unknown fields; imports refuse populated destinations and incomplete/unresolved input. Fifteen Supabase browser checks passed through customer editing/pending submission, staff receipt download/manual verification/publication, QR, anonymous access/private denial and session-bound recovery. Browser Auth/Storage HTTP is simulated around actual local SQL/RLS. Real SMTP, Storage gateway constraints/CORS, hosted PostgREST/JWT behavior and funds remain unverified.
+
+### TECHNICAL BLOCKERS
+
+- Obtain a complete source export/backup and reconcile all original IDs, owners, handles, contacts, payments, histories and objects. Firestore counts are unknown, not zero.
+- Preserve the existing Auth account's state and map its Firebase UID to the real Supabase UUID. Choose/test existing-user password continuity or verified recovery; no automatic account promotion or recovery emails were performed.
+- Verify target anonymous profile access and private denials, owner/staff sessions, confirmation/recovery URLs/email delivery, uploads/downloads, actual pending-order persistence, manual JazzCash acceptance and physical NFC/QR/production/dispatch.
+- Reconcile refreshed-tab submission recovery, final snapshot/delta/write freeze and rollback before publication. The implemented request key protects component retries; it is not a claim that a new tab can safely resubmit an uncertain existing order.
+
+### BUSINESS DECISIONS
+
+Delivery coverage/fee/dispatch estimate; digital hosting duration/update terms; cancellation before production and print-approval/defect-claim procedure.
+
+### BILLING/INFRASTRUCTURE BLOCKERS
+
+Destination Supabase configuration/operator access remains missing. `(default)` Firestore and all four Storage object byte probes remain HTTP 403; source restoration or an existing backup is necessary. The named `default` database is verified empty and cannot stand in for blocked data. One Auth user, four `avatarInbox` objects (1,163,992 bytes) and unknown Firestore records must be preserved. No Supabase paid service has been selected. Configure actual capacity/region/Auth email settings; retain Firebase Hosting/canonical domain during the backend migration.
+
+### LEGAL/POLICY REVIEW
+
+Personalized-card policy review remains required. Review processor/region/privacy retention and account migration/recovery disclosures against the actual destination before cutover; no legal compliance or hosting/delivery guarantee has been invented.
+
+No production deployment or customer-data migration is claimed. The outstanding source/destination access requests are necessary to finish, not permission to delete/disable Firebase or incur charges.

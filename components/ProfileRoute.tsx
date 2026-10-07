@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import ProfilePage from "@/components/ProfilePage";
-import { getProfile } from "@/lib/firestore";
+import { getProfile } from "@/lib/data-service";
 import { Profile } from "@/lib/data/profile";
 import { NfcWaves, QrDoodle, SparkleDoodle } from "@/components/doodles";
 

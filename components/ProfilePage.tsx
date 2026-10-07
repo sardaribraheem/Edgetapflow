@@ -3,11 +3,11 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { ibraheemProfile, Profile } from "@/lib/data/profile";
-import { saveProfile } from "@/lib/firestore";
+import { saveProfile, canEditProfile } from "@/lib/data-service";
 import { isSafeContactUrl } from "@/lib/links";
 import { contactVCard } from "@/lib/contact";
-import { auth } from "@/lib/firebase";
-import { onAuthStateChanged, User } from "firebase/auth";
+import { auth } from "@/lib/auth";
+import { onAuthStateChanged, User } from "@/lib/auth";
 import DoodleField from "./DoodleField";
 import {
   NfcWaves,
@@ -57,14 +57,27 @@ export default function ProfilePage({
   const [savedProfile, setProfile] = useState<Profile>(initialProfile);
   const profile = previewOnly ? initialProfile : savedProfile;
   const [user, setUser] = useState<User | null>(null);
-  const isOwner = !previewOnly && !!user && user.uid === profile.ownerUid;
+  const [ownerAccess, setOwnerAccess] = useState(false);
+  const isOwner = !previewOnly && !!user && ownerAccess;
   const [message, setMessage] = useState("");
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (previewOnly) return;
-    return onAuthStateChanged(auth, setUser);
-  }, [previewOnly]);
+    let active = true;
+    let generation = 0;
+    const stop = onAuthStateChanged(auth, async current => {
+      const request = ++generation;
+      setUser(current);
+      setOwnerAccess(false);
+      if (!current) return;
+      try {
+        const allowed = await canEditProfile(initialProfile);
+        if (active && request === generation) setOwnerAccess(allowed);
+      } catch { if (active && request === generation) setOwnerAccess(false); }
+    });
+    return () => { active = false; stop(); };
+  }, [previewOnly, initialProfile]);
 
   const downloadContact = () => {
     const url = URL.createObjectURL(new Blob([contactVCard(profile)], { type: "text/vcard;charset=utf-8" }));

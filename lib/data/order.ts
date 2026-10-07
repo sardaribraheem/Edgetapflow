@@ -159,8 +159,9 @@ export const FULFILLMENT_STATES: FulfillmentState[] = FULFILLMENT_FLOW.map((s) =
 
 // ── Order ─────────────────────────────────────────────────────────
 export type Order = {
-  id?: string; // Firestore doc id
-  ownerUid?: string; // Firebase Auth UID for the customer account
+  id?: string; // Preserved source document ID or database order ID
+  version?: number; // Supabase transaction conflict check
+  ownerUid?: string; // Backend auth identifier for the customer account
   orderNumber: string;
   plan: OrderPlanId;
   card: OrderCard;

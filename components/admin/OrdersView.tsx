@@ -11,9 +11,9 @@ import {
   getOrders,
   usernameAvailable,
   suggestUsername,
-} from "@/lib/firestore";
+} from "@/lib/data-service";
 import { qrDataUrl } from "@/lib/qr";
-import { downloadPrivateUpload } from "@/lib/storage";
+import { downloadPrivateUpload } from "@/lib/upload-service";
 import { profileUrl } from "@/lib/site";
 import { NfcWaves, QrDoodle, ProfileDoodle } from "@/components/doodles";
 import { CARD_TEMPLATE_ART } from "@/lib/data/cardArt";

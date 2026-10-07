@@ -134,3 +134,27 @@ Owner-directed personalized-card terms are business policy, not a legal opinion.
 **NOT READY TO LAUNCH:** all eight customer acceptance outcomes in `LAUNCH_REPORT.md` must be demonstrated, including actual unauthenticated backend profile access and completed supported ordering/payment handling.
 
 Follow-up validation: production export build and typecheck passed; lint zero errors/five existing image warnings; 364 browser assertions across five viewport widths, 57 Firebase rules checks and 36 actual-service emulator assertions passed. After bounding profile loading, a fresh local export browser using live Firebase verified sanitized unavailable state within 23 seconds, without founder fallback. Final personalized-card Terms export checks passed. These are not a successful live order or backend profile access.
+
+## Supabase implementation follow-up — 7 October 2026
+
+The owner approved local implementation after the read-only Firebase/Supabase audit. Additive relational schema, RLS/RPCs, Auth/data/upload adapters, static recovery, Storage policies and guarded offline preservation tooling are now prepared on `launch-readiness`. See [SUPABASE_MIGRATION_REPORT.md](SUPABASE_MIGRATION_REPORT.md) and [supabase/README.md](supabase/README.md). Firebase remains selected by default; `.env.local`, Firebase services/data and production Hosting are intact. No hosted database, bucket, user or deployment was created.
+
+Verification: Firebase-selected static export and 364 responsive browser assertions passed; Supabase-selected fixture export passed; 20 local PostgreSQL/RLS checks, public-key/origin preflight checks, offline ID/relationship/legacy-data preservation checks and 15 browser integration checks passed. Supabase browser checks execute real local SQL/RLS with simulated Auth/Storage HTTP. They cover staff receipt download/manual confirmation/profile publication, anonymous new-profile access, private-file denial, owner edit, session restoration, QR and recovery. They do not verify hosted services, email delivery or a real payment.
+
+### TECHNICAL BLOCKERS
+
+Complete Firestore/Auth/file preservation and normalization, a verified existing-user password/recovery strategy, hosted permission/SMTP/Storage verification, actual order/payment/physical-card walkthrough and final snapshot/delta/rollback plan remain required. Source `(default)` document counts remain unknown; the empty named `default` is not a replacement inventory. A component retry reuses its request key; refreshed-tab order reconciliation is still required before resubmission. The official Auth importer must not be run unchanged: its client-visible raw user metadata/error SQL logging require a sanitized approach. The official Firestore extractor requires fatal read errors and independent count checks.
+
+### BUSINESS DECISIONS
+
+Delivery coverage/fee/dispatch; hosting duration/update terms; cancellation before production and print-approval/defect-claim procedure. Existing personalized-card wording and separately agreed delivery/hosting expectations remain in place. No policy was invented to fill these gaps.
+
+### BILLING/INFRASTRUCTURE BLOCKERS
+
+No selected Supabase URL/public key or operator migration connection is configured. Source Firestore `(default)` and four object byte reads remain HTTP 403 under inactive billing. One Auth user and four legacy `avatarInbox` objects need verified mapping/preservation. Region/capacity and real Auth email settings need configuration; no paid project, add-on or billing activation was attempted. Hosting and canonical `https://edgetapflow.web.app` remain unchanged.
+
+### LEGAL/POLICY REVIEW
+
+Review personalized-card remedies/cancellation disclosure and the actual Supabase processor/region, privacy retention and account migration/recovery procedure before release. Local technical implementation does not establish legal compliance.
+
+**NOT READY TO LAUNCH.** None of the local results substitutes for an actual unauthenticated production profile, completed supported order/payment process or verified customer-data migration.

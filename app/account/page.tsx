@@ -2,10 +2,10 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import Link from "next/link";
-import { onAuthStateChanged, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { onAuthStateChanged, signInWithEmailAndPassword, signOut, sendPasswordResetEmail } from "@/lib/auth";
 import { NfcWaves } from "@/components/doodles";
 import { profileReturnPath } from "@/lib/site";
-import { auth } from "@/lib/firebase";
+import { auth } from "@/lib/auth";
 
 export default function AccountPage() {
   const [email, setEmail] = useState("");
@@ -92,6 +92,12 @@ export default function AccountPage() {
             <button type="submit" disabled={busy} className="btn btn-ink w-full px-5 py-3 font-bold disabled:opacity-50">
               {busy ? "Signing in…" : "Sign in"}
             </button>
+            <button type="button" className="text-sm font-bold underline" disabled={busy || !email.trim()} onClick={async () => {
+              setBusy(true); setError("");
+              try { await sendPasswordResetEmail(auth, email.trim().toLowerCase()); setMessage("If this address has an account, check your email for recovery instructions."); }
+              catch { setError("Could not request password recovery. Please try again."); }
+              finally { setBusy(false); }
+            }}>Forgot your password?</button>
           </form>
           <button onClick={handleSignOut} className="mt-4 w-full text-center text-xs font-bold text-[--ink-faint] hover:text-[--ink]">
             Sign out this browser

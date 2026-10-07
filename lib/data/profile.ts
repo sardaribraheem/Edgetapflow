@@ -20,7 +20,7 @@ export type Profile = {
   location: string;
   avatar: string;
   links: ProfileLink[];
-  ownerUid?: string; // Firebase Auth UID of the profile owner
+  ownerUid?: string; // Backend auth identifier; omitted from anonymous Supabase responses
   profileId?: string; // stable internal profile ID (username is a mutable public handle)
   active?: boolean; // published / hidden
   createdAt?: number; // epoch ms

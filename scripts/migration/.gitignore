@@ -1,0 +1,8 @@
+exports/
+backups/
+firebase-service.json
+supabase-service.json
+users.json
+auth-map.json
+asset-map.json
+prepared.sql

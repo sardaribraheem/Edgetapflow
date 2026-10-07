@@ -1,0 +1,13 @@
+import { readFile } from 'node:fs/promises';
+import { transpileModule,ModuleKind } from 'typescript';
+import assert from 'node:assert/strict';
+const source=await readFile('lib/supabase-config.ts','utf8');
+const js=transpileModule(source,{compilerOptions:{module:ModuleKind.ES2022}}).outputText;
+const {validateSupabaseConfig}=await import(`data:text/javascript;base64,${Buffer.from(js).toString('base64')}`);
+const token=role=>`e30.${Buffer.from(JSON.stringify({role})).toString('base64url')}.local_fixture`;
+for(const key of ['sb_secret_LOCAL_FIXTURE',token('service_role'),token('authenticated'),'invalid'])assert.throws(()=>validateSupabaseConfig('https://example.supabase.co',key));
+for(const url of ['http://example.supabase.co','https://user:password@example.supabase.co','ftp://localhost','https://example.supabase.co/path'])assert.throws(()=>validateSupabaseConfig(url,'sb_publishable_LOCAL_FIXTURE'));
+assert.throws(()=>validateSupabaseConfig());
+assert.equal(validateSupabaseConfig('https://example.supabase.co/',token('anon')).url,'https://example.supabase.co');
+assert.equal(validateSupabaseConfig('http://127.0.0.1:54321','sb_publishable_LOCAL_FIXTURE').url,'http://127.0.0.1:54321');
+console.log('PASS Supabase public config: privileged keys, missing values and credential-bearing/unsafe origins are rejected without echoing keys.');

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useRef } from "react";
+import { useMemo, useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { NfcWaves, SparkleDoodle, StarDoodle } from "@/components/doodles";
 import ProfilePage from "@/components/ProfilePage";
@@ -17,12 +17,14 @@ import {
 } from "@/lib/data/order";
 import type { Profile, ProfileLink } from "@/lib/data/profile";
 import { isSafeContactUrl } from "@/lib/links";
+import { usesSupabase } from "@/lib/backend";
 import { SUPPORT_URL } from "@/lib/site";
-import { createOrder, orderNumber } from "@/lib/firestore";
-import { uploadCustomDesign, uploadPublicAvatar, uploadPaymentReceipt, fileToDataUrl } from "@/lib/storage";
-import { auth } from "@/lib/firebase";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { createOrder, orderNumber } from "@/lib/data-service";
+import { uploadCustomDesign, uploadPublicAvatar, uploadPaymentReceipt, fileToDataUrl } from "@/lib/upload-service";
+import { auth, getCurrentUser, onAuthStateChanged, type User } from "@/lib/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "@/lib/auth";
 
+const PASSWORD_MIN_LENGTH = usesSupabase ? 8 : 6;
 const STEPS = ["Card", "Profile", "Links", "Preview", "Delivery", "Payment", "Done"];
 const ONLINE_CHECKOUT_ENABLED = process.env.NEXT_PUBLIC_ONLINE_CHECKOUT_ENABLED === "true";
 
@@ -67,9 +69,12 @@ export default function OrderWizard() {
   const [draft, setDraft] = useState<WizardDraft>(blankDraft);
   const [error, setError] = useState("");
   const submissionLock = useRef(false);
+  const submission = useRef<{ key: string; order: Order } | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [placed, setPlaced] = useState<Order | null>(null);
   const [resubmitKey, setResubmitKey] = useState(0); // bump to retry a failed submit
+  const [accountUser, setAccountUser] = useState<User | null>(null);
+  useEffect(() => onAuthStateChanged(auth, setAccountUser), []);
   const [accountMode, setAccountMode] = useState<AccountMode>("create");
   const [accountPassword, setAccountPassword] = useState("");
   const [paymentReceipt, setPaymentReceipt] = useState<File | null>(null);
@@ -122,7 +127,7 @@ export default function OrderWizard() {
       case 5:
       case 6:
         if (!ONLINE_CHECKOUT_ENABLED) return "Please contact EdgeTap on WhatsApp to arrange your order. Online submission is currently unavailable.";
-        if (!auth.currentUser && accountPassword.length < 6) return "Use a password with at least 6 characters.";
+        if (!accountUser && accountPassword.length < PASSWORD_MIN_LENGTH) return `Use a password with at least ${PASSWORD_MIN_LENGTH} characters.`;
         if (!paymentReceipt) return "Upload your payment receipt before placing the order.";
         if (!["image/jpeg", "image/png", "image/webp"].includes(paymentReceipt.type) || paymentReceipt.size > 8 * 1024 * 1024) return "Use a JPEG, PNG or WebP receipt no larger than 8 MB.";
         return "";
@@ -139,6 +144,7 @@ export default function OrderWizard() {
   };
 
   const back = () => {
+    if (submission.current) return setError("A retry sends the original submitted details. Contact EdgeTap to change an order after submission.");
     setError("");
     setStep((s) => Math.max(s - 1, 0));
   };
@@ -152,7 +158,7 @@ export default function OrderWizard() {
     setSubmitting(true);
     try {
       const email = draft.customer.email.trim().toLowerCase();
-      let customerUser = auth.currentUser;
+      let customerUser = await getCurrentUser();
 
       if (!customerUser) {
         if (accountMode === "create") {
@@ -176,6 +182,12 @@ export default function OrderWizard() {
         }
       }
       if (customerUser.email?.toLowerCase() !== email) throw new Error("Sign out first or use your signed-in account email for the order.");
+      if (submission.current) {
+        if (submission.current.order.ownerUid !== customerUser.uid) throw new Error("Sign in with the account used for this order.");
+        const id = await createOrder(submission.current.order, submission.current.key);
+        setPlaced({ ...submission.current.order, id });
+        return;
+      }
       const now = Date.now();
       if (!paymentReceipt) throw new Error("Payment receipt is required.");
       const [receiptUrl, avatarUrl, customDesignUrl] = await Promise.all([
@@ -209,10 +221,12 @@ export default function OrderWizard() {
         createdAt: now,
         updatedAt: now,
       };
-      const id = await createOrder(order);
+      submission.current = { key: crypto.randomUUID(), order };
+      const id = await createOrder(order, submission.current.key);
       setPlaced({ ...order, id });
-    } catch {
-      setError("We could not place your order. Check your account email, password and uploads, then try again. If you already paid, contact EdgeTap on WhatsApp before retrying.");
+    } catch (caught) {
+      if ((caught as { code?: string }).code === "email_confirmation_required") setError("Confirm your email, then choose ‘I already have one’ and sign in to submit your order. Your order has not been submitted.");
+      else setError("We could not place your order. Check your account email, password and uploads, then try again. If you already paid, contact EdgeTap on WhatsApp before retrying.");
       setResubmitKey((k) => k + 1);
     } finally {
       submissionLock.current = false;
@@ -854,7 +868,7 @@ function PaymentStep({
             value={password}
             onChange={(event) => onPasswordChange(event.target.value)}
             autoComplete={accountMode === "create" ? "new-password" : "current-password"}
-            placeholder="At least 6 characters"
+            placeholder={`At least ${PASSWORD_MIN_LENGTH} characters`}
             className="mt-1.5 w-full rounded-xl border border-[--ink]/10 bg-[--cream] px-3 py-2.5 text-sm text-[--ink]"
           />
         </label>

@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { db } from "@/lib/firebase";
-import { doc, getDoc, setDoc } from "firebase/firestore";
-import type { User } from "firebase/auth";
+import { getStaffProfile, saveFounderProfile } from "@/lib/data-service";
+import type { User } from "@/lib/auth";
 import { Profile, ibraheemProfile, ProfileLink } from "@/lib/data/profile";
 
 // Editors the owner's own profile (the ibraheem seed) — same save/link logic
@@ -18,10 +17,10 @@ export default function ProfilesView({ user }: { user: User }) {
   useEffect(() => {
     (async () => {
       try {
-        const snap = await getDoc(doc(db, "profiles", "ibraheem"));
-        if (snap.exists()) setProfile(snap.data() as Profile);
+        const current = await getStaffProfile("ibraheem");
+        if (current) setProfile(current);
       } catch (e) {
-        setLoadError(e instanceof Error ? e.message : "Couldn't load the current profile — Firestore may not be live yet.");
+        setLoadError(e instanceof Error ? e.message : "Couldn't load the current profile — the service may be unavailable.");
       }
     })();
   }, []);
@@ -38,8 +37,8 @@ export default function ProfilesView({ user }: { user: User }) {
       }
       const toSave = { ...profile };
       if (!toSave.ownerUid && user) toSave.ownerUid = user.uid;
-      await setDoc(doc(db, "profiles", "ibraheem"), toSave, { merge: true });
-      setMessage("Profile saved to Firestore ✓");
+      await saveFounderProfile(toSave);
+      setMessage("Profile saved ✓");
     } catch (err) {
       console.error("Error saving profile:", err);
       setMessage("Error saving profile: " + (err instanceof Error ? err.message : "unknown error"));
@@ -232,7 +231,7 @@ export default function ProfilesView({ user }: { user: User }) {
             disabled={saving}
             className="rounded-2xl bg-[--ink] px-8 py-3.5 font-display font-bold text-white shadow-[0_6px_0_0_rgba(16,11,74,0.4)] transition-transform hover:-translate-y-0.5 disabled:opacity-50"
           >
-            {saving ? "Saving to Firestore..." : "Save All Changes"}
+            {saving ? "Saving..." : "Save All Changes"}
           </button>
         </div>
       </form>

@@ -2,9 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { doc, getDoc } from "firebase/firestore";
-import { auth, db } from "@/lib/firebase";
-import { sendPasswordResetEmail, signInWithEmailAndPassword, signOut, onAuthStateChanged, User } from "firebase/auth";
+import { auth, isStaff } from "@/lib/auth";
+import { sendPasswordResetEmail, signInWithEmailAndPassword, signOut, onAuthStateChanged, User } from "@/lib/auth";
 import { NfcWaves } from "@/components/doodles";
 import AdminApp from "@/components/admin/AdminApp";
 
@@ -24,8 +23,8 @@ export default function AdminPage() {
       if (currentUser) {
         setLoading(true);
         try {
-          const config = await getDoc(doc(db, "config", "admin_uids"));
-          if (auth.currentUser?.uid === currentUser.uid) setAuthorized(config.exists() && config.data().uids.includes(currentUser.uid));
+          const staff = await isStaff();
+          if (auth.currentUser?.uid === currentUser.uid) setAuthorized(staff);
         } catch { setLoginError("This account does not have staff access, or access could not be verified."); }
       }
       setLoading(false);

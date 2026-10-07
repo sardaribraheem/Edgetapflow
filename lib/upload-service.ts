@@ -1,0 +1,34 @@
+import { usesSupabase } from './backend';
+import { getSupabase } from './supabase';
+
+async function upload(bucket: string, uid: string, file: File, maxMb: number): Promise<string> {
+  if (!['image/jpeg','image/png','image/webp'].includes(file.type)) throw new Error('Use a JPEG, PNG or WebP image.');
+  if (file.size<=0 || file.size>maxMb*1024*1024) throw new Error(`Image must be under ${maxMb} MB.`);
+  const extension = { 'image/jpeg':'jpg','image/png':'png','image/webp':'webp' }[file.type];
+  const path = `${uid}/${crypto.randomUUID()}.${extension}`;
+  const { error } = await getSupabase().storage.from(bucket).upload(path, file, { contentType: file.type, upsert: false });
+  if (error) throw new Error('Image upload failed. Please try again.');
+  return `${bucket}/${path}`;
+}
+export async function uploadPublicAvatar(uid: string, file: File): Promise<string> {
+  if (!usesSupabase) return (await import('./storage')).uploadPublicAvatar(uid,file);
+  const path = await upload('avatars',uid,file,5);
+  return getSupabase().storage.from('avatars').getPublicUrl(path.slice('avatars/'.length)).data.publicUrl;
+}
+export async function uploadCustomDesign(uid: string, file: File): Promise<string> {
+  return usesSupabase ? upload('order-artwork',uid,file,25) : (await import('./storage')).uploadCustomDesign(uid,file);
+}
+export async function uploadPaymentReceipt(uid: string, file: File): Promise<string> {
+  return usesSupabase ? upload('payment-receipts',uid,file,8) : (await import('./storage')).uploadPaymentReceipt(uid,file);
+}
+export function fileToDataUrl(file: File): Promise<string> {
+  return new Promise((resolve,reject)=>{ const reader=new FileReader(); reader.onload=()=>resolve(reader.result as string); reader.onerror=()=>reject(new Error('Could not read the image file.')); reader.readAsDataURL(file); });
+}
+export async function downloadPrivateUpload(path: string): Promise<void> {
+  if (!usesSupabase) return (await import('./storage')).downloadPrivateUpload(path);
+  const match=/^(payment-receipts|order-artwork|migration-quarantine)\/(.+)$/.exec(path);
+  if (!match || match[2].includes('..')) throw new Error('Invalid private upload path.');
+  const { data, error } = await getSupabase().storage.from(match[1]).download(match[2]);
+  if(error || !data) throw new Error('Download unavailable. Check your staff access.');
+  const url=URL.createObjectURL(data); const anchor=document.createElement('a'); anchor.href=url; anchor.download=path.split('/').at(-1)||'upload'; anchor.click(); window.setTimeout(()=>URL.revokeObjectURL(url),1000);
+}

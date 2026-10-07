@@ -10,9 +10,13 @@
     "typecheck": "tsc --noEmit",
     "test:browser": "node scripts/test-site.mjs",
     "serve:qa": "node scripts/serve-export.mjs",
-    "test:rules": "firebase emulators:exec --config firebase.qa.json --project demo-edgetap-qa --only firestore,storage,auth \"node scripts/test-rules.mjs && node scripts/test-services.mjs\""
+    "test:rules": "firebase emulators:exec --config firebase.qa.json --project demo-edgetap-qa --only firestore,storage,auth \"node scripts/test-rules.mjs && node scripts/test-services.mjs\"",
+    "test:supabase": "node scripts/test-supabase-config.mjs && node scripts/test-supabase.mjs",
+    "test:migration": "node scripts/test-migration.mjs",
+    "test:supabase:browser": "node scripts/test-supabase-browser.mjs"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.117.2",
     "firebase": "^12.19.0",
     "gsap": "^3.15.0",
     "next": "^16.3.8",
@@ -21,6 +25,7 @@
     "react-dom": "19.2.8"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.8",
     "@firebase/rules-unit-testing": "^5.0.2",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",

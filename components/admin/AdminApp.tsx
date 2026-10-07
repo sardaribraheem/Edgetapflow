@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import type { User } from "firebase/auth";
+import type { User } from "@/lib/auth";
 import { NfcWaves, SparkleDoodle } from "@/components/doodles";
-import { getOrders, listReviews } from "@/lib/firestore";
+import { getOrders, listReviews } from "@/lib/data-service";
 import { Order } from "@/lib/data/order";
 import { Review } from "@/lib/models";
 import OrdersView from "./OrdersView";
@@ -37,7 +37,7 @@ export default function AdminApp({ user, onLogout }: { user: User; onLogout: () 
   const failData = (e: unknown) => {
     console.error("[EdgeTap] Admin data load failed:", e);
     setLoadError(
-      e instanceof Error ? e.message : "Couldn't load Firestore data. Confirm the Firestore database is created and billing is enabled."
+      e instanceof Error ? e.message : "Couldn't load service data. Verify configuration and staff access."
     );
   };
 
@@ -340,15 +340,14 @@ function SettingsView({ user }: { user: User }) {
         <div className="border-t border-[--ink]/10 pt-4">
           <p className="text-[12px] font-bold uppercase tracking-widest text-[--ink-faint]">Admin authorization</p>
           <p className="mt-2 text-sm text-[--ink-soft]">
-            Admin access is granted by your Firebase UID being listed in the <code className="rounded bg-[--ink]/5 px-1.5 py-0.5">config/admin_uids</code> Firestore doc.
-            Add your UID there once the database is live. Keep this page&#39;s login in sync with that list.
+            Staff access requires an operator-managed membership linked to your authenticated account. Account metadata cannot grant staff access.
           </p>
         </div>
       </div>
       <div className="card-paper mt-4 p-6">
-        <p className="text-sm font-bold text-[--ink]">Firebase readiness</p>
+        <p className="text-sm font-bold text-[--ink]">Service readiness</p>
         <p className="mt-2 text-[13px] leading-relaxed text-[--ink-soft]">
-          Orders, profiles, reviews and QR all write to <strong>Firestore</strong>. Firebase Authentication, Firestore and Storage must be configured;
+          Orders, profiles, reviews and uploads require configured authentication, database and storage services;
           customer checkout requires an account so profile ownership remains secure. <Link className="font-bold text-[--sky] hover:underline" href="/pricing">See pricing</Link> for the available card.
         </p>
       </div>
