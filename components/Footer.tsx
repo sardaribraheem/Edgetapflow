@@ -15,6 +15,7 @@ export default function Footer() {
           <Link href="/order">Order your card</Link>
           <Link href="/u/ibraheem">Example profile</Link>
           <Link href="/account">Customer sign in</Link>
+          <Link href="/account/orders">My orders</Link>
           <a href={SUPPORT_URL} target="_blank" rel="noreferrer">Contact on WhatsApp</a>
           <Link href="/privacy">Privacy</Link>
           <Link href="/terms">Terms</Link>

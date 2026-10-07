@@ -1,3 +1,15 @@
+# Latest application workflow update — 7 October 2026
+
+The owner requested full manual application operations after the clean Supabase setup. Migration **007 is prepared and verified locally only**; hosted history remains **001–006**. No database/frontend release, user creation, staff enrollment, payment, billing, Firebase or DukanKhata change was made in this follow-up. See [ORDER_WORKFLOW_REPORT.md](ORDER_WORKFLOW_REPORT.md) and current [LAUNCH_REPORT.md](LAUNCH_REPORT.md) for the complete workflow/configuration/tests and separated blockers.
+
+LOCAL VERIFIED: 47 SQL/RLS/administration cases; 57 complete workflow browser checks (real local PostgreSQL/RLS, simulated Auth/Storage); 344 responsive assertions; typecheck, real-config static build, zero lint errors/six image warnings, offline migration regression. Account-owned drafts and corrections, private JazzCash proof, delivery with separately agreed/verified fee, NASTP pickup, requested versus approved specification, staff review/messages/internal notes, publication/QR and physical fulfillment are implemented.
+
+HOSTED VERIFIED: existing foundation only, 21 read-only API checks and 12 anonymous browser checks; intended first staff email **sardaribraheem277@gmail.com** has zero matching/verified/enrolled accounts at inspection. The owner registers/verifies normally before guarded UUID-membership enrollment. No real hosted account/email/upload/order/payment success is claimed. SMTP/provider/sender remain unconfigured. A public example is not invented in the empty database.
+
+The prior setup report below describes applied 001–006. Its paused-checkout/no-customer-dashboard statements are superseded in local source by the new application workflow, and do not mean 007 has been released.
+
+---
+
 # EdgeTap hosted Supabase setup — 7 October 2026
 
 **Hosted foundation configured and verified. EdgeTap is NOT READY TO LAUNCH: real account/email, authorized staff/customer operations, physical card checks and website release remain.** Work remains on `launch-readiness`; nothing was deployed or pushed. Firebase and DukanKhata remain untouched; no billing/payment method, paid project/add-on, reset or deletion was performed.

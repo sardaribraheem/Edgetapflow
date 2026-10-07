@@ -66,12 +66,13 @@ export type CustomerInfo = {
   postalCode?: string;
 };
 
-export type DeliveryMethod = "pickup" | "delivery";
+export type DeliveryMethod = "pickup" | "delivery" | "nastp_pickup";
 
 // ── Card selection on an order ────────────────────────────────────
 export type OrderCard = {
   template: CardTemplateId;
   quantity: number;
+  size?: string;
   customDesignUrl?: string; // Storage ref for uploaded Custom artwork
 };
 
@@ -118,6 +119,9 @@ export const FULFILLMENT_FLOW = [
   "ready_to_ship",
   "shipped",
   "delivered",
+  "ready_for_pickup",
+  "picked_up",
+  "completed",
 ] as const;
 
 export type FulfillmentStatus = (typeof FULFILLMENT_FLOW)[number] | "cancelled";
@@ -139,6 +143,7 @@ const NEXT: Partial<Record<FulfillmentStatus, FulfillmentStatus[]>> = {
   production_ready: ["printing"], printing: ["ready_for_nfc"],
   ready_for_nfc: ["nfc_programmed"], nfc_programmed: ["qa_passed"],
   qa_passed: ["ready_to_ship"], ready_to_ship: ["shipped"], shipped: ["delivered"],
+  ready_for_pickup: ["picked_up"], picked_up: ["completed"], delivered: ["completed"],
 };
 export function canTransition(from: FulfillmentStatus, to: FulfillmentStatus): boolean {
   if (to === "cancelled") return from !== "cancelled" && from !== "delivered";
@@ -159,6 +164,17 @@ export const FULFILLMENT_STATES: FulfillmentState[] = FULFILLMENT_FLOW.map((s) =
 
 // ── Order ─────────────────────────────────────────────────────────
 export type Order = {
+  applicationStatus?: "submitted" | "under_review" | "changes_required" | "accepted" | "rejected" | "cancelled";
+  applicationId?: string;
+  approvedCardSize?: string;
+  approvedCardTemplate?: CardTemplateId;
+  customerNotes?: string;
+  cardVerifiedAmount?: number;
+  deliveryPaymentStatus?: "pending" | "verified" | "not_required";
+  deliveryPaymentReference?: string;
+  deliveryVerifiedAmount?: number;
+  events?: { id: string; kind: string; message: string; at: number }[];
+  internalNotes?: { id: string; note: string; at: number }[];
   id?: string; // Preserved source document ID or database order ID
   version?: number; // Supabase transaction conflict check
   ownerUid?: string; // Backend auth identifier for the customer account

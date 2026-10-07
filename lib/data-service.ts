@@ -70,7 +70,7 @@ export async function adminUpdateOrder(id: string, patch: Partial<Order>): Promi
 export async function confirmPayment(order: Order): Promise<void> {
   if (!usesSupabase) return (await firebase()).confirmPayment(order);
   if (!order.id) throw new Error('Order ID required.');
-  return rpc('confirm_payment', { p_id: order.id });
+  return rpc('verify_application_payment', { p_id: order.id, p_version: order.version });
 }
 export async function advanceFulfillment(id: string, expect: FulfillmentStatus, to: FulfillmentStatus): Promise<void> {
   return usesSupabase ? rpc('advance_fulfillment', { p_id: id, p_expect: expect, p_to: to }) : (await firebase()).advanceFulfillment(id, expect, to);

@@ -118,6 +118,7 @@ export default function AccountPage() {
           </button>
         </section>
         <p className="mt-5 text-center text-xs text-[--ink-faint]">
+          <Link href="/account/orders" className="block mb-3 font-bold text-[--ink] underline">My orders & saved applications</Link>
           Ordering an EdgeTap card? <Link href="/order" className="font-bold text-[--ink] underline">Prepare your card and profile</Link>.
         </p>
       </div>

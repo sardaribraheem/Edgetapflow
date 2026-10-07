@@ -14,6 +14,6 @@ console.log('PASS Supabase public config: privileged keys, missing values and cr
 const siteJS=transpileModule(await readFile('lib/site.ts','utf8'),{compilerOptions:{module:ModuleKind.ES2022}}).outputText;
 const {profileUrl,profileReturnPath}=await import(`data:text/javascript;base64,${Buffer.from(siteJS).toString('base64')}`);
 for(const name of ['.','..','../admin','bad/handle'])assert.throws(()=>profileUrl(name));
-for(const path of ['/u/.','/u/..','//outside.example','/admin'])assert.equal(profileReturnPath(path),'/');
+for(const path of ['/u/.','/u/..','//outside.example','/admin'])assert.equal(profileReturnPath(path),'/account/orders');
 assert.equal(new URL(profileUrl('real-owner')).pathname,'/u/real-owner');assert.equal(profileReturnPath('/order'),'/order');
 console.log('PASS NFC/QR handles reject browser-normalized dot paths and retain safe internal account redirects.');

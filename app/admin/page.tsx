@@ -57,7 +57,7 @@ export default function AdminPage() {
     setResetMessage("");
     try {
       await sendPasswordResetEmail(auth, email.trim().toLowerCase());
-      setResetMessage("Password reset instructions sent. Check your email.");
+      setResetMessage("If this address has an account, check your email for reset instructions.");
     } catch (err) {
       void err;
       setLoginError("Could not send password reset instructions. Please try again.");
@@ -85,9 +85,9 @@ export default function AdminPage() {
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label className="block text-sm font-semibold text-[--ink]">Email</label>
+              <label htmlFor="admin-email" className="block text-sm font-semibold text-[--ink]">Email</label>
               <input
-                type="text"
+                id="admin-email" type="email" autoComplete="username"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="mt-1 w-full rounded-xl border border-[--ink]/15 bg-white px-4 py-3 text-[--ink] focus:outline-none focus:ring-2 focus:ring-[--ink]"
@@ -95,9 +95,9 @@ export default function AdminPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-[--ink]">Password</label>
+              <label htmlFor="admin-password" className="block text-sm font-semibold text-[--ink]">Password</label>
               <input
-                type="password"
+                id="admin-password" type="password" autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"

@@ -11,6 +11,15 @@ do $$ declare t text; fn text; begin
   end if;
  end loop;
  if has_schema_privilege('anon','private','USAGE') or has_schema_privilege('authenticated','private','USAGE') then raise exception 'Private schema is exposed to app roles'; end if;
+ if to_regclass('public.order_applications') is not null then
+  if not (select relrowsecurity from pg_class where oid='public.order_applications'::regclass)
+   or has_table_privilege('anon','public.order_applications','SELECT') or has_table_privilege('authenticated','public.order_applications','INSERT,UPDATE,DELETE') then raise exception 'Unsafe application grants/RLS'; end if;
+  if has_function_privilege('authenticated','public.confirm_payment(text)','EXECUTE') then raise exception 'Legacy payment endpoint bypasses version review'; end if;
+  if exists(select 1 from public.order_applications) or exists(select 1 from private.application_events) or exists(select 1 from private.order_notes) or exists(select 1 from private.notification_outbox) then raise exception 'Application bootstrap contains operational records; inspect, never clear'; end if;
+  foreach fn in array array['verify_application_payment(text,bigint)','get_my_orders()','get_my_applications()','save_application_draft(uuid,jsonb,integer,bigint)','submit_application(uuid,bigint)','review_application(text,text,text,bigint)','reject_payment(text,text,bigint)','confirm_card_spec(text,text,text,bigint)','confirm_delivery_payment(text,text,bigint)','add_customer_message(text,text,bigint)'] loop
+   if has_function_privilege('anon','public.'||fn,'EXECUTE') or not exists(select 1 from pg_proc where oid=to_regprocedure('public.'||fn) and prosecdef and 'search_path=""'=any(proconfig)) then raise exception 'Unsafe application RPC: %',fn; end if;
+  end loop;
+ end if;
  foreach fn in array array['get_public_profile(text)','list_reviews(integer)','create_order(jsonb,uuid)','find_order_submission(uuid)','confirm_payment(text)','update_order_quote(text,bigint,bigint)','publish_order_profile(text,text,bigint)','update_profile(text,jsonb)'] loop
   if not exists(select 1 from pg_proc where oid=to_regprocedure('public.'||fn) and prosecdef and 'search_path=""'=any(proconfig)) then
    raise exception 'Missing or unsafe RPC: %',fn;

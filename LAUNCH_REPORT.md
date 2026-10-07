@@ -1,3 +1,52 @@
+## Current application workflow status — 7 October 2026
+
+**NOT READY TO LAUNCH.** The complete application workflow is implemented and verified locally on `launch-readiness`; no frontend or hosted database release was made in this task. The hosted Edgetap project remains on migrations 001–006. Migration 007 is prepared locally and NOT applied under the owner's no-deploy instruction. Firebase test-data migration stays waived; Firebase and DukanKhata are untouched.
+
+See [ORDER_WORKFLOW_REPORT.md](ORDER_WORKFLOW_REPORT.md) for history findings, schema/RLS changes, every customer/admin/payment/fulfillment step, configuration locations, exact implementation files and limitations.
+
+### LOCAL VERIFIED
+
+- Account-owned progressive cloud drafts/new-session recovery; desired handle and requested size; private manual JazzCash proof/reference; delivery and NASTP pickup; submitted staff inbox; customer corrections to the same order; independent payment/specification/application approval; public profile/QR; actual operator printing/NFC/QA and delivery/pickup completion; customer messages/history and private staff notes.
+- 24 baseline SQL/RLS + 23 application/administration checks pass. Includes owner isolation, stale review/payment denial, private notes/proofs, revoked staff, both lifecycle branches, disabled email and verified-only owner enrollment safeguards.
+- 57 browser checks pass against isolated PostgreSQL/RLS with Auth/Storage HTTP simulated: complete customer/staff workflows at 320/390/1440px, settings, refresh-safe unfinished staff notes/messages, public profiles, owner editing, confirmation-required signup and recovery guards. No production fixtures/payments/emails are created.
+- Typecheck and real public-config static export pass. Lint has zero errors and six static-image warnings. Final export contains the approved project, no fixture backend/key or privileged credential patterns.
+- 344 broader responsive/route/link/metadata/menu/error assertions pass at 320/360/390/768/1440px. Offline migration preservation regression passes; no Firebase extraction runs.
+
+### HOSTED VERIFIED
+
+- Existing 001–006 foundation only. Twenty-one real read-only API boundary checks and twelve fresh anonymous real-backend browser checks pass. No real signup/login/email/order/existing-file/payment success is inferred.
+- Read-only intended-owner inspection: `sardaribraheem277@gmail.com` is not registered/verified/enrolled yet. No user/membership was created. The owner will register/verify normally; deliberate enrollment then uses `scripts/enroll-edgetap-admin.mjs`, protected UUID staff membership, no runtime email gate.
+- Empty public profiles correctly render missing; a real published example remains required. Production website is still the previous Firebase client because release is forbidden.
+
+### TECHNICAL BLOCKERS
+
+- Separately authorize, inspect and apply only additive migration 007 to ONLY `dxyxvervvlxhwwbcbttd`; verify hosted RLS/RPCs/Storage boundaries. Do not reset or rerun the original clean installer. New frontend cannot be released against only 001–006.
+- Register/verify the real designated owner, deliberately enroll staff, and perform real hosted customer draft/proof/review/payment/correction/specification/publication and private-existing-byte tests. No fake production record will substitute for this.
+- Approve and test actual Hosting release/callbacks/routes, a public example, owner editing and physical NFC/QR on real iPhone/Android devices; verify actual manual transfer, card printing, delivery and pickup operations.
+- Current inbox/read RPCs load the newest 200 orders and latest 100 drafts. Add pagination before volume requires access to older records.
+
+### BUSINESS DECISIONS
+
+- Confirm physical card variants/dimensions, NASTP collection point/instructions/hours, delivery coverage/fee agreement/dispatch estimate, hosting/update duration and terms, cancellation/print approval/defect-handling details.
+- NASTP and delivery remain real options while details are pending. Admin → Settings manages instruction/size wording. Per-order requested size stays separate from approved size/design; staff adds actually agreed delivery fee afterward. Rs. 999 card price and JazzCash 0304 4149674 remain confirmed. No lifetime/unlimited hosting or invented courier/refund promises.
+
+### BILLING / INFRASTRUCTURE BLOCKERS
+
+- Verified SMTP provider/sender for ordinary customer confirmation/recovery. [Supabase default SMTP](https://supabase.com/docs/guides/auth/auth-smtp) is limited to project-team addresses and is not a commercial production service. Do not disable confirmation or fabricate verified users to bypass it.
+- Staff inbox and customer account messages/history are the current notification sources. Private event outbox exists locally with disabled transport; optional business-event email still needs a separately approved real worker/transport. Nothing claims an email was delivered.
+- Review hosted quotas/operations before release; no paid service/billing/payment method was enabled. Supabase ordering does not require Firebase Blaze. Rotate the privileged key previously shared in chat; it was not used/saved or embedded.
+
+### LEGAL / POLICY REVIEW
+
+Personalized cards are non-returnable/non-refundable once production starts except applicable-law requirements; actual damage/defect/EdgeTap-error/wrong-card remedies need assessment. No blanket refund or automatic remedy for customer-supplied errors. These are owner-approved business directions, not a legal-compliance certification. Review commercial/privacy/retention, cancellation and production-approval/defect details appropriately.
+
+
+---
+
+## Historical audit and earlier implementation evidence
+
+The sections below record earlier states. Their paused-checkout, missing-pickup, Firebase-backend and missing-destination statements are superseded by the current status above.
+
 > **Current hosted setup update:** Supabase foundation is configured in the confirmed Edgetap project `dxyxvervvlxhwwbcbttd`. Real public config/build and anonymous/API boundaries are verified; account/email/staff/customer/payment success paths and website release remain blocked. Firebase test-data recovery is permanently waived and Firebase is untouched. See the current hosted-state section below and [SUPABASE_MIGRATION_REPORT.md](SUPABASE_MIGRATION_REPORT.md). Earlier missing-destination/source-preservation requirements are historical and superseded.
 
 > **Current Supabase clean-start update — 7 October 2026:** Firebase test data/user/images are intentionally NOT migrated and remain untouched. Their 403/extraction/password-preservation issues are waived. Supabase is now the local default backend, with no automatic Firebase fallback. Hosted setup is pending the correct project: current CLI login exposes only inactive unlinked `DukanKhata`, not a confirmed EdgeTap destination. No remote schema/Auth/Storage changes or deployments occurred. See [SUPABASE_MIGRATION_REPORT.md](SUPABASE_MIGRATION_REPORT.md) for current evidence; source-preservation requirements below are historical and superseded.

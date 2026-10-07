@@ -26,9 +26,13 @@ export function fileToDataUrl(file: File): Promise<string> {
 }
 export async function downloadPrivateUpload(path: string): Promise<void> {
   if (!usesSupabase) return (await import('./storage')).downloadPrivateUpload(path);
+  const data = await getPrivateUploadBlob(path);
+  const url=URL.createObjectURL(data); const anchor=document.createElement('a'); anchor.href=url; anchor.download=path.split('/').at(-1)||'upload'; anchor.click(); window.setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+export async function getPrivateUploadBlob(path: string): Promise<Blob> {
   const match=/^(payment-receipts|order-artwork|migration-quarantine)\/(.+)$/.exec(path);
   if (!match || match[2].includes('..')) throw new Error('Invalid private upload path.');
   const { data, error } = await getSupabase().storage.from(match[1]).download(match[2]);
-  if(error || !data) throw new Error('Download unavailable. Check your staff access.');
-  const url=URL.createObjectURL(data); const anchor=document.createElement('a'); anchor.href=url; anchor.download=path.split('/').at(-1)||'upload'; anchor.click(); window.setTimeout(()=>URL.revokeObjectURL(url),1000);
+  if(error || !data) throw new Error('Download unavailable. Check your account access.');
+  return data;
 }

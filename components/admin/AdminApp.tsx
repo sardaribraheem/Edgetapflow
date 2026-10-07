@@ -9,6 +9,7 @@ import { Order } from "@/lib/data/order";
 import { Review } from "@/lib/models";
 import OrdersView from "./OrdersView";
 import ProfilesView from "./ProfilesView";
+import OrderSettingsPanel from './OrderSettings';
 
 export type AdminView = "dashboard" | "orders" | "clients" | "profiles" | "reviews" | "settings";
 
@@ -36,6 +37,8 @@ export default function AdminApp({ user, onLogout }: { user: User; onLogout: () 
 
   const failData = (e: unknown) => {
     console.error("[EdgeTap] Admin data load failed:", e);
+    setOrders([]);
+    setReviews([]);
     setLoadError(
       e instanceof Error ? e.message : "Couldn't load service data. Verify configuration and staff access."
     );
@@ -71,6 +74,15 @@ export default function AdminApp({ user, onLogout }: { user: User; onLogout: () 
     };
   }, []);
 
+  useEffect(() => {
+    const timer = setInterval(() => { if (document.visibilityState === 'visible') void refresh(); }, 20000);
+    const focus = () => { void refresh(); };
+    window.addEventListener('focus', focus);
+    return () => { clearInterval(timer); window.removeEventListener('focus', focus); };
+    // refresh uses state setters and the same account-scoped service calls.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="min-h-screen bg-[--cream]">
       <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 lg:flex-row">
@@ -101,11 +113,11 @@ export default function AdminApp({ user, onLogout }: { user: User; onLogout: () 
                 >
                   {v.label}
                   {v.id === "orders" && orders.filter((o) =>
-                    ["new", "payment_pending", "paid", "cod_pending_confirmation"].includes(o.fulfillment.status)
+                    ["submitted", "under_review", "changes_required"].includes(o.applicationStatus || '')
                   ).length > 0 && (
                     <span className="ml-2 rounded-full bg-[--coral] px-1.5 text-[10px] font-bold text-white">
                       {orders.filter((o) =>
-                        ["new", "payment_pending", "paid", "cod_pending_confirmation"].includes(o.fulfillment.status)
+                        ["submitted", "under_review", "changes_required"].includes(o.applicationStatus || '')
                       ).length}
                     </span>
                   )}
@@ -329,6 +341,7 @@ function SettingsView({ user }: { user: User }) {
   return (
     <div>
       <h1 className="font-display text-2xl font-bold text-[--ink]">Settings</h1>
+      <OrderSettingsPanel />
       <div className="card-paper mt-6 space-y-4 p-6">
         <div className="flex items-center justify-between">
           <div>

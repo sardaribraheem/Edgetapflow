@@ -2,7 +2,7 @@
 
 The owner approved a clean production data layer. Existing Firebase Firestore records, the Auth user and four legacy images are TEST DATA and are intentionally NOT imported. Leave Firebase untouched; do not retry extraction, recover files, migrate passwords, enable Blaze or delete anything. Historical source inventory remains in `SUPABASE_MIGRATION_AUDIT.md`.
 
-The application defaults to Supabase. The hosted foundation is now initialized in the ONLY approved project, `dxyxvervvlxhwwbcbttd` (Edgetap, region `ap-southeast-2`). Six migrations, RLS/RPCs and buckets are applied; Auth callbacks/security are configured. Anonymous/API boundaries pass; real account/email/customer/staff success workflows remain pending. DukanKhata is untouched. Read [../SUPABASE_MIGRATION_REPORT.md](../SUPABASE_MIGRATION_REPORT.md) for verified evidence and remaining blockers. Do not use an unrelated project by inference.
+The application defaults to Supabase. The hosted foundation is now initialized in the ONLY approved project, `dxyxvervvlxhwwbcbttd` (Edgetap, region `ap-southeast-2`). Migrations 001–006, RLS/RPCs and buckets are applied; application workflow migration 007 is prepared locally and unapplied; Auth callbacks/security are configured. Anonymous/API boundaries pass; real account/email/customer/staff success workflows remain pending. DukanKhata is untouched. Read [../SUPABASE_MIGRATION_REPORT.md](../SUPABASE_MIGRATION_REPORT.md) for verified evidence and remaining blockers. Do not use an unrelated project by inference.
 
 ## Local verification
 
@@ -20,7 +20,7 @@ Browser integration uses a deliberately isolated fixture export:
 ```sh
 NEXT_PUBLIC_SUPABASE_URL=https://edgetap-migration-test.supabase.co \
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_edgetap_local_test_only \
-NEXT_PUBLIC_ONLINE_CHECKOUT_ENABLED=true npm run build -- --webpack
+npm run build -- --webpack
 PORT=4173 npm run serve:qa
 # Separate terminal:
 QA_BASE_URL=http://127.0.0.1:4173 npm run test:supabase:browser
@@ -52,7 +52,7 @@ The migrations are individually transactional and deliberately fail on conflicti
 
 ## Schema / Storage / RLS
 
-Apply the six existing migrations in order:
+The first six migrations are already hosted. Migration 007 is a locally tested forward change and awaits separately authorized database release:
 
 1. `202610070001_core.sql`: relational customers/profiles/ordered links/handles/orders/contact+draft snapshots/payments/fulfillment/reviews, private ownership/staff/provenance, indexes/constraints and SELECT RLS.
 2. `202610070002_rpc.sql`: narrow read/transactional-write RPCs, explicit execution grants, server pricing and lifecycle gates.
@@ -61,7 +61,9 @@ Apply the six existing migrations in order:
 5. `202610070005_manual_payment_quote.sql`: quote required before staff confirmation; null/stale/verified-total changes rejected.
 6. `202610070006_profile_handle_paths.sql`: additive constraints and availability guard reject browser-normalized dot handles so NFC/QR destinations remain valid.
 
-There is no production seed. The `ibraheem` reservation is configuration only, with no profile/customer attached. New customers are created when a real authenticated user submits an order; paid orders are published by staff. Signup itself does not create fabricated orders/profiles. `private` remains outside the exposed Data API schemas, with no app usage grants.
+7. `202610070007_application_workflow.sql` (**LOCAL ONLY**): private progressive drafts, separate application review and requested/approved card specification, independently verified card/delivery amounts, staff/customer notes/history, disabled notification outbox, NASTP pickup lifecycle, version-aware payment verification, staff-controlled instructions. Adds five RLS tables and order/payment columns; preserves existing rows and IDs. Legacy id-only payment RPC execution is revoked so stale receipt review cannot bypass the new version check.
+
+There is no production seed. The `ibraheem` reservation is configuration only, with no profile/customer attached. With migration 007, a customer record is created when the real user first saves a private draft; paid orders are published by staff. Signup itself does not create fabricated orders/profiles. `private` remains outside the exposed Data API schemas, with no app usage grants.
 
 Public profile access is exact-handle/active-only through `get_public_profile`; anonymous table enumeration/private orders are denied. Owner display/link edits use an authenticated bounded RPC. Staff authorization comes only from active rows in protected `private.admin_members`, not user metadata/email domains. Payment, quote, publication and fulfillment are separate staff RPCs; customer payloads cannot choose price/owner/payment status.
 
@@ -90,7 +92,7 @@ Required production Auth settings:
 - Verified custom SMTP/sender and suitable rate limits. [Default Supabase SMTP](https://supabase.com/docs/guides/auth/auth-smtp) is restricted to project-team addresses; it is not an operational commercial email service. No sender/provider is assumed or purchased here.
 - Confirmation/recovery templates using the generated confirmation URL, with real approved mailbox/callback verification. The SPA handles Supabase URL sessions; no server callback route is required for this client-only Auth integration. See [redirect configuration](https://supabase.com/docs/guides/auth/redirect-urls).
 
-No Firebase user/password/session transfers. New production users register and confirm normally. The account page now offers independent signup while checkout is paused; signup itself creates no order/profile or staff membership. A signup response without a session cannot upload or submit. Recovery requires a PASSWORD_RECOVERY session event and signs out after successful password update.
+No Firebase user/password/session transfers. New production users register and confirm normally. The account page offers independent signup; signup itself creates no order/profile or staff membership. A signup response without a session cannot upload or submit. Recovery requires a PASSWORD_RECOVERY session event and signs out after successful password update.
 
 A real staff member must register and confirm first. An authorized operator must verify their exact Auth UUID, then deliberately insert `private.admin_members(user_id,active,provenance)` for that user. No automatic administrator exists. Use truthful provenance identifying owner authorization. Never select the old test account, auto-promote the first signup or rely on `raw_user_meta_data`.
 
@@ -103,14 +105,33 @@ NEXT_PUBLIC_DATA_BACKEND=supabase
 NEXT_PUBLIC_SUPABASE_URL=https://dxyxvervvlxhwwbcbttd.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<public key only>
 NEXT_PUBLIC_APP_URL=https://edgetapflow.web.app
-NEXT_PUBLIC_ONLINE_CHECKOUT_ENABLED=false
 ```
 
 The static export embeds these public values. Never use a secret/service-role key or database password. Missing configuration stops the build. Explicit `NEXT_PUBLIC_DATA_BACKEND=firebase` remains available for legacy development; there is no implicit fallback.
 
-Manual JazzCash is the sole approved payment method. Before paying, agree delivery availability/fee/dispatch, digital-hosting terms and full cost on WhatsApp. Staff enter the agreed delivery fee, review the actual transfer against the complete total, confirm payment, publish the profile, then perform physical printing/NFC/QR/QA/shipping steps. No automatic gateway exists.
+Manual JazzCash is the sole approved payment method: 0304 4149674. Confirm the recipient, card subtotal and hosting terms before transfer. The initial card payment excludes delivery. Staff review private proof, verify the actual card transfer, confirm the card specification and accept the application. Delivery fee and its payment are agreed/verified afterward, separately. Dispatch is blocked until the agreed delivery fee is settled (or explicitly zero). Pickup has no delivery fee. No payment gateway or automatic verification exists.
 
-Lost-response order retry uses the original request UUID and fingerprint. This tab stores only account/request IDs. Refresh checks the account-bound receipt; an ambiguous result blocks another submission until recheck/support resolves it. Closing the tab or switching devices requires operator/customer reconciliation. The owner must approve real hosted ordering/payment checks before enabling the checkout flag.
+The legacy instant-checkout flag is no longer read by this application wizard. The new frontend requires migration 007 and must not be released against the currently hosted 001–006 schema. Saved drafts live in RLS-protected Postgres; only a draft ID appears in the URL, with no application PII in browser draft storage. Save errors warn against leaving; version checks prevent conflicting overwrite. Lost submission responses reconcile the same owned draft/order and cannot duplicate payment/orders.
+
+### First staff account
+
+The intended first administrator is **sardaribraheem277@gmail.com**. The user will register/verify normally; no fabricated Auth user, invite or forced confirmation is created. The account was not yet registered at read-only inspection. After normal verification, an authorized operator can use:
+
+```sh
+node scripts/enroll-edgetap-admin.mjs --inspect
+# Deliberate membership write only after reviewing the verified real account:
+node scripts/enroll-edgetap-admin.mjs --apply
+```
+
+The helper refuses another project, missing/unverified/multiple accounts and revoked membership. Email identifies the owner-approved bootstrap account; runtime authorization checks protected UUID membership only. It is not called by signup or the website. No membership was applied in this task.
+
+### Business configuration and email
+
+After migration 007 and staff enrollment, use **Admin → Settings → Order & fulfillment instructions** for NASTP instructions/times, delivery coverage/dispatch wording, hosting/update wording and size option labels. Customers may request a custom size; every order retains requested specification independently of staff approval. Admin order details separately confirm the approved size/design and an actually agreed delivery fee. Card price Rs. 999 and the approved JazzCash number are returned by SQL configuration; changing these requires a reviewed pricing/payment change.
+
+SMTP is not configured. The staff inbox and customer account history refresh every 20 seconds/on focus; customer-visible decisions are separate from internal notes. Each application event creates a **disabled** notification-outbox record. No email sender/worker is currently running and no email delivery is claimed.
+
+Configure future Auth SMTP in the approved project's **Authentication → Email/SMTP settings**, with verified host, port, username, password, sender address/name. Do not put these in public environment variables or chat. If a future private worker/local config uses an ignored, mode-0600 `.env.notifications.local`, the proposed names are `EDGETAP_SMTP_HOST`, `EDGETAP_SMTP_PORT`, `EDGETAP_SMTP_USER`, `EDGETAP_SMTP_PASSWORD`, `EDGETAP_SMTP_FROM`, `EDGETAP_SMTP_SENDER_NAME` and `EDGETAP_TRANSACTIONAL_EMAIL_ENABLED=false`. **These names are a future worker configuration contract, not an implemented sender**. Verified SMTP alone does not send application events; a separately approved private, idempotent worker must claim outbox records and record real delivery results. Auth SMTP and business-event email are distinct.
 
 ## Hosted verification and future release
 
@@ -137,7 +158,7 @@ PORT=4173 npm run serve:qa
 QA_BASE_URL=http://127.0.0.1:4173 npm run test:supabase:hosted-browser
 ```
 
-Ten anonymous checks pass against the actual EdgeTap backend and real-config local export. Empty profiles correctly render missing; successful public profile/account/order/payment/Storage flows are not inferred. Production callbacks currently point to the old deployed Firebase client; full new confirmation/recovery UX needs separately approved release/preview or a reviewed testing callback arrangement. No email was sent or fictitious user created. Rotate the secret key shared in chat; it is not used by the app or saved locally.
+Twelve anonymous checks pass against the actual EdgeTap backend and real-config local export. Empty profiles correctly render missing; successful public profile/account/order/payment/Storage flows are not inferred. Production callbacks currently point to the old deployed Firebase client; full new confirmation/recovery UX needs separately approved release/preview or a reviewed testing callback arrangement. No email was sent or fictitious user created. Rotate the secret key shared in chat; it is not used by the app or saved locally.
 
 Keep Firebase Hosting/NFC URLs. Do not deploy/push until separately approved. Verify schema, Auth emails/sessions, Storage bytes, private denials, real payment handling and all customer acceptance checks first. Resolve delivery/hosting policies and legal/privacy review. Rebuild with real public configuration and test Hosting rewrites/headers on an approved preview before release.
 

@@ -32,6 +32,8 @@ try{
  await page.getByRole('button',{name:'Create a new account',exact:true}).click();await page.getByRole('heading',{name:'Create your account',exact:true}).waitFor();assert.equal(await page.getByLabel('Password',{exact:true}).getAttribute('minlength'),'8');assert.equal(await page.getByRole('button',{name:'Create account',exact:true}).count(),1);checks++;
  await page.goto(base+'/admin');assert(await page.getByRole('button',{name:/Sign in/i}).isVisible());assert.equal(await page.getByRole('heading',{name:'Orders',exact:true}).count(),0);checks++;
  await page.goto(base+'/account/recovery');assert.equal(await page.getByLabel('New password').count(),0);checks++;
+ await page.goto(base+'/order');await page.getByRole('heading',{name:'Start your EdgeTap application',exact:true}).waitFor();assert.equal(await page.getByLabel('Payment receipt screenshot').count(),0);checks++;
+ await page.goto(base+'/account/orders');await page.getByRole('link',{name:'Sign in to view your private orders',exact:true}).waitFor();assert.equal(await page.getByRole('button',{name:'Submit application',exact:true}).count(),0);checks++;
  await page.goto(base+'/privacy');assert((await page.locator('body').innerText()).includes('EdgeTap uses Supabase'));checks++;
  // Verify actual browser-to-hosted API/CORS; no mocked RPC or fallback profile.
  const result=await page.evaluate(async({url,key})=>{
