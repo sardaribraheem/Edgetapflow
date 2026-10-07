@@ -1,6 +1,6 @@
-export const DATA_BACKEND = process.env.NEXT_PUBLIC_DATA_BACKEND || "firebase";
+export const DATA_BACKEND = process.env.NEXT_PUBLIC_DATA_BACKEND || "supabase";
 if (!["firebase", "supabase"].includes(DATA_BACKEND)) throw new Error("Unsupported data backend.");
 
-// Explicit cutover; preserve the Firebase installation until destination/data
-// verification is complete. No implicit switch based on available credentials.
+// Production starts clean in Supabase. Firebase remains an explicitly selected
+// legacy option; missing Supabase configuration must never fall back to Firebase.
 export const usesSupabase = DATA_BACKEND === "supabase";

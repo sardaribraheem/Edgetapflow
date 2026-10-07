@@ -1,6 +1,8 @@
-# EdgeTap Supabase implementation
+# EdgeTap clean Supabase setup
 
-The migrations and adapters are prepared locally. Firebase is retained; there is no automatic deployment, billing activation, export or database application. Read `SUPABASE_MIGRATION_REPORT.md` and `SUPABASE_MIGRATION_AUDIT.md` before operating on customer data.
+The owner approved a clean production data layer. Existing Firebase Firestore records, the Auth user and four legacy images are TEST DATA and are intentionally NOT imported. Leave Firebase untouched; do not retry extraction, recover files, migrate passwords, enable Blaze or delete anything. Historical source inventory remains in `SUPABASE_MIGRATION_AUDIT.md`.
+
+The application defaults to Supabase. Hosted setup is incomplete: the current CLI login exposes only the inactive unlinked DukanKhata project, not a confirmed EdgeTap destination. Read [../SUPABASE_MIGRATION_REPORT.md](../SUPABASE_MIGRATION_REPORT.md) for verified evidence and remaining blockers. Do not use an unrelated project by inference.
 
 ## Local verification
 
@@ -11,82 +13,110 @@ npm run test:supabase
 npm run test:migration
 ```
 
-`test:supabase` runs actual PostgreSQL/RLS/RPC logic in PGlite with minimal local Auth/Storage schema stubs. It does not run hosted Supabase. Docker is absent in the current workspace, so full local Supabase service testing has not been substituted with a claim of hosted verification.
+SQL/RLS tests run actual PostgreSQL in PGlite with minimal Auth/Storage schemas. Fixtures are isolated to that test process; no hosted records, Auth users or files are created. The retained offline migration regression does not extract or import Firebase data.
 
-The browser integration suite requires a local static export built with deliberately fake test configuration:
+Browser integration uses a deliberately isolated fixture export:
 
 ```sh
-NEXT_PUBLIC_DATA_BACKEND=supabase \
 NEXT_PUBLIC_SUPABASE_URL=https://edgetap-migration-test.supabase.co \
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_edgetap_local_test_only \
 NEXT_PUBLIC_ONLINE_CHECKOUT_ENABLED=true npm run build -- --webpack
 PORT=4173 npm run serve:qa
-# In a separate terminal:
+# Separate terminal:
 QA_BASE_URL=http://127.0.0.1:4173 npm run test:supabase:browser
 ```
 
-These values are test fixtures. Browser Auth/Storage endpoints are intercepted, and RPCs execute against the local SQL test engine. Do not publish this export. Rebuild with existing/default configuration after testing. New SQL does not automatically fix the current live Firebase profile failure.
+Auth/Storage HTTP are simulated; RPCs run against real local SQL/RLS. A passing local suite is not proof of hosted email/JWT/byte-access/payment functionality. Never publish the fixture export. Move its generated `out/` to a protected temporary QA directory when finished, then build with actual verified public configuration before any future approved release.
 
-## Backend selection
+## Select and inspect the destination
 
-`NEXT_PUBLIC_DATA_BACKEND` defaults to `firebase`; explicitly select `supabase` only for a reviewed build. Supabase mode requires `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. The client rejects privileged secret/service-role keys. Static exports bake these values at build time. Operator credentials, Auth exports/hash parameters and database passwords must remain outside the repository/browser environment.
+The existing Supabase CLI login supplies operator account access. Do not pass tokens/passwords on command lines or print `projects api-keys` unfiltered; that response can contain privileged keys. Keep credentials outside Git/browser configuration.
 
-`NEXT_PUBLIC_ONLINE_CHECKOUT_ENABLED` remains false until real Auth, uploads, persisted pending orders and manual quote/payment/fulfillment checks pass. The supported method is manual JazzCash; no automatic gateway verification exists. Changing backends cannot decide delivery or profile-hosting terms.
-
-## Destination schema and permissions
-
-Apply the three migration files in order only to the explicitly selected empty staging destination, using an authorized operator connection. They create tables/functions/policies and Storage buckets; they intentionally fail on conflicting existing objects. Do not run a database reset, destructive diff, or blindly push into an existing project. Restrict the exposed Data API schema to `public`; never expose `private`.
-
-- `202610070001_core.sql`: relational tables, private identity/staff/source mappings, constraints/indexes, SELECT RLS and revoked direct app writes.
-- `202610070002_rpc.sql`: controlled reads and transactional writes; execution grants are explicit.
-- `202610070003_storage.sql`: public avatars, private artwork/receipts/quarantine, upload/read policies. No app overwrite/delete.
-
-Staff access comes from trusted `private.admin_members`, never `user_metadata` or guessed email domains. Ordinary staff use normal Auth sessions. Membership can be revoked immediately in the database. Verify staff mapping against the original `config/admin_uids`; the only discovered Auth account is not automatically an administrator.
-
-Public profile lookup returns active display data/links for one handle, omitting owner/customer/payment information. Ownership is checked by an authenticated boolean RPC for the editor. Anonymous profile-table enumeration is denied. Reviews are projected through an RPC that omits internal author/customer identifiers. New order/quote/payment/publication/fulfillment writes use dedicated RPCs; customer payloads cannot set price, owner, payment state or fulfillment state.
-
-## Preserve sources and use the official extraction tools
-
-The [official Firestore guide](https://supabase.com/docs/guides/platform/migrating-to-supabase/firestore-data) supplies `firestore2json` and hooks. Use a reviewed, pinned checkout of its linked `supabase-community/firebase-to-supabase` repository in a protected operator workspace outside this Git repository. Use extraction only; do not run its generic table creator/importer against the application schema. Preserve `firestore_id` and original data. Keep a separate lossless/raw backup where the exporter converts Firestore types; original timestamps/references/bytes and unknown fields must remain recoverable. Inventory subcollections and unknown collections explicitly; this app normalizer stops on unrecognized collections rather than silently dropping them. Export both database IDs separately. The current `(default)` access is HTTP 403, so extraction must not be reported complete or replaced with the empty named `default` export.
-
-Review of the linked [Firestore exporter source](https://github.com/supabase-community/firebase-to-supabase/blob/main/firestore/firestore2json.js) found caught read errors and a default-limit stopping condition that can make an incomplete extraction look finished. Pin/review the tool, make read failures fatal and independently compare exported counts. Also reject source fields that collide with exporter ID fields; the true document path must be preserved. Do not treat an empty file or successful exit as evidence that billing-blocked data is empty.
-
-[Auth migration](https://supabase.com/docs/guides/platform/migrating-to-supabase/firebase-auth) and [Storage migration](https://supabase.com/docs/guides/platform/migrating-to-supabase/firebase-storage) are separate operations. Review the official importer against the current Auth schema before use. Preserve Firebase UIDs, disabled/verification/provider state and export metadata; map to actual destination Auth UUIDs. Do not import hash material into exposed tables, invent passwords, mark unverified emails verified, automatically send recovery mail, or assume imported Firebase hashes work with Supabase password login. Review the required middleware/reset strategy first. Do not create service-account keys merely because an upstream example uses a key file; use already approved operator credentials where supported.
-
-The reviewed [Auth importer source](https://github.com/supabase-community/firebase-to-supabase/blob/main/auth/import_users.js) generates new UUIDs, leaves passwords empty, embeds the exported user in client-visible metadata and logs full SQL on errors. **Do not run it unchanged on production identities.** Hash/salt/source-export material belongs only in private operator storage. Use the official extractor where suitable, then a reviewed sanitized import with verified mapping and recovery/provider/disabled-state handling. `scripts/migration/prepare-auth.mjs` creates an offline sanitized account plan (no passwords or raw source metadata), without creating accounts or sending email:
+First confirm the exact active EdgeTap project reference. The prepared inspection command is:
 
 ```sh
-node scripts/migration/prepare-auth.mjs /protected/operator/users.json /protected/operator/auth-plan.json
+node scripts/setup-clean-supabase.mjs <confirmed-project-ref> --inspect
 ```
 
-Storage must be downloaded to protected local files and uploaded to the intended visibility buckets, with no source deletion/upsert. Preserve source object path/generation/MIME/metadata and hashes. Download the destination object again to verify identical bytes. Reconcile legacy download-token references privately; no token URL should be printed into logs or used for new receipts/artwork. The four inaccessible `avatarInbox` objects require association review and private quarantine first. Public avatar bytes are public even when their profile is hidden; this deliberately preserves current new-avatar behavior.
+It uses `supabase projects list --output json` internally to confirm access/active status, then `supabase db query --project-ref <ref> --file supabase/inspect-target.sql`. Output is schema/grant/policy/bucket metadata and aggregate counts, not customer records or credentials. It never resumes or creates projects.
 
-## Offline import preparation
-
-Protected input directory:
-
-- `source-manifest.json`: `{ "project": "edgetapflow", "database": "(default)", "complete": true, "capturedAt": "<actual snapshot time>", "authMapFile": "auth-map.json", "storageBucket": "edgetapflow.firebasestorage.app", "supabaseUrl": "<selected URL>", "collections": [{ "collection": "profiles", "file": "profiles.json", "expectedCount": <verified count> }, ...] }`. Include all six app collections (`profiles`, `orders`, `handles`, `profilesById`, `reviews`, `config`), including verified empty collections. Unknown counts are blockers, not zero. Do not put credentials in this manifest.
-- Each collection JSON is an array of source objects with exact original `firestore_id`. Original/typed backup is retained separately if extraction transforms types. Timestamp support includes epoch milliseconds, date strings and seconds/nanoseconds objects; raw original JSON is archived unchanged.
-- `auth-map.json`: array of `{ "firebaseUid": "<source UID>", "supabaseUid": "<actual destination UUID>", "verified": true }`. Derive from verified imported users; do not generate guessed mappings.
-- Optional `assetMapFile` names a verified JSON map with `sourceBucket`, `sourcePath`, `sourceGeneration`, `targetBucket`, `targetPath`, `bytes`, `sha256`, `mimeType`, `visibility` (`public`, `private`, `quarantine`), optional verified `firebaseUid`, and `verified: true`. Include every source object; original/destination download paths are used for offline byte verification. Visibility/association review is separate from matching checksums.
+To apply the authorized clean setup after reviewing inspection:
 
 ```sh
-node scripts/migration/verify-assets.mjs /protected/operator/assets.json /protected/operator/verified-assets.json
-node scripts/migration/prepare.mjs /protected/operator/export /protected/operator/prepared.sql
+node scripts/setup-clean-supabase.mjs <confirmed-project-ref> --apply
 ```
 
-Both scripts are offline and refuse output overwrite. Sensitive artifacts must be outside the repository, with directory mode 0700 and files 0600. Inspect the prepared transaction privately; test on the staging copy before an authorized import using `psql --set ON_ERROR_STOP=on --file <protected SQL>`. That operator command is deliberately not executed here. Existing Auth users and verified Storage objects must already exist; foreign keys and object assertions prevent a missing-target import. The SQL refuses populated destinations and does not drop/delete tables or Firebase data. The precreated empty founder reservation is the sole controlled reservation association update.
+Exact sequence: inspect; `require-clean-target.sql`; `supabase link --project-ref <ref>`; `supabase db push --dry-run`; `supabase db push`; `verify-clean-bootstrap.sql`. The preflight refuses existing custom application tables/views/functions, a private schema or any existing Auth users/buckets/objects. It does not clear an existing project to make it empty. Existing unrelated policies/objects need review too. No reset, source import, seed, role overwrite, paid plan or Firebase command is run.
 
-Money converts rupees to integer paisa; unknown delivery fees/totals stay null. Legacy plans/templates/pickup/payment methods/states remain historical facts. Original order/review IDs and valid stable profile UUIDs remain unchanged; non-UUID/missing profile IDs use a deterministic mapped UUID with provenance. Order contact/draft snapshots remain distinct from editable live profiles. Disagreeing mappings, identity gaps, duplicate order numbers and unresolved file visibility stop preparation. Historical missing profile timestamps remain null; they are not fabricated as migration-time customer activity. Missing reservation records receive no invented historical timestamp.
+The migrations are individually transactional and deliberately fail on conflicting objects. A later-step failure may leave earlier migrations applied. Inspect migration history and recover forward; do not reset, blindly rerun the clean installer or repair history to pretend SQL succeeded. If CLI link/push requires database/operator credentials unavailable locally, provide them through a protected operator environment, not chat or `NEXT_PUBLIC_*`. The existing login supports Management API SQL inspection; it does not guarantee every CLI database command is authorized.
 
-## Finish and cut over
+## Schema / Storage / RLS
 
-1. Obtain restored source read access or a verified existing backup; reconcile unknown counts and all four objects.
-2. Select the destination and review capacity/region/Auth recovery. Configure approved operator access without browser secrets.
-3. Apply additive schema to the empty staging target; migrate verified Auth identities and bytes independently.
-4. Prepare/validate the relational import; reconcile counts, original IDs, ownership, file hashes, monetary totals, histories and provenance.
-5. Test actual hosted anonymous access/private denials, email confirmation/recovery, owner edits/logout, staff permissions, real authenticated pending submission/manual verification and QR/NFC URLs.
-6. Resolve delivery/hosting decisions and personalized-card/privacy review. Keep online checkout paused until the actual supported process works.
-7. Reconcile a final consistent snapshot/delta and rollback/write-freeze plan. Obtain separate production deployment approval; retain Firebase and `https://edgetapflow.web.app`.
+Apply the five existing migrations in order:
 
-No production migration, notification, write freeze, deployment or Firebase decommissioning is implied by the local tests.
+1. `202610070001_core.sql`: relational customers/profiles/ordered links/handles/orders/contact+draft snapshots/payments/fulfillment/reviews, private ownership/staff/provenance, indexes/constraints and SELECT RLS.
+2. `202610070002_rpc.sql`: narrow read/transactional-write RPCs, explicit execution grants, server pricing and lifecycle gates.
+3. `202610070003_storage.sql`: bucket configuration and account-owned upload/read policies.
+4. `202610070004_submission_recovery.sql`: exact account/request receipt lookup for interrupted submissions.
+5. `202610070005_manual_payment_quote.sql`: quote required before staff confirmation; null/stale/verified-total changes rejected.
+
+There is no production seed. The `ibraheem` reservation is configuration only, with no profile/customer attached. New customers are created when a real authenticated user submits an order; paid orders are published by staff. Signup itself does not create fabricated orders/profiles. `private` remains outside the exposed Data API schemas, with no app usage grants.
+
+Public profile access is exact-handle/active-only through `get_public_profile`; anonymous table enumeration/private orders are denied. Owner display/link edits use an authenticated bounded RPC. Staff authorization comes only from active rows in protected `private.admin_members`, not user metadata/email domains. Payment, quote, publication and fulfillment are separate staff RPCs; customer payloads cannot choose price/owner/payment status.
+
+Buckets contain no placeholder files:
+
+| Bucket | Visibility | Limit | Access |
+|---|---|---|---|
+| avatars | Public bytes | 5 MB | Owner upload; owner/staff metadata |
+| order-artwork | Private | 25 MB | Owner upload/read; staff read |
+| payment-receipts | Private | 8 MB | Owner upload/read; staff read |
+| migration-quarantine | Private | 25 MB | Operator upload; staff read; empty in clean setup |
+
+JPEG/PNG/WebP only, UUID account paths, no app update/delete/upsert. Receipts/artwork use authenticated downloads; do not create permanent public bearer links. Avatar bytes are public even when a profile is draft/hidden. Test actual hosted byte authorization separately from SQL metadata policies.
+
+## Auth/dashboard configuration
+
+`supabase/config.toml` describes LOCAL development. It exposes `public`, enables email signup/confirmation, requires eight-character passwords, disables anonymous sign-in and automatic seeds, and allowlists explicit callback paths. Do not blindly push local development settings to a production project.
+
+Production Auth must use:
+
+- Site URL `https://edgetapflow.web.app`.
+- Redirect allowlist `https://edgetapflow.web.app/account` and `https://edgetapflow.web.app/account/recovery`.
+- Email provider/signup enabled; email confirmation enabled; minimum password eight; anonymous sign-in disabled.
+- Verified custom SMTP/sender and suitable rate limits. [Default Supabase SMTP](https://supabase.com/docs/guides/auth/auth-smtp) is restricted to project-team addresses; it is not an operational commercial email service. No sender/provider is assumed or purchased here.
+- Confirmation/recovery templates using the generated confirmation URL, with real approved mailbox/callback verification. The SPA handles Supabase URL sessions; no server callback route is required for this client-only Auth integration. See [redirect configuration](https://supabase.com/docs/guides/auth/redirect-urls).
+
+No Firebase user/password/session transfers. New production users register and confirm normally. A signup response without a session cannot upload or submit. Recovery requires a PASSWORD_RECOVERY session event and signs out after successful password update.
+
+A real staff member must register and confirm first. An authorized operator must verify their exact Auth UUID, then deliberately insert `private.admin_members(user_id,active,provenance)` for that user. No automatic administrator exists. Use truthful provenance identifying owner authorization. Never select the old test account, auto-promote the first signup or rely on `raw_user_meta_data`.
+
+## Public configuration / ordering
+
+Provide locally:
+
+```dotenv
+NEXT_PUBLIC_DATA_BACKEND=supabase
+NEXT_PUBLIC_SUPABASE_URL=<real HTTPS project URL>
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<public key only>
+NEXT_PUBLIC_APP_URL=https://edgetapflow.web.app
+NEXT_PUBLIC_ONLINE_CHECKOUT_ENABLED=false
+```
+
+The static export embeds these public values. Never use a secret/service-role key or database password. Missing configuration stops the build. Explicit `NEXT_PUBLIC_DATA_BACKEND=firebase` remains available for legacy development; there is no implicit fallback.
+
+Manual JazzCash is the sole approved payment method. Before paying, agree delivery availability/fee/dispatch, digital-hosting terms and full cost on WhatsApp. Staff enter the agreed delivery fee, review the actual transfer against the complete total, confirm payment, publish the profile, then perform physical printing/NFC/QR/QA/shipping steps. No automatic gateway exists.
+
+Lost-response order retry uses the original request UUID and fingerprint. This tab stores only account/request IDs. Refresh checks the account-bound receipt; an ambiguous result blocks another submission until recheck/support resolves it. Closing the tab or switching devices requires operator/customer reconciliation. The owner must approve real hosted ordering/payment checks before enabling the checkout flag.
+
+## Hosted verification and future release
+
+```sh
+npm run check:supabase:hosted
+```
+
+This command is read-only with the public key. It verifies RPC availability, absent-profile null, anonymous table/staff denials and absent-object public URL failures. It creates no user/profile/order/file and cannot prove access to an existing private file is denied. Missing config fails before requests. A verified real owner/profile or separately identified development destination is needed for real profile/signup/order/storage/manual-payment/QR tests; do not seed fictitious production data to claim readiness.
+
+Keep Firebase Hosting/NFC URLs. Do not deploy/push until separately approved. Verify schema, Auth emails/sessions, Storage bytes, private denials, real payment handling and all customer acceptance checks first. Resolve delivery/hosting policies and legal/privacy review. Rebuild with real public configuration and test Hosting rewrites/headers on an approved preview before release.
+
+Firebase SDK helpers/package/rules/emulator/source-inventory tooling may eventually be removed after successful cutover and an explicit rollback decision. Firebase Hosting/domain/CLI are still needed while `.web.app` serves EdgeTap. Nothing is deleted or disabled now; old Firebase test data is not a dependency of the clean Supabase setup.

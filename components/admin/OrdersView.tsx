@@ -11,7 +11,9 @@ import {
   getOrders,
   usernameAvailable,
   suggestUsername,
+  adminUpdateOrder,
 } from "@/lib/data-service";
+import { usesSupabase } from "@/lib/backend";
 import { qrDataUrl } from "@/lib/qr";
 import { downloadPrivateUpload } from "@/lib/upload-service";
 import { profileUrl } from "@/lib/site";
@@ -98,6 +100,19 @@ export default function OrdersView({ orders, onChanged }: Props) {
     } finally {
       setBusy(null);
     }
+  };
+
+  const quote = async (o: Order, fee: number) => {
+    if (!o.id || o.version == null) return;
+    setBusy(o.id); setError("");
+    try {
+      await adminUpdateOrder(o.id, { deliveryFee: fee, version: o.version });
+      setToast(`${o.orderNumber} agreed quote saved`);
+      onChanged();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Could not save quote.");
+      onChanged();
+    } finally { setBusy(null); }
   };
 
   return (
@@ -194,10 +209,12 @@ export default function OrdersView({ orders, onChanged }: Props) {
         <div className="lg:col-span-3">
           {selected ? (
             <OrderDetail
+              key={selected.id}
               order={selected}
               busy={busy === selected.id}
               onAdvance={(next) => advance(selected, next)}
               onConfirmPayment={() => confirm(selected)}
+              onQuote={(fee) => quote(selected, fee)}
               onCreateProfile={() => setCreatingProfileFor(selected)}
             />
           ) : (
@@ -264,13 +281,16 @@ function OrderDetail({
   onAdvance,
   onCreateProfile,
   onConfirmPayment,
+  onQuote,
 }: {
   order: Order;
   busy: boolean;
   onAdvance: (next: FulfillmentStatus) => void;
   onCreateProfile: () => void;
   onConfirmPayment: () => void;
+  onQuote: (fee: number) => void;
 }) {
+  const [quoteFee, setQuoteFee] = useState("");
   const validNext = FULFILLMENT_FLOW.filter((s) => s !== "paid" && s !== "profile_created" && canTransition(order.fulfillment.status, s));
   const inProductionPhase = ["profile_created", "production_ready", "printing", "ready_for_nfc", "nfc_programmed", "qa_passed"].includes(
     order.fulfillment.status
@@ -336,7 +356,7 @@ function OrderDetail({
           )}
         </div>
         {order.payment.status !== "paid" && order.fulfillment.status !== "cancelled" && (
-          <button onClick={onConfirmPayment} disabled={busy} className="rounded-xl bg-[--mint] px-5 py-2.5 text-[13px] font-bold text-[--ink]">
+          <button onClick={onConfirmPayment} disabled={busy || (usesSupabase && (order.deliveryFee == null || order.total == null))} className="rounded-xl bg-[--mint] px-5 py-2.5 text-[13px] font-bold text-[--ink] disabled:opacity-50">
             Confirm Payment
           </button>
         )}
@@ -348,6 +368,21 @@ function OrderDetail({
       </div>
 
       {/* fields */}
+      <Section title="AGREED PRICE" eye="manual verification">
+        <Row k="Card subtotal" v={`Rs. ${order.subtotal.toLocaleString()}`} />
+        <Row k="Delivery fee" v={order.deliveryFee == null ? "Not confirmed" : `Rs. ${order.deliveryFee.toLocaleString()}`} />
+        <Row k="Complete total" v={order.total == null ? "Not confirmed" : `Rs. ${order.total.toLocaleString()}`} />
+        <p className="mt-3 text-sm text-[--ink-soft]">Agree delivery availability, fee, dispatch estimate and the complete cost with the customer before payment. Check the actual JazzCash transfer against that total before confirming payment.</p>
+        {usesSupabase && order.payment.status === "pending" && ["new", "payment_pending"].includes(order.fulfillment.status) && <form className="mt-4 flex flex-wrap items-end gap-3" onSubmit={event => {
+          event.preventDefault();
+          if (/^\d{1,6}(\.\d{1,2})?$/.test(quoteFee)) onQuote(Number(quoteFee));
+        }}>
+          <label className="text-sm font-bold">Agreed delivery fee (Rs.)
+            <input type="number" min="0" max="100000" step="0.01" required value={quoteFee} onChange={event => setQuoteFee(event.target.value)} className="mt-2 block rounded-xl border border-[--ink]/15 px-3 py-2" />
+          </label>
+          <button type="submit" disabled={busy || !quoteFee.trim()} className="btn btn-ink px-4 py-2 disabled:opacity-50">Save agreed quote</button>
+        </form>}
+      </Section>
       <div className="grid gap-4 md:grid-cols-2">
         <Section title="CUSTOMER" eye="contact">
           <Row k="Full name" v={order.customer.fullName} />

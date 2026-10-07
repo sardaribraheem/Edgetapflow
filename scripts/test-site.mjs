@@ -19,6 +19,7 @@ try {
     page.on("console", msg => { if (msg.type()==="error" && !expectedNetworkErrors) errors.push(msg.text()); });
     // Deterministic backend failure regression; no writes to production services.
     await context.route(/firestore\.googleapis\.com/, route => route.abort());
+    await context.route(/https:\/\/[^/]+[.]supabase[.]co\/rest\//, route => route.abort());
     for (const route of ["/","/pricing","/order","/account","/privacy","/terms","/cookies","/admin"]) {
       const response = await page.goto(baseUrl+route,{waitUntil:"load"});
       assert.equal(response.status(),200,route); checks++;

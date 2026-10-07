@@ -32,10 +32,12 @@ export default function AccountPage() {
       window.location.assign(profileReturnPath(requestedPath));
     } catch (caught) {
       const code = (caught as { code?: string }).code || "";
-      if (code === "auth/invalid-credential" || code === "auth/wrong-password" || code === "auth/user-not-found") {
+      if (["auth/invalid-credential", "auth/wrong-password", "auth/user-not-found", "invalid_credentials"].includes(code)) {
         setError("That email and password do not match an EdgeTap account.");
-      } else if (code === "auth/too-many-requests") {
+      } else if (["auth/too-many-requests", "over_request_rate_limit", "over_email_send_rate_limit"].includes(code)) {
         setError("Too many attempts. Wait a moment and try again.");
+      } else if (code === "email_not_confirmed") {
+        setError("Confirm your email using the signup message before signing in.");
       } else {
         setError("Sign-in is unavailable right now. Please try again or contact EdgeTap.");
       }

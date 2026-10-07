@@ -16,5 +16,5 @@ export function profileUrl(username: string): string {
 export const SUPPORT_URL = "https://wa.me/923044149674";
 
 export function profileReturnPath(value: string | null): string {
-  return value && /^\/u\/[a-z0-9._-]{1,30}$/.test(value) ? value : "/";
+  return value === "/order" || (value && /^\/u\/[a-z0-9._-]{1,30}$/.test(value)) ? value : "/";
 }

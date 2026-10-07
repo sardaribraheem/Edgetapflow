@@ -4,12 +4,12 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getStaffProfile, saveFounderProfile } from "@/lib/data-service";
 import type { User } from "@/lib/auth";
-import { Profile, ibraheemProfile, ProfileLink } from "@/lib/data/profile";
+import { Profile, ProfileLink } from "@/lib/data/profile";
 
-// Editors the owner's own profile (the ibraheem seed) — same save/link logic
-// as the old /admin editor, kept in the shell under "Profiles".
+// No demo/fallback data is offered for saving to the clean production database.
 export default function ProfilesView({ user }: { user: User }) {
-  const [profile, setProfile] = useState<Profile>(ibraheemProfile);
+  const [profile, setProfile] = useState<Profile>({ username: "ibraheem", displayName: "", firstName: "", lastName: "", title: "", bio: "", location: "", avatar: "", links: [] });
+  const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [loadError, setLoadError] = useState("");
@@ -21,6 +21,8 @@ export default function ProfilesView({ user }: { user: User }) {
         if (current) setProfile(current);
       } catch (e) {
         setLoadError(e instanceof Error ? e.message : "Couldn't load the current profile — the service may be unavailable.");
+      } finally {
+        setLoading(false);
       }
     })();
   }, []);
@@ -127,11 +129,11 @@ export default function ProfilesView({ user }: { user: User }) {
                 <input
                   type="text"
                   value={profile.username}
-                  onChange={(e) => setProfile({ ...profile, username: e.target.value })}
+                  readOnly
                   className="w-full rounded-xl border border-[--ink]/15 bg-white px-4 py-3 text-[--ink] focus:outline-none focus:ring-2 focus:ring-[--ink]"
                 />
               </div>
-              <p className="mt-1 text-[11px] text-[--ink-faint]">Public handle — rename here if the profile needs a new /u/ URL.</p>
+              <p className="mt-1 text-[11px] text-[--ink-faint]">The reserved owner handle stays fixed so existing NFC and QR links keep working.</p>
             </div>
             <div className="sm:col-span-2">
               <label className="block text-sm font-semibold text-[--ink]">Avatar Image URL</label>
@@ -228,7 +230,7 @@ export default function ProfilesView({ user }: { user: User }) {
         <div className="flex justify-end">
           <button
             type="submit"
-            disabled={saving}
+            disabled={saving || loading || !!loadError || !profile.displayName.trim()}
             className="rounded-2xl bg-[--ink] px-8 py-3.5 font-display font-bold text-white shadow-[0_6px_0_0_rgba(16,11,74,0.4)] transition-transform hover:-translate-y-0.5 disabled:opacity-50"
           >
             {saving ? "Saving..." : "Save All Changes"}

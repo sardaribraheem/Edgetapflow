@@ -19,7 +19,8 @@ import type { Profile, ProfileLink } from "@/lib/data/profile";
 import { isSafeContactUrl } from "@/lib/links";
 import { usesSupabase } from "@/lib/backend";
 import { SUPPORT_URL } from "@/lib/site";
-import { createOrder, orderNumber } from "@/lib/data-service";
+import { createOrder, orderNumber, findOrderSubmission, type SubmissionReceipt } from "@/lib/data-service";
+import { readSubmissionMarker, rememberSubmission, clearSubmissionMarker, type SubmissionMarker } from "@/lib/order-submission";
 import { uploadCustomDesign, uploadPublicAvatar, uploadPaymentReceipt, fileToDataUrl } from "@/lib/upload-service";
 import { auth, getCurrentUser, onAuthStateChanged, type User } from "@/lib/auth";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "@/lib/auth";
@@ -75,6 +76,29 @@ export default function OrderWizard() {
   const [resubmitKey, setResubmitKey] = useState(0); // bump to retry a failed submit
   const [accountUser, setAccountUser] = useState<User | null>(null);
   useEffect(() => onAuthStateChanged(auth, setAccountUser), []);
+  const [recovery, setRecovery] = useState<{ marker?: SubmissionMarker; receipt?: SubmissionReceipt; message: string; checking?: boolean } | null>(null);
+  const [recoveryCheck, setRecoveryCheck] = useState(0);
+  useEffect(() => {
+    if (!usesSupabase || !ONLINE_CHECKOUT_ENABLED || submission.current || placed) return;
+    let active = true;
+    (async () => {
+      try {
+        const marker = readSubmissionMarker();
+        if (!marker) return;
+        if (active) setRecovery({ marker, message: "Checking your previous submission…", checking: true });
+        const user = await getCurrentUser();
+        if (user?.uid !== marker.uid) {
+          if (active) setRecovery({ marker, message: "Sign in with the account used for your previous submission before starting another order." });
+          return;
+        }
+        const receipt = await findOrderSubmission(marker.key);
+        if (active) setRecovery({ marker, ...(receipt ? { receipt } : {}), message: receipt ? "Your order was received." : "This submission has not been confirmed. Check again or contact EdgeTap before placing another order or paying again." });
+      } catch {
+        if (active) setRecovery({ message: "We could not check your previous submission. Contact EdgeTap before placing another order or paying again." });
+      }
+    })();
+    return () => { active = false; };
+  }, [accountUser, placed, recoveryCheck]);
   const [accountMode, setAccountMode] = useState<AccountMode>("create");
   const [accountPassword, setAccountPassword] = useState("");
   const [paymentReceipt, setPaymentReceipt] = useState<File | null>(null);
@@ -184,6 +208,7 @@ export default function OrderWizard() {
       if (customerUser.email?.toLowerCase() !== email) throw new Error("Sign out first or use your signed-in account email for the order.");
       if (submission.current) {
         if (submission.current.order.ownerUid !== customerUser.uid) throw new Error("Sign in with the account used for this order.");
+        if (usesSupabase) rememberSubmission({ uid: customerUser.uid, key: submission.current.key });
         const id = await createOrder(submission.current.order, submission.current.key);
         setPlaced({ ...submission.current.order, id });
         return;
@@ -222,6 +247,9 @@ export default function OrderWizard() {
         updatedAt: now,
       };
       submission.current = { key: crypto.randomUUID(), order };
+      // Persist BEFORE the RPC. A lost response/refresh cannot silently create a
+      // second order; the authenticated recovery RPC only returns its receipt.
+      if (usesSupabase) rememberSubmission({ uid: customerUser.uid, key: submission.current.key });
       const id = await createOrder(order, submission.current.key);
       setPlaced({ ...order, id });
     } catch (caught) {
@@ -237,6 +265,28 @@ export default function OrderWizard() {
   // ── Done — order confirmation ─────────────────────────────────
   if (placed) {
     return <Confirmation order={placed} />;
+  }
+  if (recovery) {
+    return <main className="min-h-screen bg-[--cream] px-4 py-24">
+      <section className="card-paper mx-auto max-w-xl p-7 sm:p-10">
+        <h1 className="font-display text-3xl font-bold text-[--ink]">{recovery.receipt ? "Order received" : "Check your previous order"}</h1>
+        <p className="mt-4 text-sm text-[--ink-soft]" role="status">{recovery.message}</p>
+        {recovery.receipt && <dl className="mt-6 space-y-3">
+          <div><dt>Order number</dt><dd className="font-bold">{recovery.receipt.orderNumber}</dd></div>
+          <div><dt>Payment</dt><dd className="capitalize">{recovery.receipt.paymentStatus === "pending" ? "Pending verification" : recovery.receipt.paymentStatus}</dd></div>
+          <div><dt>Fulfillment</dt><dd className="capitalize">{recovery.receipt.fulfillmentStatus.replaceAll("_", " ")}</dd></div>
+        </dl>}
+        <div className="mt-6 flex flex-wrap gap-4">
+          <a href={SUPPORT_URL} target="_blank" rel="noreferrer" className="btn btn-ink px-5 py-3">Contact EdgeTap on WhatsApp</a>
+          <Link href="/account?next=/order" className="btn btn-ghost px-5 py-3">Sign in</Link>
+          <button type="button" disabled={recovery.checking} onClick={() => setRecoveryCheck(value => value + 1)} className="btn btn-ghost px-5 py-3">Check submission again</button>
+          {recovery.receipt && <button type="button" onClick={() => {
+            try { clearSubmissionMarker(); setRecovery(null); setDraft(blankDraft()); setStep(0); }
+            catch { setError("Could not clear this tab's submission reference. Please contact EdgeTap."); }
+          }} className="btn btn-ghost px-5 py-3">Start a separate new order</button>}
+        </div>
+      </section>
+    </main>;
   }
 
   return (
@@ -917,7 +967,7 @@ function SubmitStep({
       <div className="mx-auto mt-8 max-w-md">
         <p className="text-[12px] font-bold uppercase tracking-widest text-[--ink-faint]">Status</p>
         <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-[--yellow-soft] px-4 py-1.5 text-xs font-bold text-[--ink]">
-          Not submitted yet · Payment will be verified after submission
+          Submission is confirmed when an order number appears · Payment is verified separately
         </div>
       </div>
     </section>

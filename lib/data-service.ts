@@ -48,6 +48,11 @@ export async function createOrder(order: Order, requestKey = crypto.randomUUID()
   order.orderNumber = receipt.orderNumber;
   return id;
 }
+export type SubmissionReceipt = { id: string; orderNumber: string; paymentStatus: string; fulfillmentStatus: string };
+export async function findOrderSubmission(requestKey: string): Promise<SubmissionReceipt | null> {
+  if (!usesSupabase) throw new Error('Order recovery requires Supabase.');
+  return rpc('find_order_submission', { p_request_key: requestKey });
+}
 export async function getOrders(): Promise<Order[]> {
   return usesSupabase ? rpc('list_orders') : (await firebase()).getOrders();
 }

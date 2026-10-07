@@ -9,3 +9,12 @@ users.json
 auth-map.json
 asset-map.json
 prepared.sql
+
+# Supabase
+.branches
+.temp
+
+# dotenvx
+.env.keys
+.env.local
+.env.*.local

@@ -1,3 +1,5 @@
+> **Current Supabase clean-start update — 7 October 2026:** Firebase test data/user/images are intentionally NOT migrated and remain untouched. Their 403/extraction/password-preservation issues are waived. Supabase is now the local default backend, with no automatic Firebase fallback. Hosted setup is pending the correct project: current CLI login exposes only inactive unlinked `DukanKhata`, not a confirmed EdgeTap destination. No remote schema/Auth/Storage changes or deployments occurred. See [SUPABASE_MIGRATION_REPORT.md](SUPABASE_MIGRATION_REPORT.md) for current evidence; source-preservation requirements below are historical and superseded.
+
 # EdgeTap launch report — updated 7 October 2026
 
 **Verdict: NOT READY TO LAUNCH.** The public-profile failure is traced to the billing-gated `(default)` Firestore database. Mandatory receipt uploads also depend on Blaze-only Cloud Storage. Online submission now defaults to paused, with an honest WhatsApp ordering handoff. No production configuration has been changed.
@@ -206,3 +208,23 @@ Destination Supabase configuration/operator access remains missing. `(default)` 
 Personalized-card policy review remains required. Review processor/region/privacy retention and account migration/recovery disclosures against the actual destination before cutover; no legal compliance or hosting/delivery guarantee has been invented.
 
 No production deployment or customer-data migration is claimed. The outstanding source/destination access requests are necessary to finish, not permission to delete/disable Firebase or incur charges.
+
+## Current clean Supabase launch blockers
+
+### TECHNICAL BLOCKERS
+
+Apply/review the prepared five migrations in the confirmed clean hosted destination; verify actual anonymous profile lookup, new-user signup/confirmation/login/recovery, owner edits, private byte denial, secure staff/manual JazzCash/quote/publication and physical NFC/QR flow. Production remains the undeployed older Firebase-backed release. A real approved owner/customer profile is needed for a public example; no fake production data is seeded. Online checkout stays paused until hosted checks pass. Interrupted-order refresh reconciliation and staff agreed-price UI are now implemented and locally verified.
+
+LOCAL VERIFIED: typecheck; lint (zero errors/five image warnings); enabled/paused Supabase fixture static exports; 23 PostgreSQL/RLS checks plus clean-bootstrap guard; 20 browser integration checks with real local SQL and simulated Auth/Storage; 364 responsive assertions. The normal unconfigured Supabase build and read-only hosted verifier correctly stop for missing public config. These are not HOSTED VERIFIED application services. Test exports are isolated from the deployable `out/` path after QA.
+
+### BUSINESS DECISIONS
+
+Delivery coverage/fee/dispatch; digital-profile hosting/update terms; cancellation before printing, print-detail approval and defect handling. Until confirmed, agree specific delivery/full-price terms during ordering; no fee/estimate is invented.
+
+### BILLING/INFRASTRUCTURE BLOCKERS
+
+Correct active EdgeTap Supabase project reference/operator access; real public URL/publishable key; verified Auth sender/custom SMTP/callbacks; explicitly authorized real staff enrollment. Current authenticated CLI exposes only inactive unrelated `DukanKhata`; do not reuse/resume it by inference. Firebase source-data extraction and old Auth/file migration are explicitly waived, with no billing change or deletion. Firebase Hosting/domain remain. No deployment or push is authorized.
+
+### LEGAL/POLICY REVIEW
+
+Review owner-directed personalized-card cancellation/remedies and actual Supabase processing region/privacy/retention. Local implementation does not establish legal compliance. **NOT READY TO LAUNCH** until the eight real customer acceptance outcomes are demonstrated.
