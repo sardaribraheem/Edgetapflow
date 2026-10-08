@@ -156,6 +156,52 @@ body {
   padding-block: clamp(3rem, 7vw, 5rem);
 }
 
+.nav-order-cta.btn { display: none; }
+@media (min-width: 640px) { .nav-order-cta.btn { display: inline-flex; } }
+
+/* Four pricing options remain in one row, with contained scrolling on mobile. */
+.pricing-page { width: 100%; max-width: 1440px; margin-inline: auto; padding: 6rem clamp(1.25rem, 3.5vw, 3rem) 5rem; color: var(--ink); }
+.pricing-heading { max-width: 960px; margin-inline: auto; text-align: center; }
+.pricing-heading > p:first-child,
+.pricing-heading h1 { font-size: clamp(2.25rem, 4.6vw, 4rem); font-weight: 600; letter-spacing: -0.025em; line-height: 1.08; text-wrap: balance; }
+.pricing-heading h1 { margin-top: 0.6rem; }
+.pricing-intro { margin-top: 1.5rem; font-size: 1.0625rem; line-height: 1.65; }
+.pricing-scroll-hint { display: none; margin-top: 2rem; font-size: 0.875rem; }
+.pricing-options { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1.5rem; margin-top: 3rem; padding: 0.75rem 0.125rem 2rem; border-radius: var(--radius-xs); }
+.pricing-options:focus-visible { outline: 3px solid var(--ink); outline-offset: 5px; }
+.pricing-option { display: flex; min-width: 0; flex-direction: column; padding: 2rem 1.75rem; background: var(--paper); border: 1px solid var(--ink-faint); border-radius: var(--radius-md); box-shadow: 0 18px 30px -18px rgb(16 11 74 / 24%); }
+.pricing-option h2 { font-size: 1.125rem; font-weight: 600; }
+.pricing-price { margin-top: 1.5rem; font-size: clamp(2rem, 2.65vw, 2.5rem); font-weight: 600; line-height: 1.15; letter-spacing: -0.025em; white-space: nowrap; }
+.pricing-price-detail { margin-top: 0.25rem; font-size: 0.875rem; }
+.pricing-description { min-height: 5.25rem; margin-top: 1rem; font-size: 0.9375rem; line-height: 1.5; }
+.pricing-features { display: grid; align-content: start; gap: 1rem; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--ink-wash); font-size: 0.875rem; line-height: 1.5; }
+.pricing-features li { display: flex; align-items: baseline; gap: 0.75rem; }
+.pricing-features li > span:first-child { flex-shrink: 0; }
+.pricing-option-action { margin-top: auto; padding-top: 2rem; }
+.pricing-option-action p { min-height: 4rem; margin-bottom: 1rem; font-size: 0.8125rem; line-height: 1.5; }
+.pricing-option-action .btn { width: 100%; min-height: 3.5rem; padding: 0.75rem; font-size: 0.9375rem; white-space: nowrap; }
+.pricing-contact { max-width: 850px; margin: 3rem auto 0; padding: clamp(1.5rem, 4vw, 3rem); scroll-margin-top: 6rem; text-align: center; background: var(--paper); border: 1px solid var(--ink-faint); border-radius: var(--radius-md); box-shadow: 0 18px 30px -18px rgb(16 11 74 / 24%); }
+.pricing-contact h2 { font-size: clamp(1.5rem, 2.5vw, 2rem); font-weight: 600; line-height: 1.15; }
+.pricing-contact > p { margin-top: 1rem; line-height: 1.6; }
+.pricing-contact-links { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 1.25rem 2rem; margin-top: 1.75rem; }
+.pricing-contact-links .btn { max-width: 100%; padding: 0.875rem 1.5rem; }
+.pricing-email { min-width: 0; overflow-wrap: anywhere; font-size: 0.9375rem; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.pricing-order-details { max-width: 960px; margin: 4rem auto 0; font-size: 0.875rem; line-height: 1.7; }
+.pricing-order-details h2 { margin-bottom: 1rem; font-size: 1.5rem; font-weight: 600; }
+.pricing-order-details p + p { margin-top: 0.875rem; }
+@media (max-width: 1199px) {
+  .pricing-scroll-hint { display: block; }
+  .pricing-options { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(280px, 1fr); overflow-x: auto; overscroll-behavior-inline: contain; scroll-snap-type: x proximity; margin-top: 0.75rem; scrollbar-color: var(--ink) var(--paper-2); }
+  .pricing-option { scroll-snap-align: start; }
+  .pricing-price { font-size: 2.25rem; }
+}
+@media (max-width: 639px) {
+  .pricing-page { padding-top: 6rem; }
+  .pricing-intro { font-size: 1rem; }
+  .pricing-option { padding: 1.75rem 1.5rem; }
+  .pricing-contact { margin-top: 2rem; }
+}
+
 /* ============================================================
    Display / editorial type
    ============================================================ */

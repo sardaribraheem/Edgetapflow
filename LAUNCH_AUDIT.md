@@ -1,3 +1,46 @@
+# EdgeTap current launch status — 8 October 2026
+
+**Commercial launch: NOT READY.** The owner explicitly authorized the four-option pricing update, required Supabase ordering upgrade and Hosting publication. Publication is separate from successful real customer/payment/production verification. Current release evidence: [PRICING_DEPLOYMENT_REPORT.md](PRICING_DEPLOYMENT_REPORT.md).
+
+## LOCAL VERIFIED
+
+101 isolated SQL-backed customer/staff/guest/sign-in browser checks; 384 final responsive/row/scroll/navigation/metadata assertions; 53 SQL/RLS checks plus migration preservation and preflight/postflight guard. Typecheck/build pass; lint: zero errors/six existing image warnings. Real export destination/credential/fixture scan passes across 131 text assets. Browser Auth/Storage/payment/email are simulated in the local workflow tests. Pricing follows the owner's reference and four options remain in one row; website package is Rs. 29,999, first year included, Rs. 3,000 annually from year two. Business NFC is contact-only custom quote.
+
+## HOSTED VERIFIED
+
+Only approved EdgeTap Supabase destination `dxyxvervvlxhwwbcbttd`; migrations **001–009 applied** after successful inspect/guard/dry run. All 23 application tables have RLS, private schema is unexposed, RPC grants/proof gates/private Storage policies pass. 29 real API boundary checks and 12 real anonymous frontend/backend checks pass. Existing customer real Auth request previously returned HTTP 200. Hosted SQL role simulation verifies owned reads and denies unenrolled staff/private access; this is not a real post-upgrade browser payment/order submission.
+
+Inventory remains one Auth user and zero customers/orders/payments/profiles/reviews/staff/files. No fake production records, Firebase test import, reset, billing or DukanKhata change. Hosting preview passed 384 route/layout checks and 12 anonymous real-backend checks; focused profile trace returned HTTP 200/null and the correct missing state. Live publication succeeded at https://edgetapflow.web.app (Hosting version `317502f5de7c600c`) and passed the same 384 layout/routing and 12 actual anonymous backend checks. Pricing and sign-in fixes are live. Deployed pricing Lighthouse: 100 performance/accessibility/best practices/SEO, mobile lab LCP 1.5 s, CLS 0; not a real-device/field guarantee. No push to main.
+
+## TECHNICAL BLOCKERS
+
+- Register/verify and deliberately enroll the real intended first administrator (`sardaribraheem277@gmail.com`); no runtime email authorization gate or fabricated verified account.
+- A real public example/profile is absent. Missing handles correctly render missing, without a founder fallback. Publish real approved data through the staff workflow.
+- Verify a real customer's authenticated draft/receipt/submission, actual manual JazzCash transfer and staff review; then profile editing/publication, physical QR/NFC, printing, QA and fulfillment. Local fixtures do not prove these real success paths.
+- Add pagination before the current newest-200 orders/latest-100 drafts limits become operationally insufficient.
+
+## BUSINESS DECISIONS
+
+Delivery coverage/dispatch commitment, cancellation-before-production and defect-reporting/remedy process, future standard-hosting duration/change notice. Fixed PVC dimensions, NASTP Delta 3/Mon–Fri 9–5, rider-paid extra delivery, hosting/updates free for now, and every-personalized-card emailed proof/10-hour response direction are confirmed. Website pricing and Business NFC contact-only quoting are confirmed.
+
+## BILLING / INFRASTRUCTURE BLOCKERS
+
+Verified SMTP/provider/sender and monitored reply mailbox; a real final-design email transport/worker. Auth confirmations/recovery for general customers and proof email delivery remain unverified. Dashboard/account messages are the current notification source. The proof clock starts only on actual sending, and printing remains held until real approval. Supabase ordering does not require Firebase Blaze; no billing/payment method was enabled. Operator rotation of the privileged key previously disclosed in chat remains documented; it is not used or embedded in the export.
+
+## LEGAL / POLICY REVIEW
+
+Review personalized-card remedies, commercial/privacy/retention terms and ten-hour silence-confirmation/email evidence. Non-returnability after production and assessed damage/defect/EdgeTap-error remedies are owner business directions, not a legal-compliance certification. No blanket refund or automatic remedy for customer-supplied errors.
+
+---
+
+# Earlier audits and implementation history
+
+The dated states below are retained as history. Their unapplied-migration/no-deploy/old-price/Firebase-backend observations are superseded by the current status above and the release report.
+
+> **Hosted ordering diagnosis — 8 October 2026:** The owner-entered real sign-in returned HTTP 200, then checkout failed because hosted ordering settings/draft RPCs are missing. Fresh read-only inventory: one Auth account; zero customer/order/payment/profile/staff/file records; all 17 application tables have RLS and the private schema is unexposed. The actual CLI dry run lists only 007–009, with no seeds/roles. The tested read-only upgrade guard and [ORDERING_UPGRADE_PLAN.md](ORDERING_UPGRADE_PLAN.md) are prepared; database approval is pending under the current AGENTS.md no-deploy instruction. No website/database release was performed.
+
+> **Sign-in inspection — 8 October 2026:** Reproduced and fixed locally: signed-in accounts still showing credentials, repeated same-user events clearing drafts/orders, and checkout return/confirmation transitions. The owner-supplied account is marked confirmed in Supabase; 007–009 and the ordering RPCs are still absent remotely. The deployed account page still uses Firebase Auth. 101 local workflow/guest/sign-in checks and 344 responsive assertions pass; final build/typecheck/lint pass (seven image warnings), with twelve fresh anonymous hosted browser checks. No deployment or schema/order/file write. See [SIGNIN_ORDERING_REPORT.md](SIGNIN_ORDERING_REPORT.md). The earlier zero-user observation below describes 7 October, not the current account inventory.
+
 > **Confirmed product/fulfillment update — 7 October 2026:** All designs are PVC/NFC, 85.60 × 53.98 mm; Wood is printed artwork. Staff manually prepares final designs. Every personalized card requires an emailed proof with a 10-hour reply window starting only after real sending. SMTP is pending; printing stays held. NASTP Delta 3 pickup: Mon–Fri 9 am–5 pm, contact +92 304 414 9674 after arrival once ready. Delivery costs extra, paid directly to the rider; staff records the actual booked fare/message. Standard profile hosting and updates have no separate fee for now. **007–009 are local only; hosted remains 001–006.** See [BUSINESS_CONFIGURATION.md](BUSINESS_CONFIGURATION.md). Earlier conflicting claims below are historical and superseded. Launch remains on hold.
 
 ## Current application workflow status — 7 October 2026

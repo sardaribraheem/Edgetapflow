@@ -1,6 +1,6 @@
-# EdgeTap business configuration — 7 October 2026
+# EdgeTap business configuration — updated 8 October 2026
 
-**Launch on hold.** Hosted foundation remains 001–006. Local migrations 007–009 are prepared only; no deployment, hosted schema change or billing action was performed.
+**Commercial launch readiness remains on hold.** The owner authorized the 8 October pricing/website deployment and required ordering upgrade. Migrations 001–009 are now hosted; no billing, reset or fixture creation. See PRICING_DEPLOYMENT_REPORT.md for release evidence.
 
 ## Confirmed product and business facts
 
@@ -18,7 +18,7 @@
 
 ## Newly confirmed offers and ordering
 
-Standard builder starts without signup and uses device drafts until account saving before payment. Website/portfolio + four linked cards costs **Rs. 18,999**, with first-year hosting/domain services included and **Rs. 3,000 annually from year two**. Cards may be requested now or within the first year. Website and custom NFC projects are contact-only, using the owner-approved phone and public email; no premium/custom checkout logic is implemented. See [GUEST_ORDERING_REPORT.md](GUEST_ORDERING_REPORT.md).
+Standard builder starts without signup and uses device drafts until account saving before payment. Website/portfolio + four linked cards costs **Rs. 29,999**, with first-year hosting/domain services included and **Rs. 3,000 annually from year two**. Cards may be requested now or within the first year. Business NFC is also a contact-only custom quote, confirmed on 8 October; the unconfirmed Rs. 2,499 package is not advertised. Website and custom NFC projects are contact-only, using the owner-approved phone and public email; no premium/custom checkout logic is implemented. See [GUEST_ORDERING_REPORT.md](GUEST_ORDERING_REPORT.md).
 
 ## Configuration and operations
 
@@ -54,4 +54,4 @@ Legal review remains separate: personalized-card cancellation/remedy wording, th
 
 ## Verification
 
-53 SQL/RLS/workflow checks, 75 complete local workflow browser checks plus 13 guest/pricing checks and 344 responsive assertions pass. Typecheck, real-public-config static build, lint (zero errors/seven static-image warnings), exact minor-unit RPC checks, offline migration regression and isolated forward-preservation checks pass. Auth/Storage HTTP and proof-transport acknowledgement are simulated in the workflow browser; no actual email, hosted record, payment or physical printing is verified. Earlier hosted evidence covers only 001–006 (21 API / 12 anonymous browser checks).
+53 SQL/RLS/workflow checks, forward-preservation/preflight/postflight checks, 101 local ordering/guest/sign-in browser checks and 384 responsive assertions pass. Typecheck/static build pass; lint has zero errors/six existing image warnings. All migrations 001–009 are hosted; 29 API boundary checks pass. Preview and live Hosting each passed 384 layout/routing and 12 actual anonymous backend checks. Live Lighthouse scored 100 in all four standard categories. Local Auth/Storage/proof transport is simulated; no successful real email, payment, physical printing or submitted hosted order is claimed. See PRICING_DEPLOYMENT_REPORT.md.

@@ -22,6 +22,14 @@ try{
  };
  const missing=await probe('get_public_profile',{p_username:`qa-absent-${crypto.randomUUID().slice(0,8)}`});assert.equal(missing,null);
  const reviews=await probe('list_reviews',{p_limit:1});assert(Array.isArray(reviews));
+ const ordering=await probe('get_order_settings');
+ assert.equal(ordering.cardPrice,999);assert.equal(ordering.jazzcashNumber,'0304 4149674');
+ assert.equal(ordering.emailNotificationsEnabled,false);assert.equal(ordering.designProofScope,'all_personalized');
+ for(const name of ['get_my_orders','get_my_applications'])await probe(name,{},true);
+ await probe('save_application_draft',{p_id:crypto.randomUUID(),p_payload:{},p_step:0,p_version:0},true);
+ await probe('submit_application',{p_id:crypto.randomUUID(),p_version:1},true);
+ await probe('verify_application_payment',{p_id:'nonexistent',p_version:1},true);
+ await probe('dispatch_rider',{p_id:'nonexistent',p_fee_minor:0,p_message:'',p_version:1},true);
  for(const name of ['list_orders','is_staff'])await probe(name,{},true);
  await probe('find_order_submission',{p_request_key:crypto.randomUUID()},true);
  for(const [name,args] of [
@@ -31,7 +39,7 @@ try{
   ['publish_order_profile',{p_id:'nonexistent',p_username:'ibraheem',p_version:1}],
   ['update_profile',{p_username:'ibraheem',p_profile:{}}]
  ])await probe(name,args,true);
- for(const table of ['profiles','customers','orders','payments','reviews']){
+ for(const table of ['profiles','customers','orders','payments','reviews','order_applications']){
   const {error}=await client.from(table).select('*').limit(1);assert(error&&['42501','PGRST301','PGRST302'].includes(error.code),`${table}: unexpected anonymous table access`);checks++;
  }
  const deniedSchema=await fetch(`${url}/rest/v1/profiles?limit=1`,{headers:{apikey:key,'Accept-Profile':'private'}});

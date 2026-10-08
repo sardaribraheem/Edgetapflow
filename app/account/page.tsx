@@ -1,16 +1,21 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail } from "@/lib/auth";
+import { useRouter } from "next/navigation";
+import { onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, sendPasswordResetEmail, type User } from "@/lib/auth";
 import { usesSupabase } from "@/lib/backend";
 import { NfcWaves } from "@/components/doodles";
-import { profileReturnPath } from "@/lib/site";
+import { accountReturnPath } from "@/lib/site";
 import { auth } from "@/lib/auth";
 import { readGuestDraft } from "@/lib/guest-draft";
 
 export default function AccountPage() {
-  const [checkoutPending, setCheckoutPending] = useState(false);
+  const router = useRouter();
+  const [draftEmail, setDraftEmail] = useState<string>();
+  const [user, setUser] = useState<User | null>(null);
+  const [ready, setReady] = useState(false);
+  const operation = useRef(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -19,28 +24,36 @@ export default function AccountPage() {
   const [mode, setMode] = useState<"signIn" | "create">("signIn");
 
   useEffect(() => {
-    void readGuestDraft().then(draft => setCheckoutPending(!!draft?.claimEmail)).catch(() => {});
+    void readGuestDraft().then(draft => setDraftEmail(draft?.claimEmail)).catch(() => {});
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) setMessage(`Signed in as ${user.email || "your EdgeTap account"}.`);
+      setUser(user);
+      setReady(true);
+      if (user) setPassword("");
     });
     return unsubscribe;
   }, []);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
+    if (operation.current) return;
+    operation.current = true;
     setBusy(true);
     setError("");
     setMessage("");
     try {
-      if (mode === "create") await createUserWithEmailAndPassword(auth, email.trim().toLowerCase(), password);
-      else await signInWithEmailAndPassword(auth, email.trim().toLowerCase(), password);
+      const result = mode === "create" ? await createUserWithEmailAndPassword(auth, email.trim().toLowerCase(), password) : await signInWithEmailAndPassword(auth, email.trim().toLowerCase(), password);
       const requestedPath = new URLSearchParams(window.location.search).get("next");
-      window.location.assign(profileReturnPath(requestedPath));
+      const guest = await readGuestDraft().catch(() => null);
+      setPassword("");
+      setMessage("Signed in. Continuing…");
+      router.replace(accountReturnPath(requestedPath, guest?.claimEmail, result.user.email));
+      return;
     } catch (caught) {
       const code = (caught as { code?: string }).code || "";
       if (code === "email_confirmation_required") {
         setPassword("");
-        setMessage("Check your email for confirmation instructions, then use your existing account to sign in. No order or profile has been created.");
+        setMode("signIn");
+        setMessage("Confirm your email, then sign in here to continue. Your card draft stays on this device. If you already have an account, use its password.");
       } else if (["auth/invalid-credential", "auth/wrong-password", "auth/user-not-found", "invalid_credentials"].includes(code)) {
         setError("That email and password do not match an EdgeTap account.");
       } else if (["auth/too-many-requests", "over_request_rate_limit", "over_email_send_rate_limit"].includes(code)) {
@@ -50,15 +63,21 @@ export default function AccountPage() {
       } else {
         setError(mode === "create" ? "Account creation is unavailable right now. Please try again or contact EdgeTap." : "Sign-in is unavailable right now. Please try again or contact EdgeTap.");
       }
-    } finally {
-      setBusy(false);
     }
+    setBusy(false);
+    operation.current = false;
   };
 
   const handleSignOut = async () => {
+    if (operation.current) return;
+    operation.current = true;
+    setBusy(true);
     try { await signOut(auth); setMessage(""); setError(""); }
     catch { setError("Could not sign out. Please try again."); }
+    finally { setBusy(false); operation.current = false; }
   };
+
+  if (!ready) return <main className="min-h-screen grid place-items-center px-4"><p role="status">Checking your sign-in…</p></main>;
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-[--cream] px-4 py-16">
@@ -69,10 +88,19 @@ export default function AccountPage() {
           </span>
           <span className="font-display text-xl font-bold text-[--ink]">EdgeTap</span>
         </Link>
-        {checkoutPending && <Link href="/order" className="btn btn-ink mb-5 px-5 py-3">Continue your saved card</Link>}
+        {draftEmail && !user && <p className="mb-5 text-sm">Your card draft is saved on this device. Sign in with the email you used at checkout to continue.</p>}
         <section className="card-paper p-7 sm:p-9">
           <p className="eyebrow text-[--ink-mid]">Customer account</p>
-          <h1 className="mt-1 font-display text-3xl font-bold text-[--ink]">{mode === "create" ? "Create your account" : "Edit your profile"}</h1>
+          <h1 className="mt-1 font-display text-3xl font-bold text-[--ink]">{user ? "You're signed in" : mode === "create" ? "Create your account" : "Sign in to EdgeTap"}</h1>
+          {user ? <>
+            <p className="mt-4">Signed in as {user.email || "your EdgeTap account"}.</p>
+            {busy ? <p role="status" className="mt-4">{message || "Please wait…"}</p> : <>
+              {draftEmail && draftEmail.toLowerCase() === user.email?.toLowerCase() && <Link href="/order" className="btn btn-ink mt-6 px-5 py-3">Continue your saved card</Link>}
+              <Link href="/account/orders" className="mt-5 block font-bold underline">View my orders & applications</Link>
+            </>}
+            {error && <p role="alert" className="mt-4">{error}</p>}
+            <button type="button" disabled={busy} onClick={handleSignOut} className="mt-6 font-bold underline disabled:opacity-50">Sign out this browser</button>
+          </> : <>
           <p className="mt-2 text-sm leading-relaxed text-[--ink-soft]">
             {mode === "create" ? "Create a login to save your profile, follow your order and edit your profile after EdgeTap activates it. Registration does not place an order or create a public profile." : "Sign in to view your orders or update your activated profile. You can build a new card before creating an account."}
           </p>
@@ -81,7 +109,7 @@ export default function AccountPage() {
               {value === "create" ? "Create a new account" : "Use existing account"}
             </button>)}
           </div>
-          <form onSubmit={handleSubmit} className="mt-7 space-y-4">
+          <form onSubmit={handleSubmit} className="mt-7 space-y-4"><fieldset disabled={busy} className="min-w-0 space-y-4">
             <label className="block text-sm font-bold text-[--ink]">
               Email
               <input
@@ -116,10 +144,7 @@ export default function AccountPage() {
               catch { setError("Could not request password recovery. Please try again."); }
               finally { setBusy(false); }
             }}>Forgot your password?</button>
-          </form>
-          <button onClick={handleSignOut} className="mt-4 w-full text-center text-xs font-bold text-[--ink-faint] hover:text-[--ink]">
-            Sign out this browser
-          </button>
+          </fieldset></form></>}
         </section>
         <p className="mt-5 text-center text-xs text-[--ink-faint]">
           <Link href="/account/orders" className="block mb-3 font-bold text-[--ink] underline">My orders & saved applications</Link>

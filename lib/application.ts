@@ -29,7 +29,10 @@ export function wizardFromApplication(p: ApplicationPayload): WizardDraft {
   return {...blankApplication(p.customer.email),cardTemplate:p.card.template,quantity:p.card.quantity,size:STANDARD_CARD_SIZE,customDesignUrl:p.card.customDesignUrl,...p.profileDraft,avatarUrl:p.profileDraft.avatarUrl,customer:p.customer,customerNotes:p.customerNotes||'',deliveryMethod:p.deliveryMethod,payment:{...p.payment,status:'pending'}};
 }
 async function rpc<T>(name:string,args:Record<string,unknown>={}):Promise<T>{
-  const {data,error}=await getSupabase().rpc(name,args); if(error) throw new Error(error.message); return data as T;
+  const {data,error}=await getSupabase().rpc(name,args); if(error) throw Object.assign(new Error(error.message),{code:error.code}); return data as T;
+}
+export function isOrderingUnavailable(error: unknown): boolean {
+  return ['PGRST202','PGRST205','42883','42P01'].includes((error as {code?:string})?.code || '');
 }
 export const getOrderSettings=()=>rpc<OrderSettings>('get_order_settings');
 export const saveOrderSettings=(settings:OrderSettings)=>rpc<void>('save_order_settings',{p_settings:settings,p_version:settings.version});

@@ -7,7 +7,11 @@ let recoverySession = false;
 export const canResetPassword = () => recoverySession;
 export const auth = { get currentUser() { return currentUser; } };
 type Auth = typeof auth;
-const mapUser = (user: { id?: string; uid?: string; email?: string | null } | null): User | null => user ? { uid: user.id || user.uid || "", email: user.email || null } : null;
+const mapUser = (user: { id?: string; uid?: string; email?: string | null } | null): User | null => {
+  if (!user) return null;
+  const next = { uid: user.id || user.uid || "", email: user.email || null };
+  return currentUser?.uid === next.uid && currentUser.email === next.email ? currentUser : next;
+};
 
 export function onAuthStateChanged(_auth: Auth, callback: (user: User | null) => void | Promise<void>): () => void {
   let cancelled = false;
@@ -16,7 +20,7 @@ export function onAuthStateChanged(_auth: Auth, callback: (user: User | null) =>
     if (cancelled) return;
     currentUser = user;
     // Do not await RPC work inside Supabase's auth callback/session lock.
-    queueMicrotask(() => { if (!cancelled) void Promise.resolve(callback(user)).catch(() => {}); });
+    setTimeout(() => { if (!cancelled) void Promise.resolve().then(() => callback(user)).catch(() => {}); }, 0);
   };
   if (usesSupabase) {
     try {

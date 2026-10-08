@@ -6,7 +6,7 @@ import { APP_URL } from "@/lib/site";
 const fredoka = Fredoka({
   variable: "--font-display",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: "variable",
 });
 
 const inter = Inter({

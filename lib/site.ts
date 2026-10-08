@@ -20,3 +20,8 @@ export const SUPPORT_URL = "https://wa.me/923044149674";
 export function profileReturnPath(value: string | null): string {
   return value === "/order" || value === "/account/orders" || (value && /^\/u\/[a-z0-9._-]{1,30}$/.test(value) && !["/u/.", "/u/.."].includes(value)) ? value : "/account/orders";
 }
+
+export function accountReturnPath(requested: string | null, draftEmail?: string, accountEmail?: string | null): string {
+  if (requested !== null) return profileReturnPath(requested);
+  return draftEmail && accountEmail && draftEmail.toLowerCase() === accountEmail.toLowerCase() ? '/order' : '/account/orders';
+}

@@ -28,7 +28,7 @@ try{
   assert.equal(await page.getByRole('button',{name:/Save changes/i}).count(),0);checks++;
  }
  assert(requests.includes('/rest/v1/rpc/get_public_profile'));checks++;
- await page.goto(base+'/account');assert(await page.getByLabel('Email',{exact:true}).isVisible());assert(await page.getByLabel('Password',{exact:true}).isVisible());checks++;
+ await page.goto(base+'/account');await page.getByLabel('Email',{exact:true}).waitFor();assert(await page.getByLabel('Email',{exact:true}).isVisible());assert(await page.getByLabel('Password',{exact:true}).isVisible());checks++;
  await page.getByRole('button',{name:'Create a new account',exact:true}).click();await page.getByRole('heading',{name:'Create your account',exact:true}).waitFor();assert.equal(await page.getByLabel('Password',{exact:true}).getAttribute('minlength'),'8');assert.equal(await page.getByRole('button',{name:'Create account',exact:true}).count(),1);checks++;
  await page.goto(base+'/admin');assert(await page.getByRole('button',{name:/Sign in/i}).isVisible());assert.equal(await page.getByRole('heading',{name:'Orders',exact:true}).count(),0);checks++;
  await page.goto(base+'/account/recovery');assert.equal(await page.getByLabel('New password').count(),0);checks++;

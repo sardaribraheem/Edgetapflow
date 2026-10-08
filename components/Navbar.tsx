@@ -16,7 +16,7 @@ export default function Navbar() {
         <div className="container-x">
           <nav className="flex items-center justify-between rounded-full bg-white/85 px-2.5 py-2 shadow-[0_14px_40px_-16px_rgba(16,11,74,0.35)] ring-1 ring-[--ink]/6 backdrop-blur-md">
             {/* brand */}
-            <Link href="/" className="flex items-center gap-2 rounded-full px-2 py-1.5">
+            <Link href="/" aria-label="EdgeTap home" prefetch={false} className="flex items-center gap-2 rounded-full px-2 py-1.5">
               <span className="grid h-8 w-8 place-items-center rounded-full bg-[--yellow]">
                 <NfcWaves className="h-5 w-5 text-[--ink]" />
               </span>
@@ -40,10 +40,10 @@ export default function Navbar() {
 
             {/* right actions */}
             <div className="flex items-center gap-2">
-              <a href={nav.cta.href} className="btn btn-ink hidden px-5 py-2.5 text-[13px] sm:inline-flex">
+              <a href={nav.cta.href} className="nav-order-cta btn btn-ink px-5 py-2.5 text-[13px]">
                 {nav.cta.label} <span aria-hidden="true">→</span>
               </a>
-              <Link href="/account" className="btn bg-white px-5 py-2.5 text-[13px] ring-1 ring-[--ink]/15 hover:bg-[--cream] sm:inline-flex">
+              <Link href="/account" prefetch={false} className="btn whitespace-nowrap bg-white px-5 py-2.5 text-[13px] ring-1 ring-[--ink]/15 hover:bg-[--cream] sm:inline-flex">
                 Sign in
               </Link>
 

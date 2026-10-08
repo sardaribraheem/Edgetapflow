@@ -12,10 +12,13 @@ assert.equal(validateSupabaseConfig('https://example.supabase.co/',token('anon')
 assert.equal(validateSupabaseConfig('http://127.0.0.1:54321','sb_publishable_LOCAL_FIXTURE').url,'http://127.0.0.1:54321');
 console.log('PASS Supabase public config: privileged keys, missing values and credential-bearing/unsafe origins are rejected without echoing keys.');
 const siteJS=transpileModule(await readFile('lib/site.ts','utf8'),{compilerOptions:{module:ModuleKind.ES2022}}).outputText;
-const {profileUrl,profileReturnPath}=await import(`data:text/javascript;base64,${Buffer.from(siteJS).toString('base64')}`);
+const {profileUrl,profileReturnPath,accountReturnPath}=await import(`data:text/javascript;base64,${Buffer.from(siteJS).toString('base64')}`);
 for(const name of ['.','..','../admin','bad/handle'])assert.throws(()=>profileUrl(name));
 for(const path of ['/u/.','/u/..','//outside.example','/admin'])assert.equal(profileReturnPath(path),'/account/orders');
 assert.equal(new URL(profileUrl('real-owner')).pathname,'/u/real-owner');assert.equal(profileReturnPath('/order'),'/order');
+for(const unsafe of ['//outside.example','https://outside.example','javascript:alert(1)','/order?next=https://outside.example','/u/..'])assert.equal(accountReturnPath(unsafe,'customer@example.test','customer@example.test'),'/account/orders');
+assert.equal(accountReturnPath(null,'customer@example.test','CUSTOMER@example.test'),'/order');assert.equal(accountReturnPath(null,'customer@example.test','other@example.test'),'/account/orders');assert.equal(accountReturnPath('/account/orders','customer@example.test','customer@example.test'),'/account/orders');assert.equal(accountReturnPath(null),'/account/orders');
+console.log('PASS account callback resumes only a matching claimed device draft and rejects external/arbitrary redirects.');
 console.log('PASS NFC/QR handles reject browser-normalized dot paths and retain safe internal account redirects.');
 
 // Verify money crossing the app/RPC boundary, including normal floating-point rupees.

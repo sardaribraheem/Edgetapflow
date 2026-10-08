@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { auth, onAuthStateChanged, type User } from '@/lib/auth';
 import { usesSupabase } from '@/lib/backend';
-import { applicationPayload, blankApplication, getMyApplications, getOrderSettings, saveApplicationDraft, submitApplication, wizardFromApplication, type OrderSettings, type WizardDraft } from '@/lib/application';
+import { applicationPayload, blankApplication, getMyApplications, getOrderSettings, isOrderingUnavailable, saveApplicationDraft, submitApplication, wizardFromApplication, type OrderSettings, type WizardDraft } from '@/lib/application';
 import { uploadCustomDesign, uploadPaymentReceipt, uploadPublicAvatar } from '@/lib/upload-service';
 import { isSafeContactUrl } from '@/lib/links';
 import { calculateSubtotal } from '@/lib/data/order';
@@ -47,7 +47,7 @@ function CloudOrderWizard(){
    if(requested&&!saved)throw new Error('This draft is unavailable. View your submitted applications on My orders.');
    meta.current={id:saved?.id||crypto.randomUUID(),version:saved?.version||0,uid:user.uid};
    setDraft(saved?wizardFromApplication(saved.payload):{...blankApplication(user.email||''),size:config.cardSizes[0]});setStep(saved?.step||0);setSavedOnce(!!saved);setSettings(config);setReady(true);
-  }).catch(e=>{if(active)setError(e.message||'Could not recover your application. Reload to try again.');});
+  }).catch(e=>{if(active)setError(isOrderingUnavailable(e)?'You are signed in, but saved applications are temporarily unavailable. Try again later or contact EdgeTap.':e.message==='This draft is unavailable. View your submitted applications on My orders.'?e.message:'Could not recover your application. Reload to try again.');});
   return()=>{active=false;};
   // Token refresh must not overwrite unsaved fields.
   // eslint-disable-next-line react-hooks/exhaustive-deps

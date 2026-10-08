@@ -34,6 +34,27 @@ try {
       assert(!/private beta|placeholder voices|coming soon|lifetime|24\/7|Admin Dashboard|Raast|Easypaisa|Meezan/i.test(text),route); checks++;
       assert(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1), `${route}: overflow at ${width}`); checks++;
       assert.equal(await page.locator('a[href="#"]').count(),0,route+" dead link"); checks++;
+      if (route === "/pricing") {
+        const cards = await page.locator('.pricing-option').evaluateAll(nodes => nodes.map(node => {
+          const box = node.getBoundingClientRect();
+          return { top: box.top, right: box.right, height: box.height };
+        }));
+        assert.equal(cards.length, 4); checks++;
+        assert(cards.every(card => Math.abs(card.top - cards[0].top) < 1), 'Four pricing options must stay in one row'); checks++;
+        assert(text.includes('Rs. 29,999') && !text.includes('Rs. 18,999') && !text.includes('Rs. 2,499')); checks++;
+        const row = page.getByRole('region', { name: 'Compare four EdgeTap options', exact: true });
+        if (width < 1200) {
+          await row.focus(); await page.keyboard.press('End');
+          await page.locator('.pricing-option').last().scrollIntoViewIfNeeded();
+          assert(await row.evaluate(node => node.scrollLeft > 0), 'Mobile row must allow access to the last plan'); checks++;
+          await row.evaluate(node => { node.scrollLeft = 0; });
+        } else {
+          assert(cards.every(card => card.right <= width), 'All four desktop plans must fit'); checks++;
+        }
+        for (const button of await page.locator('.pricing-option-action .btn').all()) {
+          assert(await button.evaluate(node => node.scrollWidth <= node.clientWidth + 1), 'Pricing CTA must fit its card'); checks++;
+        }
+      }
       if (route === "/" || route === "/pricing") {
         assert.equal(await page.locator('a[href="/admin"]').count(),0); checks++;
         const hrefs = await page.locator('a[href^="/#"],a[href^="#"]').evaluateAll(nodes => nodes.map(n=>n.getAttribute("href")));

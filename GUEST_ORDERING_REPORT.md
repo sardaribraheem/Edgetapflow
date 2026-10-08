@@ -1,3 +1,5 @@
+> **8 October update:** Four pricing options now share one row: Standard Digital Rs. 999, Business NFC contact-only custom quote, website/four-card package Rs. 29,999, and custom NFC contact-only quote. First-year website hosting/domain remains included; Rs. 3,000 annually starts in year two. Migrations 007–009 are now hosted under the owner’s explicit deployment request. See PRICING_DEPLOYMENT_REPORT.md for current release verification. Earlier local-only/hosting-hold observations below describe the previous state.
+
 # Guest ordering and pricing update — 7 October 2026
 
 Implemented locally on `launch-readiness`. No database migration, hosted data change, billing, deployment or push is performed by this update. The prior conditional request to deploy remains blocked by hosted prerequisites.
@@ -7,7 +9,7 @@ Implemented locally on `launch-readiness`. No database migration, hosted data ch
 Primary card CTAs, navigation/mobile menu, home sections, footer and account “start another” links now lead to `/pricing`. Existing owned-draft/correction links still reopen the exact private application.
 
 - **Standard card: Rs. 999/card.** Pricing → card design → profile/handle → contact links → preview → delivery/NASTP pickup → account saving → manual JazzCash → private proof → application submission.
-- **Custom website + cards: Rs. 18,999.** Custom website/portfolio, four linked cards requested now or during the first year, first-year hosting/domain services included. **Rs. 3,000 annually from year two**, confirmed by owner. Contact-only arrangement, no premium checkout, subscription, redemption ledger, website builder or automated renewal is implemented.
+- **Custom website + cards: Rs. 29,999.** Custom website/portfolio, four linked cards requested now or during the first year, first-year hosting/domain services included. **Rs. 3,000 annually from year two**, confirmed by owner. Contact-only arrangement, no premium checkout, subscription, redemption ledger, website builder or automated renewal is implemented.
 - **Custom NFC solution.** Discuss attendance, employee/event cards or another NFC idea; feasibility/scope/quote is agreed directly. These are custom-project examples, not claims that the standard app implements attendance or event management.
 - Premium/custom contact buttons lead to the visible contact section: WhatsApp **+92 304 414 9674**, owner-approved public email **sardaribraheem277@gmail.com**. This does not configure or verify an SMTP sender.
 
