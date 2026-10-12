@@ -11,12 +11,12 @@ export default function SolutionGrid() {
         {/* heading */}
         <div className="flex flex-col items-start gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <div className="eyebrow mb-3 text-[--coral]">What we offer</div>
-            <h2 className="text-display max-w-2xl text-[clamp(2.4rem,6vw,4.5rem)] text-[--ink]">
-              Your card. Your <span className="text-[--sky]">connection.</span>
+            <div className="eyebrow mb-3 text-[var(--coral)]">What we offer</div>
+            <h2 className="text-display max-w-2xl text-[clamp(2.4rem,6vw,4.5rem)] text-[var(--ink)]">
+              Your card. Your <span className="text-[var(--sky)]">connection.</span>
             </h2>
           </div>
-          <p className="max-w-sm text-[15px] leading-relaxed text-[--ink-soft]">
+          <p className="max-w-sm text-[15px] leading-relaxed text-[var(--ink-soft)]">
             One card, endless possibilities. Every EdgeTap is a physical key
             that opens the digital experience you design.
           </p>
@@ -24,7 +24,7 @@ export default function SolutionGrid() {
       </div>
 
       {/* horizontal scroll-snap showcase */}
-      <div className="scroll-x mt-10 lg:mt-14">
+      <div className="scroll-x mt-10 lg:mt-14" role="region" aria-label="EdgeTap card features" tabIndex={0}>
         {standard.map((s) => (
           <SolutionCard key={s.index} solution={s} />
         ))}

@@ -10,6 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test:browser": "node scripts/test-site.mjs",
     "serve:qa": "node scripts/serve-export.mjs",
+    "check:release": "node scripts/check-hosting-release.mjs",
+    "deploy:hosting": "npm run build && npm run check:release && npx --yes firebase-tools@15.33.0 deploy --only hosting --project edgetapflow --non-interactive",
     "test:rules": "firebase emulators:exec --config firebase.qa.json --project demo-edgetap-qa --only firestore,storage,auth \"node scripts/test-rules.mjs && node scripts/test-services.mjs\"",
     "test:supabase": "node scripts/test-supabase-config.mjs && node scripts/test-supabase.mjs && node scripts/test-applications.mjs && node scripts/test-business-migration.mjs && node scripts/test-ordering-upgrade.mjs",
     "test:migration": "node scripts/test-migration.mjs",

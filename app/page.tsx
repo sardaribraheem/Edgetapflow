@@ -1,4 +1,5 @@
 import Navbar from "@/components/Navbar";
+import HowToOrder from "@/components/HowToOrder";
 import Hero from "@/components/Hero";
 import SolutionGrid from "@/components/SolutionGrid";
 import UseCaseStory from "@/components/UseCaseStory";
@@ -13,10 +14,11 @@ export default function Home() {
   return (
     <>
       <Navbar />
-      <main>
+      <main id="main-content" tabIndex={-1}>
         <Hero />
         <SolutionGrid />
         <UseCaseStory />
+        <HowToOrder />
         <CustomCTA />
         <FAQ />
         <FinalCTA />

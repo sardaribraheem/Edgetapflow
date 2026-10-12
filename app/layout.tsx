@@ -65,7 +65,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="en"
       className={`${fredoka.variable} ${inter.variable} antialiased`}
     >
-      <body className="min-h-screen flex flex-col bg-[--color-bg] text-[--color-fg] font-sans">
+      <body className="min-h-screen flex flex-col bg-[var(--color-bg)] text-[var(--color-fg)] font-sans">
         {children}
       </body>
     </html>

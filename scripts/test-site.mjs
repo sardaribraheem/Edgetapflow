@@ -64,10 +64,37 @@ try {
         }
       }
       if (route === "/" && width < 1024) {
+        assert(await page.locator('header').getByRole('link', { name: 'Get Started', exact: false }).isVisible()); checks++;
         await page.getByRole("button",{name:"Open menu"}).click();
         assert(await page.getByRole("dialog").isVisible()); checks++;
+        const drawer = page.getByRole('dialog');
+        const links = drawer.locator('a');
+        await page.keyboard.press('Shift+Tab');
+        assert(await links.last().evaluate(node => node === document.activeElement)); checks++;
+        await page.keyboard.press('Tab');
+        assert(await links.first().evaluate(node => node === document.activeElement)); checks++;
         await page.keyboard.press("Escape");
         assert.equal(await page.getByRole("button",{name:"Open menu"}).getAttribute("aria-expanded"),"false"); checks++;
+        assert(await page.getByRole('button', { name: 'Open menu' }).evaluate(node => node === document.activeElement)); checks++;
+        await page.getByRole('button', { name: 'Open menu' }).click();
+        await page.setViewportSize({ width: 1280, height: 900 });
+        await page.waitForFunction(() => document.body.style.overflow !== 'hidden');
+        assert.equal(await page.getByRole('dialog').count(), 0); checks++;
+        await page.setViewportSize({ width, height: 900 });
+      }
+      if (route === '/') {
+        await page.getByRole('link', { name: 'Skip to content' }).focus();
+        await page.keyboard.press('Enter');
+        assert.equal(await page.evaluate(() => document.activeElement.id), 'main-content'); checks++;
+        assert.equal(await page.locator('#how-to-order ol > li').count(), 3); checks++;
+        assert.equal(await page.locator('#top a[href="/u/ibraheem"]').count(), 0); checks++;
+        const question = page.getByRole('button', { name: 'How does the NFC card work?', exact: true });
+        await question.click();
+        const answer = page.getByRole('region', { name: 'How does the NFC card work?', exact: true });
+        assert(await answer.isVisible()); checks++;
+        await question.click();
+        assert.equal(await answer.count(), 0); checks++;
+        await page.evaluate(() => window.scrollTo(0, 0));
       }
       if (route === "/" || route === "/pricing" || route === "/order") await page.screenshot({path:`test-results/${route==="/"?"home":route.slice(1)}-${width}.png`,fullPage:true});
     }

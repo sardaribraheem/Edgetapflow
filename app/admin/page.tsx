@@ -66,7 +66,7 @@ export default function AdminPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[--cream] font-display text-xl text-[--ink]">
+      <div className="flex min-h-screen items-center justify-center bg-[var(--cream)] font-display text-xl text-[var(--ink)]">
         Loading EdgeTap Admin...
       </div>
     );
@@ -74,53 +74,53 @@ export default function AdminPage() {
 
   if (!user) {
     return (
-      <div className="relative flex min-h-screen flex-col items-center justify-center bg-[--cream] px-4">
+      <div className="relative flex min-h-screen flex-col items-center justify-center bg-[var(--cream)] px-4">
         <div className="card-paper w-full max-w-md p-8 shadow-[var(--shadow-card)]">
           <div className="mb-6 flex items-center justify-center gap-2">
-            <span className="grid h-10 w-10 place-items-center rounded-full bg-[--yellow]">
-              <NfcWaves className="h-5 w-5 text-[--ink]" />
+            <span className="grid h-10 w-10 place-items-center rounded-full bg-[var(--yellow)]">
+              <NfcWaves className="h-5 w-5 text-[var(--ink)]" />
             </span>
-            <span className="font-display text-2xl font-bold text-[--ink]">EdgeTap Admin</span>
+            <span className="font-display text-2xl font-bold text-[var(--ink)]">EdgeTap Admin</span>
           </div>
 
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
-              <label htmlFor="admin-email" className="block text-sm font-semibold text-[--ink]">Email</label>
+              <label htmlFor="admin-email" className="block text-sm font-semibold text-[var(--ink)]">Email</label>
               <input
                 id="admin-email" type="email" autoComplete="username"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1 w-full rounded-xl border border-[--ink]/15 bg-white px-4 py-3 text-[--ink] focus:outline-none focus:ring-2 focus:ring-[--ink]"
+                className="mt-1 w-full rounded-xl border border-[var(--ink)]/15 bg-white px-4 py-3 text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--ink)]"
                 required
               />
             </div>
             <div>
-              <label htmlFor="admin-password" className="block text-sm font-semibold text-[--ink]">Password</label>
+              <label htmlFor="admin-password" className="block text-sm font-semibold text-[var(--ink)]">Password</label>
               <input
                 id="admin-password" type="password" autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
-                className="mt-1 w-full rounded-xl border border-[--ink]/15 bg-white px-4 py-3 text-[--ink] focus:outline-none focus:ring-2 focus:ring-[--ink]"
+                className="mt-1 w-full rounded-xl border border-[var(--ink)]/15 bg-white px-4 py-3 text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--ink)]"
                 required
               />
             </div>
-            {loginError && <p className="text-sm text-[--coral]">{loginError}</p>}
-            {resetMessage && <p className="rounded-xl bg-[--mint-soft] p-3 text-sm font-semibold text-[--ink]">{resetMessage}</p>}
+            {loginError && <p className="text-sm text-[var(--coral)]">{loginError}</p>}
+            {resetMessage && <p className="rounded-xl bg-[var(--mint-soft)] p-3 text-sm font-semibold text-[var(--ink)]">{resetMessage}</p>}
             <button
               type="submit"
-              className="w-full rounded-xl bg-[--ink] py-3.5 font-display font-semibold text-white shadow-[0_4px_0_0_rgba(16,11,74,0.3)] transition-transform hover:-translate-y-0.5"
+              className="w-full rounded-xl bg-[var(--ink)] py-3.5 font-display font-semibold text-white shadow-[0_4px_0_0_rgba(16,11,74,0.3)] transition-transform hover:-translate-y-0.5"
             >
               Sign In to Dashboard
             </button>
           </form>
 
-          <button onClick={handlePasswordReset} type="button" className="mt-4 w-full text-center text-sm font-semibold text-[--ink-soft] hover:text-[--ink] hover:underline">
+          <button onClick={handlePasswordReset} type="button" className="mt-4 w-full text-center text-sm font-semibold text-[var(--ink-soft)] hover:text-[var(--ink)] hover:underline">
             Reset admin password
           </button>
 
           <div className="mt-6 text-center">
-            <Link href="/" className="text-sm font-semibold text-[--ink-soft] hover:underline">
+            <Link href="/" className="text-sm font-semibold text-[var(--ink-soft)] hover:underline">
               ← Back to Homepage
             </Link>
           </div>

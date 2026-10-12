@@ -38,13 +38,13 @@ export function CardStep({
 
   return (
     <section className="card-paper mb-6 p-7 sm:p-10">
-      <p className="eyebrow mb-1 text-[--ink-mid]">Step 1 · Card</p>
-      <h1 className="font-display text-[clamp(1.8rem,4vw,2.6rem)] font-semibold leading-tight text-[--ink]">
+      <p className="eyebrow mb-1 text-[var(--ink-mid)]">Step 1 · Card</p>
+      <h1 className="font-display text-[clamp(1.8rem,4vw,2.6rem)] font-semibold leading-tight text-[var(--ink)]">
         Choose your card
       </h1>
-      <p className="mt-2 text-[15px] text-[--ink-soft]">The design that gets tapped. Every design is printed on a PVC card with embedded NFC, 85.60 × 53.98 mm.</p>
+      <p className="mt-2 text-[15px] text-[var(--ink-soft)]">The design that gets tapped. Every design is printed on a PVC card with embedded NFC, 85.60 × 53.98 mm.</p>
 
-      <div className="mt-4 rounded-xl bg-[--mint-soft]/60 px-4 py-3 text-sm font-bold text-[--ink]">
+      <div className="mt-4 rounded-xl bg-[var(--mint-soft)]/60 px-4 py-3 text-sm font-bold text-[var(--ink)]">
         Your EdgeTap card · Design selected for review
       </div>
 
@@ -55,21 +55,21 @@ export function CardStep({
             type="button"
             aria-pressed={draft.cardTemplate === t.id}
             onClick={() => onChange({ cardTemplate: t.id })}
-            className={`group relative flex flex-col items-start gap-2 rounded-xl border-2 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-[--ink]/50 ${
-              draft.cardTemplate === t.id ? "border-[--ink] bg-[--yellow-soft]/30 shadow-[var(--shadow-card)]" : "border-[--ink]/10 bg-white"
+            className={`group relative flex flex-col items-start gap-2 rounded-xl border-2 p-4 text-left transition-all hover:-translate-y-0.5 hover:border-[var(--ink)]/50 ${
+              draft.cardTemplate === t.id ? "border-[var(--ink)] bg-[var(--yellow-soft)]/30 shadow-[var(--shadow-card)]" : "border-[var(--ink)]/10 bg-white"
             }`}
           >
-            <span className={`relative grid h-32 w-full place-items-center overflow-hidden rounded-md ring-1 ring-[--ink]/10 ${t.tone}`}>
+            <span className={`relative grid h-32 w-full place-items-center overflow-hidden rounded-md ring-1 ring-[var(--ink)]/10 ${t.tone}`}>
               {(["simple", "lux", "wood", "inverted"] as CardTemplateId[]).includes(t.id) ? (
                 <img src={`/card-designs/${t.id}.png`} alt={`${t.name} card design`} className="h-full w-full object-cover" />
               ) : (
-                <NfcWaves className={`h-9 w-9 ${t.id === "inverted" ? "text-[--yellow]" : "text-[--ink]"}`} />
+                <NfcWaves className={`h-9 w-9 ${t.id === "inverted" ? "text-[var(--yellow)]" : "text-[var(--ink)]"}`} />
               )}
             </span>
-            <span className="font-display text-lg font-bold text-[--ink]">{t.name}</span>
-            <span className="text-[13px] font-medium text-[--ink-soft]">{t.tagline}</span>
+            <span className="font-display text-lg font-bold text-[var(--ink)]">{t.name}</span>
+            <span className="text-[13px] font-medium text-[var(--ink-soft)]">{t.tagline}</span>
             {draft.cardTemplate === t.id && (
-              <span className="absolute -top-2 -right-2 grid h-6 w-6 place-items-center rounded-full bg-[--ink] text-white">
+              <span className="absolute -top-2 -right-2 grid h-6 w-6 place-items-center rounded-full bg-[var(--ink)] text-white">
                 ✓
               </span>
             )}
@@ -78,29 +78,29 @@ export function CardStep({
       </div>
 
       {draft.cardTemplate === "upload" && (
-        <div className="mt-6 rounded-2xl bg-[--sky-soft]/40 p-5 ring-1 ring-[--sky]/30">
-          <p className="text-sm font-bold text-[--ink]">Upload your own card design</p><p className="mt-2 text-sm">Your original is kept private. Staff will manually prepare the final layout for the standard PVC card size.</p>
+        <div className="mt-6 rounded-2xl bg-[var(--sky-soft)]/40 p-5 ring-1 ring-[var(--sky)]/30">
+          <p className="text-sm font-bold text-[var(--ink)]">Upload your own card design</p><p className="mt-2 text-sm">Your original is kept private. Staff will manually prepare the final layout for the standard PVC card size.</p>
           <input aria-label="Card artwork image" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])} className="mt-3 block w-full text-sm" />
-          {uploading && <p className="mt-2 text-sm text-[--ink-soft]">{localOnly ? "Saving on this device…" : "Uploading…"}</p>}
-          {uploadError && <p className="mt-2 text-sm font-semibold text-[--coral]">{uploadError}</p>}
-          {draft.customDesignUrl && <p className="mt-2 text-sm font-semibold text-[--ink]">{draft.customDesignUrl === 'pending' ? 'Design save in progress.' : localOnly ? 'Artwork selected on this device. Check the draft save status before leaving.' : 'Private artwork uploaded. Wait for the draft save before leaving.'}</p>}
+          {uploading && <p className="mt-2 text-sm text-[var(--ink-soft)]">{localOnly ? "Saving on this device…" : "Uploading…"}</p>}
+          {uploadError && <p className="mt-2 text-sm font-semibold text-[var(--coral)]">{uploadError}</p>}
+          {draft.customDesignUrl && <p className="mt-2 text-sm font-semibold text-[var(--ink)]">{draft.customDesignUrl === 'pending' ? 'Design save in progress.' : localOnly ? 'Artwork selected on this device. Check the draft save status before leaving.' : 'Private artwork uploaded. Wait for the draft save before leaving.'}</p>}
         </div>
       )}
 
       {draft.cardTemplate === "designer" && (
-        <div className="mt-6 rounded-2xl bg-[--mint-soft]/60 p-5">
-          <p className="text-sm font-bold text-[--ink]">Need a custom design?</p>
-          <p className="mt-1 text-sm text-[--ink-soft]">We&apos;ll contact you about a professional design request and any additional fee before proceeding.</p>
+        <div className="mt-6 rounded-2xl bg-[var(--mint-soft)]/60 p-5">
+          <p className="text-sm font-bold text-[var(--ink)]">Need a custom design?</p>
+          <p className="mt-1 text-sm text-[var(--ink-soft)]">We&apos;ll contact you about a professional design request and any additional fee before proceeding.</p>
           <a href={SUPPORT_URL} target="_blank" rel="noreferrer" className="btn btn-ink mt-4 inline-flex px-4 py-2 text-sm">Request a designer</a>
         </div>
       )}
 
-      <div className="mt-6 flex items-center justify-between rounded-xl bg-white p-4 ring-1 ring-[--ink]/10">
-        <span className="text-sm font-bold text-[--ink]">Quantity</span>
+      <div className="mt-6 flex items-center justify-between rounded-xl bg-white p-4 ring-1 ring-[var(--ink)]/10">
+        <span className="text-sm font-bold text-[var(--ink)]">Quantity</span>
         <div className="flex items-center gap-3">
-          <button type="button" onClick={() => onChange({ quantity: Math.max(1, draft.quantity - 1) })} className="grid h-8 w-8 place-items-center rounded-full bg-[--ink]/8 font-bold">−</button>
+          <button type="button" onClick={() => onChange({ quantity: Math.max(1, draft.quantity - 1) })} className="grid h-8 w-8 place-items-center rounded-full bg-[var(--ink)]/8 font-bold">−</button>
           <span className="w-6 text-center font-display font-bold">{draft.quantity}</span>
-          <button type="button" onClick={() => onChange({ quantity: Math.min(20, draft.quantity + 1) })} className="grid h-8 w-8 place-items-center rounded-full bg-[--ink] text-white font-bold">+</button>
+          <button type="button" onClick={() => onChange({ quantity: Math.min(20, draft.quantity + 1) })} className="grid h-8 w-8 place-items-center rounded-full bg-[var(--ink)] text-white font-bold">+</button>
         </div>
       </div>
     </section>
@@ -146,20 +146,20 @@ export function ProfileStep({
 
   return (
     <section className="card-paper mb-6 p-7 sm:p-10">
-      <p className="eyebrow mb-1 text-[--ink-mid]">Step 2 · Profile</p>
-      <h1 className="font-display text-[clamp(1.8rem,4vw,2.6rem)] font-semibold leading-tight text-[--ink]">
+      <p className="eyebrow mb-1 text-[var(--ink-mid)]">Step 2 · Profile</p>
+      <h1 className="font-display text-[clamp(1.8rem,4vw,2.6rem)] font-semibold leading-tight text-[var(--ink)]">
         Let&apos;s build your EdgeTap
       </h1>
-      <p className="mt-2 text-[15px] text-[--ink-soft]">
+      <p className="mt-2 text-[15px] text-[var(--ink-soft)]">
         This is the information people will see when they tap your card.
       </p>
 
       <div className="mt-8 space-y-6">
         {/* avatar */}
         <div>
-          <p className="mb-2 text-sm">{localOnly ? "Your photo stays on this device until you save to your account. It becomes publicly accessible after account upload, even before profile publication. Choose a photo you intend to share." : "Avatar images are publicly accessible after upload, even before profile publication. Upload only an image you intend to share."}</p><label className="block text-sm font-bold text-[--ink]">Profile picture <span className="font-normal text-[--ink-faint]">(optional)</span></label>
+          <p className="mb-2 text-sm">{localOnly ? "Your photo stays on this device until you save to your account. It becomes publicly accessible after account upload, even before profile publication. Choose a photo you intend to share." : "Avatar images are publicly accessible after upload, even before profile publication. Upload only an image you intend to share."}</p><label className="block text-sm font-bold text-[var(--ink)]">Profile picture <span className="font-normal text-[var(--ink-faint)]">(optional)</span></label>
           <div className="mt-3 flex items-center gap-4">
-            <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-full bg-[--yellow] ring-2 ring-white shadow-[var(--shadow-card)]">
+            <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--yellow)] ring-2 ring-white shadow-[var(--shadow-card)]">
               {draft.avatarPreview || draft.avatarUrl || preview ? (
                 <img
                   src={draft.avatarPreview || draft.avatarUrl || preview}
@@ -167,10 +167,10 @@ export function ProfileStep({
                   className="h-full w-full object-cover"
                 />
               ) : (
-                <SparkleDoodle className="h-7 w-7 text-[--ink]" />
+                <SparkleDoodle className="h-7 w-7 text-[var(--ink)]" />
               )}
             </div>
-            <label className="btn cursor-pointer bg-white px-4 py-2.5 text-[13px] font-bold ring-1 ring-[--ink]/15 hover:bg-[--cream]">
+            <label className="btn cursor-pointer bg-white px-4 py-2.5 text-[13px] font-bold ring-1 ring-[var(--ink)]/15 hover:bg-[var(--cream)]">
               {uploading ? (localOnly ? "Saving…" : "Uploading…") : "Upload photo"}
               <input
                 type="file"
@@ -180,11 +180,11 @@ export function ProfileStep({
               />
             </label>
           </div>
-          {uploadError && <p className="mt-2 text-[13px] font-semibold text-[--coral]">{uploadError}</p>}
+          {uploadError && <p className="mt-2 text-[13px] font-semibold text-[var(--coral)]">{uploadError}</p>}
         </div>
 
         <div>
-          <label htmlFor="ow-name" className="block text-sm font-bold text-[--ink]">
+          <label htmlFor="ow-name" className="block text-sm font-bold text-[var(--ink)]">
             Name
           </label>
           <input
@@ -194,13 +194,13 @@ export function ProfileStep({
             value={draft.displayName}
             onChange={(e) => onChange({ displayName: e.target.value })}
             placeholder="Ahmad Khan"
-            className="mt-2 w-full rounded-xl border border-[--ink]/15 bg-white px-4 py-3 text-[--ink] focus:outline-none focus:ring-2 focus:ring-[--ink]"
+            className="mt-2 w-full rounded-xl border border-[var(--ink)]/15 bg-white px-4 py-3 text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--ink)]"
           />
         </div>
 
         <div>
-          <label htmlFor="ow-title" className="block text-sm font-bold text-[--ink]">
-            Title <span className="font-normal text-[--ink-faint]">(optional)</span>
+          <label htmlFor="ow-title" className="block text-sm font-bold text-[var(--ink)]">
+            Title <span className="font-normal text-[var(--ink-faint)]">(optional)</span>
           </label>
           <input
             id="ow-title"
@@ -209,13 +209,13 @@ export function ProfileStep({
             value={draft.title}
             onChange={(e) => onChange({ title: e.target.value })}
             placeholder="e.g. Software Developer · Founder"
-            className="mt-2 w-full rounded-xl border border-[--ink]/15 bg-white px-4 py-3 text-[--ink] focus:outline-none focus:ring-2 focus:ring-[--ink]"
+            className="mt-2 w-full rounded-xl border border-[var(--ink)]/15 bg-white px-4 py-3 text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--ink)]"
           />
         </div>
 
         <div>
-          <label htmlFor="ow-bio" className="block text-sm font-bold text-[--ink]">
-            Bio <span className="font-normal text-[--ink-faint]">(optional)</span>
+          <label htmlFor="ow-bio" className="block text-sm font-bold text-[var(--ink)]">
+            Bio <span className="font-normal text-[var(--ink-faint)]">(optional)</span>
           </label>
           <textarea
             id="ow-bio"
@@ -224,7 +224,7 @@ export function ProfileStep({
             value={draft.bio}
             onChange={(e) => onChange({ bio: e.target.value })}
             placeholder="What should people know about you?"
-            className="mt-2 w-full resize-none rounded-xl border border-[--ink]/15 bg-white px-4 py-3 text-[--ink] focus:outline-none focus:ring-2 focus:ring-[--ink]"
+            className="mt-2 w-full resize-none rounded-xl border border-[var(--ink)]/15 bg-white px-4 py-3 text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--ink)]"
           />
         </div>
       </div>
@@ -274,11 +274,11 @@ export function LinksStep({
 
   return (
     <section className="card-paper mb-6 p-7 sm:p-10">
-      <p className="eyebrow mb-1 text-[--ink-mid]">Step 3 · Links</p>
-      <h1 className="font-display text-[clamp(1.8rem,4vw,2.6rem)] font-semibold leading-tight text-[--ink]">
+      <p className="eyebrow mb-1 text-[var(--ink-mid)]">Step 3 · Links</p>
+      <h1 className="font-display text-[clamp(1.8rem,4vw,2.6rem)] font-semibold leading-tight text-[var(--ink)]">
         What do you want people to find?
       </h1>
-      <p className="mt-2 text-[15px] text-[--ink-soft]">
+      <p className="mt-2 text-[15px] text-[var(--ink-soft)]">
       Add at least one useful way for people to connect with you. You can add more anytime.
       </p>
 
@@ -288,7 +288,7 @@ export function LinksStep({
             key={p.label + p.type + LINK_PRESETS.indexOf(p)}
             type="button"
             onClick={() => addLink(p)}
-            className="rounded-full bg-[--yellow-soft] px-3 py-1.5 text-[12px] font-bold text-[--ink] ring-1 ring-[--ink]/10 hover:bg-[--yellow]"
+            className="rounded-full bg-[var(--yellow-soft)] px-3 py-1.5 text-[12px] font-bold text-[var(--ink)] ring-1 ring-[var(--ink)]/10 hover:bg-[var(--yellow)]"
           >
             + {p.label}
           </button>
@@ -296,7 +296,7 @@ export function LinksStep({
         <button
           type="button"
           onClick={() => addLink()}
-          className="rounded-full bg-white px-3 py-1.5 text-[12px] font-bold text-[--ink] ring-1 ring-[--ink]/15 hover:bg-[--cream]"
+          className="rounded-full bg-white px-3 py-1.5 text-[12px] font-bold text-[var(--ink)] ring-1 ring-[var(--ink)]/15 hover:bg-[var(--cream)]"
         >
           + Custom
         </button>
@@ -304,7 +304,7 @@ export function LinksStep({
 
       <div className="mt-6 space-y-3">
         {links.map((l, i) => (
-          <div key={i} className="flex flex-col gap-2 rounded-2xl bg-white p-4 ring-1 ring-[--ink]/10 sm:flex-row sm:items-center">
+          <div key={i} className="flex flex-col gap-2 rounded-2xl bg-white p-4 ring-1 ring-[var(--ink)]/10 sm:flex-row sm:items-center">
             <input
               type="text"
               aria-label={`Link ${i + 1} label`}
@@ -312,7 +312,7 @@ export function LinksStep({
               placeholder="Label"
               value={l.label}
               onChange={(e) => update(i, "label", e.target.value)}
-              className="rounded-xl border border-[--ink]/15 px-3 py-2 text-sm text-[--ink]"
+              className="rounded-xl border border-[var(--ink)]/15 px-3 py-2 text-sm text-[var(--ink)]"
             />
             <input
               type="text"
@@ -321,12 +321,12 @@ export function LinksStep({
               placeholder={l.type === "email" ? "example@gmail.com" : l.type === "whatsapp" ? "+92 300 1234567" : "URL (https://…)"}
               value={l.type === "email" ? l.url.replace(/^mailto:/, "") : l.type === "whatsapp" ? l.url.replace("https://wa.me/", "") : l.url}
               onChange={(e) => updateUrl(i, e.target.value)}
-              className="flex-1 rounded-xl border border-[--ink]/15 px-3 py-2 text-sm text-[--ink]"
+              className="flex-1 rounded-xl border border-[var(--ink)]/15 px-3 py-2 text-sm text-[var(--ink)]"
             />
             <select
               value={l.type}
               onChange={(e) => update(i, "type", e.target.value)}
-              className="rounded-xl border border-[--ink]/15 px-3 py-2 text-sm text-[--ink]"
+              className="rounded-xl border border-[var(--ink)]/15 px-3 py-2 text-sm text-[var(--ink)]"
               aria-label={`Link ${i + 1} type`}
             >
               {[
@@ -355,8 +355,8 @@ export function LinksStep({
         ))}
       </div>
 
-      {links.length === 0 && <p className="mt-6 text-sm font-semibold text-[--coral]">Add Email to continue.</p>}
-      <p className="mt-2 text-[12px] text-[--ink-faint]">{links.length} / 10 links</p>
+      {links.length === 0 && <p className="mt-6 text-sm font-semibold text-[var(--coral)]">Add Email to continue.</p>}
+      <p className="mt-2 text-[12px] text-[var(--ink-faint)]">{links.length} / 10 links</p>
     </section>
   );
 }
@@ -365,8 +365,8 @@ export function LinksStep({
 export function PreviewStep({ profile }: { profile: Profile }) {
   return (
     <section className="mb-6">
-      <p className="eyebrow mb-2 text-[--ink-mid]">Step 4 · Preview</p>
-      <h1 className="mb-4 font-display text-[clamp(1.8rem,4vw,2.6rem)] font-semibold leading-tight text-[--ink]">
+      <p className="eyebrow mb-2 text-[var(--ink-mid)]">Step 4 · Preview</p>
+      <h1 className="mb-4 font-display text-[clamp(1.8rem,4vw,2.6rem)] font-semibold leading-tight text-[var(--ink)]">
         This is what people see when they tap
       </h1>
       <ProfilePage initialProfile={profile} previewOnly />
@@ -401,11 +401,11 @@ export function DeliveryStep({
   ];
   return (
     <section className="card-paper mb-6 p-7 sm:p-10">
-      <p className="eyebrow mb-1 text-[--ink-mid]">Step 5 · Delivery</p>
-      <h1 className="font-display text-[clamp(1.8rem,4vw,2.6rem)] font-semibold leading-tight text-[--ink]">
+      <p className="eyebrow mb-1 text-[var(--ink-mid)]">Step 5 · Delivery</p>
+      <h1 className="font-display text-[clamp(1.8rem,4vw,2.6rem)] font-semibold leading-tight text-[var(--ink)]">
         Where should we send your card?
       </h1>
-      <p className="mt-2 text-[15px] text-[--ink-soft]">
+      <p className="mt-2 text-[15px] text-[var(--ink-soft)]">
         Your address stays private. Delivery costs extra and is paid directly to the booked rider. The actual fare is provided when your card is ready.
       </p>
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -413,16 +413,16 @@ export function DeliveryStep({
           ["delivery", "Delivery", deliveryDetails],
           ["nastp_pickup", "NASTP Pickup", pickupDetails],
         ] as const).map(([value, label, description]) => (
-          <button type="button" key={value} aria-pressed={deliveryMethod === value} onClick={() => onDeliveryMethodChange(value)} className={`rounded-xl border-2 p-4 text-left transition-colors hover:border-[--ink]/50 ${deliveryMethod === value ? "border-[--ink] bg-[--yellow-soft]/30" : "border-[--ink]/10 bg-white"}`}>
-            <span className="flex items-center justify-between font-display font-bold text-[--ink]"><span>{label}</span>{deliveryMethod === value && <span aria-hidden="true">✓</span>}</span>
-            <span className="mt-1 block text-[12px] text-[--ink-soft]">{description}</span>
+          <button type="button" key={value} aria-pressed={deliveryMethod === value} onClick={() => onDeliveryMethodChange(value)} className={`rounded-xl border-2 p-4 text-left transition-colors hover:border-[var(--ink)]/50 ${deliveryMethod === value ? "border-[var(--ink)] bg-[var(--yellow-soft)]/30" : "border-[var(--ink)]/10 bg-white"}`}>
+            <span className="flex items-center justify-between font-display font-bold text-[var(--ink)]"><span>{label}</span>{deliveryMethod === value && <span aria-hidden="true">✓</span>}</span>
+            <span className="mt-1 block text-[12px] text-[var(--ink-soft)]">{description}</span>
           </button>
         ))}
       </div>
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
         {FIELDS.filter(({ key }) => (collectEmail || key !== "email") && (deliveryMethod === "delivery" || !["address","city","postalCode"].includes(key))).map(({ key, placeholder, type, span }) => (
           <div key={key} className={span ? "sm:col-span-2" : ""}>
-            <label htmlFor={`delivery-${key}`} className="block text-sm font-bold text-[--ink]">{placeholder}</label>
+            <label htmlFor={`delivery-${key}`} className="block text-sm font-bold text-[var(--ink)]">{placeholder}</label>
             <input
               id={`delivery-${key}`}
               maxLength={key === "address" ? 1000 : key === "email" ? 254 : key === "phone" ? 30 : 120}
@@ -430,7 +430,7 @@ export function DeliveryStep({
               readOnly={key === "email"}
               value={customer[key] || ""}
               onChange={(e) => onChange({ ...customer, [key]: e.target.value })}
-              className="mt-1.5 w-full rounded-xl border border-[--ink]/15 bg-white px-4 py-3 text-[--ink] focus:outline-none focus:ring-2 focus:ring-[--ink]"
+              className="mt-1.5 w-full rounded-xl border border-[var(--ink)]/15 bg-white px-4 py-3 text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--ink)]"
             />
           </div>
         ))}

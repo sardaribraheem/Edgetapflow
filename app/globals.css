@@ -26,6 +26,7 @@
   --yellow: #f6be2c;
   --yellow-soft: #fce9b8;
   --coral: #ff6b5b;
+  --coral-ink: #bd392f;
   --coral-soft: #ffd8d2;
   --sky: #7fa8ff;
   --sky-soft: #dbe7ff;
@@ -123,6 +124,7 @@
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 6rem;
 }
 
 body {
@@ -156,8 +158,13 @@ body {
   padding-block: clamp(3rem, 7vw, 5rem);
 }
 
-.nav-order-cta.btn { display: none; }
-@media (min-width: 640px) { .nav-order-cta.btn { display: inline-flex; } }
+.nav-order-cta.btn { min-height: 44px; }
+.nav-account-link.btn { display: none; min-height: 44px; }
+@media (min-width: 640px) { .nav-account-link.btn { display: inline-flex; } }
+
+.skip-link { position: fixed; top: 1rem; left: 1rem; z-index: 60; transform: translateY(-200%); border-radius: var(--radius-pill); background: var(--ink); color: var(--cream); padding: 0.75rem 1.25rem; font-weight: 600; }
+.skip-link:focus { transform: translateY(0); }
+.scroll-x:focus-visible { outline: 3px solid var(--ink); outline-offset: -3px; }
 
 /* Four pricing options remain in one row, with contained scrolling on mobile. */
 .pricing-page { width: 100%; max-width: 1440px; margin-inline: auto; padding: 6rem clamp(1.25rem, 3.5vw, 3rem) 5rem; color: var(--ink); }

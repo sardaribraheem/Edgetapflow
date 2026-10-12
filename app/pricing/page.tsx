@@ -14,7 +14,7 @@ function Features({ items }: { items: string[] }) {
 }
 
 export default function PricingPage() {
-  return <><Navbar/><main className="pricing-page">
+  return <><Navbar/><main id="main-content" tabIndex={-1} className="pricing-page">
     <header className="pricing-heading">
       <p className="font-display">One tap. Infinite possibilities.</p>
       <h1 className="font-display">Choose your EdgeTap.</h1>

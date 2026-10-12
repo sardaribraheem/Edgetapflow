@@ -54,28 +54,28 @@ export default function PublishProfileModal({
   const availableNow = available === true || (available === null && username.trim().toLowerCase() === (order.usernameFinal || "").toLowerCase());
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-[--ink]/40 p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-50 grid place-items-center bg-[var(--ink)]/40 p-4" onClick={onClose}>
       <div
-        className="w-full max-w-lg overflow-hidden rounded-3xl bg-[--cream] shadow-2xl"
+        className="w-full max-w-lg overflow-hidden rounded-3xl bg-[var(--cream)] shadow-2xl"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true" aria-label="Create Client Profile"
       >
-        <div className="flex items-center justify-between border-b border-[--ink]/10 px-6 py-4">
-          <h3 className="font-display text-lg font-bold text-[--ink]">Create Client Profile</h3>
-          <button onClick={onClose} className="text-[--ink-faint] hover:text-[--ink]" aria-label="Close">✕</button>
+        <div className="flex items-center justify-between border-b border-[var(--ink)]/10 px-6 py-4">
+          <h3 className="font-display text-lg font-bold text-[var(--ink)]">Create Client Profile</h3>
+          <button onClick={onClose} className="text-[var(--ink-faint)] hover:text-[var(--ink)]" aria-label="Close">✕</button>
         </div>
 
         <div className="space-y-4 p-6">
           <div>
-            <p className="text-[12px] font-bold uppercase tracking-widest text-[--ink-faint]">Customer</p>
-            <p className="font-display text-base font-bold text-[--ink]">{order.customer.fullName}</p>
+            <p className="text-[12px] font-bold uppercase tracking-widest text-[var(--ink-faint)]">Customer</p>
+            <p className="font-display text-base font-bold text-[var(--ink)]">{order.customer.fullName}</p>
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-bold text-[--ink]">Profile handle</label>
+            <label className="mb-1 block text-xs font-bold text-[var(--ink)]">Profile handle</label>
             <div className="flex gap-2">
-              <span className="grid place-items-center rounded-xl bg-[--ink]/5 px-3 text-sm font-bold text-[--ink]">/u/</span>
+              <span className="grid place-items-center rounded-xl bg-[var(--ink)]/5 px-3 text-sm font-bold text-[var(--ink)]">/u/</span>
               <input
                 value={username}
                 onChange={(e) => {
@@ -85,33 +85,33 @@ export default function PublishProfileModal({
                 }}
                 onBlur={() => check(username)}
                 placeholder="ahmadkhan"
-                className="min-w-0 flex-1 rounded-xl border border-[--ink]/10 bg-white px-3 py-2.5 text-sm text-[--ink] outline-none focus:border-[--ink]/30"
+                className="min-w-0 flex-1 rounded-xl border border-[var(--ink)]/10 bg-white px-3 py-2.5 text-sm text-[var(--ink)] outline-none focus:border-[var(--ink)]/30"
               />
               <button
                 onClick={() => check(username)}
                 disabled={checking}
-                className="rounded-xl bg-[--ink]/5 px-3 py-2 text-[12px] font-bold text-[--ink] hover:bg-[--ink]/10"
+                className="rounded-xl bg-[var(--ink)]/5 px-3 py-2 text-[12px] font-bold text-[var(--ink)] hover:bg-[var(--ink)]/10"
               >
                 {checking ? "…" : "Check"}
               </button>
             </div>
             <div className="mt-1.5 flex items-center gap-2 text-[12px]">
-              {available === true && <span className="font-bold text-[--mint]">✓ Available</span>}
-              {available === false && <span className="font-bold text-[--coral]">✕ Taken — try another.</span>}
-              {availableNow && order.usernameFinal && <span className="text-[--ink-faint]">(already live as {order.usernameFinal})</span>}
-              {checking && <span className="text-[--ink-faint]">Checking…</span>}
+              {available === true && <span className="font-bold text-[var(--mint)]">✓ Available</span>}
+              {available === false && <span className="font-bold text-[var(--coral)]">✕ Taken — try another.</span>}
+              {availableNow && order.usernameFinal && <span className="text-[var(--ink-faint)]">(already live as {order.usernameFinal})</span>}
+              {checking && <span className="text-[var(--ink-faint)]">Checking…</span>}
             </div>
           </div>
 
-          <div className="rounded-xl bg-[--yellow-soft]/50 p-3 text-[12px] leading-relaxed text-[--ink-soft]">
+          <div className="rounded-xl bg-[var(--yellow-soft)]/50 p-3 text-[12px] leading-relaxed text-[var(--ink-soft)]">
             Creates the profile from this order&apos;s draft: avatar, name, bio and links. The username is checked for collisions —
             nothing is overwritten. After this, the NFC chip and QR both point to <strong>/u/{username}</strong> (never to a social platform).
           </div>
 
-          {error && <p className="rounded-xl bg-[--coral]/10 p-3 text-sm text-[--coral]">{error}</p>}
+          {error && <p className="rounded-xl bg-[var(--coral)]/10 p-3 text-sm text-[var(--coral)]">{error}</p>}
 
           <div className="flex gap-3">
-            <button onClick={onClose} className="flex-1 rounded-xl bg-[--ink]/5 px-4 py-2.5 text-sm font-bold text-[--ink]">Cancel</button>
+            <button onClick={onClose} className="flex-1 rounded-xl bg-[var(--ink)]/5 px-4 py-2.5 text-sm font-bold text-[var(--ink)]">Cancel</button>
             <button onClick={create} disabled={busy} className="btn btn-ink flex-1 px-4 py-2.5 text-sm">
               {busy ? "Creating…" : "Create profile"}
             </button>

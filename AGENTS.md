@@ -12,8 +12,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 ## Architecture
 - Next.js App Router / React / Tailwind; static export in `out/`, Firebase Hosting project `edgetapflow`.
-- Browser Firebase Auth, Firestore and Storage; no backend/API, payment gateway, mail worker or courier integration.
-- `app/`: routes/metadata; `components/`: UI and staff/order/profile screens; `lib/`: Firebase, validation, domain models; `scripts/`: production/browser/rules verification.
+- Supabase Auth, PostgreSQL/RLS/RPCs and Storage are the application backend. Firebase is Hosting only. There is no automatic payment gateway, final-design email worker or courier integration.
+- `app/`: routes/metadata; `components/`: UI and staff/order/profile screens; `lib/`: Supabase services, validation and domain models, with explicitly selected legacy Firebase adapters; `scripts/`: production/browser/SQL verification.
 - `/u/ibraheem` is the founder example. Hosting rewrites other `/u/*` requests to `/profile.html`, whose client reads the incoming pathname. Never resolve unknown handles to founder content. Verify on Hosting preview as well as the local QA server.
 - NFC programming is a manual production task; QR and NFC both encode `profileUrl` from `lib/site.ts`. Handles cannot be renamed without implementing redirects for existing cards.
 
@@ -27,12 +27,12 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - `node scripts/diagnose-live-profile.mjs` traces a fresh unauthenticated production browser and sanitized service errors; no submissions.
 
 ## Configuration and deployment
-- `.env.local` supplies all six `NEXT_PUBLIC_FIREBASE_*` web-config variables shown in `.env.example`. No private credentials in NEXT_PUBLIC variables. Values are embedded at build time; rebuild after changing them.
+- `.env.local` supplies `NEXT_PUBLIC_DATA_BACKEND=supabase`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` and the canonical app origin. Values are embedded at build time; rebuild after changing them. Legacy Firebase variables are needed only if Firebase is explicitly selected for development. No private credentials in NEXT_PUBLIC variables.
 - Confirmed canonical origin: `https://edgetapflow.web.app`; optional `NEXT_PUBLIC_APP_URL` must be an HTTPS origin. Do not switch domains without owner approval.
-- Deploy only `out/` and reviewed Firebase rules/indexes. Follow `LAUNCH_REPORT.md` release steps; never treat docs as proof of deployed service state.
+- Deploy the reviewed `out/` to Firebase Hosting only with owner authorization. `npm run deploy:hosting` rebuilds and checks the export before publishing to `edgetapflow`. Do not deploy Firebase data-service rules for the Supabase workflow. See `CLOUD_HANDOFF.md`; never treat historical reports as proof of deployed service state.
 - Preserve the generated Next.js instruction block above.
-- Billing is inactive (verified 7 October 2026). Do not enable billing/payment methods, deploy or push under the current task. `(default)` has no free tier and is billing-gated; the distinct database `default` has free tier but deny-all deployed rules. `NEXT_PUBLIC_FIRESTORE_DATABASE_ID` selects a database explicitly; no automatic migration. `firebase.spark.json` is a prepared Firestore-only config, not a deployed fix.
-- Cloud Storage requires Blaze. `NEXT_PUBLIC_ONLINE_CHECKOUT_ENABLED` defaults to false: preserve the full wizard/services, but use honest WhatsApp handoff and no payment collection/submission until verified infrastructure works. Do not infer healthy service from the old production founder fallback or an HTTP 200 WebChannel transport.
+- Do not enable billing/payment methods, change Firebase Auth/Firestore/Storage, or apply Supabase schema/data changes without corresponding owner authorization. Firestore billing is not a prerequisite for the current Supabase app. A Hosting release needs Google/Firebase CLI permission, independently of Supabase account login.
+- Build guest cards on-device and require Supabase account saving before private payment submission. Preserve review/payment/printing guards. A design-proof queue entry is not sent email; the ten-hour window begins only after actual transport confirmation. The former instant-checkout flag is no longer used.
 
 ## Coding and security
 - Preserve the existing architecture; avoid unnecessary dependencies/rewrites. Use TypeScript, shared models and existing visual styles.

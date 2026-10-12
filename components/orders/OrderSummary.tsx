@@ -14,7 +14,7 @@ export function PrivateFile({path,label}:{path:string;label:string}){
 }
 export default function OrderSummary({order:o}:{order:Order}){
  return <section className="space-y-5 break-words">
-  <div className="flex flex-wrap gap-2"><span className="rounded-full bg-[--yellow-soft] px-3 py-1 text-sm font-bold">{REVIEW_LABELS[o.applicationStatus||'']||'Review status unavailable'}</span><span className="rounded-full bg-[--mint-soft] px-3 py-1 text-sm">{o.payment.status==='paid'?'Card Payment Verified':o.payment.status==='failed'?'Card Payment Rejected':'Card Payment Pending'}</span><span className="rounded-full bg-white px-3 py-1 text-sm">{FULFILLMENT_LABELS[o.fulfillment.status]||o.fulfillment.status}</span></div>
+  <div className="flex flex-wrap gap-2"><span className="rounded-full bg-[var(--yellow-soft)] px-3 py-1 text-sm font-bold">{REVIEW_LABELS[o.applicationStatus||'']||'Review status unavailable'}</span><span className="rounded-full bg-[var(--mint-soft)] px-3 py-1 text-sm">{o.payment.status==='paid'?'Card Payment Verified':o.payment.status==='failed'?'Card Payment Rejected':'Card Payment Pending'}</span><span className="rounded-full bg-white px-3 py-1 text-sm">{FULFILLMENT_LABELS[o.fulfillment.status]||o.fulfillment.status}</span></div>
   <p className="rounded-xl bg-white p-4">{nextOrderAction(o)}</p>
   <dl className="grid gap-3 text-sm sm:grid-cols-2">
    <div><dt className="font-bold">Customer</dt><dd>{o.customer.fullName}</dd></div><div><dt className="font-bold">Email</dt><dd>{o.customer.email}</dd></div>

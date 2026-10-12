@@ -80,18 +80,18 @@ export default function AccountPage() {
   if (!ready) return <main className="min-h-screen grid place-items-center px-4"><p role="status">Checking your sign-in…</p></main>;
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[--cream] px-4 py-16">
+    <main className="flex min-h-screen items-center justify-center bg-[var(--cream)] px-4 py-16">
       <div className="w-full max-w-md">
         <Link href="/" className="mx-auto mb-8 flex w-fit items-center gap-2">
-          <span className="grid h-10 w-10 place-items-center rounded-full bg-[--yellow]">
-            <NfcWaves className="h-5 w-5 text-[--ink]" />
+          <span className="grid h-10 w-10 place-items-center rounded-full bg-[var(--yellow)]">
+            <NfcWaves className="h-5 w-5 text-[var(--ink)]" />
           </span>
-          <span className="font-display text-xl font-bold text-[--ink]">EdgeTap</span>
+          <span className="font-display text-xl font-bold text-[var(--ink)]">EdgeTap</span>
         </Link>
         {draftEmail && !user && <p className="mb-5 text-sm">Your card draft is saved on this device. Sign in with the email you used at checkout to continue.</p>}
         <section className="card-paper p-7 sm:p-9">
-          <p className="eyebrow text-[--ink-mid]">Customer account</p>
-          <h1 className="mt-1 font-display text-3xl font-bold text-[--ink]">{user ? "You're signed in" : mode === "create" ? "Create your account" : "Sign in to EdgeTap"}</h1>
+          <p className="eyebrow text-[var(--ink-mid)]">Customer account</p>
+          <h1 className="mt-1 font-display text-3xl font-bold text-[var(--ink)]">{user ? "You're signed in" : mode === "create" ? "Create your account" : "Sign in to EdgeTap"}</h1>
           {user ? <>
             <p className="mt-4">Signed in as {user.email || "your EdgeTap account"}.</p>
             {busy ? <p role="status" className="mt-4">{message || "Please wait…"}</p> : <>
@@ -101,7 +101,7 @@ export default function AccountPage() {
             {error && <p role="alert" className="mt-4">{error}</p>}
             <button type="button" disabled={busy} onClick={handleSignOut} className="mt-6 font-bold underline disabled:opacity-50">Sign out this browser</button>
           </> : <>
-          <p className="mt-2 text-sm leading-relaxed text-[--ink-soft]">
+          <p className="mt-2 text-sm leading-relaxed text-[var(--ink-soft)]">
             {mode === "create" ? "Create a login to save your profile, follow your order and edit your profile after EdgeTap activates it. Registration does not place an order or create a public profile." : "Sign in to view your orders or update your activated profile. You can build a new card before creating an account."}
           </p>
           <div className="mt-5 flex flex-wrap gap-3">
@@ -110,7 +110,7 @@ export default function AccountPage() {
             </button>)}
           </div>
           <form onSubmit={handleSubmit} className="mt-7 space-y-4"><fieldset disabled={busy} className="min-w-0 space-y-4">
-            <label className="block text-sm font-bold text-[--ink]">
+            <label className="block text-sm font-bold text-[var(--ink)]">
               Email
               <input
                 type="email"
@@ -118,10 +118,10 @@ export default function AccountPage() {
                 onChange={(event) => setEmail(event.target.value)}
                 autoComplete="email"
                 required
-                className="mt-1.5 w-full rounded-xl border border-[--ink]/15 bg-white px-4 py-3 text-[--ink] outline-none focus:ring-2 focus:ring-[--ink]"
+                className="mt-1.5 w-full rounded-xl border border-[var(--ink)]/15 bg-white px-4 py-3 text-[var(--ink)] outline-none focus:ring-2 focus:ring-[var(--ink)]"
               />
             </label>
-            <label className="block text-sm font-bold text-[--ink]">
+            <label className="block text-sm font-bold text-[var(--ink)]">
               Password
               <input
                 type="password"
@@ -130,11 +130,11 @@ export default function AccountPage() {
                 autoComplete={mode === "create" ? "new-password" : "current-password"}
                 minLength={mode === "create" ? (usesSupabase ? 8 : 6) : undefined}
                 required
-                className="mt-1.5 w-full rounded-xl border border-[--ink]/15 bg-white px-4 py-3 text-[--ink] outline-none focus:ring-2 focus:ring-[--ink]"
+                className="mt-1.5 w-full rounded-xl border border-[var(--ink)]/15 bg-white px-4 py-3 text-[var(--ink)] outline-none focus:ring-2 focus:ring-[var(--ink)]"
               />
             </label>
-            {error && <p className="rounded-xl bg-[--coral]/10 p-3 text-sm font-semibold text-[--coral]" role="alert">{error}</p>}
-            {message && <p role="status" className="rounded-xl bg-[--mint-soft] p-3 text-sm font-semibold text-[--ink]">{message}</p>}
+            {error && <p className="rounded-xl bg-[var(--coral)]/10 p-3 text-sm font-semibold text-[var(--coral)]" role="alert">{error}</p>}
+            {message && <p role="status" className="rounded-xl bg-[var(--mint-soft)] p-3 text-sm font-semibold text-[var(--ink)]">{message}</p>}
             <button type="submit" disabled={busy} className="btn btn-ink w-full px-5 py-3 font-bold disabled:opacity-50">
               {busy ? (mode === "create" ? "Creating account…" : "Signing in…") : mode === "create" ? "Create account" : "Sign in"}
             </button>
@@ -146,9 +146,9 @@ export default function AccountPage() {
             }}>Forgot your password?</button>
           </fieldset></form></>}
         </section>
-        <p className="mt-5 text-center text-xs text-[--ink-faint]">
-          <Link href="/account/orders" className="block mb-3 font-bold text-[--ink] underline">My orders & saved applications</Link>
-          Ordering an EdgeTap card? <Link href="/pricing" className="font-bold text-[--ink] underline">Prepare your card and profile</Link>.
+        <p className="mt-5 text-center text-xs text-[var(--ink-faint)]">
+          <Link href="/account/orders" className="block mb-3 font-bold text-[var(--ink)] underline">My orders & saved applications</Link>
+          Ordering an EdgeTap card? <Link href="/pricing" className="font-bold text-[var(--ink)] underline">Prepare your card and profile</Link>.
         </p>
       </div>
     </main>

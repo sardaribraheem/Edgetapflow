@@ -69,88 +69,88 @@ export default function ProfilesView({ user }: { user: User }) {
     <div>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-display text-2xl font-bold text-[--ink]">Profiles</h1>
-          <p className="text-sm text-[--ink-soft]">Edit the owner profile. Client profiles are created from orders under Orders.</p>
+          <h1 className="font-display text-2xl font-bold text-[var(--ink)]">Profiles</h1>
+          <p className="text-sm text-[var(--ink-soft)]">Edit the owner profile. Client profiles are created from orders under Orders.</p>
         </div>
         <Link
           href="/u/ibraheem"
           target="_blank"
-          className="rounded-xl bg-[--yellow-soft] px-4 py-2 text-[12px] font-bold text-[--ink] hover:bg-[--yellow]"
+          className="rounded-xl bg-[var(--yellow-soft)] px-4 py-2 text-[12px] font-bold text-[var(--ink)] hover:bg-[var(--yellow)]"
         >
           View live /u/ibraheem ↗
         </Link>
       </div>
 
       {message && (
-        <div className="card-paper mt-4 border-l-4 border-[--mint] p-4 font-display font-semibold text-[--ink]">{message}</div>
+        <div className="card-paper mt-4 border-l-4 border-[var(--mint)] p-4 font-display font-semibold text-[var(--ink)]">{message}</div>
       )}
       {loadError && !message && (
-        <div className="card-paper mt-4 border-l-4 border-[--coral] p-4 text-sm text-[--coral]">{loadError}</div>
+        <div className="card-paper mt-4 border-l-4 border-[var(--coral)] p-4 text-sm text-[var(--coral)]">{loadError}</div>
       )}
 
       <form onSubmit={handleSave} className="mt-6 space-y-6">
         {/* General info */}
         <div className="card-paper p-6">
-          <h2 className="mb-4 font-display text-base font-bold text-[--ink]">General Information</h2>
+          <h2 className="mb-4 font-display text-base font-bold text-[var(--ink)]">General Information</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="block text-sm font-semibold text-[--ink]">Display Name</label>
+              <label className="block text-sm font-semibold text-[var(--ink)]">Display Name</label>
               <input
                 type="text"
                 value={profile.displayName}
                 onChange={(e) => setProfile({ ...profile, displayName: e.target.value })}
-                className="mt-1 w-full rounded-xl border border-[--ink]/15 bg-white px-4 py-3 text-[--ink] focus:outline-none focus:ring-2 focus:ring-[--ink]"
+                className="mt-1 w-full rounded-xl border border-[var(--ink)]/15 bg-white px-4 py-3 text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--ink)]"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-[--ink]">Title / Subtitle</label>
+              <label className="block text-sm font-semibold text-[var(--ink)]">Title / Subtitle</label>
               <input
                 type="text"
                 value={profile.title}
                 onChange={(e) => setProfile({ ...profile, title: e.target.value })}
-                className="mt-1 w-full rounded-xl border border-[--ink]/15 bg-white px-4 py-3 text-[--ink] focus:outline-none focus:ring-2 focus:ring-[--ink]"
+                className="mt-1 w-full rounded-xl border border-[var(--ink)]/15 bg-white px-4 py-3 text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--ink)]"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-[--ink]">Location</label>
+              <label className="block text-sm font-semibold text-[var(--ink)]">Location</label>
               <input
                 type="text"
                 value={profile.location}
                 onChange={(e) => setProfile({ ...profile, location: e.target.value })}
-                className="mt-1 w-full rounded-xl border border-[--ink]/15 bg-white px-4 py-3 text-[--ink] focus:outline-none focus:ring-2 focus:ring-[--ink]"
+                className="mt-1 w-full rounded-xl border border-[var(--ink)]/15 bg-white px-4 py-3 text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--ink)]"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-[--ink]">Username (handle)</label>
+              <label className="block text-sm font-semibold text-[var(--ink)]">Username (handle)</label>
               <div className="mt-1 flex items-center gap-1">
-                <span className="text-sm font-bold text-[--ink-faint]">/u/</span>
+                <span className="text-sm font-bold text-[var(--ink-faint)]">/u/</span>
                 <input
                   type="text"
                   value={profile.username}
                   readOnly
-                  className="w-full rounded-xl border border-[--ink]/15 bg-white px-4 py-3 text-[--ink] focus:outline-none focus:ring-2 focus:ring-[--ink]"
+                  className="w-full rounded-xl border border-[var(--ink)]/15 bg-white px-4 py-3 text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--ink)]"
                 />
               </div>
-              <p className="mt-1 text-[11px] text-[--ink-faint]">The reserved owner handle stays fixed so existing NFC and QR links keep working.</p>
+              <p className="mt-1 text-[11px] text-[var(--ink-faint)]">The reserved owner handle stays fixed so existing NFC and QR links keep working.</p>
             </div>
             <div className="sm:col-span-2">
-              <label className="block text-sm font-semibold text-[--ink]">Avatar Image URL</label>
+              <label className="block text-sm font-semibold text-[var(--ink)]">Avatar Image URL</label>
               <input
                 type="text"
                 value={profile.avatar}
                 onChange={(e) => setProfile({ ...profile, avatar: e.target.value })}
-                className="mt-1 w-full rounded-xl border border-[--ink]/15 bg-white px-4 py-3 text-[--ink] focus:outline-none focus:ring-2 focus:ring-[--ink]"
+                className="mt-1 w-full rounded-xl border border-[var(--ink)]/15 bg-white px-4 py-3 text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--ink)]"
               />
             </div>
             <div className="sm:col-span-2">
-              <label className="block text-sm font-semibold text-[--ink]">Bio</label>
+              <label className="block text-sm font-semibold text-[var(--ink)]">Bio</label>
               <textarea
                 rows={3}
                 value={profile.bio}
                 onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-                className="mt-1 w-full rounded-xl border border-[--ink]/15 bg-white px-4 py-3 text-[--ink] focus:outline-none focus:ring-2 focus:ring-[--ink]"
+                className="mt-1 w-full rounded-xl border border-[var(--ink)]/15 bg-white px-4 py-3 text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--ink)]"
               />
             </div>
           </div>
@@ -160,24 +160,24 @@ export default function ProfilesView({ user }: { user: User }) {
         <div className="card-paper p-6">
           <div className="mb-4 flex items-center justify-between">
             <div>
-              <h2 className="font-display text-base font-bold text-[--ink]">Manage Links</h2>
-              <p className="text-sm text-[--ink-soft]">Add, edit, or remove profile links (max 10)</p>
+              <h2 className="font-display text-base font-bold text-[var(--ink)]">Manage Links</h2>
+              <p className="text-sm text-[var(--ink-soft)]">Add, edit, or remove profile links (max 10)</p>
             </div>
-            <span className="rounded-full bg-[--yellow-soft] px-3 py-1 text-xs font-bold text-[--ink]">
+            <span className="rounded-full bg-[var(--yellow-soft)] px-3 py-1 text-xs font-bold text-[var(--ink)]">
               {profile.links.length} / 10 Links
             </span>
           </div>
 
           <div className="space-y-4">
             {profile.links.map((link, index) => (
-              <div key={index} className="flex flex-col gap-3 rounded-2xl bg-white p-4 ring-1 ring-[--ink]/10 sm:flex-row sm:items-center">
+              <div key={index} className="flex flex-col gap-3 rounded-2xl bg-white p-4 ring-1 ring-[var(--ink)]/10 sm:flex-row sm:items-center">
                 <div className="flex flex-1 flex-col gap-3 sm:flex-row">
                   <input
                     type="text"
                     placeholder="Label (e.g. WhatsApp)"
                     value={link.label}
                     onChange={(e) => updateLink(index, "label", e.target.value)}
-                    className="rounded-xl border border-[--ink]/15 px-3 py-2 text-sm text-[--ink]"
+                    className="rounded-xl border border-[var(--ink)]/15 px-3 py-2 text-sm text-[var(--ink)]"
                     required
                   />
                   <input
@@ -185,7 +185,7 @@ export default function ProfilesView({ user }: { user: User }) {
                     placeholder="URL (https://...)"
                     value={link.url}
                     onChange={(e) => updateLink(index, "url", e.target.value)}
-                    className="flex-1 rounded-xl border border-[--ink]/15 px-3 py-2 text-sm text-[--ink]"
+                    className="flex-1 rounded-xl border border-[var(--ink)]/15 px-3 py-2 text-sm text-[var(--ink)]"
                     required
                   />
                 </div>
@@ -193,7 +193,7 @@ export default function ProfilesView({ user }: { user: User }) {
                   <select
                     value={link.type}
                     onChange={(e) => updateLink(index, "type", e.target.value)}
-                    className="rounded-xl border border-[--ink]/15 px-3 py-2 text-sm text-[--ink]"
+                    className="rounded-xl border border-[var(--ink)]/15 px-3 py-2 text-sm text-[var(--ink)]"
                   >
                     <option value="whatsapp">WhatsApp</option>
                     <option value="instagram">Instagram</option>
@@ -205,7 +205,7 @@ export default function ProfilesView({ user }: { user: User }) {
                   <button
                     type="button"
                     onClick={() => removeLink(index)}
-                    className="rounded-xl bg-[--coral]/10 px-3 py-2 text-sm font-semibold text-[--coral] hover:bg-[--coral]/20"
+                    className="rounded-xl bg-[var(--coral)]/10 px-3 py-2 text-sm font-semibold text-[var(--coral)] hover:bg-[var(--coral)]/20"
                   >
                     Remove
                   </button>
@@ -218,12 +218,12 @@ export default function ProfilesView({ user }: { user: User }) {
             <button
               type="button"
               onClick={addLink}
-              className="mt-4 w-full rounded-xl border-2 border-dashed border-[--ink]/20 py-3 font-display font-semibold text-[--ink] hover:border-[--ink] hover:bg-white/50"
+              className="mt-4 w-full rounded-xl border-2 border-dashed border-[var(--ink)]/20 py-3 font-display font-semibold text-[var(--ink)] hover:border-[var(--ink)] hover:bg-white/50"
             >
               + Add New Link ({10 - profile.links.length} remaining)
             </button>
           ) : (
-            <p className="mt-4 text-center text-sm font-semibold text-[--coral]">Maximum limit of 10 links reached.</p>
+            <p className="mt-4 text-center text-sm font-semibold text-[var(--coral)]">Maximum limit of 10 links reached.</p>
           )}
         </div>
 
@@ -231,14 +231,14 @@ export default function ProfilesView({ user }: { user: User }) {
           <button
             type="submit"
             disabled={saving || loading || !!loadError || !profile.displayName.trim()}
-            className="rounded-2xl bg-[--ink] px-8 py-3.5 font-display font-bold text-white shadow-[0_6px_0_0_rgba(16,11,74,0.4)] transition-transform hover:-translate-y-0.5 disabled:opacity-50"
+            className="rounded-2xl bg-[var(--ink)] px-8 py-3.5 font-display font-bold text-white shadow-[0_6px_0_0_rgba(16,11,74,0.4)] transition-transform hover:-translate-y-0.5 disabled:opacity-50"
           >
             {saving ? "Saving..." : "Save All Changes"}
           </button>
         </div>
       </form>
 
-      <p className="mt-4 text-[12px] text-[--ink-faint]">
+      <p className="mt-4 text-[12px] text-[var(--ink-faint)]">
         Tip: client profiles are auto-created from orders (Orders → Create Client Profile) and stay editable by the customer through their /u/ link.
       </p>
     </div>

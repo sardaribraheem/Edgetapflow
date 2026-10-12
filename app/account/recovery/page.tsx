@@ -14,7 +14,7 @@ export default function RecoveryPage() {
     catch { setMessage('Could not update the password. Request a new recovery link and try again.'); }
     finally { setBusy(false); }
   }
-  return <main className="min-h-screen grid place-items-center bg-[--cream] px-4 py-16"><section className="card-paper w-full max-w-md p-8">
+  return <main className="min-h-screen grid place-items-center bg-[var(--cream)] px-4 py-16"><section className="card-paper w-full max-w-md p-8">
     <h1 className="font-display text-3xl font-bold">Reset your password</h1>
     {ready ? <form onSubmit={submit} className="mt-6 space-y-4"><label className="block font-semibold">New password<input type="password" autoComplete="new-password" required minLength={8} value={password} onChange={e=>setPassword(e.target.value)} className="mt-2 block w-full rounded-xl border p-3" /></label><button className="btn btn-ink px-5 py-3" disabled={busy}>{busy ? 'Updating…' : 'Update password'}</button></form> : <p className="mt-4">Open the recovery link from your email to set a new password.</p>}
     {message && <p role="status" className="mt-4">{message}</p>}

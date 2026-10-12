@@ -52,29 +52,29 @@ function ProfileRouteInner({ username }: { username: string }) {
 
   if (!result) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[--cream] px-4 text-center">
-        <span className="grid h-16 w-16 animate-pulse-soft place-items-center rounded-full bg-[--yellow-soft]">
-          <NfcWaves className="h-8 w-8 text-[--ink]" />
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[var(--cream)] px-4 text-center">
+        <span className="grid h-16 w-16 animate-pulse-soft place-items-center rounded-full bg-[var(--yellow-soft)]">
+          <NfcWaves className="h-8 w-8 text-[var(--ink)]" />
         </span>
-        <p className="font-display text-lg font-bold text-[--ink]">Loading /u/{username}…</p>
-        <p className="text-sm text-[--ink-soft]">One tap away.</p>
+        <p className="font-display text-lg font-bold text-[var(--ink)]">Loading /u/{username}…</p>
+        <p className="text-sm text-[var(--ink-soft)]">One tap away.</p>
       </div>
     );
   }
 
   if ("error" in result) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[--cream] px-4 text-center">
-        <QrDoodle className="h-14 w-14 origin-center rotate-[-8deg] text-[--ink-faint]" />
-        <h1 className="font-display text-3xl font-bold text-[--ink]">{result.error.missing ? "Profile not found" : "Profile unavailable"}</h1>
-        <p className="max-w-sm text-sm leading-relaxed text-[--ink-soft]">
-          {result.error.missing ? <>There&apos;s no published EdgeTap profile at <strong className="text-[--ink]">/u/{username}</strong>. Please check the card or link.</> : <>We could not load <strong className="text-[--ink]">/u/{username}</strong> right now.</>}
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[var(--cream)] px-4 text-center">
+        <QrDoodle className="h-14 w-14 origin-center rotate-[-8deg] text-[var(--ink-faint)]" />
+        <h1 className="font-display text-3xl font-bold text-[var(--ink)]">{result.error.missing ? "Profile not found" : "Profile unavailable"}</h1>
+        <p className="max-w-sm text-sm leading-relaxed text-[var(--ink-soft)]">
+          {result.error.missing ? <>There&apos;s no published EdgeTap profile at <strong className="text-[var(--ink)]">/u/{username}</strong>. Please check the card or link.</> : <>We could not load <strong className="text-[var(--ink)]">/u/{username}</strong> right now.</>}
         </p>
         {result.error.missing ? null : (
-          <p className="max-w-sm text-sm text-[--ink-soft]">Please try again shortly. If this continues, contact EdgeTap on WhatsApp.</p>
+          <p className="max-w-sm text-sm text-[var(--ink-soft)]">Please try again shortly. If this continues, contact EdgeTap on WhatsApp.</p>
         )}
         <Link href="/" className="btn btn-ink mt-2 px-7 py-3 text-[15px]">
-          Home <SparkleDoodle className="ml-1 inline h-4 w-4 text-[--yellow]" />
+          Home <SparkleDoodle className="ml-1 inline h-4 w-4 text-[var(--yellow)]" />
         </Link>
       </div>
     );

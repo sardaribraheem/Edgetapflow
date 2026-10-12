@@ -4,13 +4,19 @@ export const nav = {
   brand: "EDGE TAP",
   links: [
     { label: "What We Offer", href: "/#offer" },
-    { label: "Solutions", href: "/#solutions" },
     { label: "How It Works", href: "/#solutions" },
+    { label: "How to Order", href: "/#how-to-order" },
     { label: "Pricing", href: "/pricing" },
-    { label: "Example Profile", href: "/u/ibraheem" },
+    { label: "FAQs", href: "/#faq" },
   ],
   cta: { label: "Get Started", href: "/pricing" },
 };
+
+export const orderingSteps = [
+  { title: "Make it yours", description: "Choose a card design, add your contact details and links, and preview your profile. No account needed yet." },
+  { title: "Save and submit", description: "Sign in or create an account to save your details. Submit your JazzCash payment proof for staff review." },
+  { title: "Track your card", description: "Follow review requests and progress in My orders. Collect at NASTP when ready, or pay the booked rider separately for delivery." },
+];
 
 // SECTION 02 — "What can we build for you?"
 export type Solution = {

@@ -30,8 +30,13 @@ export default function MobileMenu({ open, onClose }: Props) {
     };
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
+    const onResize = () => {
+      if (window.matchMedia("(min-width: 1024px)").matches) onClose();
+    };
+    window.addEventListener("resize", onResize);
     return () => {
       document.removeEventListener("keydown", onKey);
+      window.removeEventListener("resize", onResize);
       document.body.style.overflow = previousOverflow;
       previousFocus?.focus();
     };
@@ -43,7 +48,7 @@ export default function MobileMenu({ open, onClose }: Props) {
       <button
         aria-label="Close menu"
         onClick={onClose}
-        className={`absolute inset-0 bg-[--ink]/30 backdrop-blur-sm transition-opacity duration-300 ${
+        className={`absolute inset-0 bg-[var(--ink)]/30 backdrop-blur-sm transition-opacity duration-300 ${
           open ? "opacity-100" : "opacity-0"
         }`}
         tabIndex={open ? 0 : -1}
@@ -51,25 +56,26 @@ export default function MobileMenu({ open, onClose }: Props) {
 
       {/* drawer */}
       <div
+        id="mobile-menu"
         ref={dialogRef}
         inert={!open}
         aria-hidden={!open}
         role="dialog"
         aria-modal="true"
         aria-label="Menu"
-        className={`absolute right-0 top-0 flex h-full w-[min(84vw,360px)] flex-col bg-[--paper] shadow-2xl transition-transform duration-300 ease-out ${
+        className={`absolute right-0 top-0 flex h-full w-[min(84vw,360px)] flex-col overflow-y-auto bg-[var(--paper)] shadow-2xl transition-transform duration-300 ease-out ${
           open ? "translate-x-0" : "translate-x-full"
         }`}
       >
         {/* header */}
         <div className="flex items-center justify-between px-5 pt-5">
-          <Link href="/" onClick={onClose} className="font-display text-lg font-bold tracking-tight text-[--ink]">
+          <Link href="/" onClick={onClose} className="font-display text-lg font-bold tracking-tight text-[var(--ink)]">
             EDGE TAP
           </Link>
           <button
             onClick={onClose}
             aria-label="Close menu"
-            className="grid h-10 w-10 place-items-center rounded-full bg-[--ink]/6 text-[--ink]"
+            className="grid h-10 w-10 place-items-center rounded-full bg-[var(--ink)]/6 text-[var(--ink)]"
           >
             <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round">
               <path d="M6 6l12 12M18 6L6 18" />
@@ -84,16 +90,19 @@ export default function MobileMenu({ open, onClose }: Props) {
               key={l.label}
               href={l.href}
               onClick={onClose}
-              className="flex items-center justify-between border-b border-[--ink]/8 py-4 font-display text-2xl font-semibold text-[--ink] transition-colors hover:text-[--ink-soft]"
+              className="flex items-center justify-between border-b border-[var(--ink)]/8 py-4 font-display text-2xl font-semibold text-[var(--ink)] transition-colors hover:text-[var(--ink-soft)]"
             >
               <span>{l.label}</span>
-              <span className="text-[--ink-faint]">0{i + 1}</span>
+              <span className="text-[var(--ink-faint)]">0{i + 1}</span>
             </a>
           ))}
         </nav>
 
         {/* CTA */}
         <div className="mt-auto px-5 pb-6">
+          <Link href="/account" onClick={onClose} className="btn btn-ghost mb-3 w-full px-6 py-3 text-base">
+            Sign in / My account
+          </Link>
           <a
             href={nav.cta.href}
             onClick={onClose}
@@ -101,14 +110,14 @@ export default function MobileMenu({ open, onClose }: Props) {
           >
             {nav.cta.label} <span aria-hidden="true">→</span>
           </a>
-          <div className="mt-4 flex items-center justify-center gap-2 text-[11px] text-[--ink-mid]">
-            <NfcWaves className="h-4 w-4 text-[--yellow]" />
+          <div className="mt-4 flex items-center justify-center gap-2 text-[11px] text-[var(--ink-mid)]">
+            <NfcWaves className="h-4 w-4 text-[var(--yellow)]" />
             One tap. Infinite possibilities.
           </div>
         </div>
 
         {/* corner sparkle */}
-        <SparkleDoodle className="absolute left-4 top-24 h-8 w-8 text-[--yellow]" />
+        <SparkleDoodle className="absolute left-4 top-24 h-8 w-8 text-[var(--yellow)]" />
       </div>
     </div>
   );

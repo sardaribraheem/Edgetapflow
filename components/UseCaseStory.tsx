@@ -21,10 +21,10 @@ function TapSequence() {
         <EdgeTapCard />
       </div>
       <div className="flex flex-col items-center gap-1">
-        <span className="grid h-9 w-9 place-items-center rounded-full bg-[--ink] font-display text-[10px] font-bold uppercase text-[--cream]">
+        <span className="grid h-9 w-9 place-items-center rounded-full bg-[var(--ink)] font-display text-[10px] font-bold uppercase text-[var(--cream)]">
           Tap
         </span>
-        <ArrowDoodle className="h-7 w-7 rotate-[-20deg] text-[--ink-faint]" />
+        <ArrowDoodle className="h-7 w-7 rotate-[-20deg] text-[var(--ink-faint)]" />
       </div>
       <PhoneMockup className="w-[96px] md:w-[150px]">
         <PhoneScreen />
@@ -34,9 +34,9 @@ function TapSequence() {
 }
 
 const toneText: Record<string, string> = {
-  yellow: "text-[--yellow]",
-  coral: "text-[--coral]",
-  sky: "text-[--sky]",
+  yellow: "text-[var(--yellow)]",
+  coral: "text-[var(--coral)]",
+  sky: "text-[var(--sky)]",
 };
 
 // Full-bleed horizontal scroll-snap storytelling. Each panel is one
@@ -44,26 +44,26 @@ const toneText: Record<string, string> = {
 // on every breakpoint (no GSAP pin needed).
 export default function UseCaseStory() {
   return (
-    <section id="solutions" className="usecase-pin relative bg-[--paper-deep]">
+    <section id="solutions" className="usecase-pin relative bg-[var(--paper-deep)]">
       <div className="usecase-track scroll-smooth">
         {useCases.map((uc) => (
           <div key={uc.id} className="usecase-panel relative">
             {/* backdrop doodles — subtle, not chaotic */}
-            <SparkleDoodle className="absolute left-[8%] top-[14%] h-8 w-8 text-[--yellow] opacity-50" />
-            <StarDoodle className="absolute right-[10%] top-[20%] h-7 w-7 text-[--sky] opacity-50" />
+            <SparkleDoodle className="absolute left-[8%] top-[14%] h-8 w-8 text-[var(--yellow)] opacity-50" />
+            <StarDoodle className="absolute right-[10%] top-[20%] h-7 w-7 text-[var(--sky)] opacity-50" />
 
             <div className="container-x relative flex flex-col items-center gap-6 py-10 text-center md:py-0">
               <div className="flex flex-col items-center gap-2">
-                <span className="eyebrow text-[--ink-mid]">{uc.kicker}</span>
+                <span className="eyebrow text-[var(--ink-mid)]">{uc.kicker}</span>
                 <span className={`font-display text-lg ${toneText[uc.tone]}`}>
                   {uc.id === "scan" ? "Scan → Profile" : "Tap → Contact"}
                 </span>
               </div>
 
-              <h3 className="text-display max-w-3xl text-[clamp(2.6rem,7vw,5.5rem)] text-[--ink]">
+              <h3 className="text-display max-w-3xl text-[clamp(2.6rem,7vw,5.5rem)] text-[var(--ink)]">
                 {uc.headline}
               </h3>
-              <p className="max-w-xl text-[16px] leading-relaxed text-[--ink-soft]">
+              <p className="max-w-xl text-[16px] leading-relaxed text-[var(--ink-soft)]">
                 {uc.context}
               </p>
 
@@ -75,14 +75,14 @@ export default function UseCaseStory() {
         {/* final "that's just the start" panel — links into CustomCTA */}
         <div className="usecase-panel relative">
           <div className="container-x flex flex-col items-center text-center">
-            <SparkleDoodle className="mb-4 h-10 w-10 text-[--yellow]" />
-            <span className="eyebrow mb-3 text-[--coral]">The takeaway</span>
-            <h3 className="text-display max-w-4xl text-[clamp(2.4rem,6vw,5rem)] text-[--ink]">
+            <SparkleDoodle className="mb-4 h-10 w-10 text-[var(--yellow)]" />
+            <span className="eyebrow mb-3 text-[var(--coral)]">The takeaway</span>
+            <h3 className="text-display max-w-4xl text-[clamp(2.4rem,6vw,5rem)] text-[var(--ink)]">
               And that&apos;s
               <br />
-              just the <span className="text-[--sky]">start.</span>
+              just the <span className="text-[var(--sky)]">start.</span>
             </h3>
-            <p className="mt-4 max-w-md text-[16px] text-[--ink-soft]">
+            <p className="mt-4 max-w-md text-[16px] text-[var(--ink-soft)]">
               One card. Your contact details and links.
               A profile you can update as your work grows.
             </p>
