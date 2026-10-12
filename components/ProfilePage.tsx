@@ -222,8 +222,8 @@ export default function ProfilePage({
                 <a
                   key={l.type + l.url}
                   href={l.url}
-                  target={l.url.startsWith("mailto") ? undefined : "_blank"}
-                  rel="noreferrer"
+                  target={/^https?:\/\//i.test(l.url) ? "_blank" : undefined}
+                  rel={/^https?:\/\//i.test(l.url) ? "noreferrer" : undefined}
                   className="group flex items-center gap-3 rounded-2xl bg-white px-4 py-3.5 ring-1 ring-[var(--ink)]/8 transition-all hover:-translate-y-0.5 hover:shadow-[var(--shadow-soft)]"
                 >
                   <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[var(--ink)]/5 text-[var(--ink)] ring-1 ring-[var(--ink)]/10 transition-colors group-hover:bg-[var(--ink)] group-hover:text-[var(--cream)]">
@@ -295,10 +295,10 @@ export default function ProfilePage({
                 </button>
               ) : (
                 <Link
-                  href={`/account?next=${encodeURIComponent(`/u/${profile.username}`)}`}
+                  href={user ? "/account" : `/account?next=${encodeURIComponent(`/u/${profile.username}`)}`}
                   className="btn bg-white px-4 py-2 text-[12px] font-bold text-[var(--ink)] ring-1 ring-[var(--ink)]/15 hover:bg-[var(--cream)]"
                 >
-                  Sign in to edit
+                  {user ? "My account" : "Sign in to edit"}
                 </Link>
               )}
             </div>

@@ -33,6 +33,7 @@ After deployment, verify the new ordering section on the homepage, `/account`, `
 - 53 SQL/RLS cases passed against local PostgreSQL.
 - 101 ordering, admin, guest-draft and sign-in browser checks passed with local SQL/RLS and simulated Auth/Storage HTTP.
 - 449 responsive/navigation assertions passed from 320px to 1440px.
+- 41 dedicated profile browser checks passed: independent handles, contact links/vCard, owner editing, unrelated-user access, missing/hidden profiles, retry and owner publication through the admin editor.
 - 29 read-only hosted Supabase checks passed.
 
 Local test orders covered delivery and NASTP pickup, receipt submission, review/corrections, payment guards, profile publication and physical fulfillment stages. They did not send funds, upload production customer files or validate physical cards.
@@ -44,3 +45,9 @@ Firebase Hosting publication requires a Firebase/Google login; this cloud sessio
 Final-design email sending requires a private mail worker/provider and a monitored reply mailbox. The queue and printing guard are implemented; a queued email does not start the ten-hour review window. Application email delivery, real private-file access, a real customer order/payment and NFC/QR checks remain separate operational validation.
 
 Rotate any operator token previously shared in chat. Routine development and customer/admin sign-in require no operator token.
+
+## Public profile links
+
+`/u/<handle>` displays an active profile published in Supabase. A draft or submitted card application does not create a public profile. Staff publish customer profiles from an approved, paid order under Orders → Publish profile. For the owner, open Admin → Profiles, fill in the actual details, and Save All Changes to create `/u/ibraheem`. At the latest read-only inspection, neither `ibraheem` nor `profile` had a profile row; the live missing-profile screen was expected. No production profile was seeded during QA.
+
+Profile fixes also prevent telephone links opening blank tabs, show My account to signed-in non-owners, provide retry after transient loading failures, and label the owner editor inputs correctly.

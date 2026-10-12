@@ -2,3 +2,4 @@
 await import('./test-order-workflow-browser.mjs');
 await import('./test-guest-browser.mjs');
 await import('./test-signin-browser.mjs');
+await import('./test-profile-browser.mjs');

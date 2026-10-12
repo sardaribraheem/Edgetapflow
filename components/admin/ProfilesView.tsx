@@ -10,6 +10,7 @@ import { Profile, ProfileLink } from "@/lib/data/profile";
 export default function ProfilesView({ user }: { user: User }) {
   const [profile, setProfile] = useState<Profile>({ username: "ibraheem", displayName: "", firstName: "", lastName: "", title: "", bio: "", location: "", avatar: "", links: [] });
   const [loading, setLoading] = useState(true);
+  const [profileExists, setProfileExists] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [loadError, setLoadError] = useState("");
@@ -18,7 +19,7 @@ export default function ProfilesView({ user }: { user: User }) {
     (async () => {
       try {
         const current = await getStaffProfile("ibraheem");
-        if (current) setProfile(current);
+        if (current) { setProfile(current); setProfileExists(true); }
       } catch (e) {
         setLoadError(e instanceof Error ? e.message : "Couldn't load the current profile — the service may be unavailable.");
       } finally {
@@ -40,6 +41,7 @@ export default function ProfilesView({ user }: { user: User }) {
       const toSave = { ...profile };
       if (!toSave.ownerUid && user) toSave.ownerUid = user.uid;
       await saveFounderProfile(toSave);
+      setProfileExists(true);
       setMessage("Profile saved ✓");
     } catch (err) {
       console.error("Error saving profile:", err);
@@ -72,14 +74,20 @@ export default function ProfilesView({ user }: { user: User }) {
           <h1 className="font-display text-2xl font-bold text-[var(--ink)]">Profiles</h1>
           <p className="text-sm text-[var(--ink-soft)]">Edit the owner profile. Client profiles are created from orders under Orders.</p>
         </div>
-        <Link
+        {profileExists && profile.active !== false && <Link
           href="/u/ibraheem"
           target="_blank"
           className="rounded-xl bg-[var(--yellow-soft)] px-4 py-2 text-[12px] font-bold text-[var(--ink)] hover:bg-[var(--yellow)]"
         >
           View live /u/ibraheem ↗
-        </Link>
+        </Link>}
       </div>
+
+      {!loading && !loadError && !profileExists && (
+        <p role="status" className="mt-4 rounded-xl bg-[var(--yellow-soft)] p-4 text-sm">
+          Your owner profile hasn’t been created yet. Add your details and save to publish /u/ibraheem.
+        </p>
+      )}
 
       {message && (
         <div className="card-paper mt-4 border-l-4 border-[var(--mint)] p-4 font-display font-semibold text-[var(--ink)]">{message}</div>
@@ -94,9 +102,10 @@ export default function ProfilesView({ user }: { user: User }) {
           <h2 className="mb-4 font-display text-base font-bold text-[var(--ink)]">General Information</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
-              <label className="block text-sm font-semibold text-[var(--ink)]">Display Name</label>
+              <label htmlFor="owner-displayName" className="block text-sm font-semibold text-[var(--ink)]">Display Name</label>
               <input
                 type="text"
+                id="owner-displayName"
                 value={profile.displayName}
                 onChange={(e) => setProfile({ ...profile, displayName: e.target.value })}
                 className="mt-1 w-full rounded-xl border border-[var(--ink)]/15 bg-white px-4 py-3 text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--ink)]"
@@ -104,9 +113,10 @@ export default function ProfilesView({ user }: { user: User }) {
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-[var(--ink)]">Title / Subtitle</label>
+              <label htmlFor="owner-title" className="block text-sm font-semibold text-[var(--ink)]">Title / Subtitle</label>
               <input
                 type="text"
+                id="owner-title"
                 value={profile.title}
                 onChange={(e) => setProfile({ ...profile, title: e.target.value })}
                 className="mt-1 w-full rounded-xl border border-[var(--ink)]/15 bg-white px-4 py-3 text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--ink)]"
@@ -114,21 +124,23 @@ export default function ProfilesView({ user }: { user: User }) {
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-[var(--ink)]">Location</label>
+              <label htmlFor="owner-location" className="block text-sm font-semibold text-[var(--ink)]">Location</label>
               <input
                 type="text"
+                id="owner-location"
                 value={profile.location}
                 onChange={(e) => setProfile({ ...profile, location: e.target.value })}
                 className="mt-1 w-full rounded-xl border border-[var(--ink)]/15 bg-white px-4 py-3 text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--ink)]"
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-[var(--ink)]">Username (handle)</label>
+              <label htmlFor="owner-username" className="block text-sm font-semibold text-[var(--ink)]">Username (handle)</label>
               <div className="mt-1 flex items-center gap-1">
                 <span className="text-sm font-bold text-[var(--ink-faint)]">/u/</span>
                 <input
                   type="text"
-                  value={profile.username}
+                  id="owner-username"
+                value={profile.username}
                   readOnly
                   className="w-full rounded-xl border border-[var(--ink)]/15 bg-white px-4 py-3 text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--ink)]"
                 />
@@ -136,18 +148,20 @@ export default function ProfilesView({ user }: { user: User }) {
               <p className="mt-1 text-[11px] text-[var(--ink-faint)]">The reserved owner handle stays fixed so existing NFC and QR links keep working.</p>
             </div>
             <div className="sm:col-span-2">
-              <label className="block text-sm font-semibold text-[var(--ink)]">Avatar Image URL</label>
+              <label htmlFor="owner-avatar" className="block text-sm font-semibold text-[var(--ink)]">Avatar Image URL</label>
               <input
                 type="text"
+                id="owner-avatar"
                 value={profile.avatar}
                 onChange={(e) => setProfile({ ...profile, avatar: e.target.value })}
                 className="mt-1 w-full rounded-xl border border-[var(--ink)]/15 bg-white px-4 py-3 text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--ink)]"
               />
             </div>
             <div className="sm:col-span-2">
-              <label className="block text-sm font-semibold text-[var(--ink)]">Bio</label>
+              <label htmlFor="owner-bio" className="block text-sm font-semibold text-[var(--ink)]">Bio</label>
               <textarea
                 rows={3}
+                id="owner-bio"
                 value={profile.bio}
                 onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
                 className="mt-1 w-full rounded-xl border border-[var(--ink)]/15 bg-white px-4 py-3 text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--ink)]"
@@ -239,7 +253,7 @@ export default function ProfilesView({ user }: { user: User }) {
       </form>
 
       <p className="mt-4 text-[12px] text-[var(--ink-faint)]">
-        Tip: client profiles are auto-created from orders (Orders → Create Client Profile) and stay editable by the customer through their /u/ link.
+        Client profiles become public through Orders → Publish profile after review and payment verification. A saved draft or submitted order does not publish a profile.
       </p>
     </div>
   );

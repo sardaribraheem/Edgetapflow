@@ -19,6 +19,7 @@ export default function ProfileRoute() {
 }
 
 function ProfileRouteInner({ username }: { username: string }) {
+  const [attempt, setAttempt] = useState(0);
   const [result, setResult] = useState<
     { profile: Profile } | { error: { missing: boolean; message: string } } | null
   >(null);
@@ -48,7 +49,7 @@ function ProfileRouteInner({ username }: { username: string }) {
     return () => {
       active = false;
     };
-  }, [username]);
+  }, [username, attempt]);
 
   if (!result) {
     return (
@@ -71,7 +72,12 @@ function ProfileRouteInner({ username }: { username: string }) {
           {result.error.missing ? <>There&apos;s no published EdgeTap profile at <strong className="text-[var(--ink)]">/u/{username}</strong>. Please check the card or link.</> : <>We could not load <strong className="text-[var(--ink)]">/u/{username}</strong> right now.</>}
         </p>
         {result.error.missing ? null : (
-          <p className="max-w-sm text-sm text-[var(--ink-soft)]">Please try again shortly. If this continues, contact EdgeTap on WhatsApp.</p>
+          <>
+            <p className="max-w-sm text-sm text-[var(--ink-soft)]">Please try again shortly. If this continues, contact EdgeTap on WhatsApp.</p>
+            <button type="button" className="btn btn-ghost px-7 py-3 text-[15px]" onClick={() => { setResult(null); setAttempt(value => value + 1); }}>
+              Try again
+            </button>
+          </>
         )}
         <Link href="/" className="btn btn-ink mt-2 px-7 py-3 text-[15px]">
           Home <SparkleDoodle className="ml-1 inline h-4 w-4 text-[var(--yellow)]" />
