@@ -9,6 +9,7 @@ import { contactVCard } from "@/lib/contact";
 import { auth } from "@/lib/auth";
 import { onAuthStateChanged, User } from "@/lib/auth";
 import DoodleField from "./DoodleField";
+import DefaultAvatar from "./ui/DefaultAvatar";
 import {
   NfcWaves,
   InstagramIcon,
@@ -154,7 +155,7 @@ export default function ProfilePage({
                       draggable={false}
                     />
                   ) : (
-                    <SparkleDoodle className="h-8 w-8 text-[var(--ink)]" />
+                    <DefaultAvatar size={72} />
                   )}
                 </div>
                 <SparkleDoodle className="absolute -right-3 -top-2 h-8 w-8 text-[var(--yellow)]" />
@@ -284,6 +285,7 @@ export default function ProfilePage({
               <NfcWaves className="h-4 w-4 text-[var(--yellow)]" />
               Powered by EdgeTap
             </div>
+            <a href="/icons/streamline/LICENSE.txt" className="icon-attribution">Icons by Streamline</a>
             <div className="flex items-center gap-3">
               {isOwner ? (
                 <button

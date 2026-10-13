@@ -38,17 +38,17 @@ function Icon({ name, className }: { name: string; className: string }) {
   }
 }
 
-export default function SolutionCard({ solution }: { solution: Solution }) {
+export default function SolutionCard({ solution, duplicate = false }: { solution: Solution; duplicate?: boolean }) {
   return (
-    <article className="card-paper group relative flex w-[88%] shrink-0 flex-col overflow-hidden p-7 sm:w-[74%] sm:p-8 md:w-[60%] md:p-9 lg:w-[50%]">
+    <article aria-hidden={duplicate || undefined} className="offer-card card-paper group relative flex shrink-0 flex-col overflow-hidden p-7 sm:p-8 md:p-9">
       {/* index + tag */}
       <div className="flex items-center justify-between">
-        <span className="font-display text-sm font-semibold text-[var(--ink-faint)]">
+        <span className="font-display text-sm font-semibold text-[var(--ink-soft)]">
           {solution.index}
         </span>
         <span className="flex items-center gap-1.5">
           <span className={`h-2 w-2 rounded-full ${toneDot[solution.tone]}`} aria-hidden="true" />
-          <span className="eyebrow text-[var(--ink-mid)]">{solution.tag}</span>
+          <span className="eyebrow text-[var(--ink-soft)]">{solution.tag}</span>
         </span>
       </div>
 
@@ -59,7 +59,7 @@ export default function SolutionCard({ solution }: { solution: Solution }) {
           className="h-24 w-24 text-[var(--ink)] transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-105 sm:h-28 sm:w-28"
         />
         <NfcWaves className="absolute -bottom-3 -right-3 h-20 w-20 text-[var(--ink)]/10" />
-        <SparkleDoodle className="absolute left-5 top-4 h-6 w-6 text-[var(--ink-mid)] opacity-50" />
+        <SparkleDoodle className="absolute left-5 top-4 h-6 w-6 text-[var(--ink-soft)] opacity-50" />
       </div>
 
       {/* big title + description */}
@@ -83,10 +83,10 @@ export default function SolutionCard({ solution }: { solution: Solution }) {
       </div>
 
       <div className="mt-6 flex items-center gap-2 font-display text-sm font-semibold text-[var(--ink)]">
-        <Link href="/pricing" className="min-h-11 inline-flex items-center underline">
+        <Link href="/pricing" tabIndex={duplicate ? -1 : undefined} onPointerDown={duplicate ? event => event.preventDefault() : undefined} className="min-h-11 inline-flex items-center underline">
           Build your card
         </Link>
-        <ArrowCurveDoodle className="h-5 w-5 text-[var(--ink-faint)] transition-transform group-hover:rotate-12" />
+        <ArrowCurveDoodle className="h-5 w-5 text-[var(--ink-soft)] transition-transform group-hover:rotate-12" />
       </div>
     </article>
   );

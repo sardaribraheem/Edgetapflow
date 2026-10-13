@@ -22,6 +22,7 @@ export default function Footer() {
           <Link href="/cookies">Cookies &amp; browser storage</Link>
         </nav>
         <p className="mt-8 text-xs text-[var(--ink-soft)]">© {new Date().getFullYear()} EdgeTap · Pakistan</p>
+        <a href="/icons/streamline/LICENSE.txt" className="mt-2 inline-block text-xs text-[var(--ink-soft)]">Icons by Streamline</a>
       </div>
     </footer>
   );

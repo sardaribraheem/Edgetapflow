@@ -1,9 +1,12 @@
+"use client";
+
+import { useEffect, useRef } from "react";
 import { useCases } from "@/lib/data/content";
+import { gsap, ScrollTrigger, prefersReducedMotion } from "@/lib/animations";
 import EdgeTapCard from "./EdgeTapCard";
 import PhoneMockup from "./PhoneMockup";
 import PhoneProfile from "./PhoneProfile";
 import {
-  ArrowCurveDoodle,
   ArrowDoodle,
   SparkleDoodle,
   StarDoodle,
@@ -16,8 +19,8 @@ function PhoneScreen() {
 // Physical card -> TAP -> phone sequence used inside each panel.
 function TapSequence() {
   return (
-    <div className="mt-6 flex items-center justify-center gap-3 md:gap-6">
-      <div className="w-[104px] rotate-[-6deg] md:w-[150px]">
+    <div className="story-tap mt-4 flex items-center justify-center gap-3 md:gap-6">
+      <div className="story-card w-[104px] rotate-[-6deg] md:w-[150px]">
         <EdgeTapCard />
       </div>
       <div className="flex flex-col items-center gap-1">
@@ -26,7 +29,7 @@ function TapSequence() {
         </span>
         <ArrowDoodle className="h-7 w-7 rotate-[-20deg] text-[var(--ink-faint)]" />
       </div>
-      <PhoneMockup className="w-[96px] md:w-[150px]">
+      <PhoneMockup className="story-phone w-[96px] md:w-[150px]">
         <PhoneScreen />
       </PhoneMockup>
     </div>
@@ -34,27 +37,66 @@ function TapSequence() {
 }
 
 const toneText: Record<string, string> = {
-  yellow: "text-[var(--yellow)]",
-  coral: "text-[var(--coral)]",
-  sky: "text-[var(--sky)]",
+  yellow: "text-[var(--ink)]",
+  coral: "text-[var(--coral-ink)]",
+  sky: "text-[var(--sky-ink)]",
 };
 
-// Full-bleed horizontal scroll-snap storytelling. Each panel is one
-// viewport-wide slide; swiping / scrolling sideways reveals the next —
-// on every breakpoint (no GSAP pin needed).
 export default function UseCaseStory() {
+  const section = useRef<HTMLElement>(null);
+  const viewport = useRef<HTMLDivElement>(null);
+  const track = useRef<HTMLDivElement>(null);
+  const trigger = useRef<ScrollTrigger | null>(null);
+  const current = useRef(0);
+  const counter = useRef<HTMLSpanElement>(null);
+  const dots = useRef<HTMLDivElement>(null);
+  const count = useCases.length + 1;
+  useEffect(() => {
+    const wrapper = section.current, view = viewport.current, row = track.current;
+    if (!wrapper || !view || !row) return;
+    let active = true;
+    const media = gsap.matchMedia();
+    media.add({ motion: "(prefers-reduced-motion: no-preference)", room: "(min-height: 640px)" }, context => {
+      if (!context.conditions?.motion || !context.conditions?.room) return;
+      wrapper.dataset.pinned = "true";
+      const distance = () => row.scrollWidth - view.clientWidth;
+      const tween = gsap.to(row, {
+        x: () => -distance(), ease: "none",
+        scrollTrigger: {
+          trigger: wrapper, pin: view, start: "top top", end: () => `+=${distance()}`,
+          scrub: true, invalidateOnRefresh: true, anticipatePin: 1,
+          onUpdate: self => {
+            const index = Math.round(self.progress * (count - 1));
+            current.current = index;
+            if (counter.current) counter.current.textContent = `${index + 1} / ${count}`;
+            dots.current?.querySelectorAll("button").forEach((button, i) => { if (i === index) button.setAttribute("aria-current", "step"); else button.removeAttribute("aria-current"); });
+          },
+        },
+      });
+      trigger.current = tween.scrollTrigger || null;
+      void document.fonts.ready.then(() => { if (active) ScrollTrigger.refresh(); });
+      return () => { delete wrapper.dataset.pinned; trigger.current = null; row.scrollLeft = 0; };
+    }, section);
+    return () => { active = false; media.revert(); };
+  }, [count]);
+  const show = (index: number) => {
+    const next = Math.max(0, Math.min(count - 1, index));
+    if (trigger.current) window.scrollTo({ top: trigger.current.start + next / (count - 1) * (trigger.current.end - trigger.current.start), behavior: prefersReducedMotion() ? "instant" : "smooth" });
+    else track.current?.scrollTo({ left: next * (viewport.current?.clientWidth || 0), behavior: "smooth" });
+  };
   return (
-    <section id="solutions" className="usecase-pin relative bg-[var(--paper-deep)]">
-      <div className="usecase-track scroll-smooth">
+    <section ref={section} id="solutions" aria-label="How it works" className="usecase-pin relative bg-[var(--paper-deep)]">
+      <div ref={viewport} className="usecase-viewport">
+      <div ref={track} className="usecase-track">
         {useCases.map((uc) => (
           <div key={uc.id} className="usecase-panel relative">
             {/* backdrop doodles — subtle, not chaotic */}
             <SparkleDoodle className="absolute left-[8%] top-[14%] h-8 w-8 text-[var(--yellow)] opacity-50" />
             <StarDoodle className="absolute right-[10%] top-[20%] h-7 w-7 text-[var(--sky)] opacity-50" />
 
-            <div className="container-x relative flex flex-col items-center gap-6 py-10 text-center md:py-0">
+            <div className="story-content container-x relative flex flex-col items-center text-center">
               <div className="flex flex-col items-center gap-2">
-                <span className="eyebrow text-[var(--ink-mid)]">{uc.kicker}</span>
+                <span className="eyebrow text-[var(--ink-soft)]">{uc.kicker}</span>
                 <span className={`font-display text-lg ${toneText[uc.tone]}`}>
                   {uc.id === "scan" ? "Scan → Profile" : "Tap → Contact"}
                 </span>
@@ -86,18 +128,15 @@ export default function UseCaseStory() {
               One card. Your contact details and links.
               A profile you can update as your work grows.
             </p>
-            <span className="scroll-hint mt-6">
-              Keep scrolling <ArrowCurveDoodle className="h-4 w-4 -rotate-45" />
-            </span>
           </div>
         </div>
       </div>
-
-      {/* floating nudge */}
-      <div className="pointer-events-none absolute bottom-5 left-1/2 -translate-x-1/2" aria-hidden="true">
-        <span className="scroll-hint">
-          Swipe / scroll <ArrowCurveDoodle className="h-4 w-4 -rotate-45" />
-        </span>
+      <div className="story-controls">
+        <button type="button" className="icon-button" aria-label="Previous how-it-works slide" onClick={() => show(current.current - 1)}>←</button>
+        <div ref={dots} className="story-dots">{Array.from({ length: count }, (_, index) => <button type="button" key={index} aria-label={`How it works: slide ${index + 1}`} aria-current={index === 0 ? "step" : undefined} onClick={() => show(index)}><span /></button>)}</div>
+        <span ref={counter} className="story-count">1 / {count}</span>
+        <button type="button" className="icon-button" aria-label="Next how-it-works slide" onClick={() => show(current.current + 1)}>→</button>
+      </div>
       </div>
     </section>
   );

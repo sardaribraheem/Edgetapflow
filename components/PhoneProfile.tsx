@@ -28,12 +28,14 @@ export default function PhoneProfile() {
   );
 
   return (
-    <div className="flex h-full flex-col px-4 pt-12">
+    <div className="phone-profile flex h-full flex-col px-4 pt-12">
       {/* avatar + name */}
       <div className="flex flex-col items-center pt-2">
         <div className="grid h-16 w-16 place-items-center overflow-hidden rounded-full bg-[var(--yellow)] ring-2 ring-[var(--ink)]/10">
           <img
             src={ibraheemProfile.avatar}
+            loading="lazy"
+            decoding="async"
             alt=""
             className="h-full w-full object-cover"
             draggable={false}
@@ -42,10 +44,10 @@ export default function PhoneProfile() {
         <div className="mt-2 font-display text-[17px] font-semibold leading-none text-[var(--ink)]">
           {ibraheemProfile.displayName}
         </div>
-        <div className="mt-1 text-[11px] font-medium text-[var(--ink-mid)]">
+        <div className="mt-1 text-[11px] font-medium text-[var(--ink-soft)]">
           {ibraheemProfile.title}
         </div>
-        <div className="mt-0.5 text-[10px] text-[var(--ink-faint)]">
+        <div className="mt-0.5 text-[10px] text-[var(--ink-soft)]">
           📍 {ibraheemProfile.location}
         </div>
       </div>
@@ -64,7 +66,7 @@ export default function PhoneProfile() {
             <span className="flex-1 text-[12px] font-semibold text-[var(--ink)]">
               {l.label}
             </span>
-            <span className="text-[12px] text-[var(--ink-faint)]">→</span>
+            <span className="text-[12px] text-[var(--ink-soft)]">→</span>
           </div>
         ))}
 
@@ -81,7 +83,7 @@ export default function PhoneProfile() {
       </div>
 
       {/* powered by */}
-      <div className="mt-auto flex items-center justify-center gap-1 pb-3 pt-4 text-[9px] font-semibold uppercase tracking-[0.18em] text-[var(--ink-faint)]">
+      <div className="mt-auto flex items-center justify-center gap-1 pb-3 pt-4 text-[9px] font-semibold uppercase tracking-[0.18em] text-[var(--ink-soft)]">
         <span className="h-1.5 w-1.5 rounded-full bg-[var(--ink)]" /> Powered by EdgeTap
       </div>
     </div>

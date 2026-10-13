@@ -9,6 +9,7 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test:browser": "node scripts/test-site.mjs",
+    "test:ux": "node scripts/test-ux-browser.mjs",
     "serve:qa": "node scripts/serve-export.mjs",
     "check:release": "node scripts/check-hosting-release.mjs",
     "deploy:hosting": "npm run build && npm run check:release && npx --yes firebase-tools@15.33.0 deploy --only hosting --project edgetapflow --non-interactive",

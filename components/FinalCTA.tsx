@@ -19,7 +19,7 @@ export default function FinalCTA() {
         <h2 className="text-display max-w-4xl text-[clamp(2.8rem,8vw,6.5rem)] text-[var(--ink)]">
           Ready to tap into
           <br />
-          something <span className="text-[var(--coral)]">better?</span>
+          something <span className="text-[var(--coral-ink)]">better?</span>
         </h2>
 
         <p className="mt-6 max-w-xl text-[17px] leading-relaxed text-[var(--ink-soft)]">
@@ -36,11 +36,11 @@ export default function FinalCTA() {
           </Link>
         </div>
 
-        <div className="mt-12 flex items-center justify-center gap-3 text-[var(--ink-faint)]">
+        <div className="mt-12 flex items-center justify-center gap-3 text-[var(--ink-soft)]">
           <span className="font-display text-sm font-semibold uppercase tracking-[0.18em]">
             One tap
           </span>
-          <ArrowDoodle className="h-6 w-6 text-[var(--coral)]" />
+          <ArrowDoodle className="h-6 w-6 text-[var(--coral-ink)]" />
           <span className="font-display text-sm font-semibold uppercase tracking-[0.18em]">
             Infinite possibilities
           </span>

@@ -1,10 +1,13 @@
 "use client";
 import { useState } from "react";
 import ProfilePage from "@/components/ProfilePage";
-import { CARD_TEMPLATES, LINK_PRESETS, LINK_ACCENTS, type CardTemplateId, type CustomerInfo, type DeliveryMethod } from "@/lib/data/order";
+import { CARD_TEMPLATES, LINK_PRESETS, LINK_ACCENTS, calculateSubtotal, type CardTemplateId, type CustomerInfo, type DeliveryMethod } from "@/lib/data/order";
 import type { Profile, ProfileLink } from "@/lib/data/profile";
 import { fileToDataUrl } from "@/lib/upload-service";
-import { NfcWaves, SparkleDoodle } from "@/components/doodles";
+import { NfcWaves } from "@/components/doodles";
+import Icon from "@/components/ui/Icon";
+import InfoHelp from "@/components/ui/InfoHelp";
+import DefaultAvatar from "@/components/ui/DefaultAvatar";
 import { SUPPORT_URL } from '@/lib/site';
 import type { WizardDraft } from "@/lib/application";
 export function CardStep({
@@ -42,13 +45,12 @@ export function CardStep({
       <h1 className="font-display text-[clamp(1.8rem,4vw,2.6rem)] font-semibold leading-tight text-[var(--ink)]">
         Choose your card
       </h1>
-      <p className="mt-2 text-[15px] text-[var(--ink-soft)]">The design that gets tapped. Every design is printed on a PVC card with embedded NFC, 85.60 × 53.98 mm.</p>
-
-      <div className="mt-4 rounded-xl bg-[var(--mint-soft)]/60 px-4 py-3 text-sm font-bold text-[var(--ink)]">
-        Your EdgeTap card · Design selected for review
+      <div className="order-spec-line">
+        <span><Icon name="card" size={18} />PVC · NFC + QR</span>
+        <InfoHelp title="Card specifications"><p>85.60 × 53.98 mm. Every design has embedded NFC and a QR fallback. Wood is a printed design on PVC.</p><p>For your own artwork, EdgeTap staff manually prepares the layout for this card size. Your original upload is preserved privately; uploading artwork does not choose a different physical size.</p></InfoHelp>
       </div>
 
-      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="card-design-grid mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
         {CARD_TEMPLATES.map((t) => (
           <button
             key={t.id}
@@ -59,7 +61,7 @@ export function CardStep({
               draft.cardTemplate === t.id ? "border-[var(--ink)] bg-[var(--yellow-soft)]/30 shadow-[var(--shadow-card)]" : "border-[var(--ink)]/10 bg-white"
             }`}
           >
-            <span className={`relative grid h-32 w-full place-items-center overflow-hidden rounded-md ring-1 ring-[var(--ink)]/10 ${t.tone}`}>
+            <span className={`relative grid aspect-[1.586] w-full place-items-center overflow-hidden rounded-md ring-1 ring-[var(--ink)]/10 ${t.tone}`}>
               {(["simple", "lux", "wood", "inverted"] as CardTemplateId[]).includes(t.id) ? (
                 <img src={`/card-designs/${t.id}.png`} alt={`${t.name} card design`} className="h-full w-full object-cover" />
               ) : (
@@ -67,10 +69,9 @@ export function CardStep({
               )}
             </span>
             <span className="font-display text-lg font-bold text-[var(--ink)]">{t.name}</span>
-            <span className="text-[13px] font-medium text-[var(--ink-soft)]">{t.tagline}</span>
             {draft.cardTemplate === t.id && (
               <span className="absolute -top-2 -right-2 grid h-6 w-6 place-items-center rounded-full bg-[var(--ink)] text-white">
-                ✓
+                <Icon name="check" size={14} />
               </span>
             )}
           </button>
@@ -79,7 +80,7 @@ export function CardStep({
 
       {draft.cardTemplate === "upload" && (
         <div className="mt-6 rounded-2xl bg-[var(--sky-soft)]/40 p-5 ring-1 ring-[var(--sky)]/30">
-          <p className="text-sm font-bold text-[var(--ink)]">Upload your own card design</p><p className="mt-2 text-sm">Your original is kept private. Staff will manually prepare the final layout for the standard PVC card size.</p>
+          <div className="flex items-center justify-between"><p className="text-sm font-bold text-[var(--ink)]">Upload your own card design</p><InfoHelp title="Private card artwork"><p>Your original is kept private. Staff will manually prepare the final layout for the standard PVC card size.</p><p>Use a JPEG, PNG or WebP image within 25 MB.</p></InfoHelp></div>
           <input aria-label="Card artwork image" type="file" accept="image/jpeg,image/png,image/webp" onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])} className="mt-3 block w-full text-sm" />
           {uploading && <p className="mt-2 text-sm text-[var(--ink-soft)]">{localOnly ? "Saving on this device…" : "Uploading…"}</p>}
           {uploadError && <p className="mt-2 text-sm font-semibold text-[var(--coral)]">{uploadError}</p>}
@@ -98,11 +99,12 @@ export function CardStep({
       <div className="mt-6 flex items-center justify-between rounded-xl bg-white p-4 ring-1 ring-[var(--ink)]/10">
         <span className="text-sm font-bold text-[var(--ink)]">Quantity</span>
         <div className="flex items-center gap-3">
-          <button type="button" onClick={() => onChange({ quantity: Math.max(1, draft.quantity - 1) })} className="grid h-8 w-8 place-items-center rounded-full bg-[var(--ink)]/8 font-bold">−</button>
+          <button type="button" aria-label="Decrease quantity" onClick={() => onChange({ quantity: Math.max(1, draft.quantity - 1) })} className="grid h-11 w-11 place-items-center rounded-full bg-[var(--ink)]/8 font-bold">−</button>
           <span className="w-6 text-center font-display font-bold">{draft.quantity}</span>
-          <button type="button" onClick={() => onChange({ quantity: Math.min(20, draft.quantity + 1) })} className="grid h-8 w-8 place-items-center rounded-full bg-[var(--ink)] text-white font-bold">+</button>
+          <button type="button" aria-label="Increase quantity" onClick={() => onChange({ quantity: Math.min(20, draft.quantity + 1) })} className="grid h-11 w-11 place-items-center rounded-full bg-[var(--ink)] text-white font-bold">+</button>
         </div>
       </div>
+      <div className="order-price"><strong className="font-display">Rs. {calculateSubtotal(draft.quantity).toLocaleString()}</strong><span>Delivery extra, paid to the rider</span></div>
     </section>
   );
 }
@@ -150,16 +152,14 @@ export function ProfileStep({
       <h1 className="font-display text-[clamp(1.8rem,4vw,2.6rem)] font-semibold leading-tight text-[var(--ink)]">
         Let&apos;s build your EdgeTap
       </h1>
-      <p className="mt-2 text-[15px] text-[var(--ink-soft)]">
-        This is the information people will see when they tap your card.
-      </p>
+      <p className="mt-2 text-[15px] text-[var(--ink-soft)]">Your public profile, your way.</p>
 
       <div className="mt-8 space-y-6">
         {/* avatar */}
         <div>
-          <p className="mb-2 text-sm">{localOnly ? "Your photo stays on this device until you save to your account. It becomes publicly accessible after account upload, even before profile publication. Choose a photo you intend to share." : "Avatar images are publicly accessible after upload, even before profile publication. Upload only an image you intend to share."}</p><label className="block text-sm font-bold text-[var(--ink)]">Profile picture <span className="font-normal text-[var(--ink-faint)]">(optional)</span></label>
+          <div className="flex items-center justify-between"><label htmlFor="ow-photo" className="block text-sm font-bold text-[var(--ink)]">Profile picture <span className="font-normal text-[var(--ink-faint)]">(optional)</span></label><InfoHelp title="Profile photo privacy"><p>{localOnly ? "Your photo stays on this device until you save to your account. It becomes publicly accessible after account upload, even before profile publication. Choose a photo you intend to share." : "Avatar images are publicly accessible after upload, even before profile publication. Upload only an image you intend to share."}</p><p>JPEG, PNG or WebP, up to 5 MB. Leave it blank to use the default profile picture.</p></InfoHelp></div>
           <div className="mt-3 flex items-center gap-4">
-            <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-full bg-[var(--yellow)] ring-2 ring-white shadow-[var(--shadow-card)]">
+            <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-full bg-white ring-2 ring-white shadow-[var(--shadow-card)]">
               {draft.avatarPreview || draft.avatarUrl || preview ? (
                 <img
                   src={draft.avatarPreview || draft.avatarUrl || preview}
@@ -167,19 +167,22 @@ export function ProfileStep({
                   className="h-full w-full object-cover"
                 />
               ) : (
-                <SparkleDoodle className="h-7 w-7 text-[var(--ink)]" />
+                <DefaultAvatar size={44} />
               )}
             </div>
             <label className="btn cursor-pointer bg-white px-4 py-2.5 text-[13px] font-bold ring-1 ring-[var(--ink)]/15 hover:bg-[var(--cream)]">
+              <Icon name="camera" size={18} />
               {uploading ? (localOnly ? "Saving…" : "Uploading…") : "Upload photo"}
               <input
                 type="file"
+                id="ow-photo"
                 accept="image/jpeg,image/png,image/webp"
-                className="hidden"
+                className="sr-only"
                 onChange={(e) => e.target.files?.[0] && handleUpload(e.target.files[0])}
               />
             </label>
           </div>
+          <p className="mt-3 text-xs text-[var(--ink-soft)]">Your photo is public after account upload.</p>
           {uploadError && <p className="mt-2 text-[13px] font-semibold text-[var(--coral)]">{uploadError}</p>}
         </div>
 
@@ -226,6 +229,10 @@ export function ProfileStep({
             placeholder="What should people know about you?"
             className="mt-2 w-full resize-none rounded-xl border border-[var(--ink)]/15 bg-white px-4 py-3 text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--ink)]"
           />
+        </div>
+        <div>
+          <div className="flex items-center justify-between"><label htmlFor="ow-handle" className="block text-sm font-bold">Desired profile handle</label><InfoHelp title="Profile handle"><p>This is a request. Your handle is claimed uniquely when staff publishes your profile. Requested handles are confirmed during review.</p><p>Once published, the handle stays fixed so your NFC and QR links keep working.</p></InfoHelp></div>
+          <div className="profile-handle-input"><span>/u/</span><input id="ow-handle" aria-label="Desired profile handle" maxLength={30} value={draft.usernameSuggested} onChange={event => onChange({ usernameSuggested: event.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, "") })} placeholder="yourname" /></div>
         </div>
       </div>
     </section>
@@ -279,7 +286,7 @@ export function LinksStep({
         What do you want people to find?
       </h1>
       <p className="mt-2 text-[15px] text-[var(--ink-soft)]">
-      Add at least one useful way for people to connect with you. You can add more anytime.
+      Add up to 10 ways to reach you.
       </p>
 
       <div className="mt-6 flex flex-wrap gap-2">
@@ -367,7 +374,7 @@ export function PreviewStep({ profile }: { profile: Profile }) {
     <section className="mb-6">
       <p className="eyebrow mb-2 text-[var(--ink-mid)]">Step 4 · Preview</p>
       <h1 className="mb-4 font-display text-[clamp(1.8rem,4vw,2.6rem)] font-semibold leading-tight text-[var(--ink)]">
-        This is what people see when they tap
+        Preview your profile
       </h1>
       <ProfilePage initialProfile={profile} previewOnly />
     </section>
@@ -405,18 +412,20 @@ export function DeliveryStep({
       <h1 className="font-display text-[clamp(1.8rem,4vw,2.6rem)] font-semibold leading-tight text-[var(--ink)]">
         Where should we send your card?
       </h1>
-      <p className="mt-2 text-[15px] text-[var(--ink-soft)]">
-        Your address stays private. Delivery costs extra and is paid directly to the booked rider. The actual fare is provided when your card is ready.
-      </p>
+      <p className="mt-2 text-[15px] text-[var(--ink-soft)]">Your address stays private. Pay delivery separately to the rider.</p>
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
         {([
           ["delivery", "Delivery", deliveryDetails],
           ["nastp_pickup", "NASTP Pickup", pickupDetails],
         ] as const).map(([value, label, description]) => (
-          <button type="button" key={value} aria-pressed={deliveryMethod === value} onClick={() => onDeliveryMethodChange(value)} className={`rounded-xl border-2 p-4 text-left transition-colors hover:border-[var(--ink)]/50 ${deliveryMethod === value ? "border-[var(--ink)] bg-[var(--yellow-soft)]/30" : "border-[var(--ink)]/10 bg-white"}`}>
-            <span className="flex items-center justify-between font-display font-bold text-[var(--ink)]"><span>{label}</span>{deliveryMethod === value && <span aria-hidden="true">✓</span>}</span>
-            <span className="mt-1 block text-[12px] text-[var(--ink-soft)]">{description}</span>
-          </button>
+          <div key={value} className={`delivery-option ${deliveryMethod === value ? "is-selected" : ""}`}>
+            <button type="button" aria-pressed={deliveryMethod === value} onClick={() => onDeliveryMethodChange(value)} className="delivery-choice">
+              <Icon name={value === "delivery" ? "truck" : "pin"} size={28} />
+              <span><strong className="font-display">{label}</strong><span>{value === "delivery" ? "Rider fee extra" : "Collect when ready"}</span></span>
+              {deliveryMethod === value && <Icon name="check" size={18} />}
+            </button>
+            <InfoHelp title={value === "delivery" ? "Delivery details" : "NASTP pickup details"}><p>{description}</p></InfoHelp>
+          </div>
         ))}
       </div>
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
