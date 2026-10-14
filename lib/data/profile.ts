@@ -25,6 +25,7 @@ export type Profile = {
   active?: boolean; // published / hidden
   createdAt?: number; // epoch ms
   updatedAt?: number; // epoch ms
+  version?: number;
 };
 
 export const ibraheemProfile: Profile = {

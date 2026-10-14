@@ -5,6 +5,7 @@ import { FULFILLMENT_LABELS, REVIEW_LABELS, nextOrderAction } from '@/lib/applic
 import { getPrivateUploadBlob, downloadPrivateUpload } from '@/lib/upload-service';
 import Link from 'next/link';
 import { SUPPORT_URL } from '@/lib/site';
+import OrderJourney from './OrderJourney';
 
 export function PrivateFile({path,label}:{path:string;label:string}){
  const [url,setUrl]=useState(''),[error,setError]=useState(''),[busy,setBusy]=useState(false);
@@ -13,7 +14,7 @@ export function PrivateFile({path,label}:{path:string;label:string}){
  return <div className="mt-2"><div className="flex flex-wrap gap-3"><button type="button" disabled={busy} onClick={()=>{void view();}} className="font-bold underline">View {label}</button><button type="button" disabled={busy} onClick={()=>{setError('');void downloadPrivateUpload(path).catch(()=>setError('Download unavailable.'));}} className="underline">Download {label}</button>{url&&<button type="button" className="underline" onClick={()=>setUrl('')}>Close preview</button>}</div>{error&&<p role="alert" className="mt-2 text-sm">{error}</p>}{url&&<img src={url} alt={'Private '+label+' preview'} className="mt-3 max-h-96 max-w-full rounded-xl object-contain"/>}</div>;
 }
 export default function OrderSummary({order:o}:{order:Order}){
- return <section className="space-y-5 break-words">
+ return <section className="space-y-5 break-words"><OrderJourney order={o}/>
   <div className="flex flex-wrap gap-2"><span className="rounded-full bg-[var(--yellow-soft)] px-3 py-1 text-sm font-bold">{REVIEW_LABELS[o.applicationStatus||'']||'Review status unavailable'}</span><span className="rounded-full bg-[var(--mint-soft)] px-3 py-1 text-sm">{o.payment.status==='paid'?'Card Payment Verified':o.payment.status==='failed'?'Card Payment Rejected':'Card Payment Pending'}</span><span className="rounded-full bg-white px-3 py-1 text-sm">{FULFILLMENT_LABELS[o.fulfillment.status]||o.fulfillment.status}</span></div>
   <p className="rounded-xl bg-white p-4">{nextOrderAction(o)}</p>
   <dl className="grid gap-3 text-sm sm:grid-cols-2">
@@ -23,7 +24,7 @@ export default function OrderSummary({order:o}:{order:Order}){
    <div><dt className="font-bold">Approved card specification</dt><dd>{o.approvedCardSize ? o.approvedCardTemplate+" / "+o.approvedCardSize : "Pending staff confirmation"}</dd></div><div><dt className="font-bold">Fulfillment</dt><dd>{o.deliveryMethod==='nastp_pickup'?'NASTP Pickup':'Delivery'}</dd></div>
    {o.deliveryMethod==='delivery'&&<div className="sm:col-span-2"><dt className="font-bold">Delivery details</dt><dd>{o.customer.address}, {o.customer.city} {o.customer.postalCode}</dd></div>}
    <div><dt className="font-bold">Card subtotal</dt><dd>Rs. {o.subtotal.toLocaleString()}</dd></div><div><dt className="font-bold">Delivery charge</dt><dd>{o.deliveryMethod==='nastp_pickup'?'Not applicable (NASTP pickup)':o.deliveryPaymentRecipient==='rider_direct'?(o.riderFee==null?'Extra; paid directly to rider. Fare provided when booked.':'Rs. '+o.riderFee.toLocaleString()+' — pay directly to the rider'):(o.deliveryFee==null?'Pending; confirmed separately':'Rs. '+o.deliveryFee.toLocaleString())}</dd></div>
-   <div><dt className="font-bold">{o.deliveryPaymentRecipient==='rider_direct'?'EdgeTap total (card only)':'Complete total'}</dt><dd>{o.total==null?'Awaiting agreement':'Rs. '+o.total.toLocaleString()}</dd></div><div><dt className="font-bold">Payment method / reference</dt><dd>{o.payment.method} · {o.payment.reference||'No reference supplied'}</dd></div>
+   <div><dt className="font-bold">{o.deliveryPaymentRecipient==='rider_direct'?'EdgeTap total (card only)':'Complete total'}</dt><dd>{o.total==null?'Awaiting agreement':'Rs. '+o.total.toLocaleString()}</dd></div><div><dt className="font-bold">Payment method</dt><dd>{o.payment.method}{o.payment.reference?' · '+o.payment.reference:''}</dd></div>
    <div><dt className="font-bold">Delivery payment</dt><dd>{o.deliveryMethod==='delivery'&&o.deliveryPaymentRecipient==='rider_direct'?'Pay the rider directly; EdgeTap does not collect this fare':o.deliveryPaymentStatus==="verified"?"Separately verified":o.deliveryPaymentStatus==="not_required"?"Not required":"Pending; card payment is separate"}</dd></div><div><dt className="font-bold">Submitted</dt><dd>{new Date(o.createdAt).toLocaleString()}</dd></div>
    <div className="sm:col-span-2"><dt className="font-bold">Profile information</dt><dd>{o.profileDraft.displayName} · {o.profileDraft.title}<p className="whitespace-pre-wrap">{o.profileDraft.bio}</p><ul>{o.profileDraft.links.map((l,i)=><li key={i}>{l.label}: {l.url}</li>)}</ul></dd></div>
   </dl>

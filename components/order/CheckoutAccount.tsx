@@ -3,8 +3,8 @@ import { useRef, useState, type FormEvent } from 'react';
 import InfoHelp from '@/components/ui/InfoHelp';
 import { auth, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, type User } from '@/lib/auth';
 
-export default function CheckoutAccount({user,busy,onPrepare,onContinue}:{user:User|null;busy:boolean;onPrepare:(email:string)=>Promise<void>;onContinue:()=>Promise<void>}){
- const [mode,setMode]=useState<'create'|'signIn'>('create'),[email,setEmail]=useState(''),[password,setPassword]=useState(''),[working,setWorking]=useState(false),[error,setError]=useState(''),[message,setMessage]=useState('');
+export default function CheckoutAccount({user,busy,initialEmail='',onPrepare,onContinue}:{user:User|null;busy:boolean;initialEmail?:string;onPrepare:(email:string)=>Promise<void>;onContinue:()=>Promise<void>}){
+ const [mode,setMode]=useState<'create'|'signIn'>('create'),[email,setEmail]=useState(initialEmail),[password,setPassword]=useState(''),[working,setWorking]=useState(false),[error,setError]=useState(''),[message,setMessage]=useState('');
  const operation=useRef(false),emailInput=useRef<HTMLInputElement>(null);
  async function continueSignedIn(){if(operation.current||busy)return;operation.current=true;setWorking(true);setError('');try{await onContinue();}catch{setError('Could not save your device draft. Keep this page open and try again.');}finally{setWorking(false);operation.current=false;}}
  async function recover(){if(operation.current||busy||!emailInput.current?.reportValidity())return;operation.current=true;setWorking(true);setError('');setMessage('');try{const address=email.trim().toLowerCase();await onPrepare(address);await sendPasswordResetEmail(auth,address);setMessage('If this address has an account, check your email for recovery instructions. Your card draft stays on this device.');}catch{setError('Could not request password recovery. Your draft is retained; try again or contact EdgeTap.');}finally{setWorking(false);operation.current=false;}}

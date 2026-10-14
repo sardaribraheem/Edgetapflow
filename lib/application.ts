@@ -23,10 +23,21 @@ export function blankApplication(email: string): WizardDraft {
   return { customerNotes:'', cardTemplate:'simple', quantity:1, size:STANDARD_CARD_SIZE, avatarUploadPending:false, displayName:'', title:'', bio:'', usernameSuggested:'', links:[], customer:{fullName:'',phone:'',email,address:'',city:''},deliveryMethod:'delivery',payment:{method:'jazzcash',status:'pending'} };
 }
 export function applicationPayload(d: WizardDraft): ApplicationPayload {
-  return {customerNotes:d.customerNotes,card:{template:d.cardTemplate,quantity:d.quantity,size:d.size,...(d.customDesignUrl && d.customDesignUrl !== 'pending' ? {customDesignUrl:d.customDesignUrl}: {})},customer:{...d.customer,...(d.deliveryMethod==='nastp_pickup'?{address:'',city:'',postalCode:''}:{})},profileDraft:{displayName:d.displayName,title:d.title,bio:d.bio,usernameSuggested:d.usernameSuggested,links:d.links,...(d.avatarUrl?{avatarUrl:d.avatarUrl}:{})},deliveryMethod:d.deliveryMethod,payment:{method:'jazzcash',...(d.payment.receiptUrl?{receiptUrl:d.payment.receiptUrl}:{}),reference:d.payment.reference||''}};
+  return {customerNotes:d.customerNotes,card:{template:d.cardTemplate,quantity:d.quantity,size:d.size,...(d.customDesignUrl && d.customDesignUrl !== 'pending' ? {customDesignUrl:d.customDesignUrl}: {})},customer:{...d.customer,fullName:d.displayName.trim()||d.customer.fullName,...(d.deliveryMethod==='nastp_pickup'?{address:'',city:'',postalCode:''}:{})},profileDraft:{displayName:d.displayName,title:d.title,bio:d.bio,usernameSuggested:d.usernameSuggested||suggestProfileHandle(d.displayName),links:d.links,...(d.avatarUrl?{avatarUrl:d.avatarUrl}:{})},deliveryMethod:d.deliveryMethod,payment:{method:'jazzcash',...(d.payment.receiptUrl?{receiptUrl:d.payment.receiptUrl}:{}),...(d.payment.reference?{reference:d.payment.reference}:{})}};
+}
+export function suggestProfileHandle(name: string): string {
+  if (!name.trim()) return '';
+  return name.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0,30).replace(/-+$/g, '') || 'profile';
+}
+export function contactEmail(links: ProfileLink[]): string {
+  for (const link of links) {
+    const address = /^mailto:([^?\s]+)$/i.exec(link.url)?.[1];
+    if (address && address.length <= 254 && /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(address)) return address.toLowerCase();
+  }
+  return '';
 }
 export function wizardFromApplication(p: ApplicationPayload): WizardDraft {
-  return {...blankApplication(p.customer.email),cardTemplate:p.card.template,quantity:p.card.quantity,size:STANDARD_CARD_SIZE,customDesignUrl:p.card.customDesignUrl,...p.profileDraft,avatarUrl:p.profileDraft.avatarUrl,customer:p.customer,customerNotes:p.customerNotes||'',deliveryMethod:p.deliveryMethod,payment:{...p.payment,status:'pending'}};
+  return {...blankApplication(p.customer.email),cardTemplate:p.card.template,quantity:p.card.quantity,size:STANDARD_CARD_SIZE,customDesignUrl:p.card.customDesignUrl,...p.profileDraft,avatarUrl:p.profileDraft.avatarUrl,customer:{...p.customer,fullName:p.profileDraft.displayName||p.customer.fullName},customerNotes:p.customerNotes||'',deliveryMethod:p.deliveryMethod,payment:{...p.payment,status:'pending'}};
 }
 async function rpc<T>(name:string,args:Record<string,unknown>={}):Promise<T>{
   const {data,error}=await getSupabase().rpc(name,args); if(error) throw Object.assign(new Error(error.message),{code:error.code}); return data as T;

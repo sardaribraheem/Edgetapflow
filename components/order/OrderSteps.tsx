@@ -231,8 +231,8 @@ export function ProfileStep({
           />
         </div>
         <div>
-          <div className="flex items-center justify-between"><label htmlFor="ow-handle" className="block text-sm font-bold">Desired profile handle</label><InfoHelp title="Profile handle"><p>This is a request. Your handle is claimed uniquely when staff publishes your profile. Requested handles are confirmed during review.</p><p>Once published, the handle stays fixed so your NFC and QR links keep working.</p></InfoHelp></div>
-          <div className="profile-handle-input"><span>/u/</span><input id="ow-handle" aria-label="Desired profile handle" maxLength={30} value={draft.usernameSuggested} onChange={event => onChange({ usernameSuggested: event.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, "") })} placeholder="yourname" /></div>
+          <div className="flex items-center justify-between"><label htmlFor="ow-handle" className="block text-sm font-bold">Desired profile handle <span className="font-normal text-[var(--ink-soft)]">(optional)</span></label><InfoHelp title="Profile handle"><p>Leave this blank and we suggest a handle from your name. Staff confirms an available handle during review and claims it uniquely when publishing your profile.</p><p>Once published, the handle stays fixed so your NFC and QR links keep working.</p></InfoHelp></div>
+          <div className="profile-handle-input"><span>/u/</span><input id="ow-handle" aria-label="Desired profile handle" maxLength={30} value={draft.usernameSuggested} onChange={event => onChange({ usernameSuggested: event.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, "") })} placeholder="Based on your name" /></div>
         </div>
       </div>
     </section>
@@ -400,7 +400,6 @@ export function DeliveryStep({
   onChange: (c: CustomerInfo) => void;
 }) {
   const FIELDS: { key: keyof CustomerInfo; placeholder: string; type: string; span?: boolean }[] = [
-    { key: "fullName", placeholder: "Full name", type: "text" },
     { key: "phone", placeholder: "Phone number", type: "tel" },
     { key: "email", placeholder: "Account email", type: "email" },
     { key: "address", placeholder: "Delivery address", type: "text", span: true },
@@ -413,6 +412,7 @@ export function DeliveryStep({
         Where should we send your card?
       </h1>
       <p className="mt-2 text-[15px] text-[var(--ink-soft)]">Your address stays private. Pay delivery separately to the rider.</p>
+      <p className="mt-4 flex items-center gap-2 text-sm"><Icon name="user" size={18}/>{customer.fullName}</p>
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
         {([
           ["delivery", "Delivery", deliveryDetails],

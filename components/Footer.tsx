@@ -2,7 +2,7 @@ import Link from "next/link";
 import { NfcWaves } from "./doodles";
 import { SUPPORT_URL } from "@/lib/site";
 
-export default function Footer() {
+export default function Footer({showIconCredit=false}:{showIconCredit?:boolean}) {
   return (
     <footer className="border-t border-[var(--ink)]/8 bg-[var(--cream)]">
       <div className="container-x py-12">
@@ -22,7 +22,7 @@ export default function Footer() {
           <Link href="/cookies">Cookies &amp; browser storage</Link>
         </nav>
         <p className="mt-8 text-xs text-[var(--ink-soft)]">© {new Date().getFullYear()} EdgeTap · Pakistan</p>
-        <a href="/icons/streamline/LICENSE.txt" className="mt-2 inline-block text-xs text-[var(--ink-soft)]">Icons by Streamline</a>
+        {showIconCredit&&<a href="/icons/streamline/LICENSE.txt" className="mt-2 inline-block text-xs text-[var(--ink-soft)]">Icons by Streamline</a>}
       </div>
     </footer>
   );

@@ -64,7 +64,7 @@ export default function UseCaseStory() {
         x: () => -distance(), ease: "none",
         scrollTrigger: {
           trigger: wrapper, pin: view, start: "top top", end: () => `+=${distance()}`,
-          scrub: true, invalidateOnRefresh: true, anticipatePin: 1,
+          scrub: .65, invalidateOnRefresh: true, anticipatePin: 1,
           onUpdate: self => {
             const index = Math.round(self.progress * (count - 1));
             current.current = index;

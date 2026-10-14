@@ -58,3 +58,6 @@ blob-report/
 !public/apple-touch-icon.png
 firestore-debug.log
 ui-debug.log
+
+# Owner-authorized local test cleanup backups; never commit customer data.
+/.private-backups/

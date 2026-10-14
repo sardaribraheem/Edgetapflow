@@ -10,6 +10,9 @@ import { Review } from "@/lib/models";
 import OrdersView from "./OrdersView";
 import ProfilesView from "./ProfilesView";
 import OrderSettingsPanel from './OrderSettings';
+import Icon, { type IconName } from '@/components/ui/Icon';
+import InfoHelp from '@/components/ui/InfoHelp';
+import DefaultAvatar from '@/components/ui/DefaultAvatar';
 
 export type AdminView = "dashboard" | "orders" | "clients" | "profiles" | "reviews" | "settings";
 
@@ -21,9 +24,11 @@ const VIEWS: { id: AdminView; label: string }[] = [
   { id: "reviews", label: "Reviews" },
   { id: "settings", label: "Settings" },
 ];
+const VIEW_ICONS: Record<AdminView, IconName> = {dashboard:'eye',orders:'card',clients:'user',profiles:'avatar',reviews:'check',settings:'shield'};
 
 export default function AdminApp({ user, onLogout }: { user: User; onLogout: () => void }) {
   const [view, setView] = useState<AdminView>("dashboard");
+  const [selectedOrder, setSelectedOrder] = useState('');
   const [orders, setOrders] = useState<Order[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loadError, setLoadError] = useState("");
@@ -111,6 +116,7 @@ export default function AdminApp({ user, onLogout }: { user: User; onLogout: () 
                       : "hover:bg-[var(--ink)]/5"
                   }`}
                 >
+                  <Icon name={VIEW_ICONS[v.id]} size={18}/>
                   {v.label}
                   {v.id === "orders" && orders.filter((o) =>
                     ["submitted", "under_review", "changes_required"].includes(o.applicationStatus || '')
@@ -156,9 +162,9 @@ export default function AdminApp({ user, onLogout }: { user: User; onLogout: () 
           ) : view === "dashboard" ? (
             <DashboardView orders={orders} reviews={reviews} onOpenOrders={() => setView("orders")} />
           ) : view === "orders" ? (
-            <OrdersView orders={orders} onChanged={refresh} />
+            <OrdersView orders={orders} onChanged={refresh} initialOrderId={selectedOrder} />
           ) : view === "clients" ? (
-            <ClientsView orders={orders} />
+            <ClientsView orders={orders} onOpenOrder={id=>{setSelectedOrder(id);setView('orders');}} />
           ) : view === "profiles" ? (
             <ProfilesView user={user} />
           ) : view === "reviews" ? (
@@ -276,7 +282,8 @@ function DashboardView({
 }
 
 // ── Clients ──────────────────────────────────────────────────────
-function ClientsView({ orders }: { orders: Order[] }) {
+function ClientsView({ orders, onOpenOrder }: { orders: Order[]; onOpenOrder:(id:string)=>void }) {
+  const [query, setQuery] = useState('');
   const clients: (Order["customer"] & { orderId: string; orderNumber: string; createdAt: number })[] = [];
   for (const o of orders) {
     const entry = { ...o.customer, orderId: o.id || "", orderNumber: o.orderNumber, createdAt: o.createdAt };
@@ -286,18 +293,21 @@ function ClientsView({ orders }: { orders: Order[] }) {
   return (
     <div>
       <h1 className="font-display text-2xl font-bold text-[var(--ink)]">Clients</h1>
-      <p className="text-sm text-[var(--ink-soft)]">Customers by email (deduplicated from orders).</p>
+      <p className="text-sm text-[var(--ink-soft)]">{clients.length} clients</p>
+      <input aria-label="Search clients" placeholder="Find a client" value={query} onChange={event=>setQuery(event.target.value)} className="mt-5 w-full rounded-xl border bg-white p-3"/>
       <div className="mt-6 space-y-3">
-        {clients.map((c) => (
+        {clients.filter(c=>[c.fullName,c.email,c.phone].some(value=>value.toLowerCase().includes(query.toLowerCase()))).map((c) => (
           <div key={c.orderId} className="card-paper flex flex-wrap items-center justify-between gap-3 p-5">
-            <div>
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="h-11 w-11 shrink-0"><DefaultAvatar size={28}/></div><div className="min-w-0">
               <p className="font-display font-bold text-[var(--ink)]">{c.fullName}</p>
-              <p className="text-[13px] text-[var(--ink-soft)]">{c.email} · {c.phone}</p>
-              <p className="text-[12px] text-[var(--ink-faint)]">{c.city} · {c.orderNumber}</p>
+              <p className="break-all text-[13px] text-[var(--ink-soft)]">{c.email}</p>
+              </div>
             </div>
-            <span className="rounded-full bg-[var(--sky-soft)] px-3 py-1 text-[11px] font-bold text-[var(--ink)]">
-              {new Date(c.createdAt).toLocaleDateString()}
-            </span>
+            <div className="flex items-center gap-2">
+              <InfoHelp title={'Contact '+c.fullName}><p>{c.email}</p><p>{c.phone}</p>{c.city&&<p>{c.city}</p>}<p>Latest order: {c.orderNumber}</p><p>{new Date(c.createdAt).toLocaleDateString()}</p></InfoHelp>
+              <button type="button" aria-label={'Open order '+c.orderNumber} title="Open order" className="icon-button" onClick={()=>onOpenOrder(c.orderId)}><Icon name="card"/></button>
+            </div>
           </div>
         ))}
         {clients.length === 0 && <p className="card-paper p-6 text-sm text-[var(--ink-faint)]">No clients yet.</p>}

@@ -4,9 +4,12 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getStaffProfile, saveFounderProfile } from "@/lib/data-service";
 import type { User } from "@/lib/auth";
-import { Profile, ProfileLink } from "@/lib/data/profile";
+import Icon from "@/components/ui/Icon";
+import InfoHelp from "@/components/ui/InfoHelp";
+import { ibraheemProfile, Profile, ProfileLink } from "@/lib/data/profile";
 
-// No demo/fallback data is offered for saving to the clean production database.
+// The owner explicitly requested restoration of this original founder example.
+// Existing service data always takes precedence over the approved original.
 export default function ProfilesView({ user }: { user: User }) {
   const [profile, setProfile] = useState<Profile>({ username: "ibraheem", displayName: "", firstName: "", lastName: "", title: "", bio: "", location: "", avatar: "", links: [] });
   const [loading, setLoading] = useState(true);
@@ -20,6 +23,7 @@ export default function ProfilesView({ user }: { user: User }) {
       try {
         const current = await getStaffProfile("ibraheem");
         if (current) { setProfile(current); setProfileExists(true); }
+        else setProfile({...ibraheemProfile, links:ibraheemProfile.links.map(link=>({...link})), active:true});
       } catch (e) {
         setLoadError(e instanceof Error ? e.message : "Couldn't load the current profile — the service may be unavailable.");
       } finally {
@@ -44,8 +48,8 @@ export default function ProfilesView({ user }: { user: User }) {
       setProfileExists(true);
       setMessage("Profile saved ✓");
     } catch (err) {
-      console.error("Error saving profile:", err);
-      setMessage("Error saving profile: " + (err instanceof Error ? err.message : "unknown error"));
+
+      setMessage(err instanceof Error ? err.message : "Could not save the profile. Retry or check your staff access.");
     } finally {
       setSaving(false);
     }
@@ -72,20 +76,20 @@ export default function ProfilesView({ user }: { user: User }) {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-2xl font-bold text-[var(--ink)]">Profiles</h1>
-          <p className="text-sm text-[var(--ink-soft)]">Edit the owner profile. Client profiles are created from orders under Orders.</p>
+          <p className="text-sm text-[var(--ink-soft)]">Your example profile · /u/ibraheem</p>
         </div>
         {profileExists && profile.active !== false && <Link
           href="/u/ibraheem"
           target="_blank"
           className="rounded-xl bg-[var(--yellow-soft)] px-4 py-2 text-[12px] font-bold text-[var(--ink)] hover:bg-[var(--yellow)]"
         >
-          View live /u/ibraheem ↗
+          <Icon name="eye" size={18}/>View live /u/ibraheem
         </Link>}
       </div>
 
       {!loading && !loadError && !profileExists && (
         <p role="status" className="mt-4 rounded-xl bg-[var(--yellow-soft)] p-4 text-sm">
-          Your owner profile hasn’t been created yet. Add your details and save to publish /u/ibraheem.
+          Your owner profile hasn’t been created yet. Your original details are ready to review and publish.
         </p>
       )}
 
@@ -99,7 +103,7 @@ export default function ProfilesView({ user }: { user: User }) {
       <form onSubmit={handleSave} className="mt-6 space-y-6">
         {/* General info */}
         <div className="card-paper p-6">
-          <h2 className="mb-4 font-display text-base font-bold text-[var(--ink)]">General Information</h2>
+          <h2 className="mb-4 font-display text-base font-bold text-[var(--ink)]">Profile details</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             <div>
               <label htmlFor="owner-displayName" className="block text-sm font-semibold text-[var(--ink)]">Display Name</label>
@@ -145,7 +149,7 @@ export default function ProfilesView({ user }: { user: User }) {
                   className="w-full rounded-xl border border-[var(--ink)]/15 bg-white px-4 py-3 text-[var(--ink)] focus:outline-none focus:ring-2 focus:ring-[var(--ink)]"
                 />
               </div>
-              <p className="mt-1 text-[11px] text-[var(--ink-faint)]">The reserved owner handle stays fixed so existing NFC and QR links keep working.</p>
+              <InfoHelp title="Reserved founder handle"><p>The reserved owner handle stays fixed so existing NFC and QR links keep working.</p></InfoHelp>
             </div>
             <div className="sm:col-span-2">
               <label htmlFor="owner-avatar" className="block text-sm font-semibold text-[var(--ink)]">Avatar Image URL</label>
@@ -175,7 +179,7 @@ export default function ProfilesView({ user }: { user: User }) {
           <div className="mb-4 flex items-center justify-between">
             <div>
               <h2 className="font-display text-base font-bold text-[var(--ink)]">Manage Links</h2>
-              <p className="text-sm text-[var(--ink-soft)]">Add, edit, or remove profile links (max 10)</p>
+              <p className="text-sm text-[var(--ink-soft)]">Up to 10 links</p>
             </div>
             <span className="rounded-full bg-[var(--yellow-soft)] px-3 py-1 text-xs font-bold text-[var(--ink)]">
               {profile.links.length} / 10 Links
@@ -188,7 +192,7 @@ export default function ProfilesView({ user }: { user: User }) {
                 <div className="flex flex-1 flex-col gap-3 sm:flex-row">
                   <input
                     type="text"
-                    placeholder="Label (e.g. WhatsApp)"
+                    aria-label={`Link ${index+1} label`} maxLength={80} placeholder="Label"
                     value={link.label}
                     onChange={(e) => updateLink(index, "label", e.target.value)}
                     className="rounded-xl border border-[var(--ink)]/15 px-3 py-2 text-sm text-[var(--ink)]"
@@ -196,7 +200,7 @@ export default function ProfilesView({ user }: { user: User }) {
                   />
                   <input
                     type="text"
-                    placeholder="URL (https://...)"
+                    aria-label={`Link ${index+1} URL`} maxLength={2048} placeholder="URL"
                     value={link.url}
                     onChange={(e) => updateLink(index, "url", e.target.value)}
                     className="flex-1 rounded-xl border border-[var(--ink)]/15 px-3 py-2 text-sm text-[var(--ink)]"
@@ -214,14 +218,14 @@ export default function ProfilesView({ user }: { user: User }) {
                     <option value="linkedin">LinkedIn</option>
                     <option value="github">GitHub</option>
                     <option value="portfolio">Portfolio/Website</option>
-                    <option value="mail">Email</option>
+                    <option value="email">Email</option>
                   </select>
                   <button
                     type="button"
-                    onClick={() => removeLink(index)}
+                    aria-label={`Remove link ${index+1}`} title="Remove link" onClick={() => removeLink(index)}
                     className="rounded-xl bg-[var(--coral)]/10 px-3 py-2 text-sm font-semibold text-[var(--coral)] hover:bg-[var(--coral)]/20"
                   >
-                    Remove
+                    <Icon name="trash" size={18}/>
                   </button>
                 </div>
               </div>
@@ -234,27 +238,25 @@ export default function ProfilesView({ user }: { user: User }) {
               onClick={addLink}
               className="mt-4 w-full rounded-xl border-2 border-dashed border-[var(--ink)]/20 py-3 font-display font-semibold text-[var(--ink)] hover:border-[var(--ink)] hover:bg-white/50"
             >
-              + Add New Link ({10 - profile.links.length} remaining)
+              + Add link
             </button>
           ) : (
             <p className="mt-4 text-center text-sm font-semibold text-[var(--coral)]">Maximum limit of 10 links reached.</p>
           )}
         </div>
 
-        <div className="flex justify-end">
+        <div className="flex flex-wrap items-center justify-between gap-4"><label className="flex items-center gap-2 font-bold text-sm"><input type="checkbox" checked={profile.active!==false} onChange={event=>setProfile({...profile,active:event.target.checked})}/>Published</label>
           <button
             type="submit"
             disabled={saving || loading || !!loadError || !profile.displayName.trim()}
             className="rounded-2xl bg-[var(--ink)] px-8 py-3.5 font-display font-bold text-white shadow-[0_6px_0_0_rgba(16,11,74,0.4)] transition-transform hover:-translate-y-0.5 disabled:opacity-50"
           >
-            {saving ? "Saving..." : "Save All Changes"}
+            <Icon name="save" size={18}/>{saving ? "Saving..." : "Save All Changes"}
           </button>
         </div>
       </form>
 
-      <p className="mt-4 text-[12px] text-[var(--ink-faint)]">
-        Client profiles become public through Orders → Publish profile after review and payment verification. A saved draft or submitted order does not publish a profile.
-      </p>
+      <InfoHelp title="Publishing client profiles" label="Publication help"><p>Client profiles become public through Orders → Publish profile after review and payment verification. A saved draft or submitted order does not publish a profile.</p><p>Handles are reserved atomically so another profile cannot be overwritten.</p></InfoHelp>
     </div>
   );
 }

@@ -8,7 +8,11 @@ import { usesSupabase } from "@/lib/backend";
 import { NfcWaves } from "@/components/doodles";
 import { accountReturnPath } from "@/lib/site";
 import { auth } from "@/lib/auth";
+import { contactEmail } from "@/lib/application";
 import { readGuestDraft } from "@/lib/guest-draft";
+import { getMyProfiles } from '@/lib/data-service';
+import type { Profile } from '@/lib/data/profile';
+import Icon from '@/components/ui/Icon';
 
 export default function AccountPage() {
   const router = useRouter();
@@ -22,9 +26,16 @@ export default function AccountPage() {
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [mode, setMode] = useState<"signIn" | "create">("signIn");
+  const [owned,setOwned]=useState<{uid:string;profiles:Profile[]}>({uid:'',profiles:[]});
+  const uid=user?.uid;
+  useEffect(()=>{if(!uid)return;let active=true;void getMyProfiles().then(profiles=>{if(active)setOwned({uid,profiles});}).catch(()=>{});return()=>{active=false;};},[uid]);
 
   useEffect(() => {
-    void readGuestDraft().then(draft => setDraftEmail(draft?.claimEmail)).catch(() => {});
+    void readGuestDraft().then(draft => {
+      setDraftEmail(draft?.claimEmail);
+      const cached = draft?.claimEmail || contactEmail(draft?.payload.profileDraft.links || []);
+      setEmail(current => current || cached);
+    }).catch(() => {});
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setReady(true);
@@ -97,6 +108,8 @@ export default function AccountPage() {
             {busy ? <p role="status" className="mt-4">{message || "Please wait…"}</p> : <>
               {draftEmail && draftEmail.toLowerCase() === user.email?.toLowerCase() && <Link href="/order" className="btn btn-ink mt-6 px-5 py-3">Continue your saved card</Link>}
               <Link href="/account/orders" className="mt-5 block font-bold underline">View my orders & applications</Link>
+              {owned.uid===user.uid&&owned.profiles.map(profile=><Link key={profile.username} href={'/u/'+encodeURIComponent(profile.username)} className="btn btn-ink mt-4 px-4 py-3"><Icon name="edit" size={18}/>My profile · {profile.displayName}</Link>)}
+              {!owned.profiles.length&&<p className="mt-4 text-sm text-[var(--ink-soft)]">Edit your card details in My orders. Your profile becomes editable here after publication.</p>}
             </>}
             {error && <p role="alert" className="mt-4">{error}</p>}
             <button type="button" disabled={busy} onClick={handleSignOut} className="mt-6 font-bold underline disabled:opacity-50">Sign out this browser</button>

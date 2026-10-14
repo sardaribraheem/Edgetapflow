@@ -98,7 +98,7 @@ try {
   await card.getByRole('button', { name: 'Continue →', exact: true }).click();
   await card.getByRole('button', { name: 'Continue →', exact: true }).click();
   await card.getByRole('button', { name: /^NASTP Pickup/ }).click();
-  await card.getByLabel('Full name', { exact: true }).fill('Local fixture');
+  assert.equal(await card.getByLabel('Full name', { exact: true }).count(), 0);
   await card.getByLabel('Phone number', { exact: true }).fill('03044149674');
   await card.getByRole('button', { name: 'Continue to save profile', exact: true }).click();
   await card.getByRole('button', { name: 'I already have an account', exact: true }).click();

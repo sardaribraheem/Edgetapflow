@@ -1,15 +1,18 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { ibraheemProfile, Profile } from "@/lib/data/profile";
-import { saveProfile, canEditProfile } from "@/lib/data-service";
+import { canEditProfile } from "@/lib/data-service";
 import { isSafeContactUrl } from "@/lib/links";
-import { contactVCard } from "@/lib/contact";
+import { contactPdf } from "@/lib/contact-pdf";
 import { auth } from "@/lib/auth";
 import { onAuthStateChanged, User } from "@/lib/auth";
 import DoodleField from "./DoodleField";
 import DefaultAvatar from "./ui/DefaultAvatar";
+import Icon from "./ui/Icon";
+import dynamic from "next/dynamic";
+const ProfileEditor = dynamic(() => import("./ProfileEditor"));
 import {
   NfcWaves,
   InstagramIcon,
@@ -38,6 +41,7 @@ const iconFor = (type: string, className: string) => {
       return <GlobeIcon className={className} />;
     case "github":
       return <GitHubIcon className={className} />;
+    case "email":
     case "mail":
       return <MailIcon className={className} />;
     default:
@@ -61,7 +65,8 @@ export default function ProfilePage({
   const [ownerAccess, setOwnerAccess] = useState(false);
   const isOwner = !previewOnly && !!user && ownerAccess;
   const [message, setMessage] = useState("");
-  const [saving, setSaving] = useState(false);
+  const [editing,setEditing] = useState(false),[downloading,setDownloading]=useState(false);
+  const accountUid=useRef<string|undefined>(undefined),downloadLock=useRef(false);
 
   useEffect(() => {
     if (previewOnly) return;
@@ -69,8 +74,8 @@ export default function ProfilePage({
     let generation = 0;
     const stop = onAuthStateChanged(auth, async current => {
       const request = ++generation;
+      if (accountUid.current !== current?.uid) { accountUid.current=current?.uid; setEditing(false); setOwnerAccess(false); }
       setUser(current);
-      setOwnerAccess(false);
       if (!current) return;
       try {
         const allowed = await canEditProfile(initialProfile);
@@ -80,30 +85,16 @@ export default function ProfilePage({
     return () => { active = false; stop(); };
   }, [previewOnly, initialProfile]);
 
-  const downloadContact = () => {
-    const url = URL.createObjectURL(new Blob([contactVCard(profile)], { type: "text/vcard;charset=utf-8" }));
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${profile.username}.vcf`;
-    link.click();
-    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
-  };
-
-  const handleSave = async () => {
-    setSaving(true);
+  const downloadContact = async () => {
+    if (downloadLock.current) return;
+    downloadLock.current=true;setDownloading(true);setMessage('');
     try {
-      if (!isOwner) throw new Error("Sign in as the profile owner.");
-      if (!profile.displayName.trim() || profile.links.length > 10 || profile.links.some((l) => !isSafeContactUrl(l.url))) {
-        setMessage("Add a name and valid contact URLs, with no more than ten links.");
-        return;
-      }
-      await saveProfile(profile.username, profile);
-      setMessage("Profile updated.");
-    } catch {
-      setMessage("Could not save your profile. Please try again.");
-    } finally {
-      setSaving(false);
-    }
+      const bytes=await contactPdf(profile);
+      const url=URL.createObjectURL(new Blob([new Uint8Array(bytes).buffer],{type:'application/pdf'}));
+      const link=document.createElement('a');link.href=url;link.download=profile.username+'.pdf';link.click();
+      window.setTimeout(()=>URL.revokeObjectURL(url),1000);
+    } catch { setMessage('Could not create the contact PDF. Try again.'); }
+    finally {downloadLock.current=false;setDownloading(false);}
   };
 
   return (
@@ -126,18 +117,6 @@ export default function ProfilePage({
       </DoodleField>
 
       <main className="container-x relative mx-auto w-full max-w-5xl py-6 my-auto">
-        {/* edge badge — pill back to home */}
-        <Link
-          href="/"
-          className="mb-6 inline-flex items-center gap-2 self-start rounded-full bg-white px-3 py-2 shadow-[var(--shadow-doodle)] ring-1 ring-[var(--ink)]/8 transition-transform hover:-translate-y-0.5"
-        >
-          <span className="grid h-8 w-8 place-items-center rounded-full bg-[var(--yellow)]">
-            <NfcWaves className="h-4 w-4 text-[var(--ink)]" />
-          </span>
-          <span className="font-display text-sm font-bold text-[var(--ink)]">EdgeTap</span>
-          <span className="hidden text-[13px] text-[var(--ink-faint)] sm:inline">→ Home</span>
-        </Link>
-
         {/* the card */}
         <div className="card-paper relative overflow-hidden">
           <SparkleDoodle className="absolute -right-2 -top-2 h-10 w-10 text-[var(--yellow)] md:hidden" aria-hidden="true" />
@@ -162,57 +141,13 @@ export default function ProfilePage({
               </div>
 
               <h1 className="mt-5 font-display text-[clamp(2rem,5vw,3rem)] font-semibold leading-none text-[var(--ink)]">
-                {isOwner ? (
-                  <input
-                    type="text"
-                    aria-label="Display name"
-                    value={profile.displayName}
-                    onChange={(e) => setProfile({ ...profile, displayName: e.target.value })}
-                    className="w-full bg-transparent border-b-2 border-[var(--ink)]/20 focus:border-[var(--ink)] outline-none text-center md:text-left"
-                  />
-                ) : (
-                  profile.displayName
-                )}
+                {profile.displayName}
               </h1>
               <p className="mt-2 text-[16px] font-medium text-[var(--ink-soft)]">
-                {isOwner ? (
-                  <input
-                    type="text"
-                    aria-label="Professional title"
-                    value={profile.title}
-                    onChange={(e) => setProfile({ ...profile, title: e.target.value })}
-                    className="w-full bg-transparent border-b-2 border-[var(--ink)]/20 focus:border-[var(--ink)] outline-none text-center md:text-left"
-                  />
-                ) : (
-                  profile.title
-                )}
+                {profile.title}
               </p>
-              <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[var(--ink)]/5 px-3 py-1 text-[13px] text-[var(--ink-mid)] ring-1 ring-[var(--ink)]/8">
-                📍 {isOwner ? (
-                  <input
-                    type="text"
-                    aria-label="Location"
-                    value={profile.location}
-                    onChange={(e) => setProfile({ ...profile, location: e.target.value })}
-                    className="bg-transparent border-b border-[var(--ink)]/20 focus:border-[var(--ink)] outline-none w-24"
-                  />
-                ) : (
-                  profile.location
-                )}
-              </span>
-              <p className="mt-4 max-w-sm text-[15px] leading-relaxed text-[var(--ink-soft)]">
-                {isOwner ? (
-                  <textarea
-                    aria-label="Bio"
-                    value={profile.bio}
-                    onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-                    className="w-full bg-transparent border-b-2 border-[var(--ink)]/20 focus:border-[var(--ink)] outline-none resize-none"
-                    rows={3}
-                  />
-                ) : (
-                  profile.bio
-                )}
-              </p>
+              {profile.location && <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[var(--ink)]/5 px-3 py-1 text-[13px] text-[var(--ink-mid)]"><Icon name="pin" size={15}/>{profile.location}</span>}
+              {profile.bio && <p className="mt-4 max-w-sm whitespace-pre-wrap text-[15px] leading-relaxed text-[var(--ink-soft)]">{profile.bio}</p>}
 
             </header>
 
@@ -239,74 +174,34 @@ export default function ProfilePage({
                 </a>
               ))}
 
-              {isOwner && (
-                <div className="space-y-3 rounded-xl bg-white p-4">
-                  <p className="font-bold text-sm">Edit contact links ({profile.links.length}/10)</p>
-                  {profile.links.map((link, index) => (
-                    <div key={index} className="space-y-2 border-b pb-3">
-                      <label className="block text-sm">Link label
-                        <input aria-label={`Link ${index + 1} label`} value={link.label} maxLength={80} className="w-full rounded border p-2" onChange={(e) => setProfile({ ...profile, links: profile.links.map((item, i) => i === index ? { ...item, label: e.target.value } : item) })} />
-                      </label>
-                      <label className="block text-sm">Contact URL
-                        <input aria-label={`Link ${index + 1} URL`} value={link.url} maxLength={2048} className="w-full rounded border p-2" onChange={(e) => setProfile({ ...profile, links: profile.links.map((item, i) => i === index ? { ...item, url: e.target.value } : item) })} />
-                      </label>
-                      <button type="button" className="min-h-11 text-sm underline" onClick={() => setProfile({ ...profile, links: profile.links.filter((_, i) => i !== index) })}>Remove link {index + 1}</button>
-                    </div>
-                  ))}
-                  <button type="button" disabled={profile.links.length >= 10} className="btn btn-ghost min-h-11 px-4 disabled:opacity-50" onClick={() => setProfile({ ...profile, links: [...profile.links, { type: "website", label: "Website", url: "", icon: "globe", accent: "#7FA8FF" }] })}>Add link</button>
-                </div>
-              )}
               {message && <p role="status" className="text-sm">{message}</p>}
               {/* save contact */}
               <button
                 type="button"
-                onClick={downloadContact}
+                disabled={downloading} onClick={()=>{void downloadContact();}}
                 className="group mt-1 flex items-center gap-3 rounded-2xl bg-[var(--ink)] px-4 py-3.5 text-white shadow-[0_6px_0_-3px_rgba(16,11,74,0.35)] transition-transform hover:-translate-y-0.5"
               >
                 <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[var(--yellow)] text-[var(--ink)]">
                   <SaveIcon className="h-5 w-5" />
                 </span>
-                <span className="flex-1 font-display text-[16px] font-semibold">Save Contact</span>
+                <span className="flex-1 font-display text-[16px] font-semibold">{downloading?'Creating PDF…':'Save Contact'}</span>
                 <span className="text-[16px] text-white/60 transition-transform group-hover:translate-x-1">
                   →
                 </span>
               </button>
 
-              <div className="mt-3 flex items-center justify-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ink-faint)]">
-                <span className="h-1.5 w-1.5 rounded-full bg-[var(--mint)]" />
-                u/{profile.username} · One tap. Infinite possibilities.
-              </div>
+
             </section>
           </div>
 
           {/* foot bar (hidden in preview mode — the /order shell provides Edit/Continue) */}
           <footer className={`flex items-center justify-between gap-3 border-t border-[var(--ink)]/8 bg-[var(--paper-2)]/60 px-7 py-4 sm:px-10 md:px-12 ${previewOnly ? "hidden" : ""}`}>
-            <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--ink-faint)]">
-              <NfcWaves className="h-4 w-4 text-[var(--yellow)]" />
-              Powered by EdgeTap
-            </div>
-            <a href="/icons/streamline/LICENSE.txt" className="icon-attribution">Icons by Streamline</a>
-            <div className="flex items-center gap-3">
-              {isOwner ? (
-                <button
-                  onClick={handleSave}
-                  disabled={saving}
-                  className="btn bg-[var(--mint)] px-4 py-2 text-[12px] font-bold text-[var(--ink)] hover:bg-[var(--mint-soft)] disabled:opacity-50"
-                >
-                  {saving ? "Saving..." : "Save Changes 💾"}
-                </button>
-              ) : (
-                <Link
-                  href={user ? "/account" : `/account?next=${encodeURIComponent(`/u/${profile.username}`)}`}
-                  className="btn bg-white px-4 py-2 text-[12px] font-bold text-[var(--ink)] ring-1 ring-[var(--ink)]/15 hover:bg-[var(--cream)]"
-                >
-                  {user ? "My account" : "Sign in to edit"}
-                </Link>
-              )}
-            </div>
+            <Link href="/" className="profile-powered" aria-label="Powered by EdgeTap"><span className="grid h-8 w-8 place-items-center rounded-full bg-[var(--yellow)]"><NfcWaves className="h-4 w-4 text-[var(--ink)]"/></span><span>Powered by EdgeTap</span></Link>
+            {isOwner ? <button type="button" onClick={()=>{setMessage('');setEditing(true);}} className="btn btn-ghost px-4 py-2 text-xs"><Icon name="edit" size={17}/>Edit profile</button> : <Link href={user?'/account':`/account?next=${encodeURIComponent('/u/'+profile.username)}`} className="btn btn-ghost px-4 py-2 text-xs">{user?'My account':'Sign in to edit'}</Link>}
           </footer>
         </div>
       </main>
+      {editing && isOwner && user && <ProfileEditor profile={profile} uid={user.uid} onClose={()=>setEditing(false)} onSaved={saved=>{setProfile(saved);setEditing(false);setMessage('Profile updated.');}}/>}
     </div>
   );
 }

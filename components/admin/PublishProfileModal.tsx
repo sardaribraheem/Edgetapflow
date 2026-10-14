@@ -1,5 +1,7 @@
 "use client";
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import Icon from '@/components/ui/Icon';
+import InfoHelp from '@/components/ui/InfoHelp';
 import type { Order } from '@/lib/data/order';
 import { createClientProfileFromOrder, suggestUsername, usernameAvailable } from '@/lib/data-service';
 export default function PublishProfileModal({
@@ -16,6 +18,13 @@ export default function PublishProfileModal({
   const [available, setAvailable] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const dialog = useRef<HTMLDialogElement>(null), checkingVersion = useRef(0), operation = useRef(false);
+  useEffect(() => {
+    const prior = document.body.style.overflow, focused = document.activeElement as HTMLElement|null;
+    const modal = dialog.current, versions = checkingVersion;
+    modal?.showModal(); document.body.style.overflow = 'hidden';
+    return () => { modal?.close(); document.body.style.overflow = prior; focused?.focus(); versions.current++; };
+  }, []);
 
   useEffect(() => {
     if (!username && order.customer.fullName) {
@@ -28,19 +37,23 @@ export default function PublishProfileModal({
   const check = async (u: string) => {
     const clean = u.toLowerCase().replace(/[^a-z0-9._-]/g, "").slice(0, 30);
     if (!clean) return setAvailable(null);
+    const version = ++checkingVersion.current;
     setChecking(true);
     try {
-      setAvailable(await usernameAvailable(clean));
+      const result = await usernameAvailable(clean);
+      if (version === checkingVersion.current) setAvailable(result);
     } catch {
-      setAvailable(null);
+      if (version === checkingVersion.current) setAvailable(null);
     } finally {
-      setChecking(false);
+      if (version === checkingVersion.current) setChecking(false);
     }
   };
 
   const create = async () => {
+    if (operation.current) return;
     setError("");
-    if (!username.trim()) return setError("Enter a username.");
+    if (!/^[a-z0-9._-]{1,30}$/.test(username) || ['.','..'].includes(username)) return setError("Enter a valid profile handle.");
+    operation.current = true;
     setBusy(true);
     try {
       await createClientProfileFromOrder(order, username);
@@ -48,22 +61,22 @@ export default function PublishProfileModal({
     } catch (e) {
       setError(e instanceof Error ? e.message : "Couldn't create profile.");
       setBusy(false);
+      operation.current = false;
     }
   };
 
   const availableNow = available === true || (available === null && username.trim().toLowerCase() === (order.usernameFinal || "").toLowerCase());
 
   return (
-    <div className="fixed inset-0 z-50 grid place-items-center bg-[var(--ink)]/40 p-4" onClick={onClose}>
-      <div
-        className="w-full max-w-lg overflow-hidden rounded-3xl bg-[var(--cream)] shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
+      <dialog ref={dialog}
+        className="publication-dialog w-[calc(100%_-_2rem)] max-w-lg overflow-auto rounded-3xl bg-[var(--cream)] p-0 text-[var(--ink)] shadow-2xl"
+        onCancel={event=>{event.preventDefault();if(!operation.current)onClose();}}
+        onClick={event=>{if(event.target===event.currentTarget&&!operation.current)onClose();}}
         aria-modal="true" aria-label="Create Client Profile"
       >
         <div className="flex items-center justify-between border-b border-[var(--ink)]/10 px-6 py-4">
           <h3 className="font-display text-lg font-bold text-[var(--ink)]">Create Client Profile</h3>
-          <button onClick={onClose} className="text-[var(--ink-faint)] hover:text-[var(--ink)]" aria-label="Close">✕</button>
+          <button onClick={onClose} disabled={busy} className="icon-button" aria-label="Close"><Icon name="close"/></button>
         </div>
 
         <div className="space-y-4 p-6">
@@ -73,14 +86,16 @@ export default function PublishProfileModal({
           </div>
 
           <div>
-            <label className="mb-1 block text-xs font-bold text-[var(--ink)]">Profile handle</label>
+            <label htmlFor="publish-handle" className="mb-1 block text-xs font-bold text-[var(--ink)]">Profile handle</label>
             <div className="flex gap-2">
               <span className="grid place-items-center rounded-xl bg-[var(--ink)]/5 px-3 text-sm font-bold text-[var(--ink)]">/u/</span>
               <input
+                id="publish-handle" disabled={busy}
                 value={username}
                 onChange={(e) => {
                   const v = e.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, "").slice(0, 30);
                   setUsername(v);
+                  checkingVersion.current++; setChecking(false);
                   setAvailable(null);
                 }}
                 onBlur={() => check(username)}
@@ -89,7 +104,7 @@ export default function PublishProfileModal({
               />
               <button
                 onClick={() => check(username)}
-                disabled={checking}
+                disabled={checking||busy}
                 className="rounded-xl bg-[var(--ink)]/5 px-3 py-2 text-[12px] font-bold text-[var(--ink)] hover:bg-[var(--ink)]/10"
               >
                 {checking ? "…" : "Check"}
@@ -103,21 +118,18 @@ export default function PublishProfileModal({
             </div>
           </div>
 
-          <div className="rounded-xl bg-[var(--yellow-soft)]/50 p-3 text-[12px] leading-relaxed text-[var(--ink-soft)]">
-            Creates the profile from this order&apos;s draft: avatar, name, bio and links. The username is checked for collisions —
-            nothing is overwritten. After this, the NFC chip and QR both point to <strong>/u/{username}</strong> (never to a social platform).
-          </div>
+          <p className="text-sm">NFC + QR → <strong>/u/{username}</strong></p>
+          <InfoHelp title="Publishing a profile"><p>Publishes the avatar, name, bio and links from this order. The database reserves the handle in a transaction and rejects collisions or stale orders.</p><p>This requires an accepted application and verified card payment. Once published, the handle stays fixed so existing cards keep working.</p></InfoHelp>
 
           {error && <p className="rounded-xl bg-[var(--coral)]/10 p-3 text-sm text-[var(--coral)]">{error}</p>}
 
           <div className="flex gap-3">
-            <button onClick={onClose} className="flex-1 rounded-xl bg-[var(--ink)]/5 px-4 py-2.5 text-sm font-bold text-[var(--ink)]">Cancel</button>
-            <button onClick={create} disabled={busy} className="btn btn-ink flex-1 px-4 py-2.5 text-sm">
+            <button onClick={onClose} disabled={busy} className="flex-1 rounded-xl bg-[var(--ink)]/5 px-4 py-2.5 text-sm font-bold text-[var(--ink)]">Cancel</button>
+            <button onClick={create} disabled={busy||available===false} className="btn btn-ink flex-1 px-4 py-2.5 text-sm"><Icon name="eye" size={18}/>
               {busy ? "Creating…" : "Create profile"}
             </button>
           </div>
         </div>
-      </div>
-    </div>
+      </dialog>
   );
 }

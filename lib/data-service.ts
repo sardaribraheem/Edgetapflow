@@ -36,6 +36,10 @@ export async function saveProfile(username: string, profile: Profile): Promise<v
   if (!usesSupabase) return (await firebase()).saveProfile(username, profile);
   return rpc('update_profile', { p_username: username, p_profile: profile });
 }
+export async function getMyProfiles(): Promise<Profile[]> {
+  if (!usesSupabase) return [];
+  return rpc('get_my_profiles');
+}
 export function orderNumber(from = new Date()): string {
   const date = `${from.getFullYear()}${String(from.getMonth()+1).padStart(2,'0')}${String(from.getDate()).padStart(2,'0')}`;
   return `ET-${date}-${crypto.randomUUID().slice(0,8).toUpperCase()}`;

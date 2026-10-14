@@ -1,7 +1,7 @@
 // Check the actual static export before publishing to the approved Hosting site.
 // This command performs no network request and never prints configuration values.
 import assert from 'node:assert/strict';
-import { readFile, readdir } from 'node:fs/promises';
+import { readFile, readdir, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 
 try {
@@ -15,7 +15,12 @@ try {
   const required = ['index.html', 'admin.html', 'account.html', 'account/recovery.html', 'account/orders.html', 'order.html', 'profile.html', 'privacy.html', 'terms.html', 'cookies.html', 'robots.txt', 'sitemap.xml'];
   for (const file of required) await readFile(join('out', file));
   const files = await readdir('out', { recursive: true });
-  const publicFiles = files.filter(file => /\.(html|js|json|txt|css|xml)$/.test(file));
+  // Webpack metadata chunks live inside directories named robots.txt/sitemap.xml.
+  // Scan their contents as usual, while reading only actual text files.
+  const publicFiles = [];
+  for (const file of files) {
+    if (/\.(html|js|json|txt|css|xml)$/.test(file) && (await stat(join('out', file))).isFile()) publicFiles.push(file);
+  }
   assert(!files.some(file => file.split(/[\\/]/).some(part => part.startsWith('.env'))), 'Environment files must not enter the export.');
   let compiled = '';
   for (const file of publicFiles) {
