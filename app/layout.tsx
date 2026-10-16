@@ -22,7 +22,7 @@ export const metadata: Metadata = {
     template: "%s · EdgeTap",
   },
   description:
-    "Physical NFC business cards with a QR fallback and an editable digital profile. Rs. 999 per card plus delivery. One tap. Infinite possibilities.",
+    "Physical NFC business cards with your link or an editable digital profile and optional QR. Cards from Rs. 999 plus delivery. One tap. Infinite possibilities.",
   keywords: [
     "NFC",
     "digital business card",

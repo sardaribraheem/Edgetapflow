@@ -35,22 +35,12 @@ try {
       assert(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1), `${route}: overflow at ${width}`); checks++;
       assert.equal(await page.locator('a[href="#"]').count(),0,route+" dead link"); checks++;
       if (route === "/pricing") {
-        const cards = await page.locator('.pricing-option').evaluateAll(nodes => nodes.map(node => {
-          const box = node.getBoundingClientRect();
-          return { top: box.top, right: box.right, height: box.height };
-        }));
-        assert.equal(cards.length, 4); checks++;
-        assert(cards.every(card => Math.abs(card.top - cards[0].top) < 1), 'Four pricing options must stay in one row'); checks++;
-        assert(text.includes('Rs. 29,999') && !text.includes('Rs. 18,999') && !text.includes('Rs. 2,499')); checks++;
-        const row = page.getByRole('region', { name: 'Compare four EdgeTap options', exact: true });
-        if (width < 1200) {
-          await row.focus(); await page.keyboard.press('End');
-          await page.locator('.pricing-option').last().scrollIntoViewIfNeeded();
-          assert(await row.evaluate(node => node.scrollLeft > 0), 'Mobile row must allow access to the last plan'); checks++;
-          await row.evaluate(node => { node.scrollLeft = 0; });
-        } else {
-          assert(cards.every(card => card.right <= width), 'All four desktop plans must fit'); checks++;
-        }
+        const cards = await page.locator('.pricing-option').evaluateAll(nodes => nodes.map(node => {const b=node.getBoundingClientRect();return {top:b.top,right:b.right,width:b.width,height:b.height};}));
+        assert.equal(cards.length,3); checks++;
+        assert(text.includes('Rs. 999') && text.includes('Rs. 1,499') && text.includes('Rs. 29,999')); checks++;
+        if(width>900){assert(cards[1].width>cards[0].width&&cards[1].height>cards[0].height,'Centre offer leads');checks++;}
+        else{assert(cards[1].top>cards[0].top&&cards[2].top>cards[1].top,'Three offers stack on mobile');checks++;}
+        assert(cards.every(card=>card.right<=width),'All offers fit the viewport');checks++;
         for (const button of await page.locator('.pricing-option-action .btn').all()) {
           assert(await button.evaluate(node => node.scrollWidth <= node.clientWidth + 1), 'Pricing CTA must fit its card'); checks++;
         }
@@ -87,7 +77,7 @@ try {
         await page.keyboard.press('Enter');
         assert.equal(await page.evaluate(() => document.activeElement.id), 'main-content'); checks++;
         assert.equal(await page.locator('#how-to-order ol > li').count(), 3); checks++;
-        assert.equal(await page.locator('#top a[href="/u/ibraheem"]').count(), 0); checks++;
+        assert.equal(await page.locator('#top a[href="/u/ibraheem"]:visible').count(), width >= 1000 ? 1 : 0); checks++;
         const question = page.getByRole('button', { name: 'How does the NFC card work?', exact: true });
         await question.click();
         const answer = page.getByRole('region', { name: 'How does the NFC card work?', exact: true });

@@ -8,6 +8,7 @@ type Props = {
   className?: string;
   /** Vertical parallax offset in px over the scroll range (0 = none). */
   parallax?: number;
+  interactive?:boolean;
 };
 
 // Positions a scattered set of doodles in an absolute layer and gives the
@@ -16,6 +17,7 @@ export default function DoodleField({
   children,
   className = "",
   parallax = -60,
+  interactive=false,
 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -39,7 +41,7 @@ export default function DoodleField({
   }, [parallax]);
 
   return (
-    <div ref={ref} className={`pointer-events-none absolute inset-0 ${className}`} aria-hidden="true">
+    <div ref={ref} className={`pointer-events-none absolute inset-0 ${className}`} aria-hidden={interactive?undefined:true}>
       {children}
     </div>
   );

@@ -13,7 +13,7 @@ export const nav = {
 };
 
 export const orderingSteps = [
-  { title: "Make it yours", description: "Choose a card design, add your contact details and links, and preview your profile. No account needed yet." },
+  { title: "Make it yours", description: "Choose a card design, add your contact details and links, and preview your digital profile. EdgeTap prepares the final card proof after acceptance." },
   { title: "Save and submit", description: "Sign in or create an account to save your details. Submit your JazzCash payment proof for staff review." },
   { title: "Track your card", description: "Follow review requests and progress in My orders. Collect at NASTP when ready, or pay the booked rider separately for delivery." },
 ];
@@ -33,7 +33,7 @@ export type Solution = {
 export const solutions: Solution[] = [
   { index: "01", tag: "Your card", title: "Physical NFC Business Card",
     description: "Carry one card that opens your EdgeTap profile on compatible NFC smartphones.",
-    bullets: ["Rs. 999 per card", "Choose a card design", "No visitor app"], icon: "businessCard", tone: "yellow" },
+    bullets: ["Cards from Rs. 999", "Choose a card design", "No visitor app"], icon: "businessCard", tone: "yellow" },
   { index: "02", tag: "Your profile", title: "Your Contact Details & Links",
     description: "Share up to ten contact and social links on your digital profile. Sign in to update it after activation.",
     bullets: ["WhatsApp", "Portfolio", "Save contact"], icon: "globe", tone: "mint" },
@@ -67,11 +67,11 @@ export const useCases: UseCase[] = [
 
 // FAQ
 export const faqs = [
-  { q: "What do I receive for Rs. 999?", a: "One physical NFC card with a QR fallback, linked to your EdgeTap digital profile with up to ten contact links. Delivery is quoted separately for your location before fulfillment." },
+  { q: "Which card should I choose?", a: "Link Card (Rs. 999) opens your existing portfolio, social page or website. EdgeTap Profile (Rs. 1,499) includes your editable profile with up to ten links. Both include a physical NFC card, customizable front/back and optional QR. Delivery is separate." },
   { q: "How does the NFC card work?", a: "Hold your card near the NFC reader on a compatible phone and open the notification. Your profile opens in the browser. Reader position and NFC settings vary by phone; internet access is required." },
   { q: "What if a phone does not support NFC?", a: "Scan the QR code on the card with the phone camera. It links to the same digital profile, so NFC is optional." },
   { q: "Can I change my information later?", a: "Sign in with your checkout account and open your activated profile to update your details and links. Your physical card keeps the same profile URL." },
-  { q: "How do I order and pay?", a: "Start at Pricing and choose the standard card. Build and preview it without an account; your draft stays on this device. Create an account or sign in just before payment to save your profile details, then submit private JazzCash proof for staff review. Website packages and custom NFC projects are arranged by contacting EdgeTap. Confirm the card amount and JazzCash recipient before transferring. Delivery costs extra: EdgeTap books a rider when your paid card is ready and you pay the rider directly. The actual fare appears on My orders. NASTP Delta 3 pickup is Monday–Friday, 9 am–5 pm (Pakistan time); contact +92 304 414 9674 after reaching NASTP once your card is ready. Standard digital profile hosting and updates have no separate fee for now. Follow review decisions and next steps on My orders; a receipt upload does not verify payment." },
-  { q: "Can I order multiple cards?", a: "The standard order supports one to twenty cards at Rs. 999 each, all linked to the same profile. Contact us before ordering cards for different people." },
+  { q: "How do I order and pay?", a: "Start at Pricing and choose the standard card. Choose the design and add its details without an account; your draft stays on this device. Create an account or sign in just before payment to save your profile details, then submit private JazzCash proof for staff review. Website packages and custom NFC projects are arranged by contacting EdgeTap. Confirm the card amount and JazzCash recipient before transferring. Delivery costs extra: EdgeTap books a rider when your paid card is ready and you pay the rider directly. The actual fare appears on My orders. NASTP Delta 3 pickup is Monday–Friday, 9 am–5 pm (Pakistan time); contact +92 304 414 9674 after reaching NASTP once your card is ready. Standard digital profile hosting and updates have no separate fee for now. Follow review decisions and next steps on My orders; a receipt upload does not verify payment." },
+  { q: "Can I order multiple cards?", a: "Order one to twenty identical cards: Rs. 999 each for Link Card or Rs. 1,499 each for EdgeTap Profile, all opening the same destination. Contact us before ordering cards for different people." },
   { q: "Can I return a personalized card?", a: "Personalized cards are non-returnable and non-refundable once production starts, except where applicable law requires otherwise. Contact EdgeTap if your card arrives damaged, defective, wrongly supplied or incorrectly printed due to an EdgeTap production error so we can assess a remedy. Check the details you supply before approving production; customer-provided errors do not automatically qualify for a replacement or refund. See our Terms for details." },
 ];

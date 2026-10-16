@@ -61,3 +61,8 @@ ui-debug.log
 
 # Owner-authorized local test cleanup backups; never commit customer data.
 /.private-backups/
+
+# Designer assets are source files, not diagnostic screenshots.
+!public/card-backgrounds/**/*.png
+!public/card-backgrounds/*.png
+!public/card-designs/*.png

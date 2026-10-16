@@ -75,7 +75,7 @@ export async function createOrder(order: Order): Promise<string> {
     orderNumber: order.orderNumber || orderNumber(),
     plan: "standard",
     payment: { ...order.payment, method: "jazzcash", status: "pending" },
-    subtotal: calculateSubtotal(order.card.quantity),
+    subtotal: calculateSubtotal(order.card.quantity,'standard'),
     deliveryFee: null,
     total: null,
     createdAt: now,

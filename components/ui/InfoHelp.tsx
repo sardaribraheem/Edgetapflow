@@ -27,7 +27,7 @@ export default function InfoHelp({ title, label, children }: { title: string; la
     <button ref={trigger} type="button" className={label ? "info-help info-help-label" : "info-help"} aria-label={label || `About ${title.toLowerCase()}`} aria-haspopup="dialog" onClick={open}>
       <Icon name="info" size={18} />{label && <span>{label}</span>}
     </button>
-    <dialog ref={dialog} aria-labelledby={id} className="help-dialog" onClose={closed} onCancel={event => { event.preventDefault(); close(); }} onClick={event => { if (event.target === event.currentTarget) close(); }} onKeyDown={event => {
+    <dialog ref={dialog} aria-labelledby={id} className="help-dialog" onClose={closed} onCancel={event => { event.stopPropagation(); event.preventDefault(); close(); }} onClick={event => { if (event.target === event.currentTarget) close(); }} onKeyDown={event => {
       if (event.key !== "Tab") return;
       const elements = event.currentTarget.querySelectorAll<HTMLElement>('a[href], button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), [tabindex="0"]');
       const first = elements[0], last = elements[elements.length - 1];

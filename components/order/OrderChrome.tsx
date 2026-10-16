@@ -5,11 +5,11 @@ import Link from "next/link";
 import Icon, { type IconName } from "@/components/ui/Icon";
 import InfoHelp from "@/components/ui/InfoHelp";
 
-const icons: Record<string, IconName> = { Card: "card", Profile: "user", Links: "link", Preview: "eye", Fulfillment: "truck", "Save profile": "save", JazzCash: "receipt", Submit: "check" };
+const icons: Record<string, IconName> = { Review:'eye','Profile preview':'eye',Details:'user',Link:'link', 'Save order':'save', Card: "card", Profile: "user", Links: "link", Preview: "eye", Fulfillment: "truck", "Save profile": "save", JazzCash: "receipt", Submit: "check" };
 const stepIcon = (label: string): IconName => icons[label] || "card";
 
 export function OrderProgress({ steps, step, cardSelected = true }: { steps: string[]; step: number; cardSelected?: boolean }) {
-  const weights:Record<string,number>={Card:cardSelected?40:0,Profile:50,Links:60,Preview:70,Fulfillment:78,'Save profile':82,JazzCash:88,Submit:94};
+  const weights:Record<string,number>={Details:50,Review:70,'Profile preview':70,Link:10,'Save order':82,Card:cardSelected?40:0,Profile:50,Links:60,Preview:70,Fulfillment:78,'Save profile':82,JazzCash:88,Submit:94};
   const progress=weights[steps[step]]??0;
   return <div className="builder-progress"><div role="progressbar" aria-label="Card setup progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress} className="builder-progress-track"><span style={{transform:`scaleX(${progress/100})`}}/></div><ol aria-label="Application progress" className="order-progress">{steps.map((label, index) => <li key={label} aria-current={step === index ? "step" : undefined} aria-label={`${index + 1}. ${label}${index < step ? ", completed" : ""}`} className={`${index === step ? "is-current" : ""} ${index < step ? "is-complete" : ""}`}>
     <span className="order-step-icon"><Icon name={index < step ? "check" : stepIcon(label)} size={20} /></span><span className="order-step-label">{label}</span>
@@ -30,7 +30,8 @@ export function DraftStatus({ status, onSave, onClear, disabled, children }: { s
 export function OrderNotes({ guest = false, onTermsNavigate }: { guest?: boolean; onTermsNavigate?: ComponentProps<typeof Link>["onNavigate"] }) {
   return <div className="order-notes">
     <InfoHelp title="Final-design review" label="Design review">
-      <p>{guest ? "Every personalized card receives a final-design email before printing. Reply within 10 hours of sending to confirm or request changes. With no timely reply, staff checks the inbox and confirms the design after the window." : "Every personalized card requires a final-design email before printing. Reply within 10 hours of sending to confirm or request changes. If there is no timely reply, staff checks the inbox and confirms the design after the window. The timer starts only after the email is actually sent."}</p>
+      <p>EdgeTap prepares the card proof after accepting your order. Review both sides in My orders. One revision request is included: put all changes in one note. Further edits need an agreed extra payment. Contact a professional graphic designer for a substantial redesign.</p>
+      <p>Account-shared proofs wait for your explicit approval. If EdgeTap separately sends a proof by email, its existing 10-hour reply window starts only after actual sending.</p>
     </InfoHelp>
     <InfoHelp title="Personalized-card terms" label="Card terms">
       <p>{guest ? "Personalized cards are non-returnable/non-refundable once production starts, except where applicable law requires otherwise. Contact EdgeTap about damage, defects or EdgeTap errors." : "Personalized cards are non-returnable and non-refundable once production starts, except where applicable law requires otherwise. Contact EdgeTap about damage, defects, EdgeTap printing errors or a wrongly supplied card. Check your supplied details before approving production."}</p>

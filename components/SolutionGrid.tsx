@@ -4,6 +4,7 @@ import { useEffect, useRef, useSyncExternalStore } from "react";
 import { gsap } from "@/lib/animations";
 import { solutions } from "@/lib/data/content";
 import SolutionCard from "./SolutionCard";
+import {OFFER_MOTION} from '@/lib/data/motion';
 
 function subscribeMotion(callback: () => void) {
   const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -23,6 +24,11 @@ export default function SolutionGrid() {
     if (!row || !strip) return;
     let visible = false, hovered = false, stopped = false;
     let tween: gsap.core.Tween | undefined;
+    let slots: HTMLElement[] = [], centres: number[] = [];
+    const scaleCards = () => {
+      const x=Number(gsap.getProperty(strip,'x'))||0,centre=row.clientWidth/2+row.scrollLeft;
+      slots.forEach((slot,index)=>{const distance=Math.min(1,Math.abs(centres[index]+x-centre)/(row.clientWidth*.6));const emphasis=(1+Math.cos(Math.PI*distance))/2;const card=slot.firstElementChild as HTMLElement;card.style.transform=`scale(${OFFER_MOTION.minScale+(OFFER_MOTION.maxScale-OFFER_MOTION.minScale)*emphasis})`;});
+    };
     const update = () => {
       const moving = !reduced && !hovered && !stopped && visible && !document.hidden;
       row.dataset.moving = String(moving);
@@ -32,10 +38,11 @@ export default function SolutionGrid() {
       const progress = tween?.progress() || 0;
       tween?.kill();
       gsap.set(strip, { clearProps: "transform" });
-      if (reduced || stopped) return;
-      const cards = strip.querySelectorAll<HTMLElement>(".offer-card");
-      const distance = cards[standard.length].offsetLeft - cards[0].offsetLeft;
-      tween = gsap.fromTo(strip, { x: 0 }, { x: -distance, duration: distance / 24, ease: "none", repeat: -1, paused: true, force3D: true });
+      slots=Array.from(strip.querySelectorAll<HTMLElement>('.offer-slot'));
+      centres=slots.map(slot=>slot.offsetLeft+slot.offsetWidth/2);
+      if (reduced || stopped) {scaleCards();return;}
+      const distance = slots[standard.length].offsetLeft - slots[0].offsetLeft;
+      tween = gsap.fromTo(strip, { x: 0 }, { x: -distance, duration: distance / OFFER_MOTION.pixelsPerSecond, ease: "none", repeat: -1, paused: true, force3D: true,onUpdate:scaleCards });
       tween.progress(progress);
       update();
     };
@@ -45,6 +52,7 @@ export default function SolutionGrid() {
       stopped = true; tween?.kill();
       gsap.set(strip, { clearProps: "transform" });
       row.scrollLeft = position;
+      scaleCards();
       update();
     };
     const enter = (event: PointerEvent) => { if (event.pointerType === "mouse") { hovered = true; update(); } };
@@ -55,12 +63,14 @@ export default function SolutionGrid() {
     observer.observe(row); resize.observe(row);
     row.addEventListener("pointerenter", enter); row.addEventListener("pointerleave", leave);
     row.addEventListener("pointerdown", stop); row.addEventListener("focusin", stop); row.addEventListener("wheel", wheel, { passive: true });
+    row.addEventListener('scroll',scaleCards,{passive:true});
     document.addEventListener("visibilitychange", update);
     measure();
     return () => {
       observer.disconnect(); resize.disconnect(); tween?.kill(); gsap.set(strip, { clearProps: "transform" });
       row.removeEventListener("pointerenter", enter); row.removeEventListener("pointerleave", leave);
       row.removeEventListener("pointerdown", stop); row.removeEventListener("focusin", stop); row.removeEventListener("wheel", wheel);
+      row.removeEventListener('scroll',scaleCards);
       document.removeEventListener("visibilitychange", update);
     };
   }, [reduced, standard.length]);
@@ -76,7 +86,7 @@ export default function SolutionGrid() {
     </div>
     <div ref={carousel} className="offer-carousel mt-10 lg:mt-14" role="region" aria-label="EdgeTap card features" tabIndex={0}>
       <div ref={track} className="offer-track">
-        {[...standard, ...standard, ...standard].map((solution, index) => <SolutionCard key={solution.index + "-" + index} solution={solution} duplicate={index >= standard.length} />)}
+        {[...standard, ...standard, ...standard].map((solution, index) => <div className="offer-slot" key={solution.index + "-" + index}><SolutionCard solution={solution} duplicate={index >= standard.length} /></div>)}
       </div>
     </div>
   </section>;

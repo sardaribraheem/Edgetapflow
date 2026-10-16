@@ -5,7 +5,7 @@ const DATABASE='edgetap-device-drafts';
 const STORE='drafts';
 const KEY='current';
 export const GUEST_DRAFT_TTL=7*24*60*60*1000;
-export type GuestDraft={id:string;revision:number;updatedAt:number;step:number;cardChosen?:boolean;payload:ApplicationPayload;files:{artwork?:File;avatar?:File};claimEmail?:string;transfer?:{uid:string;artworkPath?:string;avatarUrl?:string}};
+export type GuestDraft={id:string;revision:number;updatedAt:number;step:number;cardChosen?:boolean;payload:ApplicationPayload;files:{artwork?:File;backArtwork?:File;avatar?:File;logo?:File};claimEmail?:string;transfer?:{uid:string;artworkPath?:string;backArtworkPath?:string;avatarUrl?:string;logoUrl?:string}};
 function open():Promise<IDBDatabase>{return new Promise((resolve,reject)=>{if(!window.indexedDB)return reject(new Error('Device saving is unavailable in this browser.'));const request=indexedDB.open(DATABASE,1);request.onupgradeneeded=()=>request.result.createObjectStore(STORE);request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(new Error('Device saving is unavailable. Check your browser storage settings.'));});}
 export async function readGuestDraft():Promise<GuestDraft|null>{
  const db=await open();
@@ -14,7 +14,7 @@ export async function readGuestDraft():Promise<GuestDraft|null>{
 export function localPayload(draft:WizardDraft):ApplicationPayload{
  const payload=applicationPayload(draft);
  payload.profileDraft.usernameSuggested=draft.usernameSuggested;
- delete payload.card.customDesignUrl;delete payload.profileDraft.avatarUrl;
+ delete payload.card.customDesignUrl;if(payload.card.physical){delete payload.card.physical.backDesignUrl;delete payload.card.physical.logoUrl;}delete payload.profileDraft.avatarUrl;
  payload.customer.email='';payload.payment={method:'jazzcash'};
  return payload;
 }

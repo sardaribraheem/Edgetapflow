@@ -11,7 +11,7 @@ export default function HowToOrder() {
             Your next introduction starts here.
           </h2>
           <p className="mt-5 leading-relaxed text-[var(--ink-soft)]">
-            Rs. 999 per card. Start with a preview and save your details when you’re ready.
+            Cards from Rs. 999. Start with a preview and save your details when you’re ready.
           </p>
         </div>
         <ol className="mt-10 grid gap-5 md:grid-cols-3">

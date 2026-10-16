@@ -13,6 +13,8 @@ import Icon from './ui/Icon';
 export default function ProfileEditor({profile,uid,onClose,onSaved}:{profile:Profile;uid:string;onClose:()=>void;onSaved:(profile:Profile)=>void}) {
   const [draft,setDraft]=useState<Profile>(()=>({...profile,links:profile.links.map(link=>({...link}))}));
   const [photo,setPhoto]=useState<File|null>(null),[preview,setPreview]=useState('');
+  const [logoFile,setLogoFile]=useState<File|null>(null),[logoPreview,setLogoPreview]=useState('');
+  const uploadedLogo=useRef<{file:File;url:string}|null>(null);
   const [busy,setBusy]=useState(false),[error,setError]=useState('');
   const dialog=useRef<HTMLDialogElement>(null),operation=useRef(false),mounted=useRef(false);
   const uploaded=useRef<{file:File;url:string}|null>(null);
@@ -23,6 +25,8 @@ export default function ProfileEditor({profile,uid,onClose,onSaved}:{profile:Pro
     return()=>{mounted.current=false;modal?.close();document.body.style.overflow=overflow;focus?.focus();};
   },[]);
   useEffect(()=>()=>{if(preview)URL.revokeObjectURL(preview);},[preview]);
+  useEffect(()=>()=>{if(logoPreview)URL.revokeObjectURL(logoPreview);},[logoPreview]);
+  const selectLogo=(file:File|undefined)=>{if(!file)return;if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size<=0||file.size>5*1024*1024){setError('Choose a JPEG, PNG or WebP logo up to 5 MB.');return;}setError('');setLogoFile(file);setLogoPreview(URL.createObjectURL(file));uploadedLogo.current=null;};
   const changeLink=(index:number,patch:Partial<ProfileLink>)=>setDraft(value=>({...value,links:value.links.map((link,i)=>i===index?{...link,...patch}:link)}));
   const selectPhoto=(file:File|undefined)=>{
     if(!file)return;
@@ -40,8 +44,9 @@ export default function ProfileEditor({profile,uid,onClose,onSaved}:{profile:Pro
         if(uploaded.current?.file!==photo)uploaded.current={file:photo,url:await uploadPublicAvatar(uid,photo)};
         avatar=uploaded.current.url;await check();
       }
+      let logo=draft.logo;if(logoFile){if(uploadedLogo.current?.file!==logoFile)uploadedLogo.current={file:logoFile,url:await uploadPublicAvatar(uid,logoFile)};logo=uploadedLogo.current.url;await check();}
       const parts=draft.displayName.trim().split(/\s+/);
-      await saveProfile(profile.username,{...draft,username:profile.username,avatar,firstName:parts[0],lastName:parts.slice(1).join(' ')});
+      await saveProfile(profile.username,{...draft,username:profile.username,avatar,logo,firstName:parts[0],lastName:parts.slice(1).join(' ')});
       await check();const saved=await getProfile(profile.username);await check();onSaved(saved);
     }catch(e){if(mounted.current)setError(e instanceof Error&&/changed|Reload|reopen/i.test(e.message)?e.message:'Could not publish your changes. Your edits are still here; try again.');}
     finally{operation.current=false;if(mounted.current)setBusy(false);}
@@ -55,6 +60,7 @@ export default function ProfileEditor({profile,uid,onClose,onSaved}:{profile:Pro
           <div><label className="btn btn-ghost cursor-pointer px-4 py-3"><Icon name="camera" size={18}/>Change photo<input type="file" aria-label="Profile picture" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={event=>selectPhoto(event.target.files?.[0])}/></label><p className="mt-2 text-xs text-[var(--ink-soft)]">Public when saved · Up to 5 MB</p></div>
           {(photo||draft.avatar)&&<button type="button" className="icon-button" aria-label="Remove profile picture" title="Remove photo" onClick={()=>{setPhoto(null);setPreview('');uploaded.current=null;setDraft(value=>({...value,avatar:''}));}}><Icon name="trash"/></button>}
         </div>
+        {'logo' in profile&&<div className="flex flex-wrap items-center gap-4">{(logoPreview||draft.logo)&&<img src={logoPreview||draft.logo} alt="Logo preview" className="h-14 max-w-32 object-contain"/>}<label className="btn btn-ghost cursor-pointer px-4 py-3"><Icon name="camera" size={18}/>Logo (optional)<input type="file" aria-label="Profile logo" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={event=>selectLogo(event.target.files?.[0])}/></label>{(logoFile||draft.logo)&&<button type="button" className="icon-button" aria-label="Remove logo" onClick={()=>{setLogoFile(null);setLogoPreview('');uploadedLogo.current=null;setDraft(value=>({...value,logo:''}));}}><Icon name="trash"/></button>}<p className="text-xs text-[var(--ink-soft)]">Public when saved · Digital profile only. Printed cards keep their approved design.</p></div>}
         <div className="grid gap-4 sm:grid-cols-2">
           {([{key:'displayName',label:'Display name',max:120},{key:'title',label:'Professional title',max:160},{key:'location',label:'Location',max:160}] as const).map(field=><label key={field.key} className="profile-editor-label">{field.label}<input value={draft[field.key]} maxLength={field.max} required={field.key==='displayName'} onChange={event=>setDraft(value=>({...value,[field.key]:event.target.value}))}/></label>)}
           <label className="profile-editor-label sm:col-span-2">Bio<textarea aria-label="Bio" rows={4} maxLength={2000} value={draft.bio} onChange={event=>setDraft(value=>({...value,bio:event.target.value}))}/></label>

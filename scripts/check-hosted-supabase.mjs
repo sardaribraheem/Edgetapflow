@@ -39,6 +39,9 @@ try{
   ['publish_order_profile',{p_id:'nonexistent',p_username:'ibraheem',p_version:1}],
   ['update_profile',{p_username:'ibraheem',p_profile:{}}]
  ])await probe(name,args,true);
+ await probe('get_print_package',{p_id:'nonexistent',p_version:1},true);
+ await probe('prepare_print_proof',{p_id:'nonexistent',p_physical:{},p_settings:{},p_front:'nonexistent',p_back:'nonexistent',p_pdf:'nonexistent',p_version:1},true);
+ await probe('can_read_print_file',{p_name:'qa-absent.png'},true);
  for(const table of ['profiles','customers','orders','payments','reviews','order_applications']){
   const {error}=await client.from(table).select('*').limit(1);assert(error&&['42501','PGRST301','PGRST302'].includes(error.code),`${table}: unexpected anonymous table access`);checks++;
  }
@@ -50,7 +53,7 @@ try{
  assert.equal(settingsResponse.status,200);const settings=await settingsResponse.json();
  assert.equal(settings.disable_signup,false);assert.equal(settings.mailer_autoconfirm,false);assert.equal(settings.external.email,true);assert.equal(settings.external.anonymous_users,false);checks++;
  const jwksResponse=await fetch(`${url}/auth/v1/.well-known/jwks.json`);assert.equal(jwksResponse.status,200);assert((await jwksResponse.json()).keys.length>0);checks++;
- for(const bucket of ['payment-receipts','order-artwork']){
+ for(const bucket of ['payment-receipts','order-artwork','print-packages']){
   const response=await fetch(`${url}/storage/v1/object/public/${bucket}/qa-absent.png`,{headers:{apikey:key}});
   assert([400,403,404].includes(response.status),`${bucket}: private public URL should fail`);checks++;
  }

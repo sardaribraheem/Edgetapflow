@@ -1,10 +1,11 @@
 -- Post-upgrade verification permits existing real accounts/data. No fixtures.
 begin read only;
 do $$
-declare versions text[]; t text; fn text; settings jsonb;
+declare versions text[]; t text; fn text; settings jsonb; products boolean;
 begin
  select array_agg(version::text order by version) into versions from supabase_migrations.schema_migrations;
- if versions is distinct from array['202610070001','202610070002','202610070003','202610070004','202610070005','202610070006','202610070007','202610070008','202610070009','202610140010'] then raise exception 'Incomplete or unexpected migration history'; end if;
+ products='202610150012'=any(versions);
+ if versions is distinct from array['202610070001','202610070002','202610070003','202610070004','202610070005','202610070006','202610070007','202610070008','202610070009','202610140010','202610140011'] and versions is distinct from (array['202610070001','202610070002','202610070003','202610070004','202610070005','202610070006','202610070007','202610070008','202610070009','202610140010','202610140011']||array['202610150012']) and versions is distinct from (array['202610070001','202610070002','202610070003','202610070004','202610070005','202610070006','202610070007','202610070008','202610070009','202610140010','202610140011','202610150012','202610160013']) and versions is distinct from array['202610070001','202610070002','202610070003','202610070004','202610070005','202610070006','202610070007','202610070008','202610070009','202610140010','202610140011','202610150012','202610160013','202610160014'] and versions is distinct from array['202610070001','202610070002','202610070003','202610070004','202610070005','202610070006','202610070007','202610070008','202610070009','202610140010','202610140011','202610150012','202610160013','202610160014','202610160015'] then raise exception 'Incomplete or unexpected migration history'; end if;
  foreach t in array array['public.order_applications','private.application_events','private.order_notes','private.notification_outbox','private.order_settings','private.design_proof_emails'] loop
   if not exists(select 1 from pg_class where oid=to_regclass(t) and relrowsecurity) then raise exception 'Missing workflow table or RLS: %',t; end if;
   if has_table_privilege('anon',t,'SELECT,INSERT,UPDATE,DELETE') or has_table_privilege('authenticated',t,'INSERT,UPDATE,DELETE') then raise exception 'Unsafe workflow table grants: %',t; end if;
@@ -18,7 +19,11 @@ begin
  if has_function_privilege('anon','private.design_proof_email_sent(uuid,text)','EXECUTE') or has_function_privilege('authenticated','private.design_proof_email_sent(uuid,text)','EXECUTE') then raise exception 'Email delivery completion exposed'; end if;
  if not exists(select 1 from pg_policies where schemaname='storage' and tablename='objects' and policyname='edgetap_prepared_artwork_owner_read') then raise exception 'Prepared artwork owner policy missing'; end if;
  if not exists(select 1 from storage.buckets where id='avatars' and public) or (select count(*) from storage.buckets where id in ('order-artwork','payment-receipts','migration-quarantine') and not public)<>3 then raise exception 'Bucket visibility mismatch'; end if;
+ if products and (not has_function_privilege('authenticated','public.confirm_link_destination(text,bigint)','EXECUTE') or has_function_privilege('anon','public.confirm_link_destination(text,bigint)','EXECUTE')) then raise exception 'Unsafe direct-link RPC grants';end if;
  settings=public.get_order_settings();
+ if '202610160013'=any(versions) and settings->>'cardEditorVersion' is distinct from (case when '202610160014'=any(versions) then '4' else '3' end) then raise exception 'Missing editor capability';end if;
+ if '202610160015'=any(versions) and settings->>'designReviewVersion' is distinct from '1' then raise exception 'Missing private proof-review capability';end if;
+ if products and settings->'offerPrices' is distinct from '{"direct_link":999,"profile":1499}'::jsonb then raise exception 'Unexpected card product prices';end if;
  if settings->>'cardPrice'<>'999' or settings->>'jazzcashNumber'<>'0304 4149674' or settings->>'emailNotificationsEnabled'<>'false' or settings->>'designProofScope'<>'all_personalized' then raise exception 'Unexpected ordering configuration'; end if;
 end $$;
 -- SQL role simulation against an existing, unenrolled account. This is not a
@@ -36,5 +41,5 @@ do $$ begin
  begin perform 1 from private.admin_members;raise exception 'Private staff directory visible';exception when insufficient_privilege then null;end;
 end $$;
 reset role;
-select 'Ordering upgrade verified: 001–010, RLS/RPC grants, private artwork/receipts and proof-email gates. No data changed.' as result;
+select 'Ordering upgrade verified against allowed 001–011, 001–012, 001–013, 001–014 or 001–015 history, RLS/RPC grants, private artwork/receipts and proof-email gates. No data changed.' as result;
 commit;

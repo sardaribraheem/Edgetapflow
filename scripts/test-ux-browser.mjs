@@ -29,18 +29,19 @@ try {
     verify(await help.evaluate(node => node === document.activeElement), 'Closing must restore focus.');
     verify(await page.evaluate(() => document.body.style.overflow !== 'hidden'), 'Closing must restore page scroll.');
     verify(await page.getByRole('progressbar',{name:'Card setup progress'}).getAttribute('aria-valuenow')==='0','Card setup starts before selection.');
-    await page.getByRole('button',{name:/^Lux/}).click();
+    await page.getByRole('button',{name:/^Blue studio/}).click();
     verify(await page.getByRole('progressbar',{name:'Card setup progress'}).getAttribute('aria-valuenow')==='40','Selecting a card completes the first 40%.');
     await page.getByRole('button', { name: 'Continue →', exact: true }).click();
     await page.getByRole('img', { name: 'Default profile picture', exact: true }).waitFor({ state: 'visible' });
     verify(await page.getByRole('img', { name: 'Default profile picture', exact: true }).isVisible(), 'Empty photo must show the default avatar.');
     verify((await page.locator('main').innerText()).includes('Your photo is public after account upload.'), 'Photo privacy must be visible before uploading.');
-    await page.getByLabel('Name', { exact: true }).fill('Local UX Fixture');
+    await page.getByLabel('Name or main heading', { exact: true }).fill('Local UX Fixture');
     verify(await page.getByLabel('Desired profile handle', { exact: true }).inputValue() === '', 'Requested handle must be optional.');
     await page.getByRole('button', { name: 'Continue →', exact: true }).click();
     await page.getByRole('button', { name: '+ Email', exact: true }).click();
     await page.getByLabel('Link 1 URL', { exact: true }).fill('fixture@example.test');
     await page.getByRole('button', { name: 'Continue →', exact: true }).click();
+
     await page.getByRole('img', { name: 'Default profile picture', exact: true }).waitFor({ state: 'visible' });
     verify(await page.getByRole('img', { name: 'Default profile picture', exact: true }).isVisible(), 'Preview must use the same default avatar.');
     verify(await fits(page), 'Profile preview must fit.');
@@ -95,9 +96,9 @@ try {
     await page.waitForTimeout(600);
     verify(await row.evaluate(node => node.scrollLeft-(getComputedStyle(node.querySelector('.offer-track')).transform==='none'?0:new DOMMatrixReadOnly(getComputedStyle(node.querySelector('.offer-track')).transform).m41)) > start + 5, 'Features must move without input.');
     if (width === 1440) {
-      const geometry=await row.evaluate(node=>{const cards=node.querySelectorAll('.offer-card');return cards[3].offsetLeft-cards[0].offsetLeft;});
+      const geometry=await row.evaluate(node=>{const cards=node.querySelectorAll('.offer-slot');return cards[3].offsetLeft-cards[0].offsetLeft;});
       const position=await row.evaluate(node=>node.scrollLeft-new DOMMatrixReadOnly(getComputedStyle(node.querySelector('.offer-track')).transform).m41);
-      await page.clock.runFor(Math.ceil((geometry-position)/24*1000)+200);
+      await page.clock.runFor(Math.ceil((geometry-position)/32*1000)+200);
       verify(await row.evaluate(node=>-new DOMMatrixReadOnly(getComputedStyle(node.querySelector('.offer-track')).transform).m41)<50,'The wide carousel must wrap without running out of cards.');
       verify(await row.evaluate(node=>node.querySelector('.offer-track').getBoundingClientRect().right>=node.getBoundingClientRect().right),'The loop must fill the viewport across its seam.');
     }

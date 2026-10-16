@@ -21,6 +21,14 @@ export async function uploadCustomDesign(uid: string, file: File): Promise<strin
 export async function uploadPaymentReceipt(uid: string, file: File): Promise<string> {
   return usesSupabase ? upload('payment-receipts',uid,file,8) : (await import('./storage')).uploadPaymentReceipt(uid,file);
 }
+export async function uploadPrintFile(uid:string,blob:Blob,face:'front'|'back'|'pdf'):Promise<string>{
+  const mime=face==='pdf'?'application/pdf':'image/png';
+  if(blob.type!==mime||blob.size<=0||blob.size>32*1024*1024)throw new Error('Print export must be a PNG or PDF within 32 MB.');
+  const path=`${uid}/${crypto.randomUUID()}-${face}.${face==='pdf'?'pdf':'png'}`;
+  const {error}=await getSupabase().storage.from('print-packages').upload(path,blob,{contentType:mime,upsert:false});
+  if(error)throw new Error('Could not save the private print export. Retry when your connection is available.');
+  return 'print-packages/'+path;
+}
 export function fileToDataUrl(file: File): Promise<string> {
   return new Promise((resolve,reject)=>{ const reader=new FileReader(); reader.onload=()=>resolve(reader.result as string); reader.onerror=()=>reject(new Error('Could not read the image file.')); reader.readAsDataURL(file); });
 }
@@ -30,7 +38,7 @@ export async function downloadPrivateUpload(path: string): Promise<void> {
   const url=URL.createObjectURL(data); const anchor=document.createElement('a'); anchor.href=url; anchor.download=path.split('/').at(-1)||'upload'; anchor.click(); window.setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
 export async function getPrivateUploadBlob(path: string): Promise<Blob> {
-  const match=/^(payment-receipts|order-artwork|migration-quarantine)\/(.+)$/.exec(path);
+  const match=/^(payment-receipts|order-artwork|print-packages|migration-quarantine)\/(.+)$/.exec(path);
   if (!match || match[2].includes('..')) throw new Error('Invalid private upload path.');
   const { data, error } = await getSupabase().storage.from(match[1]).download(match[2]);
   if(error || !data) throw new Error('Download unavailable. Check your account access.');

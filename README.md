@@ -2,18 +2,29 @@
 
 One tap. Infinite possibilities.
 
-Physical NFC cards with a QR fallback and an editable digital profile. The confirmed launch origin is https://edgetapflow.web.app. Cards cost Rs. 999 each; delivery is confirmed separately. Support is on WhatsApp +92 304 414 9674; the approved manual payment method is JazzCash.
+**Current launch authority: [docs/LAUNCH_STATUS.md](docs/LAUNCH_STATUS.md).** The owner is prioritizing a small, personally managed physical-card launch at NASTP NIIT. **App development is deferred until explicitly resumed.**
 
-This is a Next.js static export served by Firebase Hosting. Supabase Auth/Postgres/Storage is now the default data backend. The clean hosted schema/RLS/RPC/Storage foundation is configured in the confirmed Edgetap project `dxyxvervvlxhwwbcbttd` (region `ap-southeast-2`). Anonymous/API boundaries are hosted-verified. The owner account is email-verified and enrolled as staff; real customer order/payment and final-design email success flows still need operational verification. Existing Firebase records/users/files are disposable test data and are intentionally not imported; Firebase remains untouched. Staff manually agree the quote, verify JazzCash payment, publish the customer profile, program NFC, print QR and track fulfillment. There is no automatic payment gateway or courier integration.
+The website is a Next.js static export on Firebase Hosting at `https://edgetapflow.web.app`. Supabase handles Auth/Postgres/Storage. Fresh audit checks confirm migrations 001–011, live public routes/founder/missing-handle behavior and 33 read-only Auth/API boundaries. Historical builds and simulations do not establish actual customer email, private-file success, funds, proof receipt or complete physical fulfillment. A sample is obtained and partly tested by the owner; its front print is fading. See the launch-status findings rather than older reports for remaining work.
 
-Keep an existing `.env.local`. If it does not exist, copy `.env.example` and fill in the real PUBLIC Supabase URL/publishable key. Never include a secret/service-role key or database password in public variables. A missing Supabase configuration fails the build instead of silently using Firebase. The current local file is configured with the real public Supabase values and retains the legacy Firebase values. Run `npm ci`, then `npm run dev`. Explicit `NEXT_PUBLIC_DATA_BACKEND=firebase` is retained for legacy development; no Firebase billing is enabled.
+Owner-confirmed offers: Link Card Rs. 999; EdgeTap Profile Rs. 1,499; Website + Cards Rs. 29,999, delivery separate. The new source and migrations 012–013 are local/unreleased; see [card offers](docs/CARD_PRODUCTS.md). Existing submitted prices are preserved. JazzCash is the current manual payment method; actual funds require verification. Public profile data and private order/receipt/artwork data remain separate. Printing requires the current accepted specification, actual payment and guarded proof review. There is no automatic payment gateway or courier integration.
 
-New builders start at Pricing, then build without an account using device drafts. Account saving occurs immediately before payment; existing private drafts/corrections retain cloud recovery. The application workflow saves private account-owned drafts after that handoff, offers delivery and NASTP pickup, accepts private manual JazzCash proof, and provides staff review plus customer status/history through physical fulfillment. All cards are standard 85.60 × 53.98 mm PVC/NFC; Wood is a printed design. Card payment excludes rider delivery: staff books the ride when ready, records the actual fare/message, and the customer pays the rider directly. Every personalized card requires a staff-prepared final-design email and actual-send-only ten-hour reply window before printing. NASTP Delta 3 pickup is Mon–Fri 9 am–5 pm; contact after arrival once ready. Standard profile hosting/updates have no separate fee for now. SMTP is not configured; staff inbox and customer account messages are the notification sources. See [ORDER_WORKFLOW_REPORT.md](ORDER_WORKFLOW_REPORT.md) for implementation, configuration and test evidence.
+Keep the existing `.env.local`. If setting up another development copy, use `.env.example` and public Supabase values only; no service-role/SMTP credentials in browser variables. Supabase is the selected backend; explicit Firebase data adapters remain a legacy development option. Canonical `.web.app` has not changed.
 
-The current hosted ordering endpoints pass 29 read-only API/security checks. Historical migration and release reports describe earlier states; they do not establish current release readiness. The former instant-checkout flag is no longer used. See [CLOUD_HANDOFF.md](CLOUD_HANDOFF.md) for the latest verified cloud work and remaining deployment/operational steps.
+```sh
+npm ci
+npm run dev -- --port 3001
+```
 
-Do not interpret this README or historical checklists as proof of launch readiness. Hosting duration/future changes, delivery coverage, cancellation/defect handling, SMTP and real proof-email transport, legal review of the personalized-card policy and live end-to-end verification remain outstanding.
+For build/verification commands use [BUILD.md](docs/BUILD.md). Any production change or real operational test needs its corresponding owner authorization; this documentation audit does not deploy, migrate, send email, create real orders, spend money or change customer policies.
 
-Website/four-card package Rs. 29,999 (first year included; Rs. 3,000 annually from year two) and custom NFC projects are contact-only. See [GUEST_ORDERING_REPORT.md](GUEST_ORDERING_REPORT.md).
+| Need | Read |
+|---|---|
+| Current evidence, costs and next action | [Launch status](docs/LAUNCH_STATUS.md) |
+| Review proposed fixes | [Operational fixes](docs/OPERATIONAL_FIXES_FOR_REVIEW.md) |
+| Frontend edits without AI | [Developer guide](docs/developerguide.md) |
+| Backend/security/testing | [Backend guide](docs/backendguide.md) |
+| Staff workflow | [Admin guide](docs/adminguide.md) |
+| Personally managed launch | [Business guide](docs/businessguide.md) |
+| All documents/history | [Guide index](docs/README.md) |
 
-To check a prepared production export, run `npm run check:release`. When Firebase Hosting access is available, authenticate with `npx --yes firebase-tools@15.33.0 login` and run `npm run deploy:hosting`. Firebase authentication here is deployment permission, separate from Supabase user sign-in.
+Existing pickup/payment/hosting and personalized-card terms are preserved. NIIT is the owner's launch focus; it does not automatically replace current Delta 3 pickup copy/hours. No custom-domain switch has been decided. [Historical reports](docs/archive/README.md) preserve release/migration/test evidence and superseded notes without presenting them as active blockers.

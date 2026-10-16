@@ -14,11 +14,19 @@
     "check:release": "node scripts/check-hosting-release.mjs",
     "deploy:hosting": "npm run build && npm run check:release && npx --yes firebase-tools@15.33.0 deploy --only hosting --project edgetapflow --non-interactive",
     "test:rules": "firebase emulators:exec --config firebase.qa.json --project demo-edgetap-qa --only firestore,storage,auth \"node scripts/test-rules.mjs && node scripts/test-services.mjs\"",
-    "test:supabase": "node scripts/test-supabase-config.mjs && node scripts/test-supabase.mjs && node scripts/test-applications.mjs && node scripts/test-business-migration.mjs && node scripts/test-ordering-upgrade.mjs && node scripts/test-profile-editing.mjs",
+    "test:supabase": "node scripts/test-supabase-config.mjs && node scripts/test-supabase.mjs && node scripts/test-applications.mjs && node scripts/test-business-migration.mjs && node scripts/test-ordering-upgrade.mjs && node scripts/test-profile-editing.mjs && node scripts/test-physical-cards.mjs && node scripts/test-card-products.mjs && node scripts/test-nfc-link.mjs && node scripts/test-card-editor.mjs && node scripts/test-card-branding.mjs && node scripts/test-design-proof-review.mjs",
     "test:migration": "node scripts/test-migration.mjs",
     "test:supabase:browser": "node scripts/test-supabase-browser.mjs",
     "check:supabase:hosted": "node scripts/check-hosted-supabase.mjs",
-    "test:supabase:hosted-browser": "node scripts/test-hosted-supabase-browser.mjs"
+    "test:supabase:hosted-browser": "node scripts/test-hosted-supabase-browser.mjs",
+    "test:card-products": "node scripts/test-card-products.mjs && node scripts/test-nfc-link.mjs",
+    "test:card-products:browser": "node scripts/test-card-products-browser.mjs",
+    "test:card-editor": "node scripts/test-card-editor.mjs",
+    "test:card-editor:browser": "node scripts/test-card-editor-browser.mjs",
+    "test:card-gallery": "node scripts/test-card-branding.mjs",
+    "test:card-gallery:browser": "node scripts/test-card-gallery-browser.mjs",
+    "test:design-review": "node scripts/test-design-proof-review.mjs",
+    "test:design-review:browser": "node scripts/test-design-proof-review-browser.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",
@@ -40,6 +48,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "^16.3.8",
+    "jsqr": "^1.4.0",
     "playwright": "^1.63.0",
     "tailwindcss": "^4",
     "typescript": "^5"

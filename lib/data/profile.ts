@@ -19,6 +19,7 @@ export type Profile = {
   bio: string;
   location: string;
   avatar: string;
+  logo?: string;
   links: ProfileLink[];
   ownerUid?: string; // Backend auth identifier; omitted from anonymous Supabase responses
   profileId?: string; // stable internal profile ID (username is a mutable public handle)

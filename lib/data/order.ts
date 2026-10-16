@@ -2,62 +2,28 @@
 // Shared by the /order wizard, the admin dashboard, and lib/firestore.ts.
 
 import type { ProfileLink } from "./profile";
+import templates from './card-templates.json';
+import type { PhysicalCard, PrintSnapshot } from '../physical-card';
 
 // Owner-confirmed standard size; other size/design availability needs review.
 export const STANDARD_CARD_SIZE = 'Standard — 85.60 × 53.98 mm';
 
 // ── Card templates ────────────────────────────────────────────────
-export type CardTemplateId = "simple" | "lux" | "wood" | "inverted" | "upload" | "designer";
+export type CardTemplateId = string;
 
 export type CardTemplate = {
   id: CardTemplateId;
+  preview?: string;
   name: string;
   tagline: string;
   tone: string; // tailwind bg tone for the visual preview
   description: string;
 };
 
-export const CARD_TEMPLATES: CardTemplate[] = [
-  {
-    id: "simple",
-    name: "Simple",
-    tagline: "Clean & timeless",
-    tone: "bg-white",
-    description: "A clean everyday EdgeTap card.",
-  },
-  {
-    id: "lux",
-    name: "Lux",
-    tagline: "Premium and understated",
-    tone: "bg-[--yellow-soft]",
-    description: "A gold-toned design for a sharper first impression.",
-  },
-  {
-    id: "wood",
-    name: "Wood",
-    tagline: "Warm and distinctive",
-    tone: "bg-[#d6a36a]",
-    description: "A wood-inspired printed design on a PVC card with embedded NFC.",
-  },
-  {
-    id: "inverted",
-    name: "Inverted",
-    tagline: "High contrast",
-    tone: "bg-[--ink]",
-    description: "A dark, high-contrast EdgeTap card.",
-  },
-  {
-    id: "upload",
-    name: "Upload your card design",
-    tagline: "Use your own artwork",
-    tone: "bg-[--sky-soft]",
-    description: "Upload a design for EdgeTap to review before printing.",
-  },
-
-];
+export const CARD_TEMPLATES: CardTemplate[] = ['custom','simple','lux','wood','inverted'].map(id=>{const t=templates.filter(t=>t.id===id).sort((a,b)=>b.version-a.version)[0];return {id:t.id,name:t.name,tagline:t.tagline,tone:t.tone,description:t.description,preview:id==='custom'?'/card-designs/maincard.png':('preview' in t?t.preview:undefined)};}).concat([{id:'upload',name:'Upload a design',tagline:'Your front & back',tone:'bg-[--sky-soft]',description:'Upload separate front and back artwork for review.',preview:undefined}]);
 
 // The plan (from /pricing) that seeded an order.
-export type OrderPlanId = "standard" | "business" | "enterprise";
+export type OrderPlanId = "standard" | "direct_link" | "profile" | "business" | "enterprise";
 
 // ── Customer / delivery (PRIVATE — never surfaced on /u/…) ───────
 export type CustomerInfo = {
@@ -77,6 +43,7 @@ export type OrderCard = {
   quantity: number;
   size?: string;
   customDesignUrl?: string; // Original customer artwork, private and preserved
+  physical?: PhysicalCard;
 };
 
 // What the customer built during onboarding (draft of the future profile).
@@ -175,6 +142,12 @@ export type Order = {
   cardVerifiedAmount?: number;
   designProofScope?: 'pending' | 'all_personalized' | 'uploaded_only';
   designProofStatus?: 'not_required'|'preparing'|'awaiting_email'|'awaiting_response'|'changes_requested'|'approved'|'approved_no_response';
+  designRevisionPolicy?:'legacy'|'one_included';
+  includedDesignEditUsed?:boolean;
+  paidDesignEditCredits?:number;
+  designReviewChannel?:'email'|'account';
+  designSharedRevision?:number;
+  designSharedAt?:number;
   designProofSentAt?: number;
   designProofDeadlineAt?: number;
   deliveryPaymentRecipient?: 'edgetap' | 'rider_direct';
@@ -183,6 +156,8 @@ export type Order = {
   fulfillmentInstructions?: string;
   preparedArtworkUrl?: string;
   artworkPreparedAt?: number;
+  printSnapshot?: PrintSnapshot;
+  printRevision?: number;
   deliveryPaymentStatus?: "pending" | "verified" | "not_required";
   deliveryPaymentReference?: string;
   deliveryVerifiedAmount?: number;
@@ -193,6 +168,7 @@ export type Order = {
   ownerUid?: string; // Backend auth identifier for the customer account
   orderNumber: string;
   plan: OrderPlanId;
+  directLink?: string;
   card: OrderCard;
   deliveryMethod: DeliveryMethod;
   subtotal: number;
@@ -240,8 +216,11 @@ export const LINK_ACCENTS: Record<string, string> = {
   globe: "#7FA8FF",
 };
 
-export const CARD_PRICE = 999;
+export type CardProduct = 'direct_link' | 'profile';
+export const CARD_PRICES = {direct_link:999,profile:1499,standard:999} as const;
+export const CARD_PRICE = CARD_PRICES.profile;
+export const cardPrice = (product: CardProduct | 'standard' = 'profile') => CARD_PRICES[product];
 
-export function calculateSubtotal(quantity: number): number {
-  return CARD_PRICE * Math.max(1, Math.min(20, Math.floor(quantity)));
+export function calculateSubtotal(quantity: number, product: CardProduct | 'standard' = 'profile'): number {
+  return cardPrice(product) * Math.max(1, Math.min(20, Math.floor(quantity)));
 }

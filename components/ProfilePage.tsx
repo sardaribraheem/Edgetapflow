@@ -140,6 +140,7 @@ export default function ProfilePage({
                 <SparkleDoodle className="absolute -right-3 -top-2 h-8 w-8 text-[var(--yellow)]" />
               </div>
 
+              {profile.logo&&<img src={profile.logo} alt={`${profile.displayName} logo`} className="mt-5 h-12 max-w-40 object-contain"/>}
               <h1 className="mt-5 font-display text-[clamp(2rem,5vw,3rem)] font-semibold leading-none text-[var(--ink)]">
                 {profile.displayName}
               </h1>

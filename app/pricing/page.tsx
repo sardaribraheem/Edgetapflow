@@ -2,99 +2,13 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Link from "next/link";
 import { SUPPORT_EMAIL, SUPPORT_URL } from "@/lib/site";
-
-export const metadata = {
-  title: "Pricing",
-  alternates: { canonical: "/pricing" },
-  description: "Compare four EdgeTap options: a Rs. 999 NFC card, business NFC, a Rs. 29,999 website and four-card package, or a custom NFC solution.",
-};
-
-function Features({ items }: { items: string[] }) {
-  return <ul className="pricing-features">{items.map(item => <li key={item}><span aria-hidden="true">✓</span><span>{item}</span></li>)}</ul>;
-}
-
-export default function PricingPage() {
-  return <><Navbar/><main id="main-content" tabIndex={-1} className="pricing-page">
-    <header className="pricing-heading">
-      <p className="font-display">One tap. Infinite possibilities.</p>
-      <h1 className="font-display">Choose your EdgeTap.</h1>
-      <p className="pricing-intro">Start with a card, add your own website, or bring us an NFC idea.</p>
-    </header>
-
-    <p className="pricing-scroll-hint">Swipe or use the arrow keys to compare all four options.</p>
-    <div className="pricing-options" role="region" aria-label="Compare four EdgeTap options" tabIndex={0}>
-      <section aria-labelledby="standard-plan" className="pricing-option">
-        <h2 id="standard-plan" className="font-display">Standard Digital</h2>
-        <p className="pricing-price font-display">Rs. 999</p>
-        <p className="pricing-price-detail">per card + delivery</p>
-        <p className="pricing-description">Your everyday introduction, on one personalized NFC business card.</p>
-        <Features items={[
-          "One PVC card with embedded NFC",
-          "Your name and chosen design or uploaded artwork",
-          "Your profile with up to 10 contact links",
-          "Save Contact download and QR fallback",
-          "Profile hosting and updates at no separate fee for now",
-        ]}/>
-        <div className="pricing-option-action"><p>Build and preview first. Sign up when you save your profile before payment.</p><Link href="/order" className="btn btn-yellow">Build my card <span aria-hidden="true">→</span></Link></div>
-      </section>
-
-      <section aria-labelledby="business-plan" className="pricing-option">
-        <h2 id="business-plan" className="font-display">Business NFC</h2>
-        <p className="pricing-price font-display">Let’s talk</p>
-        <p className="pricing-price-detail">custom quote</p>
-        <p className="pricing-description">For restaurants, shops and teams exploring NFC for their customers.</p>
-        <Features items={[
-          "Card quantities and branding discussed with you",
-          "Discuss links to business pages or review destinations",
-          "Setup and requirements reviewed before quoting",
-          "Scope, price and fulfillment agreed directly with EdgeTap",
-        ]}/>
-        <div className="pricing-option-action"><p>Tell us what your business needs. Arrange this option directly with EdgeTap.</p><a href="#contact" className="btn btn-ink">Contact EdgeTap <span aria-hidden="true">→</span></a></div>
-      </section>
-
-      <section aria-labelledby="website-plan" className="pricing-option">
-        <h2 id="website-plan" className="font-display">Your Website + Cards</h2>
-        <p className="pricing-price font-display">Rs. 29,999</p>
-        <p className="pricing-price-detail">package + delivery</p>
-        <p className="pricing-description">A custom website or portfolio, with EdgeTap cards that open it.</p>
-        <Features items={[
-          "A website built around your work and needs",
-          "Four NFC cards linked to your website",
-          "Request your four cards now or during the first year",
-          "First-year hosting and domain services included",
-          "Rs. 3,000 per year from year two for hosting and domain services",
-        ]}/>
-        <div className="pricing-option-action"><p>We discuss website scope, domain and card arrangements with you before starting.</p><a href="#contact" className="btn btn-ink">Contact EdgeTap <span aria-hidden="true">→</span></a></div>
-      </section>
-
-      <section aria-labelledby="custom-nfc" className="pricing-option">
-        <h2 id="custom-nfc" className="font-display">Custom NFC Solutions</h2>
-        <p className="pricing-price font-display">Your idea</p>
-        <p className="pricing-price-detail">custom quote</p>
-        <p className="pricing-description">Have a different physical-to-digital experience in mind? Let’s explore it.</p>
-        <Features items={[
-          "Discuss attendance, staff cards or event ideas",
-          "Feasibility and requirements reviewed with you",
-          "Software and hardware needs scoped together",
-          "Project scope and price confirmed with you",
-        ]}/>
-        <div className="pricing-option-action"><p>Share your idea for a separately scoped project with EdgeTap.</p><a href="#contact" className="btn btn-ink">Contact EdgeTap <span aria-hidden="true">→</span></a></div>
-      </section>
-    </div>
-
-    <section id="contact" tabIndex={-1} className="pricing-contact">
-      <h2 className="font-display">Need a custom order or business cards?</h2>
-      <p>Talk to EdgeTap about your website package, business cards or custom NFC idea.</p>
-      <div className="pricing-contact-links"><a href={SUPPORT_URL} target="_blank" rel="noreferrer" className="btn btn-ink">WhatsApp: +92 304 414 9674</a><a href={'mailto:'+SUPPORT_EMAIL} className="pricing-email">{SUPPORT_EMAIL}</a></div>
-    </section>
-
-    <section className="pricing-order-details">
-      <h2 className="font-display">Before you order a card</h2>
-      <p>All physical cards are PVC with embedded NFC, 85.60 × 53.98 mm (approximately 3.375 × 2.125 inches). Wood is a printed design name. Staff manually prepares uploaded artwork for this size.</p>
-      <p><strong>Delivery costs extra, paid directly to the rider. It is separate from your card payment.</strong> EdgeTap books a rider when your paid card is ready; My orders shows the actual fare and dispatch message. Confirm delivery availability for your location before paying.</p>
-      <p>Alternatively, collect at NASTP Delta 3, Monday–Friday, 9 am–5 pm (Pakistan time). Once your card is ready, contact +92 304 414 9674 after reaching NASTP.</p>
-      <p>Every personalized card receives a final-design email before printing. Reply within 10 hours of sending to confirm or request changes. With no timely reply, staff checks the inbox and confirms the design after the window. <Link href="/terms" className="underline">Read the personalized-card terms</Link>.</p>
-      <p>Multiple standard cards in one order share one EdgeTap profile and cost Rs. 999 each. The standard profile has no separate hosting/update fee for now and no fixed hosting duration promise. The website package has its own annual hosting/domain charge shown above.</p>
-    </section>
-  </main><Footer/></>;
-}
+import Icon from '@/components/ui/Icon';
+export const metadata={title:'Pricing',alternates:{canonical:'/pricing'},description:'A direct-link NFC card for Rs. 999, an EdgeTap-profile card for Rs. 1,499, or your own website and cards for Rs. 29,999. Delivery separate.'};
+function Features({items}:{items:string[]}){return <ul className="pricing-features">{items.map(item=><li key={item}><Icon name="check" size={16}/><span>{item}</span></li>)}</ul>;}
+export default function PricingPage(){return <><Navbar/><main id="main-content" tabIndex={-1} className="pricing-page"><header className="pricing-heading"><h1 className="font-display">Your next introduction.</h1><p className="pricing-intro">Bring your link, build your profile, or create a website of your own.</p></header><div className="pricing-options" aria-label="Compare three EdgeTap offers">
+<section aria-labelledby="link-plan" className="pricing-option"><Icon name="link" size={28}/><h2 id="link-plan" className="font-display">Link Card</h2><p className="pricing-price font-display">Rs. 999</p><p className="pricing-price-detail">per card + delivery</p><p className="pricing-description">Already have a portfolio, LinkedIn or Linktree? Tap straight to it.</p><Features items={['One NFC card, one existing link','Customize both sides or upload your artwork','Optional QR to the same link']}/><div className="pricing-option-action"><Link href="/order?product=direct_link" className="btn btn-ink">Make my link card <span aria-hidden="true">→</span></Link></div></section>
+<section aria-labelledby="standard-plan" className="pricing-option pricing-option-featured"><Icon name="user" size={28}/><h2 id="standard-plan" className="font-display">EdgeTap Profile</h2><p className="pricing-price font-display">Rs. 1,499</p><p className="pricing-price-detail">per card + delivery</p><p className="pricing-description">Your name, story and links. One profile you can keep updating.</p><Features items={['One NFC card + your EdgeTap profile','Up to 10 contact and social links','Customize both sides or upload your artwork','Optional QR + Save Contact PDF','Profile hosting and updates at no separate fee for now']}/><div className="pricing-option-action"><Link href="/order?product=profile" className="btn btn-yellow">Build my EdgeTap <span aria-hidden="true">→</span></Link></div></section>
+<section aria-labelledby="website-plan" className="pricing-option"><Icon name="card" size={28}/><h2 id="website-plan" className="font-display">Your Website + Cards</h2><p className="pricing-price font-display">Rs. 29,999</p><p className="pricing-price-detail">package + delivery</p><p className="pricing-description">A custom website or portfolio, with cards that take people there.</p><Features items={['A website built around your work','Four linked NFC cards, now or within the first year','First-year hosting and domain services','Rs. 3,000/year for hosting and domain from year two']}/><div className="pricing-option-action"><a href="#contact" className="btn btn-ink">Discuss my website <span aria-hidden="true">→</span></a></div></section></div>
+<div className="pricing-enquiries"><section aria-labelledby="business-plan"><Icon name="card" size={24}/><div><h2 id="business-plan" className="font-display">Cards for your business?</h2><p>Teams, shops or larger quantities. Let’s talk through what you need.</p></div><a href="#contact" className="pricing-enquiry-link">Let’s talk <span aria-hidden="true">↗</span></a></section><section aria-labelledby="custom-nfc"><Icon name="link" size={24}/><div><h2 id="custom-nfc" className="font-display">A different NFC idea?</h2><p>Share your idea. We’ll review feasibility, scope and price together.</p></div><a href="#contact" className="pricing-enquiry-link">Explore an idea <span aria-hidden="true">↗</span></a></section></div>
+<section id="contact" tabIndex={-1} className="pricing-contact"><h2 className="font-display">Let’s make it happen.</h2><p>Discuss your website, business cards or custom NFC project with EdgeTap.</p><div className="pricing-contact-links"><a href={SUPPORT_URL} target="_blank" rel="noreferrer" className="btn btn-ink">Chat on WhatsApp</a><a href={'mailto:'+SUPPORT_EMAIL} className="pricing-email">{SUPPORT_EMAIL}</a></div></section>
+<details className="pricing-order-details"><summary className="font-display">Before you order a card</summary><p>All cards are PVC with embedded NFC, 85.60 × 53.98 mm. Wood is a printed design. Upload front and back separately, or customize a design here. Staff reviews the final artwork before printing.</p><p><strong>Delivery costs extra, paid directly to the rider.</strong> EdgeTap books a rider when your paid card is ready. Confirm coverage before paying. Or collect at NASTP Delta 3, Monday–Friday, 9 am–5 pm (Pakistan time); contact +92 304 414 9674 when you arrive.</p><p>Every personalized card receives a final-design email before printing. Reply within 10 hours of sending to confirm or request changes. With no timely reply, staff checks the inbox and confirms the design after the window. <Link href="/terms" className="underline">Read the personalized-card terms</Link>.</p><p>Cards in one order share the same design and destination. Link Card opens your existing URL; EdgeTap Profile includes an editable profile with no separate hosting/update fee for now and no fixed duration promise. Website package scope and domain are agreed directly before starting.</p></details></main><Footer/></>;}

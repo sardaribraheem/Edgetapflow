@@ -14,6 +14,16 @@ const chunks=(await Promise.all(assets.filter(p=>p.endsWith('.js')).map(p=>readF
 assert(chunks.includes(backend)&&!chunks.includes('dxyxvervvlxhwwbcbttd.supabase.co'),'Refuse browser fixtures against a real-config export.');
 const other='33333333-3333-4333-8333-333333333333';
 const image=await readFile('public/apple-touch-icon.png');
+const uploadedFiles=new Map();
+function uploadedBody(req){
+ const bytes=req.postDataBuffer(),type=req.headers()['content-type']||'';
+ const boundary=/boundary=(?:"([^"]+)"|([^;]+))/.exec(type);
+ if(!boundary)return {bytes,mime:type};
+ const marker=Buffer.from('--'+(boundary[1]||boundary[2]));let offset=0;
+ while((offset=bytes.indexOf(marker,offset))>=0){const headerStart=offset+marker.length+2,headerEnd=bytes.indexOf(Buffer.from('\r\n\r\n'),headerStart);if(headerEnd<0)break;const headers=bytes.subarray(headerStart,headerEnd).toString();const end=bytes.indexOf(marker,headerEnd+4);if(end<0)break;if(/filename=/.test(headers))return {bytes:bytes.subarray(headerEnd+4,end-2),mime:/Content-Type: ([^\r\n]+)/i.exec(headers)?.[1]||'application/octet-stream'};offset=end;}
+ throw new Error('Local upload fixture could not parse multipart file');
+}
+
 await db.query('insert into auth.users values($1,$2),($3,$4),($5,$6)',[owner,'customer@example.test',staff,'staff@example.test',other,'other@example.test']);
 await db.query('insert into private.admin_members(user_id,provenance) values($1,$2)',[staff,'local browser fixture only']);
 // Migration default matches the confirmed every-personalized-card proof policy.
@@ -36,11 +46,11 @@ async function setup(context){context.on('page',p=>{p.on('pageerror',e=>errors.p
  if(path==='/auth/v1/recover'){assert.equal(req.postDataJSON().email,'customer@example.test');assert.equal(new URL(req.url()).searchParams.get('redirect_to'),base+'/account/recovery');return route.fulfill({json:{}});}
  if(path==='/auth/v1/logout')return route.fulfill({status:204});
  if(path.startsWith('/rest/v1/rpc/')){const name=path.split('/').at(-1);assert.match(name,/^[a-z_]+$/);if(flags.orderingUnavailable&&['get_order_settings','get_my_applications','get_my_orders'].includes(name))return route.fulfill({status:404,json:{code:'PGRST202',message:'LOCAL TEST internal schema and function detail'}});const body=req.postData()?req.postDataJSON():{},keys=Object.keys(body);for(const key of keys)assert.match(key,/^p_[a-z_]+$/);if(name==='save_application_draft'&&flags.failGuestCloudSaveOnce){flags.failGuestCloudSaveOnce=false;return route.fulfill({status:503,json:{message:'Local fixture account save failed once.'}});}const value=await as(uid,async()=>(await db.query(`select public.${name}(${keys.map((k,i)=>`${k} => $${i+1}`).join(',')}) as value`,Object.values(body))).rows[0].value);if(name==='get_my_orders'&&flags.delayOrdersReadOnceMs){const delay=flags.delayOrdersReadOnceMs;flags.delayOrdersReadOnceMs=0;flags.delayedOrdersReadStarted=true;await new Promise(resolve=>setTimeout(resolve,delay));}if(name==='submit_application'&&flags.loseSubmissionResponse){flags.loseSubmissionResponse=false;return route.abort('failed');}return route.fulfill({json:value});}
- if(path.startsWith('/storage/v1/object/')&&req.method()==='POST'){const parts=path.slice('/storage/v1/object/'.length).split('/'),bucket=parts.shift(),name=parts.join('/');await as(uid,()=>db.query('insert into storage.objects(bucket_id,name) values($1,$2)',[bucket,name]));return route.fulfill({json:{Key:`${bucket}/${name}`,Id:crypto.randomUUID()}});}
+ if(path.startsWith('/storage/v1/object/')&&req.method()==='POST'){const parts=path.slice('/storage/v1/object/'.length).split('/'),bucket=parts.shift(),name=parts.join('/');await as(uid,()=>db.query('insert into storage.objects(bucket_id,name) values($1,$2)',[bucket,name]));uploadedFiles.set(bucket+'/'+name,bucket==='print-packages'?uploadedBody(req):{bytes:image,mime:'image/png'});return route.fulfill({json:{Key:`${bucket}/${name}`,Id:crypto.randomUUID()}});}
  if(path.startsWith('/storage/v1/object/public/')&&req.method()==='GET'){const parts=path.slice('/storage/v1/object/public/'.length).split('/'),bucket=parts.shift(),name=parts.join('/');const visible=await as(undefined,()=>db.query('select s.id from storage.objects s join storage.buckets b on b.id=s.bucket_id where b.public and s.bucket_id=$1 and s.name=$2',[bucket,name]));return route.fulfill(visible.rows.length?{contentType:'image/png',body:image}:{status:403,json:{message:'Public access denied'}});}
- if(path.startsWith('/storage/v1/object/')&&req.method()==='GET'){const downloadPath=path.replace('/storage/v1/object/authenticated/','/storage/v1/object/');const parts=downloadPath.slice('/storage/v1/object/'.length).split('/'),bucket=parts.shift(),name=parts.join('/');const visible=await as(uid,()=>db.query('select id from storage.objects where bucket_id=$1 and name=$2',[bucket,name]));return route.fulfill(visible.rows.length?{contentType:'image/png',body:image}:{status:403,json:{message:'Access denied'}});}
+ if(path.startsWith('/storage/v1/object/')&&req.method()==='GET'){const downloadPath=path.replace('/storage/v1/object/authenticated/','/storage/v1/object/');const parts=downloadPath.slice('/storage/v1/object/'.length).split('/'),bucket=parts.shift(),name=parts.join('/');const visible=await as(uid,()=>db.query('select id from storage.objects where bucket_id=$1 and name=$2',[bucket,name]));const saved=uploadedFiles.get(bucket+'/'+name);return route.fulfill(visible.rows.length?{contentType:saved?.mime||'image/png',body:saved?.bytes||image}:{status:403,json:{message:'Access denied'}});}
  throw new Error(`Unhandled test endpoint: ${path}`);
- }catch(error){return route.fulfill({status:403,json:{message:error.message,code:'42501'}});}});
+ }catch(error){if(path.startsWith('/rest/v1/rpc/')||path.startsWith('/storage/'))flags.lastServiceError={path,message:error.message};return route.fulfill({status:403,json:{message:error.message,code:'42501'}});}});
  await context.route(/https:\/\/[^/]+[.]supabase[.]co\//,route=>{if(new URL(route.request().url()).origin!==backend){errors.push('Refused unexpected backend');return route.abort();}return route.fallback();});
  context.on('request',req=>{if(/firebase|firestore\.googleapis|identitytoolkit\.googleapis/.test(new URL(req.url()).hostname)) errors.push('Supabase-selected UI contacted Firebase');});}
 
