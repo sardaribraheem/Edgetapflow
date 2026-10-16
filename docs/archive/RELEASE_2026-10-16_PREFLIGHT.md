@@ -1,0 +1,46 @@
+# Archived release preflight
+
+**Superseded by the completed [16 October release](../RELEASE_2026-10-16.md).** The pending permissions/migrations below describe the state before owner approval. They are not current instructions; 001–015 are now applied.
+
+# 16 October 2026 release preflight
+
+Current authority: [LAUNCH_STATUS.md](LAUNCH_STATUS.md). App work remains deferred.
+
+**Firebase Hosting deployment is owner-authorized. Production is not updated yet: the four required Supabase migrations still need authorization.** No production database update, Auth configuration change, real account/order/payment/message or physical stage was performed in this preflight.
+
+## Verified release artifact
+
+- Temporary preview: https://edgetapflow--release-20261016-5amx095o.web.app
+- Preview version: `ae83d57dca84c205`, published 16 October 2026 at 12:34 pm Pakistan time; expires 17 October at 12:34 pm.
+- Current production: https://edgetapflow.web.app, version `e4635533ce44dcb1` (unchanged).
+- Real-configuration export: **181 files**; public text/credential/fixture release guard: **131 assets passed**.
+- Artifact manifest SHA256: `6d603a6ac020e8d1fe18710c36da4b7301225a3f9ca40c9e487eb9868a3e0f5f` (sorted filename/content-hash manifest).
+- Full local Supabase/security regression passed, including 29 private-proof/revision-policy checks. Workflow Auth/Storage/funds remain simulated.
+- Firebase preview: **444 responsive browser assertions passed** at 320/360/390/768/1440 px, with backend REST blocked. **38 additional Hosting/read-only public-profile checks passed**, including headers, progressive hero hiding, real founder rendering and a genuinely missing handle. No customer writes.
+- Corrected one obsolete general browser assertion: the owner explicitly requested the founder profile hero link; it now checks visibility at the responsive breakpoint.
+
+## Required database update
+
+Fresh linked migration history confirms **001–011 applied**, **012–015 pending**. Public settings currently have no `offerPrices`, `cardEditorVersion` or `designReviewVersion`; the new frontend intentionally blocks account transfer/payment against this backend.
+
+The dry run lists exactly these four files, with no seeds or role changes:
+
+| File | SHA256 |
+|---|---|
+| `202610150012_card_products_and_editor.sql` | `3c8274ba7cdce6d3959fe6f83448508dce9fe62f352e499a263e7d20c21f2349` |
+| `202610160013_card_text_rotation.sql` | `61aa15f33fe322775581453af0d9e8c84bed339e89c8232e219221ae21bdd6e2` |
+| `202610160014_card_artwork_and_branding.sql` | `2e4fb19ad2354144bed5fcf7369e89cecc3c9b5171cfba567ea974dbaba35b36` |
+| `202610160015_customer_design_review.sql` | `bf743453c95d5258eb231e713b08ea41ee2b104c74d90653ea1971690785d610` |
+
+012 enables the approved Rs. 999 direct-link/Rs. 1,499 profile offers, validated destinations and two-sided editor. 013 adds rotation validation. 014 registers versioned artwork and optional owned logos. 015 adds private proof sharing, owner approval, one included revision on new orders and a private manually verified paid-edit ledger. Existing submitted prices and existing orders' revision terms are retained in local regression tests. No migration sends a message, verifies actual funds, publishes a customer profile or marks a physical stage complete.
+
+## Finish after database authorization
+
+1. Recheck destination, current migration history and the four file hashes. Repeat the dry run; stop if the plan differs.
+2. Review the existing recovery/backup arrangements privately before applying. Do not claim that a Hosting rollback reverses database changes.
+3. Apply only the reviewed pending migrations using the linked project. No clean installer/reset, seed or customer-data cleanup.
+4. Verify history through 015; run read-only backend boundary checks and confirm `offerPrices = {direct_link: 999, profile: 1499}`, `cardEditorVersion = 4`, `designReviewVersion = 1`. Validate RPC permissions/current-proof guards; no real order needed for release checks.
+5. Confirm the local export matches the tested artifact. Publish that exact version to the live Hosting channel, then verify live routes, public profiles, asset version and capability compatibility without customer writes.
+6. Record actual release/version and update current supporting status references. Preserve prior release evidence. Actual ordinary-customer email/private-byte/payment/printing/NFC/QR/handoff evidence and the fading-front correction remain separate pilot work.
+
+The owner authorized Firebase publication. [AGENTS.md](../AGENTS.md) requires corresponding authorization for live Supabase schema/data changes; this document does not supply it. Do not publish the new checkout to production while the live backend lacks its required capabilities.

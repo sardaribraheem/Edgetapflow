@@ -1,6 +1,6 @@
 # EdgeTap admin guide
 
-**Current authority: [LAUNCH_STATUS.md](LAUNCH_STATUS.md).** The private account-proof flow below is local/unreleased and needs reviewed migrations **012 → 013 → 014 → 015** plus a separately authorized frontend release. Hosted 001–011 is the last verified baseline. App work is deferred.
+**Current authority: [LAUNCH_STATUS.md](LAUNCH_STATUS.md).** The private account-proof flow below is released. Migrations **001–015 are applied**, and Firebase version `ae83d57dca84c205` is live as of 16 October 2026. See [release evidence](RELEASE_2026-10-16.md). App work is deferred.
 
 1. Sign in at `/admin`, open **Orders**, select the application. Check the details, links, private receipt and separate front/back artwork.
 2. Check the **actual JazzCash transfer** against the subtotal. Confirm the specification, then **Accept application**. A screenshot alone does not verify money.

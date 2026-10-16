@@ -5,6 +5,7 @@
 | Task | Supporting guide |
 |---|---|
 | Read current findings and launch readiness | [Launch status](LAUNCH_STATUS.md) |
+| Verify the 16 October production release | [Release evidence](RELEASE_2026-10-16.md) |
 | Review proposed operational fixes before authorizing work | [Operational fixes for review](OPERATIONAL_FIXES_FOR_REVIEW.md) |
 | Review the new Link Card/profile offers and editor release | [Card offers](CARD_PRODUCTS.md) |
 | Build locally or understand Hosting | [Build guide](BUILD.md) |

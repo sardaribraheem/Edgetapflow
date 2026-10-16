@@ -116,9 +116,9 @@ Use `node scripts/check-live-services.mjs` and `npm run check:supabase:hosted` f
 
 Do not recommend `test:supabase:hosted-browser` as a current live check: it assumes an absent founder/clean project. Its correction is [prepared separately for review](OPERATIONAL_FIXES_FOR_REVIEW.md). Fresh migrations 001–011 and the 33 read-only boundaries are recorded in launch status.
 
-## 10. Card products and migration 012 (local, unapplied)
+## 10. Card products and migration 012 (applied 16 October)
 
-[Card offers guide](CARD_PRODUCTS.md) describes the new source. Hosted baseline remains 001–011; do not apply 012 as part of a build/test command. After separate review/authorization, it must precede the matching Hosting release.
+[Card offers guide](CARD_PRODUCTS.md) describes the released implementation. Hosted baseline is 001–015; [release evidence](RELEASE_2026-10-16.md) records the owner-approved migration and Hosting steps. Builds/tests do not apply hosted migrations. Never rerun or edit an applied migration.
 
 `ApplicationPayload.product` is `direct_link` or `profile`; `directLink` is accepted only for Link Card. New requests without a label use the Profile price (Rs. 1,499), so omitting metadata cannot buy a profile at Rs. 999. Existing submitted `standard` orders keep their original Rs. 999 price when corrected; product changes are blocked. Unsubmitted drafts review current pricing.
 
@@ -130,7 +130,7 @@ The link budget uses the normalized percent-encoded URL, UTF-8 byte count, uncom
 
 `get_order_settings.offerPrices` gates the new customer payment flow. If the hosted backend is still 011, account transfer/payment for the new offers stops before receipt collection. General mail transport remains unchanged/unverified. No deployed worker was introduced.
 
-## 11. Text transforms and editor capability (013, local/unapplied)
+## 11. Text transforms and editor capability (013, applied 16 October)
 
 Migration 013 adds optional numeric text `rotation` in −180…180 degrees through a strict validator wrapper, preserving 012’s ownership, shape, template, QR and private-file checks. Missing angles remain zero; malformed/missing scenes are still rejected. Previous validator/settings aliases remain inaccessible to clients. No existing scene/order is rewritten.
 
@@ -138,19 +138,23 @@ The settings RPC advertises `cardEditorVersion: 3`. The new frontend requires it
 
 Text extents rotate with the layer for print-safe checks. Shared coordinate mapping accounts for bleed and rotated backs; the live preview preserves the complete bleed aspect ratio. Actual exports contain the scene, with no selection handles. Reopened direct-link payloads preserve the private contact name separately from the printed heading. Final proof generation uses the printed heading. The change introduces no mail worker, payment automation or new production verification.
 
-## 12. Artwork presets and brand logo (014, local/unapplied)
+<a id="12-artwork-presets-and-brand-logo-014-localunapplied"></a>
+
+## 12. Artwork presets and brand logo (014, applied 16 October)
 
 Prepared migration `202610160014_card_artwork_and_branding.sql` appends version-2 definitions for `simple`, `lux`, `wood`, `inverted`; version 1 remains unchanged for historical orders/proofs. It adds `profiles.logo`, validates `physical.logoUrl` against an owned object in the existing public avatars bucket, and includes the logo in public profile JSON. A Link Card logo does not create a digital profile. No new bucket or identity system is introduced.
 
 Publication reuses existing staff/acceptance/payment/handle guards, then copies the validated order logo. Owner edits preserve stable handles and optimistic versions; invalid logo updates roll back. Wrapper aliases are revoked from clients. Adding/removing a public profile logo after publication does not rewrite an approved physical card or proof.
 
-Settings advertise `cardEditorVersion: 4`. New preset versions and optional-logo checkout require this before account transfer/payment; custom text transforms still require at least 3. Review/apply **012, 013, then 014** only with separate authorization before the matching frontend release. Local test commands do not apply hosted migrations. Hosted 001–011 remains the last verified baseline.
+Settings advertise `cardEditorVersion: 4`. New preset versions and optional-logo checkout require this before account transfer/payment; custom text transforms still require at least 3. **012, 013, 014 and 015 were applied with explicit owner approval before the matching frontend release.** Local test commands do not apply hosted migrations. Hosted 001–015 is the verified baseline.
 
 `npm run test:card-gallery` covers owned/unowned/missing logo paths, publication guards, anonymous field privacy, immutable handles, rollback and wrapper grants. `test:card-gallery:browser` covers responsive gallery/modal behavior, device recovery, authenticated logo transfer and owner editing. Auth/Storage transport is simulated; real email/payment/private-byte and physical QA evidence remains outstanding in [launch status](LAUNCH_STATUS.md).
 
-## 13. Private account proof and revision policy (015, local/unapplied)
+<a id="13-private-account-proof-and-revision-policy-015-localunapplied"></a>
 
-`202610160015_customer_design_review.sql` is prepared for separate review/application after **012 → 013 → 014**. It is not hosted. Existing orders are assigned `legacy`; only newly created orders default to `one_included`. No old commercial terms are rewritten.
+## 13. Private account proof and revision policy (015, applied 16 October)
+
+`202610160015_customer_design_review.sql` was applied with owner approval after **012 → 013 → 014**, and the matching frontend is released. Existing orders are assigned `legacy`; only newly created orders default to `one_included`. No old commercial terms are rewritten.
 
 - `share_design_proof(id, version)` is staff-only and requires the accepted, paid order, specification, confirmed destination and current saved proof. It supersedes queued email jobs and records the shared revision, without recording sent email/deadline.
 - `respond_to_design_proof(id, revision, action, note, version)` checks actual ownership, version, current shared proof and all payment/destination/specification guards. A revision note must be nonempty and uses the included request once. Approval alone does not advance physical production.
@@ -158,6 +162,6 @@ Settings advertise `cardEditorVersion: 4`. New preset versions and optional-logo
 - Regenerating the proof clears sharing/approval but preserves the used allowance and paid ledger. Stale/double replies are rejected. Existing email reply guards consume the same revision allowance transactionally, so switching channels cannot obtain another free edit.
 - Private account review has **no automatic timeout**. Existing real-email review retains its restricted transport confirmation, ten-hour window and inbox/reply checks. No worker/sender is introduced.
 
-`get_order_settings.designReviewVersion: 1` is required before new-product account transfer/payment. Keep this separate from `cardEditorVersion: 4`. `verify-ordering-upgrade.sql` checks the corresponding migration/capability when present; it does not apply anything. Release order is **012 → 013 → 014 → 015**, then rebuild/release the reviewed frontend under separate authorization. Hosted 001–011 is the last verified baseline.
+`get_order_settings.designReviewVersion: 1` is required before new-product account transfer/payment. Keep this separate from `cardEditorVersion: 4`. `verify-ordering-upgrade.sql` checks the corresponding migration/capability when present; it does not apply anything. The completed release order was **012 → 013 → 014 → 015**, then promotion of the reviewed Firebase preview. Hosted 001–015 is the verified baseline. `supabase/verify-card-release.sql` checks the released capabilities and private edit/RPC boundaries read-only; do not rerun the applied migrations.
 
 `npm run test:design-review` exercises SQL ownership, revision quota, stale/concurrent requests, paid-credit privacy, legacy migration behavior and channel/printing guards. `test:design-review:browser` tests both checkout modes, custom-popup-only canvases, real PDF/PNG rendering, private account review, sign-in return, included/paid revisions and progressive hero breakpoints. Auth, Storage and funds are fixtures; real private bytes, ordinary Auth email and actual production/handoff need separate evidence.

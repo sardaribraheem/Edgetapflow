@@ -1,6 +1,6 @@
 # Link Card, EdgeTap Profile and two-sided card editing
 
-**Updated 16 October 2026. Local implementation, not released.** [LAUNCH_STATUS.md](LAUNCH_STATUS.md) remains the status authority. Hosted baseline: migrations 001–011 and previously released site. New migrations **012 (products/editor), 013 (rotation), 014 (artwork/logo) and 015 (private proof review/revision allowance)** are prepared and tested locally, not applied. App work stays deferred.
+**Released 16 October 2026.** [LAUNCH_STATUS.md](LAUNCH_STATUS.md) remains the status authority. Hosted baseline: migrations 001–015 and Firebase version `ae83d57dca84c205`. **012 (products/editor), 013 (rotation), 014 (artwork/logo) and 015 (private proof review/revision allowance)** are applied. See [release evidence](RELEASE_2026-10-16.md). App work stays deferred.
 
 ## Owner-confirmed offers
 
@@ -34,7 +34,7 @@ The custom editing canvas, admin proof and PDF/PNG share the canvas renderer. Ex
 
 Local validation includes the existing SQL/security suite, 12 product/security/legacy-price checks, 24 URL/NDEF checks and browser tests of both offers, responsive pricing/editor, private front/back account transfer, admin link confirmation and real digital PDF/PNG generation/QR decode. Auth/Storage transport and email are simulated. No real customer/order/payment/mail/physical production was performed.
 
-Before release: review/apply 012 → 013 → 014 → 015 under corresponding authorization, confirm hosted offer settings and private boundaries, rebuild with real public configuration and pass the release guard, then separately authorize the Hosting release. Do not deploy the fixture export. Remaining real email, private-file, print defect and physical pilot evidence stays listed in launch status.
+Release completed after owner authorization: 012 → 013 → 014 → 015 applied, hosted capabilities/private boundaries checked, and the guarded real-configuration export promoted from preview to live. Do not deploy the fixture export. Remaining real email, private-file, print defect and physical pilot evidence stays listed in launch status.
 
 Code map and everyday edits: [Developer guide](developerguide.md). RPC/security details and fixture commands: [Backend guide](backendguide.md). Operator buttons: [Admin guide](adminguide.md).
 
@@ -46,7 +46,7 @@ Text rotation is optional, defaults to zero for old scenes, and is validated/sto
 
 `get_order_settings.cardEditorVersion >= 3` is required before custom-card account transfer/payment. Missing backend support leaves the device draft intact and hides payment. This capability is distinct from physical schema 2 and is supplied only by migration 013. Presets without an editor retain their existing offer guard. Reopened Link Card orders now preserve the edited private contact name instead of replacing it with stale cached display-name data.
 
-## Editor follow-up — 16 October 2026 (local, unreleased)
+## Pre-release editor follow-up — 16 October 2026 (historical validation)
 
 Direct text dragging, resize/rotation/delete handles, an HSV/HEX/RGB palette and a **Centre QR** reset are implemented for the website. Print output preserves rotation without exporting editing controls. The Link Card PNG QR was decoded to the exact customer-supplied URL; staff uses that same confirmed URL for manual NFC programming.
 
@@ -54,7 +54,7 @@ Fixed during this check: stale cached names overwriting edited Link Card contact
 
 Verified locally: **57** interaction/touch/compatibility checks, **51** product/order/PDF/PNG/QR checks, **45** existing print/export checks, **10** geometry/colour/name/SQL checks, the full Supabase regression suite, TypeScript and lint (zero errors; six existing image warnings). Auth/Storage and proof transport are fixtures. These tests do not establish real email, funds, actual chip compatibility or physical print quality.
 
-**At that editor check migration 013 was prepared and unapplied, alongside 012.** The current reviewed release sequence is 012 → 013 → 014 → 015 before a separately authorized frontend release. Hosted 001–011 remains the last verified production baseline; app work stays deferred. No deployment, hosted migration, real order, payment or email occurred.
+**At that editor check migration 013 was prepared and unapplied, alongside 012.** That pre-release validation changed no hosted service or customer data. The later release applied 012–015 and published the frontend; current hosted baseline is 001–015. App work stays deferred.
 
 
 **Final build, 16 October:** the real public-configuration webpack build and Hosting release guard passed after source application. No deployment or hosted migration was performed.
@@ -63,12 +63,12 @@ Verified locally: **57** interaction/touch/compatibility checks, **51** product/
 
 Customers have seven choices: Customize with a popup, four owner-artwork presets, separate front/back upload, and a textual designer contact (URL awaited). Presets collect a required name/main heading and optional motto/logo on the next page; layouts stay fixed. Link Card now includes this Details step without creating a digital profile. Printed heading and private recipient name remain separate.
 
-The logo is separate from the avatar, public after authenticated upload, and appears on the card plus an EdgeTap Profile on guarded publication. Migration 014 and capability 4 support the new artwork versions/logo; 012–015 remain unapplied. Screenshot artwork is not a verified printer original; obtain better source artwork for low-resolution designs and check every final proof.
+The logo is separate from the avatar, public after authenticated upload, and appears on the card plus an EdgeTap Profile on guarded publication. Migration 014 and capability 4 support the new artwork versions/logo; 012–015 are now applied. Screenshot artwork is not a verified printer original; obtain better source artwork for low-resolution designs and check every final proof.
 
-## Latest checkout/proof update — 16 October (local/unreleased)
+## Checkout/proof update — released 16 October
 
 Checkout has no generated physical-card previews, including presets/uploads. The explicit Customize popup keeps both editable canvases; profile checkout keeps its digital preview. Link Card review shows the URL, chosen printed heading, design, quantity and QR setting. Staff final proofs use the printed heading rather than the private recipient name.
 
 Migration 015 adds private account sharing, customer approval and one included revision request on new orders. All edits go in one note; saving/re-sharing another proof does not replenish the allowance. A separately agreed, manually verified edit payment grants one further request. Existing orders retain legacy terms. Extra preference edits and major redesigns are separate; existing defect rules remain. Account sharing sends no email and never times out. The advanced email path keeps actual transport and window guards.
 
-The payment guard requires `designReviewVersion >= 1` for the new offers. Review/apply **012 → 013 → 014 → 015** before the matching separately authorized frontend release. All four are prepared, unapplied. See [admin steps](adminguide.md).
+The payment guard requires `designReviewVersion >= 1` for the new offers. **012 → 013 → 014 → 015** were applied with explicit owner approval before the matching Firebase release. Do not rerun them. See [admin steps](adminguide.md).

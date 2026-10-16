@@ -25,3 +25,5 @@ Older releases, migration claims, clean-project assumptions, operator commands, 
 | [Finalplan_before_launch_audit.md](Finalplan_before_launch_audit.md) | `finalplanoflaunchandapp.md` |
 
 The pre-audit business reference and app plan preserve the source before current expenses/status and the app deferral were reconciled. Current versions remain in the parent `edgetapStuff` folder. `latesttodo.md` includes unrelated requirements; they are not current EdgeTap scope.
+
+- [16 October release preflight](RELEASE_2026-10-16_PREFLIGHT.md): historical pending state; the [completed release](../RELEASE_2026-10-16.md) is current.

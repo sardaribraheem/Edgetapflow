@@ -1,6 +1,6 @@
 # Operational fixes prepared for review
 
-**15 October audit, updated 16 October. Status: production proposals; separate local proof implementation noted below.** Use [LAUNCH_STATUS.md](LAUNCH_STATUS.md) for verified findings. This audit applied no code/configuration/migration fix, sent no email, created no order and purchased nothing. App development remains deferred.
+**15 October audit, updated 16 October. Status: remaining operational proposals; released private-proof implementation noted below.** Use [LAUNCH_STATUS.md](LAUNCH_STATUS.md) for verified findings. This audit applied no code/configuration/migration fix, sent no email, created no order and purchased nothing. App development remains deferred.
 
 | Work | Smallest proposed scope | Acceptance evidence | Separate authorization |
 |---|---|---|---|
@@ -18,4 +18,4 @@ A future sender needs careful current-job/proof validation, retry handling and p
 
 Current pickup/payment/hosting rules stay unchanged. Clarify any NASTP NIIT pickup-policy change separately. Do not resume the app or its phone-NFC prototype until the owner explicitly requests it.
 
-**16 October owner-authorized source work:** private account proof sharing/customer approval and included/paid revision controls are implemented and tested locally; migration 015 is prepared, unapplied. This supplies an alternative to proof email once separately reviewed/released. The admin manually sends the review link; no automatic sending or no-response approval is added. Ordinary Auth confirmation/recovery evidence and the real pilot remain outstanding. See [launch status](LAUNCH_STATUS.md) and [admin steps](adminguide.md). The audit statement above describes 15 October, not a claim that this later source work is absent.
+**16 October owner-authorized source work:** private account proof sharing/customer approval and included/paid revision controls are released on 16 October after owner approval of migration 015 (001–015 now applied) and Firebase publication. This supplies an alternative to proof email. [Release evidence](RELEASE_2026-10-16.md) records the verified scope. The admin manually sends the review link; no automatic sending or no-response approval is added. Ordinary Auth confirmation/recovery evidence and the real pilot remain outstanding. See [launch status](LAUNCH_STATUS.md) and [admin steps](adminguide.md). The audit statement above describes 15 October, not a claim that this later source work is absent.

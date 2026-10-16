@@ -25,6 +25,13 @@ try{
  const ordering=await probe('get_order_settings');
  assert.equal(ordering.cardPrice,999);assert.equal(ordering.jazzcashNumber,'0304 4149674');
  assert.equal(ordering.emailNotificationsEnabled,false);assert.equal(ordering.designProofScope,'all_personalized');
+ assert.deepEqual(ordering.offerPrices,{direct_link:999,profile:1499},'Released offers must match the approved backend.');
+ assert.equal(ordering.cardEditorVersion,4,'Released artwork/editor capability is missing.');
+ assert.equal(ordering.designReviewVersion,1,'Released private-proof review capability is missing.');checks++;
+ await probe('confirm_link_destination',{p_id:'nonexistent',p_version:1},true);
+ await probe('share_design_proof',{p_id:'nonexistent',p_version:1},true);
+ await probe('respond_to_design_proof',{p_id:'nonexistent',p_revision:1,p_action:'confirm',p_note:'',p_version:1},true);
+ await probe('record_design_edit_payment',{p_id:'nonexistent',p_amount_minor:100,p_note:'anonymous denial probe',p_version:1},true);
  for(const name of ['get_my_orders','get_my_applications'])await probe(name,{},true);
  await probe('save_application_draft',{p_id:crypto.randomUUID(),p_payload:{},p_step:0,p_version:0},true);
  await probe('submit_application',{p_id:crypto.randomUUID(),p_version:1},true);

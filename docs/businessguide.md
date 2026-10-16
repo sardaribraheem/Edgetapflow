@@ -27,7 +27,7 @@ Keep designer/custom/bulk and existing website-package work contact-only with a 
 | Obtained sample total | **Rs. 500** | In hand; fading front remains open |
 | Temu order: 18 advertised NTAG215 cards | **Rs. 2,300 total; Rs. 127.78/card** | Ordered, before any additional charges; not established as delivered, genuine specification or usable stock |
 | Small envelope | Rs. 10–20/card | Estimate being considered; not a confirmed purchased cost |
-| Confirmed offers | **Link Card Rs. 999; EdgeTap Profile Rs. 1,499** | Local/unreleased implementation; delivery separate |
+| Confirmed offers | **Link Card Rs. 999; EdgeTap Profile Rs. 1,499** | Released 16 October 2026; delivery separate |
 
 Sample remainder before packaging/other costs: Link Card **Rs. 499**, EdgeTap Profile **Rs. 999**. With estimated envelope: **Rs. 479–489** or **Rs. 979–989** respectively, before remaining costs.
 
@@ -37,7 +37,7 @@ If the Temu stock arrives and is usable, its conditional blank + printing + esti
 
 1. Correct/replace the fading front and inspect the result. Record only actual printer requirements, costs and approvals. RGB exports are not certified CMYK/PDF-X.
 2. Establish real ordinary-customer signup/confirmation/recovery evidence. Current SMTP provider configuration is unverified, not automatically absent because an old report says pending.
-3. Review/release the private account-proof flow (015) and establish actual customer approval through My orders. The admin sends the prepared review link manually; account sharing itself sends nothing and never auto-approves. If using advanced email review, independently establish real transport and monitored replies; queueing is not sending.
+3. The private account-proof flow (015) is released; establish actual customer approval through My orders during the consenting pilot. The admin sends the prepared review link manually; account sharing itself sends nothing and never auto-approves. If using advanced email review, independently establish real transport and monitored replies; queueing is not sending.
 4. Confirm remaining delivery coverage/cancellation/defect/retention terms without inventing new promises. Any NIIT pickup-location/hours change needs separate confirmation.
 5. Separately authorize one consenting real customer walkthrough and record actual payment, private-file access, customer profile ownership, proof review, printing/NFC/QR QA and handoff.
 
@@ -61,7 +61,7 @@ For each order record reference, actual funds, quantity, costs, proof revisions,
 
 ## Card offers update — 15 October 2026
 
-The owner confirmed **Link Card Rs. 999**, **EdgeTap Profile Rs. 1,499**, and **Website + four cards Rs. 29,999**, delivery separate. This update is implemented in local source and tested with isolated fixtures. **Migrations 012–015 are prepared, not applied; these features are not deployed.** Hosted migrations 001–011 and the previously released website remain the last verified production baseline. Review/apply 012–015 under separate authorization before releasing the matching frontend. The new checkout checks offer/editor support and private-proof capability before payment. Existing submitted Rs. 999 orders keep their agreed price. [Card offers guide](CARD_PRODUCTS.md).
+The owner confirmed **Link Card Rs. 999**, **EdgeTap Profile Rs. 1,499**, and **Website + four cards Rs. 29,999**, delivery separate. This update is released on 16 October 2026. **Migrations 001–015 are applied and the matching Firebase frontend is live.** [Release evidence](RELEASE_2026-10-16.md) distinguishes browser/SQL verification from the still-needed real customer and physical pilot. Do not rerun applied migrations. The new checkout checks offer/editor support and private-proof capability before payment. Existing submitted Rs. 999 orders keep their agreed price. [Card offers guide](CARD_PRODUCTS.md).
 
 
 ## Physical-design review policy — owner update, 16 October

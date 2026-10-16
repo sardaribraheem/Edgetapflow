@@ -156,7 +156,7 @@ Click a colour swatch to open the palette. Drag within the saturation/brightness
 | `lib/colour.ts` | Colour conversions |
 | `lib/card-renderer.ts` | Draws actual text rotation for preview and exports |
 | `lib/application.ts` | Private contact mapping and backend capability guard |
-| `supabase/migrations/202610160013_card_text_rotation.sql` | Prepared server validation and editor capability; not applied |
+| `supabase/migrations/202610160013_card_text_rotation.sql` | Applied 16 October: server validation and editor capability; do not edit this migration |
 
 `npm run test:card-editor` checks local geometry, colours, name recovery and SQL. Use the backend guide’s isolated fixture setup for `npm run test:card-editor:browser`. Runtime buttons/selection outlines belong only to the preview; do not add them to the print renderer.
 
