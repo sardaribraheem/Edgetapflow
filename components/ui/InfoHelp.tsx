@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import Icon from "./Icon";
 
 export default function InfoHelp({ title, label, children }: { title: string; label?: string; children: ReactNode }) {
@@ -9,22 +9,23 @@ export default function InfoHelp({ title, label, children }: { title: string; la
   const previousOverflow = useRef("");
   const opened = useRef(false);
   const id = useId();
+  const [expanded,setExpanded]=useState(false);
   useEffect(() => () => { if (opened.current) document.body.style.overflow = previousOverflow.current; }, []);
   const open = () => {
     if (!dialog.current || dialog.current.open) return;
     previousOverflow.current = document.body.style.overflow;
     dialog.current.showModal();
-    opened.current = true;
+    opened.current = true; setExpanded(true);
     document.body.style.overflow = "hidden";
   };
   const closed = () => {
     if (opened.current) document.body.style.overflow = previousOverflow.current;
-    opened.current = false;
+    opened.current = false; setExpanded(false);
     trigger.current?.focus();
   };
   const close = () => { dialog.current?.close(); closed(); };
   return <>
-    <button ref={trigger} type="button" className={label ? "info-help info-help-label" : "info-help"} aria-label={label || `About ${title.toLowerCase()}`} aria-haspopup="dialog" onClick={open}>
+    <button ref={trigger} type="button" className={label ? "info-help info-help-label" : "info-help"} aria-label={label || `About ${title.toLowerCase()}`} aria-haspopup="dialog" aria-expanded={expanded} onClick={open}>
       <Icon name="info" size={18} />{label && <span>{label}</span>}
     </button>
     <dialog ref={dialog} aria-labelledby={id} className="help-dialog" onClose={closed} onCancel={event => { event.stopPropagation(); event.preventDefault(); close(); }} onClick={event => { if (event.target === event.currentTarget) close(); }} onKeyDown={event => {

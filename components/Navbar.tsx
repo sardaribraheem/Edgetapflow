@@ -2,9 +2,9 @@
 
 import { useCallback, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { nav } from "@/lib/data/content";
 import MobileMenu from "./MobileMenu";
-import { NfcWaves } from "./doodles";
 
 // Floating rounded pill navigation; collapses to a drawer on mobile.
 export default function Navbar() {
@@ -19,9 +19,7 @@ export default function Navbar() {
           <nav aria-label="Main navigation" className="flex items-center justify-between rounded-full bg-white/85 px-2.5 py-2 shadow-[0_14px_40px_-16px_rgba(16,11,74,0.35)] ring-1 ring-[var(--ink)]/6 backdrop-blur-md">
             {/* brand */}
             <Link href="/" aria-label="EdgeTap home" prefetch={false} className="flex items-center gap-2 rounded-full px-2 py-1.5">
-              <span className="grid h-8 w-8 place-items-center rounded-full bg-[var(--yellow)]">
-                <NfcWaves className="h-5 w-5 text-[var(--ink)]" />
-              </span>
+              <Image src="/favicon-96.png" alt="" width={36} height={36} className="nav-brand-logo rounded-lg"/>
               <span className="hidden font-display text-[15px] font-bold tracking-tight text-[var(--ink)] sm:block">
                 EDGE TAP
               </span>

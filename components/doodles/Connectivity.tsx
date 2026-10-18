@@ -8,7 +8,7 @@ type P = SVGProps<SVGSVGElement>;
 export function NfcWaves({ className, ...props }: P) {
   return (
     <svg
-      viewBox="0 0 64 64"
+      viewBox="6 3 52 38"
       fill="none"
       stroke="currentColor"
       strokeWidth={3.4}
@@ -22,9 +22,6 @@ export function NfcWaves({ className, ...props }: P) {
       <path d="M13 13.5C25 5 39 5 51 13.5" />
       <path d="M23 26.5c4.5-3.5 13.5-3.5 18 0" />
       <path d="M32 34a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />
-      <path d="M23 39.5c4.5 3.5 13.5 3.5 18 0" />
-      <path d="M18 44c8 7 20 7 28 0" />
-      <path d="M13 50.5C25 59 39 59 51 50.5" />
     </svg>
   );
 }

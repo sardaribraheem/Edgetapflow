@@ -1,6 +1,6 @@
 import templates from './data/card-templates.json';
 import type { Order } from './data/order';
-import { profileUrl } from './site';
+import { isProfileDestination } from './site';
 
 export const CARD_WIDTH_MM = 85.60;
 export const CARD_HEIGHT_MM = 53.98;
@@ -51,7 +51,7 @@ export function clampQrPosition(x:number,y:number,sizeMm:number,safeMm=3) {const
 export function printPackageHold(order: Order): string {
   if(!order.printSnapshot)return 'Prepare the front and back proof first.';
   if(order.applicationStatus!=='accepted'||order.payment.status!=='paid'||order.cardVerifiedAmount!==order.subtotal)return 'Accept the application and verify the card payment.';
-  if(order.plan==='direct_link'?(!order.directLink||order.nfcUrl!==order.directLink):(!order.usernameFinal||!order.profileId||order.nfcUrl!==profileUrl(order.usernameFinal)))return 'Confirm the card destination before preparing its QR.';
+  if(order.plan==='direct_link'?(!order.directLink||order.nfcUrl!==order.directLink):(!order.usernameFinal||!order.profileId||!isProfileDestination(order.nfcUrl,order.usernameFinal)))return 'Confirm the card destination before preparing its QR.';
   if(!order.printSnapshot.settings.confirmed)return 'Confirm the printer requirements.';
   if(order.printSnapshot.settings.colour!=='rgb')return 'CMYK conversion must be completed by your printer; this exporter produces RGB.';
   if(!['approved','approved_no_response'].includes(order.designProofStatus||''))return 'Complete the actual customer design-proof review.';

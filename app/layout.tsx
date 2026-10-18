@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Fredoka, Inter } from "next/font/google";
 import "./globals.css";
 import { APP_URL } from "@/lib/site";
+import { SITE_DESCRIPTION, SOCIAL_IMAGE } from "@/lib/seo";
 
 const fredoka = Fredoka({
   variable: "--font-display",
@@ -18,38 +19,32 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL(APP_URL),
   title: {
-    default: "EdgeTap — One Tap. Infinite Possibilities.",
+    default: "EdgeTap · NFC Business Cards in Lahore, Pakistan",
     template: "%s · EdgeTap",
   },
-  description:
-    "Physical NFC business cards with your link or an editable digital profile and optional QR. Cards from Rs. 999 plus delivery. One tap. Infinite possibilities.",
-  keywords: [
-    "NFC",
-    "digital business card",
-    "smart card",
-    "contactless",
-    "digital profile",
-    "NFC business card",
-    "tap to review",
-    "QR code",
-    "digital menu",
-  ],
+  description: SITE_DESCRIPTION,
   openGraph: {
     type: "website",
-    images: [{ url: "/social-card.png", width: 1200, height: 630, alt: "EdgeTap — One tap. Infinite possibilities." }],
+    images: [SOCIAL_IMAGE],
     url: APP_URL,
     siteName: "EdgeTap",
-    title: "EdgeTap — One Tap. Infinite Possibilities.",
-    description:
-      "Smart NFC experiences for people and businesses. One tap. Infinite possibilities.",
+    title: "EdgeTap · NFC Business Cards in Lahore, Pakistan",
+    description: SITE_DESCRIPTION,
   },
-  icons: { icon: "/brand-icon.svg", apple: "/apple-touch-icon.png" },
+  icons: {
+    icon: [
+      { url: `${APP_URL}/favicon-96.png`, type: "image/png", sizes: "96x96" },
+      { url: `${APP_URL}/favicon-512.png`, type: "image/png", sizes: "512x512" },
+      { url: `${APP_URL}/favicon.ico`, type: "image/x-icon", sizes: "16x16 32x32 48x48 96x96 256x256" },
+    ],
+    shortcut: `${APP_URL}/favicon.ico`,
+    apple: { url: `${APP_URL}/apple-touch-icon.png`, sizes: "180x180", type: "image/png" },
+  },
   twitter: {
     card: "summary_large_image",
-    images: ["/social-card.png"],
-    title: "EdgeTap — One Tap. Infinite Possibilities.",
-    description:
-      "Smart NFC experiences for people and businesses. One tap. Infinite possibilities.",
+    images: [SOCIAL_IMAGE.url],
+    title: "EdgeTap · NFC Business Cards in Lahore, Pakistan",
+    description: SITE_DESCRIPTION,
   },
 };
 
@@ -63,6 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
+      data-scroll-behavior="smooth"
       className={`${fredoka.variable} ${inter.variable} antialiased`}
     >
       <body className="min-h-screen flex flex-col bg-[var(--color-bg)] text-[var(--color-fg)] font-sans">

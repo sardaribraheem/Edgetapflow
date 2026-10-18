@@ -7,7 +7,14 @@ async function upload(bucket: string, uid: string, file: File, maxMb: number): P
   const extension = { 'image/jpeg':'jpg','image/png':'png','image/webp':'webp' }[file.type];
   const path = `${uid}/${crypto.randomUUID()}.${extension}`;
   const { error } = await getSupabase().storage.from(bucket).upload(path, file, { contentType: file.type, upsert: false });
-  if (error) throw new Error('Image upload failed. Please try again.');
+  if (error) {
+    if (typeof navigator !== 'undefined' && !navigator.onLine) throw new Error('You are offline. Reconnect, then choose the image again.');
+    const status = String(error.statusCode || '');
+    if (status === '401' || status === '403') throw new Error('Your upload access could not be confirmed. Sign in again, then retry the image.');
+    if (status === '413') throw new Error(`Image must be under ${maxMb} MB.`);
+    if (status === '429') throw new Error('Too many upload attempts. Wait a moment, then choose the image again.');
+    throw new Error('Image upload could not reach storage. Check your connection, then choose the image again.');
+  }
   return `${bucket}/${path}`;
 }
 export async function uploadPublicAvatar(uid: string, file: File): Promise<string> {

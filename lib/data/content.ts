@@ -5,11 +5,10 @@ export const nav = {
   links: [
     { label: "What We Offer", href: "/#offer" },
     { label: "How It Works", href: "/#solutions" },
-    { label: "How to Order", href: "/#how-to-order" },
     { label: "Pricing", href: "/pricing" },
     { label: "FAQs", href: "/#faq" },
   ],
-  cta: { label: "Get Started", href: "/pricing" },
+  cta: { label: "Get Your EdgeTap", href: "/pricing" },
 };
 
 export const orderingSteps = [
@@ -35,7 +34,7 @@ export const solutions: Solution[] = [
     description: "Carry one card that opens your EdgeTap profile on compatible NFC smartphones.",
     bullets: ["Cards from Rs. 999", "Choose a card design", "No visitor app"], icon: "businessCard", tone: "yellow" },
   { index: "02", tag: "Your profile", title: "Your Contact Details & Links",
-    description: "Share up to ten contact and social links on your digital profile. Sign in to update it after activation.",
+    description: "Your contacts, socials and story in one place. Update your profile as your world grows.",
     bullets: ["WhatsApp", "Portfolio", "Save contact"], icon: "globe", tone: "mint" },
   { index: "03", tag: "QR fallback", title: "Scan to Connect",
     description: "No NFC? Scan the QR code on the card with a phone camera. It opens the same profile in a browser; internet access is required.",
@@ -55,7 +54,7 @@ export type UseCase = {
 
 export const useCases: UseCase[] = [
   { id: "meet", kicker: "How it works · 1", headline: "Make an introduction.",
-    context: "At a meeting or event, hold your card near the NFC reader on a compatible phone. Open the notification to visit your profile.",
+    context: "At a meeting or event, touch your card to the NFC reader on a compatible phone. Open the notification to visit your profile.",
     icon: "card", tone: "yellow", phone: "profile" },
   { id: "scan", kicker: "How it works · 2", headline: "Or scan the QR code.",
     context: "Use the phone camera to scan the card’s QR code when NFC is unavailable. Both routes open the same profile in the browser.",
@@ -67,7 +66,7 @@ export const useCases: UseCase[] = [
 
 // FAQ
 export const faqs = [
-  { q: "Which card should I choose?", a: "Link Card (Rs. 999) opens your existing portfolio, social page or website. EdgeTap Profile (Rs. 1,499) includes your editable profile with up to ten links. Both include a physical NFC card, customizable front/back and optional QR. Delivery is separate." },
+  { q: "Which card should I choose?", a: "Link Card (Rs. 999) opens your existing portfolio, social page or website. EdgeTap Profile (Rs. 1,499) includes your editable profile for your contacts and links. Both include a physical NFC card, customizable front/back and optional QR. Delivery is separate." },
   { q: "How does the NFC card work?", a: "Hold your card near the NFC reader on a compatible phone and open the notification. Your profile opens in the browser. Reader position and NFC settings vary by phone; internet access is required." },
   { q: "What if a phone does not support NFC?", a: "Scan the QR code on the card with the phone camera. It links to the same digital profile, so NFC is optional." },
   { q: "Can I change my information later?", a: "Sign in with your checkout account and open your activated profile to update your details and links. Your physical card keeps the same profile URL." },

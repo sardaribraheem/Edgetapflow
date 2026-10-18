@@ -1,5 +1,4 @@
 import Link from "next/link";
-import EdgeTapCard from "./EdgeTapCard";
 import { SparkleDoodle, ArrowDoodle } from "./doodles";
 
 // Final CTA — the EdgeTap card returns as the culmination of the page.
@@ -12,9 +11,6 @@ export default function FinalCTA() {
       </div>
 
       <div className="container-x relative flex flex-col items-center text-center">
-        <div className="mb-8 rotate-[-4deg] animate-float-slow">
-          <EdgeTapCard rotate />
-        </div>
 
         <h2 className="text-display max-w-4xl text-[clamp(2.8rem,8vw,6.5rem)] text-[var(--ink)]">
           Ready to tap into

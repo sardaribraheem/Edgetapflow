@@ -1,0 +1,34 @@
+import assert from 'node:assert/strict';
+import {readFile,readdir} from 'node:fs/promises';
+import {createTestDatabase} from './supabase-test-db.mjs';
+const db=await createTestDatabase({migrate:false});let checks=0;
+const q=(s,a=[])=>db.query(s,a),rpc=async(n,a=[]) => (await q(`select public.${n}(${a.map((_,i)=>'$'+(i+1)).join(',')}) value`,a)).rows[0].value;
+const owner='22222222-2222-4222-8222-222222222222',other='33333333-3333-4333-8333-333333333333',staff='11111111-1111-4111-8111-111111111111';
+const as=async(uid,work)=>{await db.exec(uid?'set role authenticated':'set role anon');await q("select set_config('request.jwt.claim.sub',$1,false)",[uid||'']);try{return await work();}finally{await db.exec('reset role');}};
+const check=(ok,label)=>{assert(ok,label);checks++;console.log('PASS '+label);};
+const physical={schemaVersion:2,templateVersion:1,useProfileName:true,useProfileTitle:true,printedName:'Domain test',printedTitle:'',standardBack:true,qr:{enabled:true,placement:'centre',face:'back',x:.5,y:.5,sizeMm:20}};
+const payload={product:'profile',card:{template:'simple',quantity:1,size:'Standard — 85.60 × 53.98 mm',physical},customer:{fullName:'Domain test',phone:'03001234567',email:'domain@example.test',address:'',city:''},profileDraft:{displayName:'Domain test',title:'',bio:'',usernameSuggested:'domain-test',links:[{type:'portfolio',label:'Website',url:'https://example.test/'}]},deliveryMethod:'nastp_pickup',payment:{method:'jazzcash',receiptUrl:'payment-receipts/'+owner+'/receipt.png'}};
+let id,version;
+const order=()=>as(staff,()=>rpc('get_order',[id]));
+const accept=async()=>{let o=await order();await as(staff,()=>rpc('confirm_card_spec',[id,payload.card.size,'simple',o.version]));o=await order();await as(staff,()=>rpc('verify_application_payment',[id,o.version]));o=await order();await as(staff,()=>rpc('review_application',[id,'accept','',o.version]));return order();};
+try{
+ for(const f of (await readdir('supabase/migrations')).filter(f=>f.endsWith('.sql')&&!f.includes('0016_')).sort())await db.exec(await readFile('supabase/migrations/'+f,'utf8'));
+ await q('insert into auth.users values($1,$2),($3,$4),($5,$6)',[owner,'domain@example.test',other,'other@example.test',staff,'staff@example.test']);await q("insert into private.admin_members(user_id,provenance) values($1,'LOCAL DOMAIN TEST')",[staff]);await q("insert into storage.objects(bucket_id,name) values('payment-receipts',$1)",[owner+'/receipt.png']);
+ id=await as(owner,()=>rpc('create_order',[payload,crypto.randomUUID()]));let o=await accept();await as(staff,()=>rpc('publish_order_profile',[id,'legacy-domain-test',o.version]));
+ const oldId=id;const before=(await q('select to_jsonb(o) value from public.orders o where id=$1',[id])).rows[0].value;
+ await db.exec(await readFile('supabase/migrations/202610170016_custom_domain.sql','utf8'));
+ check(JSON.stringify(before)===JSON.stringify((await q('select to_jsonb(o) value from public.orders o where id=$1',[id])).rows[0].value),'Migration preserves every field of an already published legacy order');
+ check((await order()).nfcUrl==='https://edgetapflow.web.app/u/legacy-domain-test','Printed legacy destination stays unchanged');
+ check((await q('select private.destination_ready(o) value from public.orders o where id=$1',[id])).rows[0].value,'Legacy destination still passes production guard');
+ check((await as(null,()=>rpc('get_order_settings'))).profileOrigin==='https://edgetap.tech','Public capability reports the new preferred origin');
+ id=await as(owner,()=>rpc('create_order',[payload,crypto.randomUUID()]));o=await order();await as(staff,()=>assert.rejects(()=>rpc('publish_order_profile',[id,'unpaid-domain-test',o.version])));check(true,'Unpaid/unaccepted publication remains blocked');
+ o=await accept();version=o.version;
+ await as(owner,()=>assert.rejects(()=>rpc('publish_order_profile',[id,'owner-domain-test',version])));await as(other,()=>assert.rejects(()=>rpc('publish_order_profile',[id,'other-domain-test',version])));check(true,'Ordinary customers cannot publish a profile');
+ await as(staff,()=>assert.rejects(()=>rpc('publish_order_profile',[id,'stale-domain-test',version-1])));check(true,'Stale publication is still rejected');
+ const result=await as(staff,()=>rpc('publish_order_profile',[id,'new-domain-test',version]));check(result.profileUrl==='https://edgetap.tech/u/new-domain-test'&&(await order()).nfcUrl===result.profileUrl,'New publication and future QR/NFC use the preferred domain');
+ check((await q('select private.destination_ready(o) value from public.orders o where id=$1',[id])).rows[0].value,'New domain passes the existing print guards');
+ await as(staff,()=>assert.rejects(()=>rpc('publish_order_profile',[id,'replace-domain-test',version])));check((await order()).nfcUrl===result.profileUrl,'Repeat publication cannot overwrite an existing confirmed destination');
+ for(const name of ['publish_order_profile_before_custom_domain(text,text,bigint)','get_order_settings_before_custom_domain()'])check(!(await q("select has_function_privilege('authenticated',$1,'EXECUTE') value",['public.'+name])).rows[0].value,'Renamed '+name.split('(')[0]+' cannot bypass current guards');
+ id=oldId;check((await order()).nfcUrl===before.nfc_url,'Later publications leave old cards untouched');
+ console.log('PASS '+checks+' custom-domain SQL/legacy-preservation/publication/security checks. Local fixture only; migration NOT applied to hosted database.');
+}finally{await db.close();}

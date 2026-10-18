@@ -1,7 +1,8 @@
 import { usesSupabase } from "@/lib/backend";
 import Link from "next/link";
 import { SUPPORT_URL } from "@/lib/site";
-export const metadata = { alternates: { canonical: "/privacy" }, title: "Privacy", description: "EdgeTap account, product and service information." };
+import { publicPageMetadata } from '@/lib/seo';
+export const metadata = publicPageMetadata('/privacy', 'Privacy', 'How EdgeTap handles public profile details, private orders, payment receipts, uploaded artwork and account data.');
 export default function PolicyPage() {
   return <main className="container-x max-w-3xl min-h-screen py-16">
     <Link href="/" className="underline">← Back to EdgeTap</Link>

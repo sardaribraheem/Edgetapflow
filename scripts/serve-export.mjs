@@ -3,7 +3,7 @@ import { createServer } from "node:http";
 import { readFile, stat } from "node:fs/promises";
 import { resolve, extname } from "node:path";
 const root = resolve("out");
-const types = { ".html":"text/html", ".js":"text/javascript", ".css":"text/css", ".svg":"image/svg+xml", ".png":"image/png", ".ico":"image/x-icon", ".txt":"text/plain", ".xml":"application/xml", ".json":"application/json", ".woff2":"font/woff2" };
+const types = { ".html":"text/html", ".js":"text/javascript", ".css":"text/css", ".svg":"image/svg+xml", ".png":"image/png", ".webp":"image/webp", ".ico":"image/x-icon", ".txt":"text/plain", ".xml":"application/xml", ".json":"application/json", ".woff2":"font/woff2" };
 createServer(async (req,res) => {
   let path;
   try { path = decodeURIComponent(new URL(req.url,"http://localhost").pathname); }
@@ -20,7 +20,7 @@ createServer(async (req,res) => {
   }
   try {
     const body = await readFile(target);
-    res.writeHead(status,{"Content-Type":types[extname(target)] || "application/octet-stream", "X-Content-Type-Options":"nosniff"});
+    res.writeHead(status,{"Content-Type":types[extname(target)] || "application/octet-stream", "X-Content-Type-Options":"nosniff", ...(path.startsWith("/card-previews/") ? {"Cache-Control":"public, max-age=31536000, immutable"} : {})});
     res.end(body);
   } catch { res.writeHead(500).end("Build the production export first."); }
 }).listen(Number(process.env.PORT || 3000),"127.0.0.1", () => console.log("Production export QA: http://127.0.0.1:"+(process.env.PORT || 3000)));

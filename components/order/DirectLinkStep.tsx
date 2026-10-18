@@ -3,7 +3,7 @@ import {useState} from 'react';
 import type {WizardDraft} from '@/lib/application';
 import {directLinkError,nfcLinkSize} from '@/lib/nfc-link';
 import Icon from '@/components/ui/Icon';
-import InfoHelp from '@/components/ui/InfoHelp';
+import {OrderHelp as InfoHelp} from './OrderInformation';
 const choices=[['instagram','Instagram','https://instagram.com/yourname'],['linkedin','LinkedIn','https://www.linkedin.com/in/yourname'],['github','GitHub','https://github.com/yourname'],['portfolio','Portfolio','https://yourwebsite.com'],['whatsapp','WhatsApp','https://wa.me/923001234567'],['globe','Custom link','https://']];
 export default function DirectLinkStep({draft,onChange}:{draft:WizardDraft;onChange:(patch:Partial<WizardDraft>)=>void}){
  const [selected,setSelected]=useState('');const value=draft.directLink||'',size=nfcLinkSize(value),error=value?directLinkError(value):'';

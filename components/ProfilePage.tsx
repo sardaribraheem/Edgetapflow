@@ -63,6 +63,7 @@ export default function ProfilePage({
   const profile = previewOnly ? initialProfile : savedProfile;
   const [user, setUser] = useState<User | null>(null);
   const [ownerAccess, setOwnerAccess] = useState(false);
+  const ProfileContainer = previewOnly ? "section" : "main";
   const isOwner = !previewOnly && !!user && ownerAccess;
   const [message, setMessage] = useState("");
   const [editing,setEditing] = useState(false),[downloading,setDownloading]=useState(false);
@@ -116,7 +117,7 @@ export default function ProfilePage({
         <SparkleDoodle className="absolute left-[28%] top-[78%] h-7 w-7 text-[var(--coral)] animate-pulse-soft" />
       </DoodleField>
 
-      <main className="container-x relative mx-auto w-full max-w-5xl py-6 my-auto">
+      <ProfileContainer className="container-x relative mx-auto w-full max-w-5xl py-6 my-auto">
         {/* the card */}
         <div className="card-paper relative overflow-hidden">
           <SparkleDoodle className="absolute -right-2 -top-2 h-10 w-10 text-[var(--yellow)] md:hidden" aria-hidden="true" />
@@ -201,7 +202,7 @@ export default function ProfilePage({
             {isOwner ? <button type="button" onClick={()=>{setMessage('');setEditing(true);}} className="btn btn-ghost px-4 py-2 text-xs"><Icon name="edit" size={17}/>Edit profile</button> : <Link href={user?'/account':`/account?next=${encodeURIComponent('/u/'+profile.username)}`} className="btn btn-ghost px-4 py-2 text-xs">{user?'My account':'Sign in to edit'}</Link>}
           </footer>
         </div>
-      </main>
+      </ProfileContainer>
       {editing && isOwner && user && <ProfileEditor profile={profile} uid={user.uid} onClose={()=>setEditing(false)} onSaved={saved=>{setProfile(saved);setEditing(false);setMessage('Profile updated.');}}/>}
     </div>
   );

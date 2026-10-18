@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 
-export type IconName = "qr" | "edit" | "mail" | "phone" | "refresh" | "info" | "user" | "avatar" | "card" | "link" | "eye" | "truck" | "receipt" | "check" | "save" | "trash" | "close" | "pause" | "play" | "shield" | "pin" | "camera";
+export type IconName = "star" | "qr" | "edit" | "mail" | "phone" | "refresh" | "info" | "user" | "avatar" | "card" | "link" | "eye" | "truck" | "receipt" | "check" | "save" | "trash" | "close" | "pause" | "play" | "shield" | "pin" | "camera";
 
 // Streamline Core, CC BY 4.0. Attribution: /icons/streamline/LICENSE.txt.
 export default function Icon({ name, size = 20, className = "" }: { name: IconName; size?: number; className?: string }) {

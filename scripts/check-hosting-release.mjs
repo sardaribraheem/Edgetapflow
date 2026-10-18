@@ -35,6 +35,7 @@ try {
     if (file.endsWith('.js')) compiled += source;
   }
   assert(compiled.includes(`${project.project_ref}.supabase.co`), 'The real Supabase backend is absent from the compiled browser code.');
+  await import('./test-seo.mjs');
   console.log(`PASS Hosting release: ${publicFiles.length} public text assets checked; approved Supabase project, account routes, profile rewrite and credential/fixture guards verified. No deployment performed.`);
 } catch (error) {
   console.error(`HOSTING RELEASE BLOCKED: ${error.message}`);

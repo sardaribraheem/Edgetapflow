@@ -22,8 +22,14 @@ const iconFor = (type: string, className: string) => {
 
 // Phone screen: the digital profile that opens after tapping a
 // professional EdgeTap card (use case 01 / MEET SOMEONE).
-export default function PhoneProfile() {
-  const primary = ibraheemProfile.links.filter((l) =>
+export type StoryPerson = { displayName:string; title:string; location:string; avatar:string };
+export default function PhoneProfile({ person }: { person?:StoryPerson } = {}) {
+  const profile = person || ibraheemProfile;
+  const primary = person ? [
+    {type:'whatsapp',label:'WhatsApp'},
+    {type:'instagram',label:'Instagram'},
+    {type:'portfolio',label:'Portfolio'},
+  ] : ibraheemProfile.links.filter((l) =>
     ["whatsapp", "linkedin", "instagram", "portfolio"].includes(l.type),
   );
 
@@ -33,7 +39,7 @@ export default function PhoneProfile() {
       <div className="flex flex-col items-center pt-2">
         <div className="grid h-16 w-16 place-items-center overflow-hidden rounded-full bg-[var(--yellow)] ring-2 ring-[var(--ink)]/10">
           <img
-            src={ibraheemProfile.avatar}
+            src={profile.avatar}
             loading="lazy"
             decoding="async"
             alt=""
@@ -42,13 +48,13 @@ export default function PhoneProfile() {
           />
         </div>
         <div className="mt-2 font-display text-[17px] font-semibold leading-none text-[var(--ink)]">
-          {ibraheemProfile.displayName}
+          {profile.displayName}
         </div>
         <div className="mt-1 text-[11px] font-medium text-[var(--ink-soft)]">
-          {ibraheemProfile.title}
+          {profile.title}
         </div>
         <div className="mt-0.5 text-[10px] text-[var(--ink-soft)]">
-          📍 {ibraheemProfile.location}
+          📍 {profile.location}
         </div>
       </div>
 
@@ -76,7 +82,7 @@ export default function PhoneProfile() {
             <SaveIcon className="h-4 w-4" />
           </span>
           <span className="flex-1 text-[12px] font-semibold">
-            {profileContacts[0].label}
+            {person ? 'Save profile' : profileContacts[0].label}
           </span>
           <span className="text-[12px] text-white/60">→</span>
         </div>

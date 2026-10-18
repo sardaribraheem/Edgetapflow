@@ -1,10 +1,10 @@
+import FeedbackForm from "./FeedbackForm";
 import Link from "next/link";
 import { SUPPORT_URL } from "@/lib/site";
 import {
   SparkleDoodle,
   ScribbleDoodle,
   NfcWaves,
-  ArrowCurveDoodle,
   StarDoodle,
 } from "./doodles";
 
@@ -40,14 +40,14 @@ export default function CustomCTA() {
 
         <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
           <Link href="/pricing" className="btn btn-yellow px-8 py-4 text-[16px]">
-            Order your card <span aria-hidden="true">→</span>
+            Get Your EdgeTap <span aria-hidden="true">→</span>
           </Link>
           <a href={SUPPORT_URL} target="_blank" rel="noreferrer" className="btn btn-ghost px-8 py-4 text-[16px] text-[var(--cream)] [&]:border-[var(--cream)]/25 [&]:text-[var(--cream)] hover:bg-[var(--cream)]/5">
             WhatsApp EdgeTap
           </a>
         </div>
 
-        <ArrowCurveDoodle className="mt-10 hidden h-16 w-16 text-[var(--yellow)] md:block" />
+        <FeedbackForm/>
       </div>
     </section>
   );

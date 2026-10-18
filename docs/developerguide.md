@@ -124,13 +124,13 @@ npm run check:release
 
 Check `/`, `/order`, `/account`, `/admin` and an actual public profile. Try a long name, blank title, upload with/without QR, narrow phone width and keyboard controls. A passing build does not prove payments, email, printing or NFC.
 
-For full isolated browser tests, follow [backendguide.md](backendguide.md); never submit test orders into production. Hosting uses the generated `out/` folder, so `next start` is inappropriate. Deployment requires owner authorization and Firebase CLI login; run `npm run deploy:hosting` only for the reviewed export. Never upload `.env.local` or private cleanup backups.
+Some older browser suites below retain superseded UI expectations; use the current suite selection in [BUILD.md](BUILD.md). For isolated browser tests, follow [backendguide.md](backendguide.md); never submit test orders into production. Hosting uses the generated `out/` folder, so `next start` is inappropriate. Deployment requires owner authorization and Firebase CLI login; run `npm run deploy:hosting` only for the reviewed export. Never upload `.env.local` or private cleanup backups.
 
 If something breaks, read the terminal error and undo your last small edit. Typical causes: missing comma/quote in JSON, a renamed template ID, unregistered backend template version, or missing asset file. Do not delete the database or force dependency upgrades to fix a visual change.
 
-## 9. New card offers and customizer
+## 9. Card offers and customizer
 
-See [CARD_PRODUCTS.md](CARD_PRODUCTS.md) for current release state. `/pricing` has three main offers; the centre emphasis/hover and responsive stacking are in the final pricing block of `app/globals.css`. Enquiry rows sit underneath. Keep pricing and legal/landing wording consistent.
+See [businessguide.md](businessguide.md) for current offers and [LAUNCH_STATUS.md](LAUNCH_STATUS.md) for release state. `/pricing` has three symmetrical main offers; responsive stacking is in `app/globals.css`. Enquiry rows sit underneath. Keep pricing and legal/landing wording consistent.
 
 - `lib/data/order.ts`: `CARD_PRICES` and product types. Prices also need a **new server migration**, not just a text edit. Never edit an applied migration to change a price.
 - `components/order/DirectLinkStep.tsx`: the six destination choices and URL field. `lib/nfc-link.ts` validates the normalized public URL and conservative NTAG215 budget. Adding a label/placeholder does not create a new product.
@@ -160,18 +160,18 @@ Click a colour swatch to open the palette. Drag within the saturation/brightness
 
 `npm run test:card-editor` checks local geometry, colours, name recovery and SQL. Use the backend guide’s isolated fixture setup for `npm run test:card-editor:browser`. Runtime buttons/selection outlines belong only to the preview; do not add them to the print renderer.
 
-## 13. Card gallery, logos and hero links (16 October)
+## 11. Card gallery, logos and hero links
 
-- Gallery order: Customize (`maincard.png`), Black photography, Blue studio, Botanical, Honeycomb, Upload a design, then a textual designer contact. The explicit selection list is `CARD_TEMPLATES` in `lib/data/order.ts`.
+- Gallery order: Customize (the supplied main card), Black photography, Blue studio, Botanical, Honeycomb, Upload a design, then a textual designer contact. The explicit selection list is `CARD_TEMPLATES` in `lib/data/order.ts`.
 - Original preview files are in `public/card-designs/`; owner sources remain in `assets/edgetapcard/`. Their PNG exceptions in `.gitignore` must stay. Do not replace historical print backgrounds.
-- The designer URL is `DESIGNER_URL` in `lib/site.ts`. It is intentionally `null` until the owner supplies the real URL; the contact button is disabled meanwhile.
+- The designer URL is `DESIGNER_URL` in `lib/site.ts`. It is intentionally `null` until the owner supplies the real URL; the UI shows a support alternative meanwhile.
 - `components/order/CardEditorDialog.tsx` owns modal state/focus/scroll. `PhysicalCardControls.tsx` draws both sides and `CardCustomizer.tsx` edits the selected face. Keep nested colour/help Escape events from closing the parent editor.
 - The optional logo is separate from the portrait. The device draft keeps the file locally, then account saving uploads to the existing **public avatars bucket**; the UI discloses this. `physical.logoUrl` is reused by print rendering and copied to the public profile only on guarded publication. Admin proofs show the additive logo; staff checks placement.
-- `components/EdgeTapCard.tsx` displays the actual `maincard.png`, shared by Hero and How It Works. The selected-card summary is text-only; gallery thumbnails remain.
+- `components/EdgeTapCard.tsx` displays the supplied main card through `public/card-designs/maincard-v2.webp`, shared by Hero and How It Works. The selected-card summary is text-only; gallery thumbnails remain.
 - Five hero chips in `components/Hero.tsx` link to the existing founder Instagram, WhatsApp, LinkedIn, portfolio and `/u/ibraheem`. Only those anchors receive mouse attraction; touch and reduced-motion preferences disable it. Change destinations in `lib/data/profile.ts`, not in multiple components.
 - To verify locally: `npm run test:card-gallery` (SQL), and `QA_BASE_URL=http://127.0.0.1:4173 npm run test:card-gallery:browser` against the isolated fixture export from the backend guide.
 
-## 14. Hero doodles disappearing as the window shrinks
+## 12. Hero doodles disappearing as the window shrinks
 
 `components/Hero.tsx` contains the five clickable chips and their destinations; `app/globals.css` has the final **Hero doodles** media rules. The field stays in its desktop position and hides progressively. There is no mobile doodle strip.
 
@@ -186,12 +186,25 @@ Click a colour swatch to open the palette. Drag within the saturation/brightness
 
 To change when a chip disappears, edit its `max-width` rule and matching `[data-hero-link="…"]` label. Decorative SVGs thin out at the same breakpoints; the whole field is hidden below 768 px. Keep the main headline, real card artwork and order button visible. Test by slowly narrowing the browser, then widening it again; chips should disappear without stacking below the hero or causing horizontal overflow.
 
-## 15. Checkout and final proof
+## 13. Checkout and final proof
 
-Physical previews now live only in the explicit custom editor and staff final-proof tools. Keep preset/upload checkout text-only; do not reintroduce the old Card/Profile tabs in `PreviewStep`. `SelectedCard.tsx` is a text summary. Digital-profile preview remains for profile orders.
+Generated physical canvases live in the explicit custom editor and staff final-proof tools. Upload slots show separate front/back image previews, and the gallery shows thumbnails; do not reintroduce the old Card/Profile tabs in `PreviewStep`. `SelectedCard.tsx` is a text summary. Digital-profile preview remains for profile orders.
 
 `DesignProofShare.tsx` creates a private review link/message. `CustomerDesignProof.tsx` shows the shared files and collects approval or all changes in one note. `PrivateFile.tsx` uses authenticated downloads. `lib/site.ts` allows a validated order ID through sign-in, without allowing arbitrary redirects. Client buttons are convenience only; migration 015 enforces owner/staff identity, current revision/version, payment and revision allowance on the server.
 
-Never reset `includedDesignEditUsed` when saving another proof. Additional preference edits need a manually verified, agreed payment recorded by staff; do not set a fee by changing display text. Existing orders keep legacy terms. See [backend guide](backendguide.md#13-private-account-proof-and-revision-policy-015-localunapplied) and [admin guide](adminguide.md).
+Never reset `includedDesignEditUsed` when saving another proof. Additional preference edits need a manually verified, agreed payment recorded by staff; do not set a fee by changing display text. Existing orders keep legacy terms. See [backend guide](backendguide.md#order-and-proof-invariants) and [admin guide](adminguide.md).
 
 Checks: `npm run test:design-review` is local SQL. For `npm run test:design-review:browser`, use the isolated fixture export described in the backend guide, never a production-configured export. It covers checkout, actual rendered private proofs, sign-in return, included/paid requests, approval and responsive hero hiding.
+
+
+## 14. Current story, checkout and brand assets
+
+- Preserve the four horizontal scenes and both existing story anchors. `TapDemo.tsx` reveals the profile only on card/phone contact; `QrScanDemo.tsx` scans the back. `ConnectedProfiles.tsx` puts founder/Umar on two phones meeting at the top. `StoryLabels.tsx` positions the tilted labels/arrows; verify their endpoints and paragraph clearance at 320, 390, 768 and 1440px. Respect keyboard, touch and reduced motion.
+- `components/order/OrderDoodles.tsx` supplies noninteractive decorations visible around the profile builder. Keep them out of input hit areas. Ordering has one Information control beneath navigation, a thicker progress bar, and the selected-card summary outside the progress header.
+- `ArtworkSlot.tsx`, `AvatarCropper.tsx`, `LinksEditor.tsx` and `PaymentStep.tsx` own front/back previews, crop confirmation, social normalization/extra-link fees and method-specific payment details. `/order/thank-you` links to the actual submitted order. Persist edits and private uploads safely through account saving/recovery.
+- `FeedbackForm.tsx` uses compact adjacent Streamline stars, default five; restore feedback through sign-in and store authenticated submissions privately. Do not invent public reviews.
+- Owner artwork sources: `assets/edgetapcard/maincard.png`, `Umarpic.jpeg` and `assets/Logo/`. Runtime assets include versioned main-card WebP, `public/umar-story.webp` and `public/card-previews/`. Keep source/license files. Run `npm run build:card-previews` after appropriate versioned card changes. `CardArtworkWarmup.tsx` preloads small chooser images from the homepage; preserve immutable cache/version consistency.
+- Navbar uses the supplied ET monogram. `node scripts/build-brand-icons.mjs` generates the stable public PNG/ICO/Apple icons. Metadata declarations live in `app/layout.tsx`; root ICO is in `public/`, avoiding an auto-generated competing `app/favicon.ico` link. Google search-result refresh requires recrawl and cannot be inferred from a local browser icon.
+- Staff A4 print sheet: `components/admin/AdminOrderSheet.tsx`, `lib/print-job.ts`. Final proof review remains the authority; never bypass payment/specification/current-revision checks for exports.
+
+Use [backendguide.md](backendguide.md) for server capability/price changes, [BUILD.md](BUILD.md) for release checks and [RELEASE_HISTORY.md](RELEASE_HISTORY.md) for verification limits. Generated screenshots/logs are disposable; source assets and test scripts are retained.

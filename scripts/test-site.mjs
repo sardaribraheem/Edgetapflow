@@ -26,7 +26,7 @@ try {
       await page.locator("h1, form").first().waitFor({state:"visible"});
       if (["/", "/pricing", "/privacy", "/terms", "/cookies"].includes(route)) {
         const canonical = await page.locator('link[rel="canonical"]').getAttribute("href");
-        assert.equal(new URL(canonical).href, new URL(`https://edgetapflow.web.app${route}`).href); checks++;
+        assert.equal(new URL(canonical).href, new URL(`https://edgetap.tech${route}`).href); checks++;
       } else {
         assert((await page.locator('meta[name="robots"]').getAttribute("content")).includes("noindex")); checks++;
       }

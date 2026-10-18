@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SUPPORT_URL } from "@/lib/site";
-export const metadata = { alternates: { canonical: "/terms" }, title: "Terms", description: "EdgeTap account, product and service information." };
+import { publicPageMetadata } from '@/lib/seo';
+export const metadata = publicPageMetadata('/terms', 'Terms', 'EdgeTap card prices, manual JazzCash payments, delivery, design approval, revision requests and personalized-card terms.');
 export default function PolicyPage() {
   return <main className="container-x max-w-3xl min-h-screen py-16">
     <Link href="/" className="underline">← Back to EdgeTap</Link>

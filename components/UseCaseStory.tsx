@@ -3,38 +3,13 @@
 import { useEffect, useRef } from "react";
 import { useCases } from "@/lib/data/content";
 import { gsap, ScrollTrigger, prefersReducedMotion } from "@/lib/animations";
-import EdgeTapCard from "./EdgeTapCard";
-import PhoneMockup from "./PhoneMockup";
-import PhoneProfile from "./PhoneProfile";
+import TapDemo from "./TapDemo";
+import QrScanDemo from "./QrScanDemo";
+import ConnectedProfiles from "./ConnectedProfiles";
 import {
-  ArrowDoodle,
   SparkleDoodle,
   StarDoodle,
 } from "./doodles";
-
-function PhoneScreen() {
-  return <PhoneProfile />;
-}
-
-// Physical card -> TAP -> phone sequence used inside each panel.
-function TapSequence() {
-  return (
-    <div className="story-tap mt-4 flex items-center justify-center gap-3 md:gap-6">
-      <div className="story-card w-[104px] rotate-[-6deg] md:w-[150px]">
-        <EdgeTapCard />
-      </div>
-      <div className="flex flex-col items-center gap-1">
-        <span className="grid h-9 w-9 place-items-center rounded-full bg-[var(--ink)] font-display text-[10px] font-bold uppercase text-[var(--cream)]">
-          Tap
-        </span>
-        <ArrowDoodle className="h-7 w-7 rotate-[-20deg] text-[var(--ink-faint)]" />
-      </div>
-      <PhoneMockup className="story-phone w-[96px] md:w-[150px]">
-        <PhoneScreen />
-      </PhoneMockup>
-    </div>
-  );
-}
 
 const toneText: Record<string, string> = {
   yellow: "text-[var(--ink)]",
@@ -50,11 +25,22 @@ export default function UseCaseStory() {
   const current = useRef(0);
   const counter = useRef<HTMLSpanElement>(null);
   const dots = useRef<HTMLDivElement>(null);
+  const stopMomentum = useRef<() => void>(() => {});
   const count = useCases.length + 1;
   useEffect(() => {
     const wrapper = section.current, view = viewport.current, row = track.current;
     if (!wrapper || !view || !row) return;
     let active = true;
+    let hashFrame = 0;
+    const alignHash = () => {
+      let id = '';
+      try { id = decodeURIComponent(window.location.hash.slice(1)); } catch { return; }
+      const target = document.getElementById(id);
+      if (!target) return;
+      stopMomentum.current();
+      if (['how-to-order', 'solutions'].includes(id)) window.scrollTo({ top:trigger.current?.start ?? wrapper.getBoundingClientRect().top + window.scrollY, behavior:'instant' });
+      else target.scrollIntoView({ behavior:'instant', block:'start' });
+    };
     const media = gsap.matchMedia();
     media.add({ motion: "(prefers-reduced-motion: no-preference)", room: "(min-height: 640px)" }, context => {
       if (!context.conditions?.motion || !context.conditions?.room) return;
@@ -74,18 +60,67 @@ export default function UseCaseStory() {
         },
       });
       trigger.current = tween.scrollTrigger || null;
-      void document.fonts.ready.then(() => { if (active) ScrollTrigger.refresh(); });
-      return () => { delete wrapper.dataset.pinned; trigger.current = null; row.scrollLeft = 0; };
+      // Add a decaying tail to discrete mouse-wheel steps. Trackpads keep
+      // their native momentum; touch and reduced-motion scrolling stay native.
+      let frame = 0, velocity = 0, lastTime = 0;
+      const stop = () => { cancelAnimationFrame(frame); frame = 0; velocity = 0; };
+      stopMomentum.current = stop;
+      const tick = (time: number) => {
+        const dt = Math.min(50, time - lastTime); lastTime = time;
+        const decay = Math.exp(-dt / 180);
+        const before = window.scrollY;
+        const activeTrigger = trigger.current;
+        if (!activeTrigger) return stop();
+        const next = Math.max(activeTrigger.start, Math.min(activeTrigger.end, before + velocity * 180 * (1 - decay)));
+        window.scrollTo({ top: next, behavior: "instant" });
+        velocity *= decay;
+        if (Math.abs(velocity) < .015 || next === activeTrigger.start || next === activeTrigger.end) return stop();
+        frame = requestAnimationFrame(tick);
+      };
+      const wheel = (event: WheelEvent) => {
+        const activeTrigger = trigger.current;
+        if (!activeTrigger || event.ctrlKey || event.shiftKey || !event.cancelable) return;
+        const delta = event.deltaY * (event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? window.innerHeight : 1);
+        const discrete = event.deltaMode !== 0 || (Number.isInteger(event.deltaY) && Math.abs(event.deltaY) >= 40 && !event.deltaX);
+        if (!discrete) return stop();
+        const position = window.scrollY;
+        if (position < activeTrigger.start || position > activeTrigger.end || (position <= activeTrigger.start && delta < 0) || (position >= activeTrigger.end && delta > 0)) return;
+        event.preventDefault();
+        if (Math.sign(delta) !== Math.sign(velocity)) velocity = 0;
+        velocity = Math.max(-3.2, Math.min(3.2, velocity + delta * 1.25 / 180));
+        if (!frame) { lastTime = performance.now(); frame = requestAnimationFrame(tick); }
+      };
+      wrapper.addEventListener("wheel", wheel, { passive: false });
+      window.addEventListener("pointerdown", stop);
+      window.addEventListener("keydown", stop);
+      document.addEventListener("visibilitychange", stop);
+      return () => {
+        stop(); stopMomentum.current = () => {};
+        wrapper.removeEventListener("wheel", wheel);
+        window.removeEventListener("pointerdown", stop);
+        window.removeEventListener("keydown", stop);
+        document.removeEventListener("visibilitychange", stop);
+        delete wrapper.dataset.pinned; trigger.current = null; row.scrollLeft = 0;
+      };
     }, section);
-    return () => { active = false; media.revert(); };
+    // Pin setup and font layout can interrupt the browser's initial smooth
+    // hash jump. Resolve both public anchors once that layout is stable.
+    void document.fonts.ready.then(() => {
+      if (active) { ScrollTrigger.refresh(); hashFrame = requestAnimationFrame(alignHash); }
+    });
+    window.addEventListener('hashchange', alignHash);
+    return () => { active = false; cancelAnimationFrame(hashFrame); window.removeEventListener('hashchange', alignHash); media.revert(); };
   }, [count]);
   const show = (index: number) => {
+    stopMomentum.current();
     const next = Math.max(0, Math.min(count - 1, index));
     if (trigger.current) window.scrollTo({ top: trigger.current.start + next / (count - 1) * (trigger.current.end - trigger.current.start), behavior: prefersReducedMotion() ? "instant" : "smooth" });
     else track.current?.scrollTo({ left: next * (viewport.current?.clientWidth || 0), behavior: "smooth" });
   };
   return (
     <section ref={section} id="solutions" aria-label="How it works" className="usecase-pin relative bg-[var(--paper-deep)]">
+      <span id="how-to-order" className="anchor-offset" />
+      <h2 className="sr-only">How it works</h2>
       <div ref={viewport} className="usecase-viewport">
       <div ref={track} className="usecase-track">
         {useCases.map((uc) => (
@@ -98,7 +133,7 @@ export default function UseCaseStory() {
               <div className="flex flex-col items-center gap-2">
                 <span className="eyebrow text-[var(--ink-soft)]">{uc.kicker}</span>
                 <span className={`font-display text-lg ${toneText[uc.tone]}`}>
-                  {uc.id === "scan" ? "Scan → Profile" : "Tap → Contact"}
+                  {uc.id === "scan" ? "Scan → Profile" : uc.id === "connect" ? "You → Connected" : "Tap → Contact"}
                 </span>
               </div>
 
@@ -109,7 +144,7 @@ export default function UseCaseStory() {
                 {uc.context}
               </p>
 
-              <TapSequence />
+              {uc.id === "meet" ? <TapDemo /> : uc.id === "scan" ? <QrScanDemo/> : <ConnectedProfiles/>}
             </div>
           </div>
         ))}

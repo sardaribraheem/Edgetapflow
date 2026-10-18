@@ -4,15 +4,15 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { auth, onAuthStateChanged, type User } from '@/lib/auth';
 import { usesSupabase } from '@/lib/backend';
-import { applicationPayload, suggestProfileHandle, blankApplication, getMyApplications, getMyOrders, getOrderSettings, supportsCardEditor, supportsProofReview, isOrderingUnavailable, saveApplicationDraft, submitApplication, wizardFromApplication, type OrderSettings, type WizardDraft } from '@/lib/application';
+import { deliverOrderNotifications, applicationPayload, suggestProfileHandle, blankApplication, getMyApplications, getMyOrders, getOrderSettings, supportsCardEditor, supportsProofReview, isOrderingUnavailable, saveApplicationDraft, submitApplication, wizardFromApplication, type OrderSettings, type WizardDraft } from '@/lib/application';
 import { uploadCustomDesign, uploadPaymentReceipt, uploadPublicAvatar } from '@/lib/upload-service';
 import { isSafeContactUrl } from '@/lib/links';
 import { calculateSubtotal } from '@/lib/data/order';
 import type { Profile } from '@/lib/data/profile';
 import { CardStep, ProfileStep, LinksStep, PreviewStep, DeliveryStep } from './OrderSteps';
-import { OrderProgress, DraftStatus, OrderNotes } from './OrderChrome';
-import SelectedCard from './SelectedCard';
-import InfoHelp from '@/components/ui/InfoHelp';
+import { OrderProgress, OrderNotes } from './OrderChrome';
+import { OrderInformation, OrderHelp as InfoHelp } from './OrderInformation';
+import PaymentStep from './PaymentStep';
 import { SUPPORT_URL } from '@/lib/site';
 import { findOrderSubmission } from '@/lib/data-service';
 import GuestOrderWizard from './GuestOrderWizard';
@@ -21,7 +21,7 @@ import {directLinkError} from '@/lib/nfc-link';
 import {physicalCardError} from '@/lib/physical-card';
 import {clearCardArtworkCache} from '@/lib/card-renderer';
 
-const STEPS=['Card','Profile','Links','Profile preview','Fulfillment','JazzCash','Submit'];
+const STEPS=['Card','Profile','Links','Profile preview','Fulfillment','Payment','Submit'];
 export default function OrderWizard(){
  const [user,setUser]=useState<User|null>(null),[checked,setChecked]=useState(false),[cloudId,setCloudId]=useState('');
  useEffect(()=>onAuthStateChanged(auth,value=>{setCloudId(new URLSearchParams(window.location.search).get('draft')||'');setUser(value);setChecked(true);}),[]);
@@ -82,7 +82,7 @@ function CloudOrderWizard(){
  useEffect(()=>{const warn=(e:BeforeUnloadEvent)=>{if(dirty||saving||uploading){e.preventDefault();e.returnValue='';}};window.addEventListener('beforeunload',warn);return()=>window.removeEventListener('beforeunload',warn);},[dirty,saving,uploading]);
  const patch=(p:Partial<WizardDraft>)=>{setDraft(d=>({...d,...p,...(p.displayName!==undefined&&d.product!=='direct_link'?{customer:{...d.customer,fullName:p.displayName}}:{})}));setDirty(true);setError('');};
  const upload=async(kind:'avatar'|'logo'|'artwork'|'backArtwork'|'receipt',file:File|null)=>{
-  if(!user)return;if(!file){if(kind==='logo'){setDraft(d=>{const physical={...d.physical};delete physical.logoUrl;return {...d,physical,logoPreview:undefined};});setDirty(true);}return;}
+  if(!user)return;if(!file){setDraft(d=>{if(kind==='logo'){const physical={...d.physical};delete physical.logoUrl;return {...d,physical,logoPreview:undefined};}if(kind==='receipt')return {...d,payment:{...d.payment,receiptUrl:undefined}};if(kind==='artwork')return {...d,customDesignUrl:undefined,customDesignPreview:undefined};if(kind==='backArtwork')return {...d,backDesignPreview:undefined,physical:{...d.physical,standardBack:false,backDesignUrl:undefined}};return {...d,avatarUrl:undefined,avatarPreview:undefined};});setDirty(true);return;}
   const uploadUid=user.uid;const uploadDraft=meta.current;setUploading(true);setError('');
   try{
    const path=(kind==='avatar'||kind==='logo')?await uploadPublicAvatar(user.uid,file):(kind==='artwork'||kind==='backArtwork')?await uploadCustomDesign(user.uid,file):await uploadPaymentReceipt(user.uid,file);
@@ -91,9 +91,9 @@ function CloudOrderWizard(){
   }catch(e){if(accountUid.current===uploadUid)setError(e instanceof Error?e.message:'Upload failed.');throw e;}
   finally{setUploading(false);}
  };
- const preview=useMemo<Profile>(()=>({username:draft.usernameSuggested||suggestProfileHandle(draft.displayName)||'yourprofile',displayName:draft.displayName||'Your Name',firstName:draft.customer.fullName.split(' ')[0]||'',lastName:'',title:draft.title,bio:draft.bio,location:'',avatar:draft.avatarPreview||draft.avatarUrl||'',logo:draft.logoPreview||draft.physical.logoUrl,links:draft.links.filter(l=>isSafeContactUrl(l.url))}),[draft]);
- const direct=draft.product==='direct_link',sequence=direct?[2,0,1,3,4,5,6]:[0,1,2,3,4,5,6],position=sequence.indexOf(step),steps=direct?['Link','Card','Details','Review','Fulfillment','JazzCash','Submit']:STEPS;
- const offerAvailable=(!draft.product||settings?.offerPrices?.[draft.product]===({direct_link:999,profile:1499})[draft.product])&&supportsCardEditor(settings,draft)&&supportsProofReview(settings,draft);
+ const preview=useMemo<Profile>(()=>({username:draft.usernameSuggested||suggestProfileHandle(draft.displayName)||'yourprofile',displayName:draft.displayName||'Your Name',firstName:draft.customer.fullName.split(' ')[0]||'',lastName:'',title:draft.title,bio:draft.bio,location:draft.location||'',avatar:draft.avatarPreview||draft.avatarUrl||'',logo:draft.logoPreview||draft.physical.logoUrl,links:draft.links.filter(l=>isSafeContactUrl(l.url))}),[draft]);
+ const direct=draft.product==='direct_link',sequence=direct?[2,0,1,3,4,5,6]:[0,1,2,3,4,5,6],position=sequence.indexOf(step),steps=direct?['Link','Card','Details','Review','Fulfillment','Payment','Submit']:STEPS;
+ const offerAvailable=(settings?.checkoutVersion||0)>=2&&(!draft.product||settings?.offerPrices?.[draft.product]===({direct_link:999,profile:1499})[draft.product])&&supportsCardEditor(settings,draft)&&supportsProofReview(settings,draft);
  const validate=(s:number)=>{
   if(s===1&&!draft.displayName.trim())return 'Add a name or main heading.';
   if(direct&&s===2)return directLinkError(draft.directLink||'');
@@ -101,7 +101,7 @@ function CloudOrderWizard(){
   if(s===0||s===3){const problem=physicalCardError(draft.physical,draft.cardTemplate,draft.customDesignUrl);if(problem)return problem;}
   if(s===0&&(!draft.size.trim()||(draft.cardTemplate==='upload'&&(!draft.customDesignUrl||draft.customDesignUrl==='pending'))))return 'Use the standard card size and upload your artwork if using your own design.';
   if(!direct&&s===1&&(!draft.displayName.trim()||(!!draft.usernameSuggested&&(!/^[a-z0-9._-]{1,30}$/.test(draft.usernameSuggested)||['.','..'].includes(draft.usernameSuggested)))))return 'Add your name. If requesting a handle, use letters, numbers, dots, hyphens or underscores.';
-  if(!direct&&s===2&&(!draft.links.length||draft.links.some(l=>!isSafeContactUrl(l.url))))return 'Add one to ten complete contact links.';
+  if(!direct&&s===2&&(!draft.links.length||draft.links.some(l=>!isSafeContactUrl(l.url))))return 'Add complete contact links before continuing.';
   if(s===4&&(!draft.customer.fullName.trim()||!/^\+?[\d ()-]{7,30}$/.test(draft.customer.phone)||(draft.deliveryMethod==='delivery'&&(!draft.customer.address.trim()||!draft.customer.city?.trim()))))return 'Enter your name, phone and delivery address/city where applicable.';
   if(s===5&&!draft.payment.receiptUrl)return 'Upload your private JazzCash payment proof before submitting.';
   return '';
@@ -124,10 +124,10 @@ function CloudOrderWizard(){
    if(submittingDraft!==meta.current)throw new Error('Account changed; reopen your own application.');
    if(!editable){
     const received=await findOrderSubmission(meta.current.id);
-    if(received&&submittingDraft===meta.current){router.push('/account/orders?order='+encodeURIComponent(received.id));return;}
+    if(received&&submittingDraft===meta.current){router.push('/order/thank-you?order='+encodeURIComponent(received.id));return;}
     throw new Error('Application changed; reload your saved draft before submitting.');
    }
-   await flush();if(submittingDraft!==meta.current)throw new Error('Account changed; reopen your own application.');const id=await submitApplication(submittingDraft.id,submittingDraft.version);if(submittingDraft!==meta.current)return;router.push('/account/orders?order='+encodeURIComponent(id));
+   await flush();if(submittingDraft!==meta.current)throw new Error('Account changed; reopen your own application.');const id=await submitApplication(submittingDraft.id,submittingDraft.version);if(submittingDraft!==meta.current)return;void deliverOrderNotifications({id} as import('@/lib/data/order').Order).catch(()=>{});router.push('/order/thank-you?order='+encodeURIComponent(id));
   }
   catch(e){setError((e instanceof Error?e.message:'Submission could not be confirmed.')+' Check My orders before paying again; retry uses this same application.');}
   finally{lock.current=false;setSubmitting(false);}
@@ -138,20 +138,19 @@ function CloudOrderWizard(){
  if(!ready||!settings)return <main className="min-h-screen px-4 py-28"><section className="card-paper mx-auto max-w-xl p-8"><p role={error?'alert':'status'}>{error||'Recovering your saved application…'}</p>{error&&<button className="btn btn-ink mt-4 px-5 py-3" onClick={()=>window.location.reload()}>Reload</button>}<Link href="/account/orders" className="block mt-4 underline">My orders</Link></section></main>;
  return <main className="order-builder min-h-screen bg-[var(--cream)] px-4 py-10 sm:py-14"><div className="mx-auto max-w-3xl">
   <div className="mb-6 flex flex-wrap justify-between gap-3"><Link href="/" className="font-display font-bold">EdgeTap</Link><Link href="/account/orders" className="underline">My orders & applications</Link></div>
-  <div className="builder-heading has-card"><SelectedCard draft={draft}/><OrderProgress steps={steps} step={position}/></div>
-  <DraftStatus status={saving?'Saving…':dirty?'Saving…':savedOnce?'Saved':'Ready'} disabled={saving||uploading||submitting} onSave={()=>{void flush().catch(()=>{});}}><p>Your application is private and saved to this account. You can return to it from My orders. Wait until saving finishes before leaving.</p></DraftStatus>
+  <div className="builder-heading"><OrderProgress steps={[...steps.slice(0,5),direct?'Save order':'Save profile',...steps.slice(5)]} step={position+(position>=5?1:0)}/></div>
+
   {saveError&&<div role="alert" className="mb-4 rounded-xl bg-[var(--coral)]/10 p-4"><p>Draft save failed: {saveError}</p><p>Do not close this page until saving succeeds. If another session changed this draft, reload to recover the saved version.</p><button className="mt-2 underline" onClick={()=>window.location.reload()}>Reload saved draft</button></div>}
   {error&&<p role="alert" className="mb-4 rounded-xl bg-[var(--coral)]/10 p-4">{error}</p>}
-  <fieldset disabled={submitting||uploading} className="min-w-0">
+  <fieldset disabled={submitting||uploading} className="min-w-0"><OrderInformation>
    {step===0&&<CardStep draft={draft} onChange={patch} onFileChange={(f,face)=>upload(face==='back'?'backArtwork':'artwork',f)}/>}
    {step===1&&<ProfileStep draft={draft} onChange={patch} onFileChange={f=>upload('avatar',f)} onLogoChange={f=>upload('logo',f)}/>}
    {step===2&&(direct?<DirectLinkStep draft={draft} onChange={patch}/>:<LinksStep links={draft.links} onChange={links=>patch({links})}/>)}
    {step===3&&<PreviewStep profile={preview} draft={draft} onChange={patch}/>}
    {step===4&&<DeliveryStep collectName={direct} customer={draft.customer} deliveryMethod={draft.deliveryMethod} pickupDetails={settings.pickupDetails} deliveryDetails={settings.deliveryDetails} onDeliveryMethodChange={deliveryMethod=>patch({deliveryMethod,customer:{...draft.customer,...(deliveryMethod==='nastp_pickup'?{address:'',city:'',postalCode:''}:{})}})} onChange={customer=>patch({customer:{...customer,email:user.email||''}})}/>}
-   {step===5&&!offerAvailable&&<p role="alert" className="card-paper p-6">This offer is temporarily unavailable for payment. Your design is saved. Contact EdgeTap.</p>}{step===5&&offerAvailable&&<section className="card-paper mb-6 p-7 sm:p-10"><h1 className="font-display text-3xl">Manual JazzCash payment</h1><label className="mt-6 block font-bold">Payment method<select aria-label="Payment method" className="mt-2 w-full rounded-xl border p-3" value="jazzcash" onChange={()=>{}}><option value="jazzcash">JazzCash</option></select></label><p className="mt-4 font-bold">JazzCash: {settings.jazzcashNumber}</p><p className="mt-3">Confirm the recipient and amount before transferring. Staff verifies your payment.</p><InfoHelp title="Manual payment verification" label="How payment works"><p>Confirm the JazzCash recipient and card amount with EdgeTap before transferring. Delivery costs extra: you pay the rider directly, separately from this card payment. EdgeTap books the rider when your card is ready and shows the actual fare on My orders. Uploading a screenshot does not verify payment. Staff check the actual card transfer manually.</p><p>{settings.hostingDetails}</p></InfoHelp><p className="mt-3 font-bold">Card subtotal: Rs. {calculateSubtotal(draft.quantity,draft.product||'standard').toLocaleString()}</p><p className="mt-2 text-sm">{draft.deliveryMethod==='delivery'?'Delivery extra, paid directly to the rider.':'NASTP pickup selected.'}</p><InfoHelp title="Payment and fulfillment"><p>{draft.deliveryMethod==='delivery'?'Delivery is additional. You pay the booked rider directly; the fare will appear on My orders when the card is dispatched.':settings.pickupDetails}</p></InfoHelp><a className="mt-3 block underline" href={SUPPORT_URL} target="_blank" rel="noreferrer">Confirm the quote and payment instructions</a><label className="mt-5 block font-bold">Payment receipt screenshot<input aria-label="Payment receipt screenshot" type="file" accept="image/jpeg,image/png,image/webp" onChange={e=>{void upload('receipt',e.target.files?.[0]||null).catch(()=>{});}} className="mt-2 block w-full text-sm"/></label><p className="mt-2 text-sm">{draft.payment.receiptUrl?'Private proof saved to your account. You can replace it while editing.':'JPEG, PNG or WebP, up to 8 MB. Proof is private to you and authorized EdgeTap staff.'}</p></section>}
-   {step===6&&<section className="card-paper mb-6 p-7 sm:p-10"><h1 className="font-display text-3xl">Submit your application</h1><dl className="mt-5 space-y-2"><div>Name: {draft.customer.fullName}</div>{direct?<div className="break-all">Link: {draft.directLink}</div>:<div>Profile: /u/{draft.usernameSuggested||suggestProfileHandle(draft.displayName)}</div>}<div>Card: {draft.cardTemplate} · {draft.size} · {draft.quantity}</div><div>Fulfillment: {draft.deliveryMethod==='nastp_pickup'?'NASTP Pickup':'Delivery'}</div><div>Payment: manual JazzCash, awaiting staff verification</div><div>Card subtotal: Rs. {calculateSubtotal(draft.quantity,draft.product||'standard').toLocaleString()}</div>{draft.deliveryMethod==='delivery'&&<div className="font-bold">Delivery is extra and paid directly to the rider. It is not included in the card subtotal. The fare is provided when EdgeTap books the rider.</div>}</dl><label className="mt-5 block font-bold">Customer notes<textarea aria-label="Customer notes" value={draft.customerNotes} maxLength={2000} onChange={e=>patch({customerNotes:e.target.value})} className="mt-2 w-full rounded-xl border p-3"/></label><p className="mt-4 text-sm">Payment awaits staff verification. Follow progress in My orders.</p><InfoHelp title="After you submit" label="What happens next?"><p>Submitting sends the saved application to the EdgeTap staff inbox. It does not confirm payment, acceptance, production or dispatch. Follow decisions and requests on My orders.</p></InfoHelp><button type="button" onClick={()=>{void submit();}} disabled={submitting||uploading} className="btn btn-ink mt-6 px-6 py-3">{submitting?'Submitting…':'Submit application'}</button></section>}
-   <OrderNotes/>
+   {step===5&&!offerAvailable&&<p role="alert" className="card-paper p-6">This offer is temporarily unavailable for payment. Your design is saved. Contact EdgeTap.</p>}{step===5&&offerAvailable&&<PaymentStep draft={draft} onChange={patch} onFile={file=>upload('receipt',file)}/>}
+   {step===6&&<section className="card-paper mb-6 p-7 sm:p-10"><h1 className="font-display text-3xl">Submit your application</h1><dl className="mt-5 space-y-2"><div>Name: {draft.customer.fullName}</div>{direct?<div className="break-all">Link: {draft.directLink}</div>:<div>Profile: /u/{draft.usernameSuggested||suggestProfileHandle(draft.displayName)}</div>}<div>Card: {draft.cardTemplate} · {draft.size} · {draft.quantity}</div><div>Fulfillment: {draft.deliveryMethod==='nastp_pickup'?'NASTP Pickup':'Delivery'}</div><div>Payment: {draft.payment.method==='bank'?'Meezan Bank':draft.payment.method==='easypaisa'?'Easypaisa':'JazzCash'} · awaiting verification</div><div>Card subtotal: Rs. {calculateSubtotal(draft.quantity,draft.product||'standard',draft.links.length).toLocaleString()}</div>{draft.deliveryMethod==='delivery'&&<div className="font-bold">Delivery is extra and paid directly to the rider. It is not included in the card subtotal. The fare is provided when EdgeTap books the rider.</div>}</dl><label className="mt-5 block font-bold">Customer notes<textarea aria-label="Customer notes" value={draft.customerNotes} maxLength={2000} onChange={e=>patch({customerNotes:e.target.value})} className="mt-2 w-full rounded-xl border p-3"/></label><p className="mt-4 text-sm">Payment awaits staff verification. Follow progress in My orders.</p><InfoHelp title="After you submit" label="What happens next?"><p>Submitting sends the saved application to the EdgeTap staff inbox. It does not confirm payment, acceptance, production or dispatch. Follow decisions and requests on My orders.</p></InfoHelp><button type="button" onClick={()=>{void submit();}} disabled={submitting||uploading} className="btn btn-ink mt-6 px-6 py-3">{submitting?'Submitting…':'Submit application'}</button></section>}
    <div className="order-navigation flex justify-between gap-3">{position>0?<button type="button" disabled={navigating} className="btn btn-ghost px-5 py-3" onClick={()=>{void move(sequence[position-1]);}}>← Back</button>:<span/>}{step<6&&<button type="button" disabled={navigating} className="btn btn-ink px-5 py-3" onClick={()=>{void move(sequence[position+1]);}}>Continue →</button>}</div>
-  </fieldset>{uploading&&<p role="status" className="mt-4">Uploading securely. Wait until the upload and draft save finish.</p>}
+   <OrderNotes/></OrderInformation></fieldset>{uploading&&<p role="status" className="mt-4">Uploading securely. Wait until the upload and draft save finish.</p>}
  </div></main>;
 }

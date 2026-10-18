@@ -1,4 +1,5 @@
 import Link from "next/link";
+export const metadata = {title:'Page not found',robots:{index:false,follow:false}};
 export default function NotFound() {
   return <main className="min-h-screen grid place-items-center p-6 text-center"><div>
     <p className="eyebrow">EdgeTap · 404</p><h1 className="font-display text-4xl mt-4">Page not found</h1>

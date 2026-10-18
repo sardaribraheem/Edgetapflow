@@ -1,71 +1,66 @@
 # EdgeTap business guide
 
-**Current launch authority: [LAUNCH_STATUS.md](LAUNCH_STATUS.md). Updated 15 October 2026.** The owner is prioritizing a small, personally managed physical-card launch at **NASTP NIIT**. A physical sample is obtained; it has a fading-front-print defect. Suppliers are still being compared. **App work is deferred**, including its NFC prototype.
+Updated 18 October 2026. [Launch status](LAUNCH_STATUS.md) records readiness; this guide records commercial decisions and operating context.
 
-## Offer and current rules
+## Brand and offers
 
-| Item | Current recorded decision |
+EdgeTap — **One tap. Infinite possibilities.** Help people share useful contact details through a physical card and an updateable digital destination. Initial focus: Pakistan, especially Lahore, with a personally managed launch at NASTP NIIT. Brand/trademark clearance remains unresolved before major investment.
+
+| Offer | Current price | Owner-confirmed standard price | Scope |
+|---|---:|---:|---|
+| Link Card | Rs. 999/card | Rs. 1,399 | One customer-supplied existing public URL |
+| EdgeTap Profile | Rs. 1,499/card | Rs. 1,899 | Editable profile; first ten links included, each extra link Rs. 50 once per profile, not per card |
+| Website + four cards | Rs. 29,999 | Rs. 36,999 | Contact-only agreed website/portfolio scope; first year included, Rs. 3,000 annually from year two; cards now or within first year |
+
+The owner explicitly confirmed the standard prices for crossed-out comparisons. Existing submitted prices/terms remain unchanged. Delivery is extra and paid directly to the rider. Profile links have a technical limit of 100; do not advertise unlimited links.
+
+Cards are PVC NFC, **85.60 × 53.98 mm**; Wood is a printed style. Identical cards in one order share one design and destination. QR is optional and must encode the same destination as NFC. Keep public handles stable and existing printed URLs working. No universal phone-compatibility or instant-open promise.
+
+Customers may choose a preset, customize both faces or upload separate front/back artwork. Final proof approval is separate from checkout. Designer/custom/bulk work requires an agreed scope/quote; the designer URL and public designer fee remain unset. An internal Rs. 5,000 design-fee idea was never a confirmed public offer.
+
+## Payment, delivery and profile terms
+
+| Method | Receiving details |
 |---|---|
-| Link Card | Rs. 999/card; opens one customer-supplied public URL |
-| EdgeTap Profile | Rs. 1,499/card; editable profile with up to ten links |
-| Physical format | PVC NFC, 85.60 × 53.98 mm; identical cards in one order share one design/destination |
-| Design | Customize front/back text, fonts, colours and gradients; starter presets; or two private front/back uploads. Optional QR on all new designs; review current proof |
-| Payment | Manual JazzCash 0304 4149674; verify actual funds rather than the screenshot |
-| Delivery | Separate; book when ready and record actual fare/message; customer pays rider directly |
-| Pickup copy | NASTP Delta 3, Mon–Fri, 9 am–5 pm. Launch focus at NIIT does not automatically change customer pickup policy |
-| Profile | Owner edits permitted public details; stable handle; no separate hosting/update fee for now, no lifetime/unlimited promise |
-| Support | WhatsApp +92 304 414 9674; public-email question remains separately documented |
+| JazzCash | 03044149674 |
+| Easypaisa | 03044149674 |
+| Meezan Bank | IBAN PK46MEZN0000300116179673 |
 
-Keep designer/custom/bulk and existing website-package work contact-only with a confirmed scope/quote. Do not invent a designer fee or enable an app/digital subscription. See [Business configuration](BUSINESS_CONFIGURATION.md).
+Recipient for all three: **Muhammad Ibraheem Anwar**. Staff verifies actual funds manually; a receipt screenshot is not payment confirmation. No automatic gateway or courier integration exists.
 
-## Expense and stock record
+Current pickup copy: **NASTP Delta 3, Monday–Friday, 9 am–5 pm Pakistan time**. Contact after reaching when ready. NIIT is the launch focus, not an approved pickup-location/hours change. Book delivery manually when ready, record actual fare/message and have the customer pay the rider directly. No invented flat fee, service radius or dispatch deadline.
 
-| Item | Cost | State |
+Standard profile hosting/updates have no separate fee for now; hosting duration and future-change notice remain unresolved. Do not promise lifetime hosting or unlimited free updates. Owners can edit permitted public fields; handles and ownership stay fixed. Optional public city/location is separate from private delivery addresses. Portrait and logo are public when uploaded to the avatars bucket; receipts/artwork/proofs remain private.
+
+One physical-design revision request is included for new orders, with all changes in one note. Further preference revisions need a separately agreed fee and actual transfer verification before staff grants one additional request. Regenerating a proof never resets the allowance. Existing orders retain legacy terms; digital profile edits are separate. Major redesigns need a designer.
+
+Private account-proof sharing sends no email and requires explicit approval of the current revision, with no timeout. The optional email channel starts its ten-hour no-response window only after actual provider acceptance and still requires proper reply/inbox checks. Transport is currently inactive.
+
+Owner policy: personalized cards are non-returnable/non-refundable after production starts except applicable-law requirements; assess damage, defects, EdgeTap printing errors or the wrong supplied card. Customer-provided errors do not imply an automatic remedy. This is business direction needing appropriate review, not a verified legal exemption. Clarify pre-production cancellation, reporting/remedy process, coverage, privacy/retention and hosting notices before expanding.
+
+Support: **WhatsApp +92 304 414 9674**. Public email is the approved `SUPPORT_EMAIL` in `lib/site.ts`; changing it needs owner confirmation. Staff authorization uses protected UUID membership, never an email address alone.
+
+## Expenses, stock and contribution
+
+| Item | Amount | Classification |
 |---|---:|---|
-| Obtained sample blank | Rs. 350 | Owner-confirmed sample expense |
-| Sample/current printing | Rs. 150/card | Sample expense/current rate; quality not approved by price alone |
-| Obtained sample total | **Rs. 500** | In hand; fading front remains open |
-| Temu order: 18 advertised NTAG215 cards | **Rs. 2,300 total; Rs. 127.78/card** | Ordered, before any additional charges; not established as delivered, genuine specification or usable stock |
-| Small envelope | Rs. 10–20/card | Estimate being considered; not a confirmed purchased cost |
-| Confirmed offers | **Link Card Rs. 999; EdgeTap Profile Rs. 1,499** | Released 16 October 2026; delivery separate |
+| Obtained sample blank | Rs. 350 | Owner-reported actual expense |
+| Sample/current printing | Rs. 150/card | Reported actual sample expense/current rate; quality not approved by price |
+| Obtained sample total | Rs. 500 | In hand; fading front needs correction |
+| Temu: 18 advertised NTAG215 cards | Rs. 2,300 total | Ordered; arrival/specification/usability unverified |
+| Temu order-price unit cost | Rs. 127.78 | Before extra charges and rejects |
+| Small envelope | Rs. 10–20/card | Estimate, not a recorded purchase |
 
-Sample remainder before packaging/other costs: Link Card **Rs. 499**, EdgeTap Profile **Rs. 999**. With estimated envelope: **Rs. 479–489** or **Rs. 979–989** respectively, before remaining costs.
+Sample-cost remainder before packaging/other costs: **Rs. 499 Link Card / Rs. 999 Profile**. With estimated envelopes: Rs. 479–489 / Rs. 979–989. These are not net profit.
 
-If the Temu stock arrives and is usable, its conditional blank + printing + estimated envelope cost is **Rs. 287.78–297.78**, with **Rs. 701.22–711.22** remaining before extra charges and other costs. This is a scenario, not proven profit. Use `(order price + actual extra charges) ÷ usable cards` for actual blank cost. Track rejects, reprints, payment costs, support/programming/QA time, marketing/software and applicable taxes. Rider fare is separate while the customer pays the rider directly.
+If all Temu cards arrive usable, blank + print + estimated envelope is Rs. 287.78–297.78, leaving Rs. 701.22–711.22 on a Link Card before other costs. Use `(actual batch price + extra charges) / usable cards` after intake. Track rejects/reprints, payment costs, support/programming/QA time, marketing/software and applicable taxes. Rider fare remains separate.
 
-## Before the personally managed pilot
+## Launch and repeatable operations
 
-1. Correct/replace the fading front and inspect the result. Record only actual printer requirements, costs and approvals. RGB exports are not certified CMYK/PDF-X.
-2. Establish real ordinary-customer signup/confirmation/recovery evidence. Current SMTP provider configuration is unverified, not automatically absent because an old report says pending.
-3. The private account-proof flow (015) is released; establish actual customer approval through My orders during the consenting pilot. The admin sends the prepared review link manually; account sharing itself sends nothing and never auto-approves. If using advanced email review, independently establish real transport and monitored replies; queueing is not sending.
-4. Confirm remaining delivery coverage/cancellation/defect/retention terms without inventing new promises. Any NIIT pickup-location/hours change needs separate confirmation.
-5. Separately authorize one consenting real customer walkthrough and record actual payment, private-file access, customer profile ownership, proof review, printing/NFC/QR QA and handoff.
+Follow the [admin guide](adminguide.md): review → actual funds → accept specification → confirm URL or publish correct profile → save/share current proof → owner approval → printer package → print → NFC programming → spelling/finish/NFC/QR QA → pickup/rider → confirmed handoff. Advance status only after actual work. Printer briefs contain print details, not receipts or delivery addresses. RGB exports are not certified CMYK/PDF-X.
 
-Website publication, founder rendering and migrations through 011 are resolved. Neither the app nor new-domain/billing work is needed to resolve those issues. See [Operational fixes for review](OPERATIONAL_FIXES_FOR_REVIEW.md) before any production action.
+Begin with a few orders within observed capacity. Demonstrate the real tap/QR outcome; test channels such as local professionals, students, events and referrals before spending. Ask which contact links customers use, what stops them ordering and whether the actual experience meets expectations. Request permission for honest reviews/photos; invent no testimonials, customer counts, urgency or success metrics.
 
-## Repeatable order process
+Compare supplier samples for actual chip/writability, print consistency, file/bleed/orientation requirements, turnaround and defect handling. Approve the fading sample correction first. Reconcile unfinished paid orders daily; review contribution, defects and support weekly. Record enquiries, paid conversion, actual fulfillment time, repeat/referral orders and failures using real evidence. Expand only when fulfillment and contribution are reliable.
 
-`Review → verify actual transfer → accept specification → confirm direct link OR publish correct profile → save current proof → make available privately → manually share review link → customer approves current revision → printer files → print → NFC programming → QR/NFC/spelling QA → pickup/rider → confirm handoff`
-
-The sample's homepage destination was deliberate. Another card programmed for the owner's page worked according to the owner. Some phones used QR; models are unspecified. This is useful limited evidence, not a complete paid-order test or universal compatibility claim. Customer cards must encode their agreed existing link (Link Card) or `/u/<handle>` (EdgeTap Profile), with a matching QR if enabled.
-
-Use [Admin guide](adminguide.md) for buttons. Keep printer briefs limited to print details; receipts and delivery addresses remain private. Stage updates follow actual operator work.
-
-## Small launch and supplier comparison
-
-Begin with a few orders within observed capacity, using a real tap/scan demonstration at NASTP NIIT. No sales count, dispatch deadline or universal phone support is promised. Ask customers for honest feedback and permission before publishing their photos/reviews.
-
-Compare supplier sample/batch prices, NFC type/writability, print/finish consistency, accepted RGB files, bleed/orientation requirements, actual turnaround and defect handling. Current printing rate is known; quality consistency and usable Temu landed cost still need evidence. Do not buy more stock as part of this documentation audit.
-
-For each order record reference, actual funds, quantity, costs, proof revisions, time, defects, handoff and support. Reconcile unfinished paid orders daily and review contribution/defects weekly. Expand only after reliable fulfillment and positive contribution are demonstrated.
-
-## Card offers update — 15 October 2026
-
-The owner confirmed **Link Card Rs. 999**, **EdgeTap Profile Rs. 1,499**, and **Website + four cards Rs. 29,999**, delivery separate. This update is released on 16 October 2026. **Migrations 001–015 are applied and the matching Firebase frontend is live.** [Release evidence](RELEASE_2026-10-16.md) distinguishes browser/SQL verification from the still-needed real customer and physical pilot. Do not rerun applied migrations. The new checkout checks offer/editor support and private-proof capability before payment. Existing submitted Rs. 999 orders keep their agreed price. [Card offers guide](CARD_PRODUCTS.md).
-
-
-## Physical-design review policy — owner update, 16 October
-
-New orders include one revision request: the customer puts every requested change in one note, staff revises and shares a fresh proof for approval. Extra preference edits require an agreed fee and actual payment verification before granting one additional request. No fixed fee or unlimited edits are promised. Major redesigns go to a graphic designer. Existing orders keep their agreed terms; EdgeTap errors/defects remain covered by the existing defect process. Digital-profile editing is separate from physical-design revisions.
-
-Physical-card previews are removed from checkout; the explicit Customize popup still has its front/back editor. Profile-product checkout retains the digital-profile preview. Only the saved, privately shared admin proof is the final design for approval.
+Future menus, review cards, attendance, teams, analytics and companion-app ideas are in [ROADMAP.md](ROADMAP.md). They are not launch-ready offers. No stock purchase, policy change or service activation is implied by this guide.

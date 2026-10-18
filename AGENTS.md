@@ -8,48 +8,42 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-# EdgeTap engineering and launch rules
+# EdgeTap engineering rules
 
-Current evidence and owner scope: [docs/LAUNCH_STATUS.md](docs/LAUNCH_STATUS.md). Physical launch at NASTP NIIT is the priority. App work, including its NFC prototype, is deferred until explicitly resumed. Documentation/audit work authorizes no production operation or customer-policy change.
+Read [docs/LAUNCH_STATUS.md](docs/LAUNCH_STATUS.md) for current service state and [docs/README.md](docs/README.md) for maintained guides. Physical-card launch at NASTP NIIT is the priority. Companion app work, including its NFC prototype, is deferred until explicitly resumed. Documentation alone grants no production-operation permission.
 
-## Architecture
-- Next.js App Router / React / Tailwind; static export in `out/`, Firebase Hosting project `edgetapflow`.
-- Supabase Auth, PostgreSQL/RLS/RPCs and Storage are the application backend. Firebase is Hosting only. There is no automatic payment gateway, final-design email worker or courier integration.
-- `app/`: routes/metadata; `components/`: UI and staff/order/profile screens; `lib/`: Supabase services, validation and domain models, with explicitly selected legacy Firebase adapters; `scripts/`: production/browser/SQL verification.
-- `/u/ibraheem` is the founder example. Hosting rewrites other `/u/*` requests to `/profile.html`, whose client reads the incoming pathname. Never resolve unknown handles to founder content. Verify on Hosting preview as well as the local QA server.
-- NFC programming is a manual production task; QR and NFC both encode the confirmed direct link (Link Card) or `profileUrl` from `lib/site.ts` (EdgeTap Profile). Handles cannot be renamed without implementing redirects for existing cards.
+## Architecture and current release
 
-## Commands
-- `npm ci`, `npm run dev`.
-- `npm run lint`, `npm run typecheck`.
-- `npm run build` (default Turbopack); `npm run build -- --webpack` is the supported fallback when this machine prevents Turbopack worker port binding.
-- Static exports cannot use `next start`: `PORT=4173 npm run serve:qa`, then `QA_BASE_URL=http://127.0.0.1:4173 npm run test:browser`.
-- Firebase CLI + Java 21+: `npm run test:rules` (rule tests and actual-service integration tests against `demo-edgetap-qa`).
-- `node scripts/check-live-services.mjs` performs read-only service probes, without logging configuration values.
-- `node scripts/diagnose-live-profile.mjs` traces a fresh unauthenticated production browser and sanitized service errors; no submissions.
+- Next.js App Router/React/Tailwind static export to `out/`; Firebase project `edgetapflow` is Hosting only. Supabase project `dxyxvervvlxhwwbcbttd` handles Auth/PostgreSQL/RLS/RPCs/Storage. Preserve the architecture; avoid unnecessary dependencies or rewrites.
+- Latest recorded live Hosting: `f5c31e156838a13f`, 18 October 2026 at 9:01:06 pm Pakistan time, `https://edgetap.tech`. Hosted history: **001–015 plus 017/018**. **016 remains unapplied**. Never edit/rerun applied migrations or blindly push optional 016. See [release history](docs/RELEASE_HISTORY.md).
+- Checkout version 2 has three manual payment methods, paid extra links and private authenticated feedback. Email worker/provider secrets/scheduler remain inactive, `emailNotificationsEnabled=false`. Queueing/private sharing sends no email and starts no timer.
+- Founder `/u/ibraheem` is an example. Hosting rewrites other `/u/*` to `/profile.html`, whose client reads the requested path. Unknown handles must never show founder content. Profiles/private routes remain noindex and outside the sitemap; authorization is independent of indexing rules.
 
-## Configuration and deployment
-- `.env.local` supplies `NEXT_PUBLIC_DATA_BACKEND=supabase`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` and the canonical app origin. Values are embedded at build time; rebuild after changing them. Legacy Firebase variables are needed only if Firebase is explicitly selected for development. No private credentials in NEXT_PUBLIC variables.
-- Confirmed canonical origin: `https://edgetapflow.web.app`; optional `NEXT_PUBLIC_APP_URL` must be an HTTPS origin. Do not switch domains without owner approval.
-- Deploy the reviewed `out/` to Firebase Hosting only with owner authorization. `npm run deploy:hosting` rebuilds and checks the export before publishing to `edgetapflow`. Do not deploy Firebase data-service rules for the Supabase workflow. See `docs/LAUNCH_STATUS.md`; archived reports preserve history and are not proof of current service state.
-- Preserve the generated Next.js instruction block above.
-- Do not enable billing/payment methods, change Firebase Auth/Firestore/Storage, or apply Supabase schema/data changes without corresponding owner authorization. Firestore billing is not a prerequisite for the current Supabase app. A Hosting release needs Google/Firebase CLI permission, independently of Supabase account login.
-- Build guest cards on-device and require Supabase account saving before private payment submission. Preserve review/payment/printing guards. A design-proof queue entry is not sent email; the ten-hour window begins only after actual transport confirmation. Private account-proof sharing (015, applied 16 October 2026) sends no mail and never auto-times out; printing requires explicit current-revision owner approval. New orders have one included revision request; regeneration never resets it. Extra preference revisions require staff recording the separately agreed, actually verified payment. Existing orders keep their agreed legacy terms. The former instant-checkout flag is no longer used.
+## Commands and configuration
 
-## Coding and security
-- Preserve the existing architecture; avoid unnecessary dependencies/rewrites. Use TypeScript, shared models and existing visual styles.
-- Treat Firestore data as untrusted. Validate link schemes at input and rendering; escape contact-file fields. Consumers see actionable errors, not raw SDK messages/configuration.
-- Supabase RLS/RPC/Storage policies enforce the current staff/private-order/price/payment/owner boundaries; Firestore rules apply only to explicitly selected legacy development. A signed-in customer is not staff.
-- Reserve profile + handle inside a transaction, re-read the order and reject collisions or stale fulfillment. Never overwrite an existing profile during order fulfillment.
-- Private artwork/receipts store Storage paths and use authenticated download; avatars are public. Do not expose customer addresses or receipts in public profiles.
-- Never log secrets, passwords, private customer data or signed upload links; do not commit diagnostic logs or local worktrees.
-- Keep owners/handles/lifecycle fields immutable to customer edits. Do not bypass payment verification, NFC programming or QA stages.
+- `npm ci`, `npm run dev`; `npm run typecheck`, `npm run lint`.
+- `npm run build` uses Turbopack; `npm run build -- --webpack` is the fallback for restricted worker ports. Run `npm run check:release` on the actual reviewed export.
+- Static export: `PORT=4173 npm run serve:qa`; do not use `next start`. Read [backend testing guidance](docs/backendguide.md) before workflow tests. Isolated fixture exports must never be deployed. Older browser suites may have stale UI or clean-project assumptions.
+- `.env.local` supplies public Supabase URL/publishable key, selected backend and preferred origin; values embed at build time. No service-role/mail/operator credentials in `NEXT_PUBLIC_*`, logs, reports or Git.
+- Preferred origin is `https://edgetap.tech`; preserve both Firebase hosts, old Auth callbacks, saved NFC destinations and approved snapshots. Never bulk-rewrite printed-card URLs. Domain/Auth console steps are in [BUILD.md](docs/BUILD.md).
+- Deploy the reviewed `out/` to Firebase Hosting only with owner authorization. `npm run deploy:hosting` rebuilds/checks/publishes to `edgetapflow`. Schema/data/service changes need corresponding authorization. Do not deploy Firebase data-service rules for the Supabase flow or enable billing as a workaround.
+- Preserve the generated Next.js instruction block above. Read the relevant installed Next.js docs before code changes.
 
-## Commercial and launch rules
-- Brand: EdgeTap; tagline: “One tap. Infinite possibilities.” Link Card: Rs. 999; EdgeTap Profile: Rs. 1,499; Website + Cards: Rs. 29,999. Optional QR; identical cards in one order share one design/destination. Migrations 001–015 are applied; the new offers/editor/private-proof frontend was released 16 October 2026. See docs/RELEASE_2026-10-16.md. Never rerun or edit an applied migration.
-- Primary support: WhatsApp +92 304 414 9674. Confirmed payment: JazzCash 0304 4149674 only.
-- Pakistan-focused delivery; no invented charges, dispatch promises, pickup location, refunds, lifetime hosting or unlimited/free update promises. Missing policies remain launch blockers until the owner decides.
-- Owner-confirmed personalized-card policy: non-returnable/non-refundable after production starts except required law; assess damage, defects, EdgeTap printing errors or wrong supplied card. No automatic remedy for customer-provided errors. This is business-policy copy requiring legal review, not a verified legal exemption.
-- Do not advertise unimplemented attendance, restaurant menu, team, analytics, enterprise or automated email features. No fake reviews/customer counts.
-- Preserve user work. Use a dedicated branch; do not publish or overwrite live data during QA.
-- Never claim completion without verification. Report what was tested, what was simulated and what remains unverified. Passing builds do not prove a working checkout or physical card.
+## Data and production safeguards
+
+- Use TypeScript/shared models/styles. Validate untrusted data/link schemes at input and rendering; escape contact-file fields and show sanitized actionable errors.
+- RLS/RPC/Storage enforce staff/owner/private-order/price/payment boundaries. Signup does not confer staff rights. Never bypass a guard or use browser service-role credentials.
+- Reserve profile/handle in a transaction, re-read versions and reject collisions/stale fulfillment. Never overwrite another profile. Keep handle/owner/lifecycle immutable to customer edits.
+- Private artwork/receipts/proofs use Storage paths and authenticated downloads; avatars/logos are public with disclosure. Do not expose addresses, receipts, private notes or signed upload links.
+- Printing requires actual verified funds, accepted specification, confirmed destination, printer settings and current-proof approval. NFC programming and physical QA/handoff are manual actual stages, not inferred from clicks or simulations.
+- Private account proof sharing requires explicit current-revision approval and has no timeout. Optional email starts its ten-hour window only after actual provider acceptance; no-response handling requires real reply/inbox checks. Never fake a send/provider ID.
+- New orders include one consolidated revision request; regeneration/channel changes never reset it. Further preference edits require an agreed, actually verified payment recorded privately. Preserve legacy order terms. Digital profile edits do not rewrite approved physical snapshots.
+- Preserve user work and use a dedicated branch. No live data writes during QA without scoped authorization. Keep diagnostics/generated screenshots/builds/private backups ignored. Never commit customer data or credentials.
+
+## Commercial rules and evidence
+
+- Brand EdgeTap; tagline “One tap. Infinite possibilities.” Current prices: Link Rs. 999, Profile Rs. 1,499, Website + four cards Rs. 29,999. Owner-confirmed standards: Rs. 1,399 / 1,899 / 36,999 for crossed-out comparisons. First ten profile links included; Rs. 50 per extra link once per profile, not per card. Technical limit 100.
+- JazzCash/Easypaisa 03044149674; Meezan IBAN PK46MEZN0000300116179673. Recipient: Muhammad Ibraheem Anwar. Verify actual transfer manually. Support WhatsApp +92 304 414 9674.
+- Identical cards in one order share one design/destination; QR optional, same confirmed URL as NFC. PVC 85.60 × 53.98 mm. Preserve standard pickup Delta 3 Mon–Fri 9–5 PKT; NIIT launch focus is not a pickup-policy change. Delivery is separate, rider-direct actual fare.
+- Do not invent dispatch/coverage/refund/hosting/update promises, fees, testimonials, analytics or unimplemented app/team/attendance/menu features. Personalized-card policy and remaining legal/retention/hosting questions are in [businessguide.md](docs/businessguide.md).
+- Never claim actual customer success from a build, mock, queue or anonymous denial. Distinguish what was tested, simulated and still unverified: hosted signed-in uploads, real email, funds and full physical fulfillment remain separate work.

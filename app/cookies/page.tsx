@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { SUPPORT_URL } from "@/lib/site";
-export const metadata = { alternates: { canonical: "/cookies" }, title: "Cookies & Browser Storage", description: "EdgeTap account, product and service information." };
+import { publicPageMetadata } from '@/lib/seo';
+export const metadata = publicPageMetadata('/cookies', 'Cookies & Browser Storage', 'How EdgeTap uses browser storage for sign-in and unfinished card drafts. No advertising or analytics trackers are included.');
 export default function PolicyPage() {
   return <main className="container-x max-w-3xl min-h-screen py-16">
     <Link href="/" className="underline">← Back to EdgeTap</Link>

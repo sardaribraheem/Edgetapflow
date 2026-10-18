@@ -1,3 +1,4 @@
+import { extraLinkCost } from '../checkout';
 // Order / fulfillment domain data, kept separate from presentation.
 // Shared by the /order wizard, the admin dashboard, and lib/firestore.ts.
 
@@ -20,7 +21,11 @@ export type CardTemplate = {
   description: string;
 };
 
-export const CARD_TEMPLATES: CardTemplate[] = ['custom','simple','lux','wood','inverted'].map(id=>{const t=templates.filter(t=>t.id===id).sort((a,b)=>b.version-a.version)[0];return {id:t.id,name:t.name,tagline:t.tagline,tone:t.tone,description:t.description,preview:id==='custom'?'/card-designs/maincard.png':('preview' in t?t.preview:undefined)};}).concat([{id:'upload',name:'Upload a design',tagline:'Your front & back',tone:'bg-[--sky-soft]',description:'Upload separate front and back artwork for review.',preview:undefined}]);
+const previewNames: Record<string, string> = { custom:'maincard', simple:'photography', lux:'studio', wood:'botanical', inverted:'honeycomb' };
+export const CARD_TEMPLATES: CardTemplate[] = ['custom','simple','lux','wood','inverted'].map<CardTemplate>(id => {
+  const t = templates.filter(t => t.id === id).sort((a,b) => b.version-a.version)[0];
+  return { id:t.id, name:t.name, tagline:t.tagline, tone:t.tone, description:t.description, preview:'/card-previews/'+previewNames[id]+'-v'+(id==='custom'?2:1)+'.webp' };
+}).concat([{id:'upload',name:'Upload a design',tagline:'Your front & back',tone:'bg-[--sky-soft]',description:'Upload separate front and back artwork for review.',preview:undefined}]);
 
 // The plan (from /pricing) that seeded an order.
 export type OrderPlanId = "standard" | "direct_link" | "profile" | "business" | "enterprise";
@@ -48,6 +53,7 @@ export type OrderCard = {
 
 // What the customer built during onboarding (draft of the future profile).
 export type ProfileDraft = {
+  location?: string;
   avatarUrl?: string; // Storage ref — "https://" placeholders are treated as empty
   displayName: string;
   title?: string;
@@ -57,7 +63,7 @@ export type ProfileDraft = {
 };
 
 // ── Payment (state kept separate from order/fulfillment) ──────────
-export type PaymentMethod = "raast" | "easypaisa" | "jazzcash";
+export type PaymentMethod = "bank" | "easypaisa" | "jazzcash";
 export type PaymentStatus =
   | "pending" // online chosen but no provider integrated yet
   | "paid"
@@ -67,7 +73,7 @@ export type PaymentStatus =
   | "cancelled";
 
 export type PaymentInfo = {
-  method: "raast" | "easypaisa" | "jazzcash";
+  method: "bank" | "easypaisa" | "jazzcash";
   status: PaymentStatus;
   receiptUrl?: string;
   reference?: string;
@@ -180,7 +186,7 @@ export type Order = {
   fulfillment: FulfillmentInfo;
   profileId?: string; // set when admin creates the client profile
   usernameFinal?: string; // chosen handle on /u/
-  nfcUrl?: string; // https://edgetapflow.web.app/u/<username>
+  nfcUrl?: string; // Stored confirmed URL: preserve historical hosts and approved print snapshots.
   createdAt: number; // epoch ms
   updatedAt: number; // epoch ms
 };
@@ -196,7 +202,7 @@ export const LINK_PRESETS: { type: string; label: string }[] = [
   { type: "facebook", label: "Facebook" },
   { type: "tiktok", label: "TikTok" },
   { type: "youtube", label: "YouTube" },
-  { type: "portfolio", label: "Website" },
+  { type: "github", label: "GitHub" },
 ];
 
 // Default accents for the common link types (matches ProfilePage icons).
@@ -221,6 +227,6 @@ export const CARD_PRICES = {direct_link:999,profile:1499,standard:999} as const;
 export const CARD_PRICE = CARD_PRICES.profile;
 export const cardPrice = (product: CardProduct | 'standard' = 'profile') => CARD_PRICES[product];
 
-export function calculateSubtotal(quantity: number, product: CardProduct | 'standard' = 'profile'): number {
-  return cardPrice(product) * Math.max(1, Math.min(20, Math.floor(quantity)));
+export function calculateSubtotal(quantity: number, product: CardProduct | 'standard' = 'profile', linkCount = 0): number {
+  return cardPrice(product) * Math.max(1, Math.min(20, Math.floor(quantity))) + (product === 'direct_link' ? 0 : extraLinkCost(linkCount));
 }

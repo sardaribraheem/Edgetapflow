@@ -4,7 +4,7 @@ import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { gsap, prefersReducedMotion } from "@/lib/animations";
 import {ibraheemProfile} from '@/lib/data/profile';
-import EdgeTapCard from "./EdgeTapCard";
+import CardStack from "./CardStack";
 import DoodleField from "./DoodleField";
 import {
   NfcWaves,
@@ -117,14 +117,6 @@ export default function Hero() {
 
       {/* ===== Center content ===== */}
       <div className="container-x relative z-10 flex flex-col items-center text-center">
-        {/* badge */}
-        <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-white/70 px-4 py-1.5 ring-1 ring-[var(--ink)]/8 backdrop-blur">
-          <span className="h-2 w-2 animate-pulse-soft rounded-full bg-[var(--mint)]" />
-          <span className="text-[12px] font-medium text-[var(--ink-soft)]">
-            Physical NFC card + QR fallback
-          </span>
-        </div>
-
         {/* headline */}
         <div ref={headlineRef} className="relative">
           <h1 className="text-display text-[clamp(3.2rem,10vw,8rem)] text-[var(--ink)]">
@@ -144,10 +136,8 @@ export default function Hero() {
 
         {/* sub */}
         <p className="mt-6 max-w-xl text-[17px] leading-relaxed text-[var(--ink-soft)]">
-          One physical card. Your contact details and links, shared with a tap
-          or a QR scan. No app needed for the person you meet.
+          Share your world with one card. Tap or scan to connect, without an app.
         </p>
-        <p className="mt-3 text-sm font-medium text-[var(--ink)]">Cards from Rs. 999 <span aria-hidden="true">·</span> Delivery paid separately to the rider</p>
 
         {/* CTAs */}
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -159,7 +149,7 @@ export default function Hero() {
           </Link>
         </div>
 
-        <div className="hero-main-card"><EdgeTapCard/></div>
+        <div className="hero-main-card"><CardStack highPriority/></div>
 
 
       </div>

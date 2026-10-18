@@ -66,3 +66,13 @@ ui-debug.log
 !public/card-backgrounds/**/*.png
 !public/card-backgrounds/*.png
 !public/card-designs/*.png
+
+# Packaged brand assets used by metadata and marketing.
+!public/favicon-*.png
+!public/brand-profile-qr.png
+!assets/Logo/Gold and navy ET tap logo-3.png
+
+# Owner-supplied artwork for the shared card and connection illustration.
+!assets/edgetapcard/maincard.png
+
+!public/favicon.ico

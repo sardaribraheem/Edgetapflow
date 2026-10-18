@@ -1,7 +1,7 @@
 "use client";
 import {useState} from 'react';
 import type {Order} from '@/lib/data/order';
-import {shareDesignProof,recordDesignEditPayment} from '@/lib/application';
+import {shareDesignProof,recordDesignEditPayment,deliverOrderNotifications} from '@/lib/application';
 import {APP_URL} from '@/lib/site';
 export default function DesignProofShare({order:o,action}:{order:Order;action:(work:()=>Promise<void>)=>Promise<void>}){
  const [copied,setCopied]=useState(false),[amount,setAmount]=useState(''),[note,setNote]=useState(''),[verified,setVerified]=useState(false);
@@ -14,7 +14,8 @@ export default function DesignProofShare({order:o,action}:{order:Order;action:(w
  const canShare=!!o.printSnapshot&&o.applicationStatus==='accepted'&&['awaiting_email','awaiting_response'].includes(o.designProofStatus||'')&&!shared;
  return <section className="rounded-xl bg-white p-4"><h3 className="font-display text-xl">Share card proof</h3>
   {!o.printSnapshot?<p className="mt-2 text-sm">Accept the paid order, confirm its destination, then open Print package and save the front/back proof.</p>:<>
-   <p className="mt-2 text-sm">{shared?'The current proof is available privately in My orders. Send the message below to the customer.':'Save the final draft, then make this revision available to the customer.'} Account sharing sends no email and starts no email timer.</p>
+   <p className="mt-2 text-sm">{shared?'The current proof is available privately in My orders. Send the message below to the customer.':'Save the final draft, then make this revision available to the customer.'} The ten-hour review window starts only after the proof email is actually sent.</p>
+   {(canShare||shared&&!o.designProofSentAt)&&<button type="button" className="btn btn-ink mt-3 mr-3 px-5 py-3" onClick={()=>{void action(()=>deliverOrderNotifications(o,true));}}>Send proof email for approval</button>}
    {canShare&&<button type="button" className="btn btn-ink mt-3 px-5 py-3" onClick={()=>{void action(()=>shareDesignProof(o));}}>Make proof available to customer</button>}
    {shared&&<><textarea aria-label="Customer proof message" readOnly value={message} rows={5} className="mt-3 w-full rounded-xl border p-3 text-sm"/><div className="mt-3 flex flex-wrap gap-3"><button type="button" className="btn btn-ghost px-4 py-2" onClick={()=>{void action(async()=>{await navigator.clipboard.writeText(message);setCopied(true);});}}>{copied?'Copied':'Copy review message'}</button>{/^[1-9]\d{6,14}$/.test(phone)&&<a className="btn btn-ghost px-4 py-2" href={'https://wa.me/'+phone+'?text='+encodeURIComponent(message)} target="_blank" rel="noreferrer">Open customer WhatsApp</a>}</div></>}
   </>}

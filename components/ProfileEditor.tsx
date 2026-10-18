@@ -11,6 +11,7 @@ import DefaultAvatar from './ui/DefaultAvatar';
 import Icon from './ui/Icon';
 
 export default function ProfileEditor({profile,uid,onClose,onSaved}:{profile:Profile;uid:string;onClose:()=>void;onSaved:(profile:Profile)=>void}) {
+  const linkCapacity=Math.max(10,profile.linkCapacity||0,profile.links.length);
   const [draft,setDraft]=useState<Profile>(()=>({...profile,links:profile.links.map(link=>({...link}))}));
   const [photo,setPhoto]=useState<File|null>(null),[preview,setPreview]=useState('');
   const [logoFile,setLogoFile]=useState<File|null>(null),[logoPreview,setLogoPreview]=useState('');
@@ -35,7 +36,7 @@ export default function ProfileEditor({profile,uid,onClose,onSaved}:{profile:Pro
   };
   const save=async(event:FormEvent)=>{
     event.preventDefault();if(operation.current)return;
-    if(!draft.displayName.trim()||draft.links.length>10||draft.links.some(link=>!link.label.trim()||!isSafeContactUrl(link.url))){setError('Add a name and valid contact URLs, with no more than ten links.');return;}
+    if(!draft.displayName.trim()||draft.links.length>linkCapacity||draft.links.some(link=>!link.label.trim()||!isSafeContactUrl(link.url))){setError('Add a name and valid contact URLs within your purchased link allowance.');return;}
     operation.current=true;setBusy(true);setError('');
     try{
       const check=async()=>{if(!mounted.current||(await getCurrentUser())?.uid!==uid)throw new Error('Your sign-in changed. Reopen the profile with its owner account.');};
@@ -65,10 +66,10 @@ export default function ProfileEditor({profile,uid,onClose,onSaved}:{profile:Pro
           {([{key:'displayName',label:'Display name',max:120},{key:'title',label:'Professional title',max:160},{key:'location',label:'Location',max:160}] as const).map(field=><label key={field.key} className="profile-editor-label">{field.label}<input value={draft[field.key]} maxLength={field.max} required={field.key==='displayName'} onChange={event=>setDraft(value=>({...value,[field.key]:event.target.value}))}/></label>)}
           <label className="profile-editor-label sm:col-span-2">Bio<textarea aria-label="Bio" rows={4} maxLength={2000} value={draft.bio} onChange={event=>setDraft(value=>({...value,bio:event.target.value}))}/></label>
         </div>
-        <section><div className="flex items-center justify-between"><h3 className="font-display text-lg">Links</h3><span className="text-xs">{draft.links.length}/10</span></div>
-          <div className="mt-3 flex flex-wrap gap-2">{LINK_PRESETS.filter((preset,index,array)=>array.findIndex(p=>p.type===preset.type)===index).map(preset=><button type="button" key={preset.type} disabled={draft.links.length>=10} className="profile-link-preset" onClick={()=>setDraft(value=>({...value,links:[...value.links,{type:preset.type,label:preset.label,icon:preset.type,accent:LINK_ACCENTS[preset.type]||'#100B4A',url:preset.type==='email'?'mailto:':preset.type==='whatsapp'?'https://wa.me/':'https://'}]}))}>+ {preset.label}</button>)}</div>
+        <section><div className="flex items-center justify-between"><h3 className="font-display text-lg">Links</h3><span className="text-xs">{draft.links.length} links</span></div>
+          <div className="mt-3 flex flex-wrap gap-2">{LINK_PRESETS.filter((preset,index,array)=>array.findIndex(p=>p.type===preset.type)===index).map(preset=><button type="button" key={preset.type} disabled={draft.links.length>=linkCapacity} className="profile-link-preset" onClick={()=>setDraft(value=>({...value,links:[...value.links,{type:preset.type,label:preset.label,icon:preset.type,accent:LINK_ACCENTS[preset.type]||'#100B4A',url:preset.type==='email'?'mailto:':preset.type==='whatsapp'?'https://wa.me/':'https://'}]}))}>+ {preset.label}</button>)}</div>
           <div className="mt-4 space-y-3">{draft.links.map((link,index)=><div key={index} className="profile-link-editor"><label className="profile-editor-label">Label<input aria-label={`Link ${index+1} label`} maxLength={80} value={link.label} required onChange={event=>changeLink(index,{label:event.target.value})}/></label><label className="profile-editor-label">URL<input aria-label={`Link ${index+1} URL`} maxLength={2048} value={link.url} required onChange={event=>changeLink(index,{url:event.target.value})}/></label><button type="button" className="icon-button" aria-label={`Remove link ${index+1}`} onClick={()=>setDraft(value=>({...value,links:value.links.filter((_,i)=>i!==index)}))}><Icon name="trash" size={18}/></button></div>)}</div>
-          <button type="button" disabled={draft.links.length>=10} className="btn btn-ghost mt-4 px-4 py-2" onClick={()=>setDraft(value=>({...value,links:[...value.links,{type:'portfolio',label:'Website',url:'https://',icon:'globe',accent:'#100B4A'}]}))}>+ Add link</button>
+          <button type="button" disabled={draft.links.length>=linkCapacity} className="btn btn-ghost mt-4 px-4 py-2" onClick={()=>setDraft(value=>({...value,links:[...value.links,{type:'portfolio',label:'Website',url:'https://',icon:'globe',accent:'#100B4A'}]}))}>+ Add link</button>
         </section>
       </fieldset>
       <footer className="profile-editor-footer">{error&&<p role="alert" className="w-full text-sm text-[var(--coral-ink)]">{error}</p>}<button type="button" disabled={busy} className="btn btn-ghost px-4 py-3" onClick={onClose}>Cancel</button><button type="submit" disabled={busy} className="btn btn-ink px-5 py-3"><Icon name="save" size={18}/>{busy?'Publishing…':'Save & publish'}</button></footer>
