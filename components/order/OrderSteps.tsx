@@ -55,6 +55,7 @@ export function CardStep({
       <h1 className="font-display text-[clamp(1.8rem,4vw,2.6rem)] font-semibold leading-tight text-[var(--ink)]">
         Choose your card
       </h1>
+      {draft.product==='profile'&&<aside className="mt-4 rounded-xl border border-[var(--ink)]/15 bg-[var(--yellow-soft)] p-4 text-sm"><p className="font-semibold">Want a custom digital profile page?</p><a href={SUPPORT_URL+'?text='+encodeURIComponent('I would like a custom digital profile template.')} target="_blank" rel="noreferrer" className="mt-2 inline-block font-semibold underline">Contact us on WhatsApp · +92 304 414 9674</a></aside>}
       <div className="order-spec-line">
         <span><Icon name="card" size={18} />PVC · NFC{draft.physical.qr.enabled?' + QR':''}</span>
 

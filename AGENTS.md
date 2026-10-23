@@ -15,7 +15,7 @@ Read [docs/LAUNCH_STATUS.md](docs/LAUNCH_STATUS.md) for current service state an
 ## Architecture and current release
 
 - Next.js App Router/React/Tailwind static export to `out/`; Firebase project `edgetapflow` is Hosting only. Supabase project `dxyxvervvlxhwwbcbttd` handles Auth/PostgreSQL/RLS/RPCs/Storage. Preserve the architecture; avoid unnecessary dependencies or rewrites.
-- Latest recorded live Hosting: `4b2698d68c3086f1`, 23 October 2026 at 10:02:55 am Pakistan time, `https://edgetap.tech`. Hosted history: **001–015 plus 017–021**. **016 remains unapplied**. Never edit/rerun applied migrations or blindly push optional 016. See [release history](docs/RELEASE_HISTORY.md).
+- Latest recorded live Hosting: `3e2361e7ecb8e32a`, 23 October 2026 at 10:26:44 am Pakistan time, `https://edgetap.tech`. Hosted history: **001–015 plus 017–021**. **016 remains unapplied**. Never edit/rerun applied migrations or blindly push optional 016. See [release history](docs/RELEASE_HISTORY.md).
 - Checkout version 2 plus website offer-pricing version 3 is live, with Bank as the new-order default, paid extra links, opt-in public website reviews and separate private feedback. Website migrations 020/021 preserve the previously applied app contract 019. Email worker/provider secrets/scheduler remain inactive, `emailNotificationsEnabled=false`. Queueing/private sharing sends no email and starts no timer.
 - Founder `/u/ibraheem` is an example. Hosting rewrites other `/u/*` to `/profile.html`, whose client reads the requested path. Unknown handles must never show founder content. Profiles/private routes remain noindex and outside the sitemap; authorization is independent of indexing rules.
 

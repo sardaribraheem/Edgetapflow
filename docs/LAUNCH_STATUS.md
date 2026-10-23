@@ -4,7 +4,7 @@ Updated 23 October 2026, Pakistan time. This is the current status authority; pr
 
 ## Recorded production state
 
-- Preferred origin: **https://edgetap.tech**. Latest Hosting version: **`4b2698d68c3086f1`**, released 23 October at **10:02:55 am Pakistan time**. Both Firebase aliases remain available for existing cards and Auth links.
+- Preferred origin: **https://edgetap.tech**. Latest Hosting version: **`3e2361e7ecb8e32a`**, released 23 October at **10:26:44 am Pakistan time**. Both Firebase aliases remain available for existing cards and Auth links.
 - Supabase project: `dxyxvervvlxhwwbcbttd`; Firebase Hosting project: `edgetapflow`. Supabase handles Auth, database and Storage; Firebase handles Hosting only.
 - Hosted migrations: **001–015 plus 017–021**. Optional domain migration **016 is unapplied** and is not required by the released frontend. Never rerun applied migrations or blindly push all pending files.
 - Checkout version 2 plus website offer-pricing version 3 is released. Profile Card: 1499 for one, explicit two-card bundle 2099 or three-card bundle 2499. Link Card: 999 for one, explicit two-card bundle 1599 or three-card bundle 1999. Manual extra matching cards cost 700. New website orders include delivery, stated at payment; legacy order terms remain intact. Bank is the new-order default.

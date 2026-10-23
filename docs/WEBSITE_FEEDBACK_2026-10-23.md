@@ -4,7 +4,7 @@ Recorded: **23 October 2026, Pakistan time**.
 
 ## Execution update: 23 October 2026
 
-The owner-approved website release is live at **https://edgetap.tech**. Firebase Hosting version **`4b2698d68c3086f1`**, released **23 October 2026 at 10:02:55 am Pakistan time**. Exact migrations **020 and 021** were applied transactionally with history registration. Saved order, profile, application and app-function fingerprints matched before and after; existing 019 remains applied and optional 016 remains unapplied. The app source was untouched. The final release requirements below supersede earlier design/test notes.
+The owner-approved website release is live at **https://edgetap.tech**. Firebase Hosting version **`3e2361e7ecb8e32a`**, released **23 October 2026 at 10:26:44 am Pakistan time**. Exact migrations **020 and 021** were applied transactionally with history registration. Saved order, profile, application and app-function fingerprints matched before and after; existing 019 remains applied and optional 016 remains unapplied. The app source was untouched. The final release requirements below supersede earlier design/test notes.
 
 ## Final release request — supersedes earlier offer and sample-review notes
 
@@ -377,3 +377,10 @@ The browser workflow uses a separately built fixture export, local PostgreSQL an
 ## Final hosted validation
 
 The reviewed production and isolated fixture builds passed, as did TypeScript, lint (zero errors; 20 existing warnings), all existing Supabase regressions, 13 offer/ownership/delivery scenarios, seven review privacy/ranking/pagination scenarios and 97 integrated browser checks. The exact migration transaction was also exercised locally after the existing 019 contract. Release guards passed 117 SEO/static checks and 139 public text asset/configuration checks. The live read-only verifier passed after migration. Anonymous live HTTP confirmed all four bundle prices, delivery inclusion and the empty real-review feed. Live browser checks confirmed equal former/current price sizes, the admin contact, both checkout bundles for each product, no five-card offers, the public review form and matching QR image. Reviewed homepage/pricing/order/terms/profile bytes matched production, including the Firebase alias. No fake reviews, customer test orders, uploads, emails or payments were created in production.
+
+
+## Follow-up: contact on the first order screen
+
+The owner could not find the custom profile contact on `/order?product=profile` because it appeared only on the later profile-details step. Add a visible custom digital profile page callout immediately below Choose your card on the first Profile Card screen, linking to support WhatsApp +92 304 414 9674 with the custom-template message. Keep the existing details-step contact. The owner also explicitly authorised pushing the source branch to the configured repository.
+
+The first-screen contact follow-up was published as Hosting version `3e2361e7ecb8e32a` on 23 October 2026 at 10:26:44 am Pakistan time. Build/type checking and release guards passed; the contact was verified above the fold at 320×680, 390×844 and 1440×1000. This follow-up changes no backend contracts.

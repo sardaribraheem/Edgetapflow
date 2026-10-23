@@ -10,6 +10,10 @@ Consolidated 18 October 2026 from release/audit/implementation reports. [Launch 
 | 16 Oct, 12:50:10 pm | `ae83d57dca84c205` | Card products/editor/public logos/private proof after approved 012–015 |
 | 14 Oct, 10:14 pm | `e4635533ce44dcb1` | Previous verified baseline |
 
+## 23 October follow-up: custom profile contact on the first order screen
+
+Hosting version **`3e2361e7ecb8e32a`**, released **10:26:44 am Pakistan time**. The Profile Card selection screen now shows a prominent “Want a custom digital profile page?” callout immediately below Choose your card, linking to the owner’s support WhatsApp +92 304 414 9674. The later profile-details contact remains available. Build/type checking and 117 SEO/static plus 139 text asset/configuration checks passed; contact visibility without scrolling was checked at 320×680, 390×844 and 1440×1000. No database migrations or app changes. The owner explicitly authorised the source branch push in this follow-up.
+
 ## 23 October: website pricing, checkout and public reviews
 
 Owner-approved release: Firebase Hosting **`4b2698d68c3086f1`**, **23 October 2026 at 10:02:55 am Pakistan time**, `https://edgetap.tech` (Firebase aliases retained). Hosting only; no Firebase data-service deployment. Exact Supabase migrations **020/021** were applied atomically and registered after existing 019. Optional 016 remains unapplied. The transaction verified unchanged saved order/profile/application fingerprints and app function definitions; no customer rows were seeded or rewritten.
