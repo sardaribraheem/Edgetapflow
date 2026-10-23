@@ -76,3 +76,6 @@ ui-debug.log
 !assets/edgetapcard/maincard.png
 
 !public/favicon.ico
+
+# Owner-supplied Link Card design references.
+!assets/linkcard/**/*.png

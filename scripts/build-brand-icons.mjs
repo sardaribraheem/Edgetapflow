@@ -31,5 +31,5 @@ entries.forEach(({ size, bytes }, index) => {
   offset += bytes.length;
 });
 await writeFile(new URL('favicon.ico', publicDirectory), Buffer.concat([header, ...entries.map(entry => entry.bytes)]));
-await QRCode.toFile(fileURLToPath(new URL('brand-profile-qr.png',publicDirectory)), 'https://edgetap.tech/u/ibraheem', {width:256,margin:2,errorCorrectionLevel:'M'});
+await QRCode.toFile(fileURLToPath(new URL('brand-profile-qr.png',publicDirectory)), 'https://edgetap.tech', {width:256,margin:2,errorCorrectionLevel:'M'});
 console.log('Packaged ET monogram: stable public ICO (16/32/48/96/256), PNG (48/96/512), Apple touch icon (180).');

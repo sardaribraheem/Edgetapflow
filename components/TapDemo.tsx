@@ -12,11 +12,13 @@ export default function TapDemo() {
   const dragged = useRef(false), frame = useRef(0);
   const origin = useRef<{ x: number; y: number } | null>(null);
   const [connected, setConnected] = useState(false);
+  const [holding,setHolding] = useState(false);
   useEffect(() => () => cancelAnimationFrame(frame.current), []);
   function reset() {
     cancelAnimationFrame(frame.current); frame.current = 0; origin.current = null;
     if (card.current) card.current.style.transform = '';
     setConnected(false);
+    setHolding(false);
   }
   function touches() {
     const target = phone.current?.getBoundingClientRect(), face = card.current?.getBoundingClientRect();
@@ -27,7 +29,7 @@ export default function TapDemo() {
     const x = event.clientX - origin.current.x, y = event.clientY - origin.current.y;
     if (Math.hypot(x, y) > 5) dragged.current = true;
     event.currentTarget.style.transform = `translate(${x}px, ${y}px)`;
-    if (touches()) { origin.current = null; setConnected(true); }
+    if (touches()) { origin.current = null; setHolding(false); setConnected(true); }
   }
   function tryTap() {
     if (connected || frame.current || !card.current || !phone.current) return;
@@ -46,13 +48,14 @@ export default function TapDemo() {
     frame.current = requestAnimationFrame(tick);
   }
   return <div className="story-tap-demo">
-    <div className="tap-demo-stage">
+    <p className="tap-demo-instruction">Pick up the card. Drag it to the phone.</p>
+    <div className={`tap-demo-stage ${holding?'is-holding':''} ${connected?'is-connected':''}`}>
       <div className="story-card-target"><StoryLabels target="card"/>
       <button ref={card} type="button" className="tap-demo-card" aria-label="Drag card to touch the phone or press to try a tap"
-        onPointerDown={event => { if (connected || frame.current) return; dragged.current = false; origin.current = { x: event.clientX, y: event.clientY }; event.currentTarget.setPointerCapture(event.pointerId); }}
+        onPointerDown={event => { if (connected || frame.current) return; setHolding(true); dragged.current = false; origin.current = { x: event.clientX, y: event.clientY }; event.currentTarget.setPointerCapture(event.pointerId); }}
         onPointerMove={move}
-        onPointerUp={() => { origin.current = null; if (!connected && !frame.current && card.current) card.current.style.transform = ''; }}
-        onPointerCancel={() => { origin.current = null; if (!connected && card.current) card.current.style.transform = ''; }}
+        onPointerUp={() => { setHolding(false); origin.current = null; if (!connected && !frame.current && card.current) card.current.style.transform = ''; }}
+        onPointerCancel={() => { setHolding(false); origin.current = null; if (!connected && card.current) card.current.style.transform = ''; }}
         onClick={() => { if (!dragged.current) tryTap(); }}><EdgeTapCard /></button></div>
       <div className="tap-demo-cue" aria-hidden="true"><NfcWaves className="h-7 w-7" /><span>Tap</span></div>
       <div className="story-phone-target"><StoryLabels target="phone"/>
@@ -60,6 +63,6 @@ export default function TapDemo() {
       </div>
     </div>
     <button type="button" className="story-tap-button underline" onClick={() => connected ? reset() : tryTap()}>{connected ? 'Try again' : 'Try a tap'}</button>
-    <p role="status" className="story-tap-status">{connected ? 'Connected. Your profile is ready to share.' : 'Drag the card until it touches the phone.'}</p>
+    <p role="status" className="story-tap-status">{connected ? 'Connected. The profile is open.' : 'Touch the phone with the card to see the profile open.'}</p>
   </div>;
 }

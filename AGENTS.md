@@ -15,8 +15,8 @@ Read [docs/LAUNCH_STATUS.md](docs/LAUNCH_STATUS.md) for current service state an
 ## Architecture and current release
 
 - Next.js App Router/React/Tailwind static export to `out/`; Firebase project `edgetapflow` is Hosting only. Supabase project `dxyxvervvlxhwwbcbttd` handles Auth/PostgreSQL/RLS/RPCs/Storage. Preserve the architecture; avoid unnecessary dependencies or rewrites.
-- Latest recorded live Hosting: `f5c31e156838a13f`, 18 October 2026 at 9:01:06 pm Pakistan time, `https://edgetap.tech`. Hosted history: **001–015 plus 017/018**. **016 remains unapplied**. Never edit/rerun applied migrations or blindly push optional 016. See [release history](docs/RELEASE_HISTORY.md).
-- Checkout version 2 has three manual payment methods, paid extra links and private authenticated feedback. Email worker/provider secrets/scheduler remain inactive, `emailNotificationsEnabled=false`. Queueing/private sharing sends no email and starts no timer.
+- Latest recorded live Hosting: `4b2698d68c3086f1`, 23 October 2026 at 10:02:55 am Pakistan time, `https://edgetap.tech`. Hosted history: **001–015 plus 017–021**. **016 remains unapplied**. Never edit/rerun applied migrations or blindly push optional 016. See [release history](docs/RELEASE_HISTORY.md).
+- Checkout version 2 plus website offer-pricing version 3 is live, with Bank as the new-order default, paid extra links, opt-in public website reviews and separate private feedback. Website migrations 020/021 preserve the previously applied app contract 019. Email worker/provider secrets/scheduler remain inactive, `emailNotificationsEnabled=false`. Queueing/private sharing sends no email and starts no timer.
 - Founder `/u/ibraheem` is an example. Hosting rewrites other `/u/*` to `/profile.html`, whose client reads the requested path. Unknown handles must never show founder content. Profiles/private routes remain noindex and outside the sitemap; authorization is independent of indexing rules.
 
 ## Commands and configuration
@@ -42,8 +42,8 @@ Read [docs/LAUNCH_STATUS.md](docs/LAUNCH_STATUS.md) for current service state an
 
 ## Commercial rules and evidence
 
-- Brand EdgeTap; tagline “One tap. Infinite possibilities.” Current prices: Link Rs. 999, Profile Rs. 1,499, Website + four cards Rs. 29,999. Owner-confirmed standards: Rs. 1,399 / 1,899 / 36,999 for crossed-out comparisons. First ten profile links included; Rs. 50 per extra link once per profile, not per card. Technical limit 100.
+- Brand EdgeTap; tagline “One tap. Infinite possibilities.” Current prices: Link Rs. 999, Profile Rs. 1,499, Website + four cards Rs. 29,999. Owner-confirmed crossed-out comparisons: Rs. 1399 / 2200 / 36999 for crossed-out comparisons. First ten profile links included; Rs. 50 per extra link once per profile, not per card. Technical limit 100.
 - JazzCash/Easypaisa 03044149674; Meezan IBAN PK46MEZN0000300116179673. Recipient: Muhammad Ibraheem Anwar. Verify actual transfer manually. Support WhatsApp +92 304 414 9674.
-- Identical cards in one order share one design/destination; QR optional, same confirmed URL as NFC. PVC 85.60 × 53.98 mm. Preserve standard pickup Delta 3 Mon–Fri 9–5 PKT; NIIT launch focus is not a pickup-policy change. Delivery is separate, rider-direct actual fare.
+- Identical cards in one order share one design/destination; QR optional, same confirmed URL as NFC. PVC 85.60 × 53.98 mm. Preserve standard pickup Delta 3 Mon–Fri 9–5 PKT; NIIT launch focus is not a pickup-policy change. New version-3 website orders include delivery, disclosed at payment; preserve historical delivery terms. Explicit Profile bundles: two/2099 and three/2499. Link bundles: two/1599 and three/1999. No five-card offers. Manual additional matching cards cost 700; quantity edits clear the bundle.
 - Do not invent dispatch/coverage/refund/hosting/update promises, fees, testimonials, analytics or unimplemented app/team/attendance/menu features. Personalized-card policy and remaining legal/retention/hosting questions are in [businessguide.md](docs/businessguide.md).
 - Never claim actual customer success from a build, mock, queue or anonymous denial. Distinguish what was tested, simulated and still unverified: hosted signed-in uploads, real email, funds and full physical fulfillment remain separate work.

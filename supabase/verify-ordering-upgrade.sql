@@ -1,9 +1,19 @@
 -- Post-upgrade verification permits existing real accounts/data. No fixtures.
 begin read only;
 do $$
-declare versions text[]; t text; fn text; settings jsonb; products boolean;
+declare versions text[]; t text; fn text; settings jsonb; products boolean; offers boolean; website_reviews boolean;
 begin
  select array_agg(version::text order by version) into versions from supabase_migrations.schema_migrations;
+ website_reviews='202610230021'=any(versions);
+ if website_reviews and not ('202610230020'=any(versions)) then raise exception 'Website reviews require the matching website release';end if;
+ versions=array_remove(versions,'202610230021');
+ if '202610200019'=any(versions) then
+  if not ('202610180018'=any(versions)) then raise exception 'Mobile contract requires the recorded checkout foundation';end if;
+  versions=array_remove(versions,'202610200019');
+ end if;
+ offers='202610230020'=any(versions);
+ if offers and not ('202610180018'=any(versions)) then raise exception 'Website offer pricing requires checkout and notification foundations';end if;
+ versions=array_remove(versions,'202610230020');
  products='202610150012'=any(versions);
  if versions is distinct from array['202610070001','202610070002','202610070003','202610070004','202610070005','202610070006','202610070007','202610070008','202610070009','202610140010','202610140011'] and versions is distinct from (array['202610070001','202610070002','202610070003','202610070004','202610070005','202610070006','202610070007','202610070008','202610070009','202610140010','202610140011']||array['202610150012']) and versions is distinct from (array['202610070001','202610070002','202610070003','202610070004','202610070005','202610070006','202610070007','202610070008','202610070009','202610140010','202610140011','202610150012','202610160013']) and versions is distinct from array['202610070001','202610070002','202610070003','202610070004','202610070005','202610070006','202610070007','202610070008','202610070009','202610140010','202610140011','202610150012','202610160013','202610160014'] and versions is distinct from array['202610070001','202610070002','202610070003','202610070004','202610070005','202610070006','202610070007','202610070008','202610070009','202610140010','202610140011','202610150012','202610160013','202610160014','202610160015'] and versions is distinct from array['202610070001','202610070002','202610070003','202610070004','202610070005','202610070006','202610070007','202610070008','202610070009','202610140010','202610140011','202610150012','202610160013','202610160014','202610160015','202610170016'] and versions is distinct from (array['202610070001','202610070002','202610070003','202610070004','202610070005','202610070006','202610070007','202610070008','202610070009','202610140010','202610140011','202610150012','202610160013','202610160014','202610160015']||array['202610180017']) and versions is distinct from (array['202610070001','202610070002','202610070003','202610070004','202610070005','202610070006','202610070007','202610070008','202610070009','202610140010','202610140011','202610150012','202610160013','202610160014','202610160015']||array['202610180017','202610180018']) and versions is distinct from (array['202610070001','202610070002','202610070003','202610070004','202610070005','202610070006','202610070007','202610070008','202610070009','202610140010','202610140011','202610150012','202610160013','202610160014','202610160015']||array['202610170016','202610180017']) and versions is distinct from (array['202610070001','202610070002','202610070003','202610070004','202610070005','202610070006','202610070007','202610070008','202610070009','202610140010','202610140011','202610150012','202610160013','202610160014','202610160015']||array['202610170016','202610180017','202610180018']) then raise exception 'Incomplete or unexpected migration history'; end if;
  foreach t in array array['public.order_applications','private.application_events','private.order_notes','private.notification_outbox','private.order_settings','private.design_proof_emails'] loop
@@ -21,6 +31,8 @@ begin
  if not exists(select 1 from storage.buckets where id='avatars' and public) or (select count(*) from storage.buckets where id in ('order-artwork','payment-receipts','migration-quarantine') and not public)<>3 then raise exception 'Bucket visibility mismatch'; end if;
  if products and (not has_function_privilege('authenticated','public.confirm_link_destination(text,bigint)','EXECUTE') or has_function_privilege('anon','public.confirm_link_destination(text,bigint)','EXECUTE')) then raise exception 'Unsafe direct-link RPC grants';end if;
  settings=public.get_order_settings();
+ if website_reviews and (not has_function_privilege('anon','public.list_website_reviews(integer,numeric,timestamptz,text)','EXECUTE') or has_function_privilege('anon','public.submit_website_review(text,text,numeric)','EXECUTE') or not has_function_privilege('authenticated','public.submit_website_review(text,text,numeric)','EXECUTE')) then raise exception 'Unsafe public review grants';end if;
+ if offers and (settings->>'offerPricingVersion' is distinct from '3' or settings->>'additionalCardPrice' is distinct from '700' or settings->>'twoCardBundlePrice' is distinct from '2099' or settings->>'threeCardBundlePrice' is distinct from '2499' or settings->>'linkThreeCardBundlePrice' is distinct from '1999' or settings->>'linkTwoCardBundlePrice' is distinct from '1599' or settings->>'deliveryIncluded' is distinct from 'true' or has_function_privilege('anon','public.attach_existing_order_profile(text,bigint)','EXECUTE') or not has_function_privilege('authenticated','public.attach_existing_order_profile(text,bigint)','EXECUTE')) then raise exception 'Missing website offer capability or unsafe profile-binding grants';end if;
  if '202610180017'=any(versions) and settings->>'checkoutVersion' is distinct from '2' then raise exception 'Missing checkout capability';end if;
  if '202610180018'=any(versions) and (has_function_privilege('authenticated','public.claim_order_notifications(text)','EXECUTE') or has_function_privilege('anon','public.complete_order_notification(uuid,text)','EXECUTE')) then raise exception 'Email worker permissions exposed';end if;
  if '202610160013'=any(versions) and settings->>'cardEditorVersion' is distinct from (case when '202610160014'=any(versions) then '4' else '3' end) then raise exception 'Missing editor capability';end if;
@@ -44,5 +56,5 @@ do $$ begin
  begin perform 1 from private.admin_members;raise exception 'Private staff directory visible';exception when insufficient_privilege then null;end;
 end $$;
 reset role;
-select 'Ordering upgrade verified against allowed histories through 015/016 and optional 017/018, RLS/RPC grants, private artwork/receipts and proof-email gates. No data changed.' as result;
+select 'Ordering upgrade verified against allowed histories through 015/016 and optional 017/018/020, RLS/RPC grants, private artwork/receipts and proof-email gates. No data changed.' as result;
 commit;

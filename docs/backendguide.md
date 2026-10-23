@@ -55,7 +55,7 @@ References use `ET-MMDDYY-sequence`, Pakistan date and a sequence starting at 10
 
 ## Migration and capability map
 
-Hosted state: **001–015 plus 017/018**. **016 is optional and unapplied**. Never edit/rerun applied migrations, reset production or blindly push all pending files. Confirm `supabase/project.json` and inspect linked history before proposing an exact authorized change.
+Hosted state: **001–015 plus 017–021**. **016 is optional and unapplied**. Never edit/rerun applied migrations, reset production or blindly push all pending files. Confirm `supabase/project.json` and inspect linked history before proposing an exact authorized change.
 
 | Migration | Responsibility |
 |---|---|
@@ -103,3 +103,19 @@ For separately authorized activation, verify the Resend sender and monitored rep
 Review `supabase/schedule-order-notifications.sql` after worker setup. It requires pg_cron/pg_net and a matching Vault secret named `edgetap_order_worker_secret`. Keep credentials out of SQL files/Git. Establish retries, stale-proof handling and monitored replies; test actual admin/customer inboxes and timely response/no-response cases before enabling notifications. Failed/superseded sends must not start a clock. Ordinary Supabase Auth mail needs separate confirmation/recovery testing.
 
 The maintenance cleanup script is destructive to its reviewed scope: `--inspect` writes a private snapshot, `--apply` checks it and preserves accounts/staff/founder. It already ran for authorized test data. Never run it during routine tests or infer new deletion permission from its existence.
+
+
+## Prepared website offer update (23 October, not hosted by this task)
+
+`202610230020_website_offers.sql` adds explicit version-3 pricing for new website payloads. The profile and first card cost Rs. 1,499; extras cost Rs. 700. A manually selected quantity of three is Rs. 2899, while the explicit `three_card_bundle` choice with quantity three costs Rs. 2,299. Extra links for new profiles retain their existing price. Changing quantity clears the selected offer in the client; invalid offer/quantity/product combinations are rejected on the server.
+
+An optional `existingProfileId` must refer to an active profile actually owned by the calling account. Its cards cost Rs. 700 each, without profile creation or another link fee. Staff uses `attach_existing_order_profile` only after acceptance, actual payment verification and specification confirmation; normal printing/proof gates still apply. No profile content or ownership is overwritten. Profiles with no contact links can still order cards.
+
+Payloads without `pricingVersion: 3` retain existing prices, and submitted applications cannot change their pricing version/profile during corrections. The updated website upgrades recovered unsubmitted drafts to version 3 before the next save; no submitted order is repriced. `get_order_settings` exposes `offerPricingVersion: 3`, `additionalCardPrice` and `threeCardBundlePrice`, `fiveCardBundlePrice`, both Link Card bundle prices and `deliveryIncluded`; the new frontend checks the capability before payment. Keep app clients and legacy requests unchanged. This additive migration is locally verified and must not be confused with approval to apply it to the hosted project or to apply optional 016. Current hosted 019 belongs to the separately authorised app work and must be preserved.
+
+Validation commands: `npm run test:website-offers`, `npm run test:image-uploads` and, from an isolated fixture export, `npm run test:website-feedback:browser`. The last suite uses `QA_BASE_URL` and simulated Auth/Storage/notification HTTP, never live customer writes.
+
+Latest website revision: Profile bundles 3/2299 and 5/3499; Link bundles 3/1999 and 5/2799. Extra matching cards cost 700 for either product. Bank is the new default display/payment method. Delivery inclusion is stored per order, shown at payment, and rider costs stay staff-only; legacy order terms remain intact. Eleven social design templates are registered additively by pending 020. Their flat vector artwork is rebuilt from the owner’s screenshot references without stock QR codes or contact details. Only marketing QR codes change to the preferred website root.
+
+
+Final owner-approved release correction: Profile Card explicit bundles are two for 2099 and three for 2499; Link Card bundles are two for 1599 and three for 1999, with single Link Card confirmed at 999. There are no five-card offers. Extra matching cards remain 700 under manual quantity selection. Migration 021 adds a separate public website review table and narrowly granted publish/list RPCs. Existing private feedback stays private; anonymous listing is limited to eight entries per keyset page, sorted rating/newest/id descending. Already-public legacy reviews remain visible. One public review per signed-in account can be updated after a one-minute cooldown. The UI explicitly discloses public name/rating/text and offers half-star ratings.

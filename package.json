@@ -32,7 +32,11 @@
     "test:uiux": "node scripts/test-checkout-improvements.mjs && node scripts/test-order-notification-worker.mjs && node scripts/test-test-order-cleanup.mjs",
     "test:uiux:browser": "node scripts/test-uiux-browser.mjs",
     "test:story:browser": "node scripts/test-story-browser.mjs",
-    "build:card-previews": "node scripts/build-card-previews.mjs"
+    "build:card-previews": "node scripts/build-card-previews.mjs",
+    "test:website-offers": "node scripts/test-website-offers.mjs",
+    "test:website-feedback:browser": "node scripts/test-website-feedback-browser.mjs",
+    "test:image-uploads": "node scripts/test-image-uploads.mjs",
+    "test:website-reviews": "node scripts/test-website-reviews.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

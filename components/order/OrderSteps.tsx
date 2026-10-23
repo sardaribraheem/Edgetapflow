@@ -1,19 +1,23 @@
 "use client";
 import { useState } from "react";
+import { prepareImageUpload } from "@/lib/image-upload";
+import ExistingProfilePicker from "./ExistingProfilePicker";
 import ArtworkSlot from "./ArtworkSlot";
 import AvatarCropper from "./AvatarCropper";
 import { suggestProfileHandle } from "@/lib/application";
 import ProfilePage from "@/components/ProfilePage";
-import { CARD_TEMPLATES, calculateSubtotal, type CustomerInfo, type DeliveryMethod } from "@/lib/data/order";
+import { CARD_TEMPLATES, BUNDLE_PRICES, calculateSubtotal, type CustomerInfo, type DeliveryMethod } from "@/lib/data/order";
 import type { Profile } from "@/lib/data/profile";
 import { fileToDataUrl } from "@/lib/upload-service";
 import Icon from "@/components/ui/Icon";
 import { OrderHelp as InfoHelp } from "./OrderInformation";
 import DefaultAvatar from "@/components/ui/DefaultAvatar";
-import { DESIGNER_URL } from '@/lib/site';
+import { DESIGNER_URL, SUPPORT_URL } from '@/lib/site';
+import linkReferences from '@/lib/data/link-card-references.json';
 import Image from 'next/image';
 import CardEditorDialog from './CardEditorDialog';
 import type { WizardDraft } from "@/lib/application";
+import {directLinkChannel} from '@/lib/nfc-link';
 import {blankPhysicalCard} from '@/lib/physical-card';
 export function CardStep({
   draft,
@@ -32,9 +36,9 @@ export function CardStep({
 
   const handleUpload = async (file: File, face: 'front'|'back'='front') => {
     setUploadError("");
-    if (!["image/jpeg","image/png","image/webp"].includes(file.type) || file.size <= 0 || file.size > 25*1024*1024) { setUploadError("Use a JPEG, PNG or WebP image within the upload limit."); return; }
     setUploading(true);
     try {
+      file = await prepareImageUpload(file,25);
       const preview = await fileToDataUrl(file);
       await onFileChange(file,face);
       onChange(face==='front' ? { customDesignPreview:preview } : { backDesignPreview:preview });
@@ -53,11 +57,12 @@ export function CardStep({
       </h1>
       <div className="order-spec-line">
         <span><Icon name="card" size={18} />PVC · NFC{draft.physical.qr.enabled?' + QR':''}</span>
-        <InfoHelp title="Card specifications"><p>85.60 × 53.98 mm. Every card has embedded NFC. Choose whether to add a QR on any design.</p><p>For your own artwork, EdgeTap staff manually prepares the layout for this card size. Your original upload is preserved privately; uploading artwork does not choose a different physical size.</p></InfoHelp>
+
       </div>
 
+      {draft.product==='profile'&&draft.pricingVersion===3&&<ExistingProfilePicker draft={draft} onChange={onChange}/>}
       <div className="card-design-grid mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
-        {CARD_TEMPLATES.map((t) => (
+        {CARD_TEMPLATES.filter(t=>draft.product==='direct_link'?t.channel?t.channel===directLinkChannel(draft.directLink||''):['custom','upload'].includes(t.id):!t.channel).map((t) => {const reference=linkReferences[t.id as keyof typeof linkReferences];return (
           <button
             key={t.id}
             type="button"
@@ -68,28 +73,29 @@ export function CardStep({
               draft.cardTemplate === t.id ? "border-[var(--ink)] bg-[var(--yellow-soft)]/30 shadow-[var(--shadow-card)]" : "border-[var(--ink)]/10 bg-white"
             }`}
           >
-            <span className={`relative grid aspect-[1.586] w-full place-items-center overflow-hidden rounded-md ring-1 ring-[var(--ink)]/10 ${t.tone}`}>
-              {t.id !== 'upload' ? (
+            <span style={reference?{aspectRatio:`${reference.width}/${reference.height}`}:undefined} className={`relative grid aspect-[1.586] w-full place-items-center overflow-hidden rounded-md ring-1 ring-[var(--ink)]/10 ${t.tone}`}>
+              {reference ? <><Image src={reference.src} alt="" width={reference.width} height={reference.height} className="h-full w-full object-contain"/><span aria-hidden="true" className="absolute grid place-items-center bg-white" style={{left:reference.cover[0]+'%',top:reference.cover[1]+'%',width:reference.cover[2]+'%',height:reference.cover[3]+'%'}}><Image src="/brand-profile-qr.png" alt="" width={256} height={256} className="h-full max-w-full object-contain"/></span></> : t.id !== 'upload' ? (
                 <Image src={t.preview!} alt="" width={1332} height={768} className="h-full w-full object-contain"/>
               ) : (
                 <span aria-hidden="true" className="upload-arrow">↑</span>
               )}
             </span>
-            <span className="font-display text-lg font-bold text-[var(--ink)]">{t.name}</span>
+            <span className="flex w-full flex-wrap items-center justify-between gap-2"><span className="font-display text-lg font-bold text-[var(--ink)]">{t.name}</span>{t.id==='simple'&&<span className="most-used-tag">Most used</span>}</span>
             {draft.cardTemplate === t.id && (
               <span className="absolute -top-2 -right-2 grid h-6 w-6 place-items-center rounded-full bg-[var(--ink)] text-white">
                 <Icon name="check" size={14} />
               </span>
             )}
           </button>
-        ))}
+        );})}
       </div>
-      {DESIGNER_URL && <div className="mt-5 text-center"><a href={DESIGNER_URL} target="_blank" rel="noreferrer" className="font-semibold underline">Contact a professional graphic designer ↗</a></div>}
+      {draft.product==='direct_link'&&<p className="mt-3 text-xs text-[var(--ink-soft)]">Your name and link replace the sample details in your final card proof.</p>}
+      {DESIGNER_URL && <div className="mt-5 text-center"><a href={DESIGNER_URL} target="_blank" rel="noreferrer" className="text-sm underline">Need a design? Contact our graphic designer on WhatsApp</a></div>}
 
       {draft.cardTemplate === "upload" && (
         <div className="mt-6 rounded-2xl bg-[var(--sky-soft)]/40 p-5 ring-1 ring-[var(--sky)]/30">
           <div className="flex items-center justify-between"><p className="text-sm font-bold text-[var(--ink)]">Upload your own card design</p><InfoHelp title="Private card artwork"><p>Your original is kept private. Staff will manually prepare the final layout for the standard PVC card size.</p><p>Use a JPEG, PNG or WebP image within 25 MB.</p></InfoHelp></div>
-          <div className="artwork-slots mt-4">{(['front','back'] as const).map(face => <ArtworkSlot key={face} face={face} source={face==='front' ? draft.customDesignPreview || draft.customDesignUrl : draft.backDesignPreview || draft.physical.backDesignUrl} disabled={uploading} onFile={file=>{void handleUpload(file,face);}} onRemove={()=>{onChange(face==='front'?{customDesignUrl:undefined,customDesignPreview:undefined}:{backDesignPreview:undefined,physical:{...draft.physical,standardBack:false,backDesignUrl:undefined}});void onFileChange(null,face);}}/>)}</div>
+          <p className="mt-2 text-xs">JPEG, PNG or WebP · Up to 25 MB per image</p><div className="artwork-slots mt-4">{(['front','back'] as const).map(face => <ArtworkSlot key={face} face={face} source={face==='front' ? draft.customDesignPreview || draft.customDesignUrl : draft.backDesignPreview || draft.physical.backDesignUrl} disabled={uploading} onFile={file=>{void handleUpload(file,face);}} onRemove={()=>{onChange(face==='front'?{customDesignUrl:undefined,customDesignPreview:undefined}:{backDesignPreview:undefined,physical:{...draft.physical,standardBack:false,backDesignUrl:undefined}});void onFileChange(null,face);}}/>)}</div>
           {uploading && <p className="mt-2 text-sm text-[var(--ink-soft)]">{localOnly ? "Saving on this device…" : "Uploading…"}</p>}
           {uploadError && <p className="mt-2 text-sm font-semibold text-[var(--coral)]">{uploadError}</p>}
           {draft.customDesignUrl && <p className="mt-2 text-sm font-semibold text-[var(--ink)]">{draft.customDesignUrl === 'pending' ? 'Saving artwork…' : 'Artwork selected'}</p>}
@@ -104,12 +110,17 @@ export function CardStep({
       <div className="mt-6 flex items-center justify-between rounded-xl bg-white p-4 ring-1 ring-[var(--ink)]/10">
         <span className="text-sm font-bold text-[var(--ink)]">Quantity</span>
         <div className="flex items-center gap-3">
-          <button type="button" aria-label="Decrease quantity" onClick={() => onChange({ quantity: Math.max(1, draft.quantity - 1) })} className="grid h-11 w-11 place-items-center rounded-full bg-[var(--ink)]/8 font-bold">−</button>
+          <button type="button" aria-label="Decrease quantity" onClick={() => onChange({ quantity: Math.max(1, draft.quantity - 1),offer:undefined })} className="grid h-11 w-11 place-items-center rounded-full bg-[var(--ink)]/8 font-bold">−</button>
           <span className="w-6 text-center font-display font-bold">{draft.quantity}</span>
-          <button type="button" aria-label="Increase quantity" onClick={() => onChange({ quantity: Math.min(20, draft.quantity + 1) })} className="grid h-11 w-11 place-items-center rounded-full bg-[var(--ink)] text-white font-bold">+</button>
+          <button type="button" aria-label="Increase quantity" onClick={() => onChange({ quantity: Math.min(20, draft.quantity + 1),offer:undefined })} className="grid h-11 w-11 place-items-center rounded-full bg-[var(--ink)] text-white font-bold">+</button>
         </div>
       </div>
-      <div className="order-price"><strong className="font-display">Rs. {calculateSubtotal(draft.quantity,draft.product||'standard',draft.links.length).toLocaleString()}</strong></div>
+      {draft.pricingVersion===3&&<div className="mt-4 text-sm"><p>{draft.existingProfileId?'Cards for your existing profile: Rs. 700 each.':'Add another matching card for Rs. 700.'}</p>{!draft.existingProfileId&&<div className="bundle-offers">{(['two_card_bundle','three_card_bundle'] as const).map(offer=>{
+        const quantity=offer==='two_card_bundle'?2:3,price=BUNDLE_PRICES[draft.product==='direct_link'?'direct_link':'profile'][offer];
+        return <div key={offer} className="bundle-offer mt-3 rounded-xl border-2 border-[var(--yellow)] bg-[var(--yellow-soft)] p-4"><p className="font-bold">Get {quantity} cards for Rs. {price}</p><p className="mt-1 text-xs">{draft.product==='direct_link'?'One link':'One profile'}, matching cards. Select this offer to claim the price.</p><button type="button" aria-pressed={draft.offer===offer} className="btn btn-ink mt-3 px-4 py-2 text-sm" onClick={()=>onChange({quantity,offer:draft.offer===offer?undefined:offer})}>{draft.offer===offer?'Bundle selected · Remove offer':`Claim ${quantity}-card offer`}</button></div>;
+      })}</div>}{draft.offer&&<p role="status" className="mt-2 text-xs">Bundle price applied. Changing quantity removes this offer.</p>}</div>}
+
+      <div className="order-price"><strong className="font-display">Rs. {calculateSubtotal(draft.quantity,draft.product||'standard',draft.links.length,draft).toLocaleString("en",{useGrouping:false})}</strong></div>
     </section>
   );
 }
@@ -131,7 +142,7 @@ export function ProfileStep({
   const direct=draft.product==='direct_link';
   const [cropFile,setCropFile]=useState<File|null>(null);
   const [logoError,setLogoError]=useState('');
-  const handleLogo=async(file:File)=>{setLogoError('');if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size<=0||file.size>5*1024*1024){setLogoError('Use a JPEG, PNG or WebP within 5 MB.');return;}onChange({logoUploadPending:true});try{const logoPreview=await fileToDataUrl(file);onChange({logoPreview});await onLogoChange(file);}catch(e){setLogoError(e instanceof Error?e.message:'Could not save your logo.');}finally{onChange({logoUploadPending:false});}};
+  const handleLogo=async(file:File)=>{setLogoError('');onChange({logoUploadPending:true});try{file=await prepareImageUpload(file,5);const logoPreview=await fileToDataUrl(file);onChange({logoPreview});await onLogoChange(file);}catch(e){setLogoError(e instanceof Error?e.message:'Could not save your logo.');}finally{onChange({logoUploadPending:false});}};
   const [preview, setPreview] = useState("");
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
@@ -165,10 +176,12 @@ export function ProfileStep({
       </h1>
       <p className="mt-2 text-[15px] text-[var(--ink-soft)]">{direct?'Your name or heading is all we need.':'Your name or heading is required. Everything else is optional.'}</p>
 
+      {!direct&&<p className="mt-4 text-sm">Need a custom digital profile template? <a href={SUPPORT_URL+'?text='+encodeURIComponent('I would like a custom digital profile template.')} target="_blank" rel="noreferrer" className="font-semibold underline">Contact admin: +92 304 414 9674</a></p>}
       <div className="mt-8 space-y-6">
         {/* avatar */}
         {!direct&&<div>
           <div className="flex items-center justify-between"><label htmlFor="ow-photo" className="block text-sm font-bold text-[var(--ink)]">Profile picture <span className="font-normal text-[var(--ink-faint)]">(optional)</span></label><InfoHelp title="Profile photo privacy"><p>{localOnly ? "Your photo stays on this device until you save to your account. It becomes publicly accessible after account upload, even before profile publication. Choose a photo you intend to share." : "Avatar images are publicly accessible after upload, even before profile publication. Upload only an image you intend to share."}</p><p>JPEG, PNG or WebP, up to 5 MB. Leave it blank to use the default profile picture.</p></InfoHelp></div>
+          <p className="mt-2 text-xs">JPEG, PNG or WebP · Up to 5 MB · Public after account upload</p>
           <div className="mt-3 flex items-center gap-4">
             <div className="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-full bg-white ring-2 ring-white shadow-[var(--shadow-card)]">
               {draft.avatarPreview || draft.avatarUrl || preview ? (
@@ -189,7 +202,7 @@ export function ProfileStep({
                 id="ow-photo"
                 accept="image/jpeg,image/png,image/webp"
                 className="sr-only"
-                onChange={e => { const file=e.target.files?.[0]; if(file){if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size<=0||file.size>5*1024*1024)setUploadError('Use a JPEG, PNG or WebP within 5 MB.');else {setUploadError('');setCropFile(file);}} e.target.value=''; }}
+                onChange={e => { const file=e.target.files?.[0]; e.target.value=''; if(file){setUploadError('');void prepareImageUpload(file,5).then(setCropFile).catch(error=>setUploadError(error.message));} }}
               />
             </label>
           </div>
@@ -249,7 +262,7 @@ export function ProfileStep({
           <div className="flex items-center justify-between"><label htmlFor="ow-handle" className="block text-sm font-bold">Desired profile handle <span className="font-normal text-[var(--ink-soft)]">(optional)</span></label><InfoHelp title="Profile handle"><p>Leave this blank and we suggest a handle from your name. Staff confirms an available handle during review and claims it uniquely when publishing your profile.</p><p>Once published, the handle stays fixed so your NFC and QR links keep working.</p></InfoHelp></div>
           <div className="profile-handle-input"><span>/u/</span><input id="ow-handle" aria-label="Desired profile handle" maxLength={30} value={draft.usernameSuggested} onChange={event => onChange({ handleEdited:true, usernameSuggested: event.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, "") })} placeholder="Based on your name" /></div>
         </div>}
-        <div className="optional-logo"><div className="flex items-center justify-between"><label htmlFor="ow-logo" className="text-sm font-bold">Logo <span className="font-normal text-[var(--ink-soft)]">(optional)</span></label><InfoHelp title="Your logo"><p>{direct?'Your logo is placed on the front of your physical card.':'Your logo appears on your digital profile and the front of your physical card.'} Uploaded logos are publicly accessible after account upload. Choose an image you intend to share. PNG with a transparent background works best; JPEG and WebP also work, up to 5 MB.</p><p>The logo is added to the front. Staff checks its placement in your final proof before you approve printing.</p></InfoHelp></div><div className="mt-3 flex flex-wrap items-center gap-3">{(draft.logoPreview||draft.physical.logoUrl)&&<img src={draft.logoPreview||draft.physical.logoUrl} alt="Your logo preview" className="h-16 w-24 rounded-lg bg-white object-contain p-2"/>}<label className="btn btn-ghost cursor-pointer px-4 py-2.5 text-sm"><Icon name="camera" size={18}/>{draft.logoUploadPending?'Saving…':'Add logo'}<input id="ow-logo" type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={e=>e.target.files?.[0]&&handleLogo(e.target.files[0])}/></label>{(draft.logoPreview||draft.physical.logoUrl)&&<button type="button" className="text-sm underline" onClick={()=>{const physical={...draft.physical};delete physical.logoUrl;onChange({physical,logoPreview:undefined});void onLogoChange(null);}}>Remove logo</button>}</div>{logoError&&<p role="alert" className="mt-2 text-sm text-[var(--coral)]">{logoError}</p>}</div>
+        <div className="optional-logo"><div className="flex items-center justify-between"><label htmlFor="ow-logo" className="text-sm font-bold">Logo <span className="font-normal text-[var(--ink-soft)]">(optional)</span></label><InfoHelp title="Your logo"><p>{direct?'Your logo is placed on the front of your physical card.':'Your logo appears on your digital profile and the front of your physical card.'} Uploaded logos are publicly accessible after account upload. Choose an image you intend to share. PNG with a transparent background works best; JPEG and WebP also work, up to 5 MB.</p><p>The logo is added to the front. Staff checks its placement in your final proof before you approve printing.</p></InfoHelp></div><p className="mt-2 text-xs">JPEG, PNG or WebP · Up to 5 MB · Public after account upload</p><div className="mt-3 flex flex-wrap items-center gap-3">{(draft.logoPreview||draft.physical.logoUrl)&&<img src={draft.logoPreview||draft.physical.logoUrl} alt="Your logo preview" className="h-16 w-24 rounded-lg bg-white object-contain p-2"/>}<label className="btn btn-ghost cursor-pointer px-4 py-2.5 text-sm"><Icon name="camera" size={18}/>{draft.logoUploadPending?'Saving…':'Add logo'}<input id="ow-logo" type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={e=>e.target.files?.[0]&&handleLogo(e.target.files[0])}/></label>{(draft.logoPreview||draft.physical.logoUrl)&&<button type="button" className="text-sm underline" onClick={()=>{const physical={...draft.physical};delete physical.logoUrl;onChange({physical,logoPreview:undefined});void onLogoChange(null);}}>Remove logo</button>}</div>{logoError&&<p role="alert" className="mt-2 text-sm text-[var(--coral)]">{logoError}</p>}</div>
       </div>
       {cropFile&&<AvatarCropper file={cropFile} onCancel={()=>setCropFile(null)} onConfirm={file=>{setCropFile(null);void handleUpload(file);}}/>}
     </section>
@@ -300,7 +313,7 @@ export function DeliveryStep({
       <h1 className="font-display text-[clamp(1.8rem,4vw,2.6rem)] font-semibold leading-tight text-[var(--ink)]">
         Where should we send your card?
       </h1>
-      <p className="mt-2 text-[15px] text-[var(--ink-soft)]">Your address stays private. Pay delivery separately to the rider.</p>
+      <p className="mt-2 text-[15px] text-[var(--ink-soft)]">Your delivery details stay private.</p>
       <p className="mt-4 flex items-center gap-2 text-sm"><Icon name="user" size={18}/>{customer.fullName}</p>
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
         {([
@@ -310,7 +323,7 @@ export function DeliveryStep({
           <div key={value} className={`delivery-option ${deliveryMethod === value ? "is-selected" : ""}`}>
             <button type="button" aria-pressed={deliveryMethod === value} onClick={() => onDeliveryMethodChange(value)} className="delivery-choice">
               <Icon name={value === "delivery" ? "truck" : "pin"} size={28} />
-              <span><strong className="font-display">{label}</strong><span>{value === "delivery" ? "Rider fee extra" : "Collect when ready"}</span></span>
+              <span><strong className="font-display">{label}</strong><span>{value === "delivery" ? "Send to your address" : "Collect when ready"}</span></span>
               {deliveryMethod === value && <Icon name="check" size={18} />}
             </button>
             <InfoHelp title={value === "delivery" ? "Delivery details" : "NASTP pickup details"}><p>{description}</p></InfoHelp>

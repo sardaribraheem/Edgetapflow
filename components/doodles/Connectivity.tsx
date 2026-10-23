@@ -54,16 +54,7 @@ export function QrDoodle({ className, ...props }: P) {
       aria-hidden="true"
       {...props}
     >
-      <rect x="8" y="8" width="20" height="20" rx="4" fill="none" stroke="currentColor" strokeWidth="3.5" />
-      <rect x="36" y="8" width="20" height="20" rx="4" fill="none" stroke="currentColor" strokeWidth="3.5" />
-      <rect x="8" y="36" width="20" height="20" rx="4" fill="none" stroke="currentColor" strokeWidth="3.5" />
-      <rect x="14" y="14" width="8" height="8" rx="2" />
-      <rect x="42" y="14" width="8" height="8" rx="2" />
-      <rect x="14" y="42" width="8" height="8" rx="2" />
-      <rect x="42" y="38" width="8" height="8" rx="2" />
-      <rect x="54" y="38" width="8" height="8" rx="2" />
-      <rect x="38" y="52" width="8" height="8" rx="2" />
-      <rect x="54" y="54" width="6" height="6" rx="2" />
+      <image href="/brand-profile-qr.png" x="0" y="0" width="64" height="64"/>
     </svg>
   );
 }

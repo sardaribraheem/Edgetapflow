@@ -1,0 +1,123 @@
+{
+  "social-whatsapp-1": {
+    "src": "/link-card-references/social-whatsapp-1.webp",
+    "width": 450,
+    "height": 386,
+    "cover": [
+      58,
+      33,
+      30,
+      34
+    ]
+  },
+  "social-whatsapp-2": {
+    "src": "/link-card-references/social-whatsapp-2.webp",
+    "width": 454,
+    "height": 356,
+    "cover": [
+      39,
+      11,
+      33,
+      37
+    ]
+  },
+  "social-whatsapp-3": {
+    "src": "/link-card-references/social-whatsapp-3.webp",
+    "width": 420,
+    "height": 396,
+    "cover": [
+      10,
+      36,
+      38,
+      35
+    ]
+  },
+  "social-whatsapp-4": {
+    "src": "/link-card-references/social-whatsapp-4.webp",
+    "width": 438,
+    "height": 382,
+    "cover": [
+      54,
+      51,
+      27,
+      30
+    ]
+  },
+  "social-instagram-1": {
+    "src": "/link-card-references/social-instagram-1.webp",
+    "width": 498,
+    "height": 444,
+    "cover": [
+      54,
+      46,
+      31,
+      37
+    ]
+  },
+  "social-instagram-2": {
+    "src": "/link-card-references/social-instagram-2.webp",
+    "width": 496,
+    "height": 424,
+    "cover": [
+      64,
+      51,
+      21,
+      20
+    ]
+  },
+  "social-instagram-3": {
+    "src": "/link-card-references/social-instagram-3.webp",
+    "width": 508,
+    "height": 384,
+    "cover": [
+      22,
+      39,
+      32,
+      42
+    ]
+  },
+  "social-linkedin-1": {
+    "src": "/link-card-references/social-linkedin-1.webp",
+    "width": 1050,
+    "height": 872,
+    "cover": [
+      19,
+      44,
+      33,
+      32
+    ]
+  },
+  "social-linkedin-2": {
+    "src": "/link-card-references/social-linkedin-2.webp",
+    "width": 852,
+    "height": 766,
+    "cover": [
+      20,
+      42,
+      29,
+      32
+    ]
+  },
+  "social-linkedin-3": {
+    "src": "/link-card-references/social-linkedin-3.webp",
+    "width": 844,
+    "height": 626,
+    "cover": [
+      54,
+      29,
+      35,
+      44
+    ]
+  },
+  "social-tiktok-1": {
+    "src": "/link-card-references/social-tiktok-1.webp",
+    "width": 544,
+    "height": 676,
+    "cover": [
+      39,
+      61,
+      34,
+      23
+    ]
+  }
+}

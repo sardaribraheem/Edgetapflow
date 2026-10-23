@@ -1,4 +1,4 @@
-import FeedbackForm from "./FeedbackForm";
+import FeedbackReviews from "./FeedbackReviews";
 import Link from "next/link";
 import { SUPPORT_URL } from "@/lib/site";
 import {
@@ -24,7 +24,7 @@ export default function CustomCTA() {
       <div className="container-x relative flex flex-col items-center text-center">
         <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-[var(--cream)]/10 px-4 py-1.5 text-[12px] font-medium text-[var(--cream)]/80">
           <NfcWaves className="h-4 w-4 text-[var(--yellow)]" />
-          Physical → Digital experiences
+          Made for you
         </div>
 
         <h2 className="text-display max-w-4xl text-[clamp(2.6rem,7vw,5.5rem)]">
@@ -47,7 +47,7 @@ export default function CustomCTA() {
           </a>
         </div>
 
-        <FeedbackForm/>
+        <FeedbackReviews/>
       </div>
     </section>
   );

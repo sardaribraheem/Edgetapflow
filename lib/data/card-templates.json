@@ -235,5 +235,313 @@
     "preview": "/card-designs/honeycomb.png",
     "frontBackground": "/card-designs/honeycomb.png",
     "artworkMode": "honeycomb"
+  },
+  {
+    "id": "social-whatsapp-1",
+    "name": "WhatsApp Classic",
+    "tagline": "Your WhatsApp link",
+    "tone": "bg-white",
+    "description": "A WhatsApp design based on the supplied reference, personalized with your wording.",
+    "version": 1,
+    "background": "#ffffff",
+    "ink": "#168b48",
+    "accent": "#62c65d",
+    "font": "Arial",
+    "nameSlot": {
+      "x": 0.5,
+      "y": 0.7,
+      "width": 0.8,
+      "size": 4.5
+    },
+    "titleSlot": {
+      "x": 0.5,
+      "y": 0.79,
+      "width": 0.8,
+      "size": 2.5
+    },
+    "texture": "plain",
+    "frontBackground": "/link-card-designs/social-whatsapp-1.svg",
+    "preview": "/link-card-designs/social-whatsapp-1.webp",
+    "artworkMode": "social"
+  },
+  {
+    "id": "social-whatsapp-2",
+    "name": "WhatsApp Colour",
+    "tagline": "Your WhatsApp link",
+    "tone": "bg-white",
+    "description": "A WhatsApp design based on the supplied reference, personalized with your wording.",
+    "version": 1,
+    "background": "#168b48",
+    "ink": "#ffffff",
+    "accent": "#62c65d",
+    "font": "Arial",
+    "nameSlot": {
+      "x": 0.5,
+      "y": 0.7,
+      "width": 0.8,
+      "size": 4.5
+    },
+    "titleSlot": {
+      "x": 0.5,
+      "y": 0.79,
+      "width": 0.8,
+      "size": 2.5
+    },
+    "texture": "plain",
+    "frontBackground": "/link-card-designs/social-whatsapp-2.svg",
+    "preview": "/link-card-designs/social-whatsapp-2.webp",
+    "artworkMode": "social"
+  },
+  {
+    "id": "social-whatsapp-3",
+    "name": "WhatsApp Connect",
+    "tagline": "Your WhatsApp link",
+    "tone": "bg-white",
+    "description": "A WhatsApp design based on the supplied reference, personalized with your wording.",
+    "version": 1,
+    "background": "#ffffff",
+    "ink": "#168b48",
+    "accent": "#62c65d",
+    "font": "Arial",
+    "nameSlot": {
+      "x": 0.5,
+      "y": 0.7,
+      "width": 0.8,
+      "size": 4.5
+    },
+    "titleSlot": {
+      "x": 0.5,
+      "y": 0.79,
+      "width": 0.8,
+      "size": 2.5
+    },
+    "texture": "plain",
+    "frontBackground": "/link-card-designs/social-whatsapp-3.svg",
+    "preview": "/link-card-designs/social-whatsapp-3.webp",
+    "artworkMode": "social"
+  },
+  {
+    "id": "social-whatsapp-4",
+    "name": "WhatsApp Signature",
+    "tagline": "Your WhatsApp link",
+    "tone": "bg-white",
+    "description": "A WhatsApp design based on the supplied reference, personalized with your wording.",
+    "version": 1,
+    "background": "#ffffff",
+    "ink": "#168b48",
+    "accent": "#62c65d",
+    "font": "Arial",
+    "nameSlot": {
+      "x": 0.5,
+      "y": 0.7,
+      "width": 0.8,
+      "size": 4.5
+    },
+    "titleSlot": {
+      "x": 0.5,
+      "y": 0.79,
+      "width": 0.8,
+      "size": 2.5
+    },
+    "texture": "plain",
+    "frontBackground": "/link-card-designs/social-whatsapp-4.svg",
+    "preview": "/link-card-designs/social-whatsapp-4.webp",
+    "artworkMode": "social"
+  },
+  {
+    "id": "social-instagram-1",
+    "name": "Instagram Classic",
+    "tagline": "Your Instagram link",
+    "tone": "bg-white",
+    "description": "A Instagram design based on the supplied reference, personalized with your wording.",
+    "version": 1,
+    "background": "#ffffff",
+    "ink": "#a32b7c",
+    "accent": "#f5aa30",
+    "font": "Arial",
+    "nameSlot": {
+      "x": 0.5,
+      "y": 0.7,
+      "width": 0.8,
+      "size": 4.5
+    },
+    "titleSlot": {
+      "x": 0.5,
+      "y": 0.79,
+      "width": 0.8,
+      "size": 2.5
+    },
+    "texture": "plain",
+    "frontBackground": "/link-card-designs/social-instagram-1.svg",
+    "preview": "/link-card-designs/social-instagram-1.webp",
+    "artworkMode": "social"
+  },
+  {
+    "id": "social-instagram-2",
+    "name": "Instagram Colour",
+    "tagline": "Your Instagram link",
+    "tone": "bg-white",
+    "description": "A Instagram design based on the supplied reference, personalized with your wording.",
+    "version": 1,
+    "background": "#a32b7c",
+    "ink": "#ffffff",
+    "accent": "#f5aa30",
+    "font": "Arial",
+    "nameSlot": {
+      "x": 0.5,
+      "y": 0.7,
+      "width": 0.8,
+      "size": 4.5
+    },
+    "titleSlot": {
+      "x": 0.5,
+      "y": 0.79,
+      "width": 0.8,
+      "size": 2.5
+    },
+    "texture": "plain",
+    "frontBackground": "/link-card-designs/social-instagram-2.svg",
+    "preview": "/link-card-designs/social-instagram-2.webp",
+    "artworkMode": "social"
+  },
+  {
+    "id": "social-instagram-3",
+    "name": "Instagram Connect",
+    "tagline": "Your Instagram link",
+    "tone": "bg-white",
+    "description": "A Instagram design based on the supplied reference, personalized with your wording.",
+    "version": 1,
+    "background": "#a32b7c",
+    "ink": "#ffffff",
+    "accent": "#f5aa30",
+    "font": "Arial",
+    "nameSlot": {
+      "x": 0.5,
+      "y": 0.7,
+      "width": 0.8,
+      "size": 4.5
+    },
+    "titleSlot": {
+      "x": 0.5,
+      "y": 0.79,
+      "width": 0.8,
+      "size": 2.5
+    },
+    "texture": "plain",
+    "frontBackground": "/link-card-designs/social-instagram-3.svg",
+    "preview": "/link-card-designs/social-instagram-3.webp",
+    "artworkMode": "social"
+  },
+  {
+    "id": "social-linkedin-1",
+    "name": "LinkedIn Classic",
+    "tagline": "Your LinkedIn link",
+    "tone": "bg-white",
+    "description": "A LinkedIn design based on the supplied reference, personalized with your wording.",
+    "version": 1,
+    "background": "#ffffff",
+    "ink": "#0a66a0",
+    "accent": "#126dbb",
+    "font": "Arial",
+    "nameSlot": {
+      "x": 0.5,
+      "y": 0.7,
+      "width": 0.8,
+      "size": 4.5
+    },
+    "titleSlot": {
+      "x": 0.5,
+      "y": 0.79,
+      "width": 0.8,
+      "size": 2.5
+    },
+    "texture": "plain",
+    "frontBackground": "/link-card-designs/social-linkedin-1.svg",
+    "preview": "/link-card-designs/social-linkedin-1.webp",
+    "artworkMode": "social"
+  },
+  {
+    "id": "social-linkedin-2",
+    "name": "LinkedIn Colour",
+    "tagline": "Your LinkedIn link",
+    "tone": "bg-white",
+    "description": "A LinkedIn design based on the supplied reference, personalized with your wording.",
+    "version": 1,
+    "background": "#0a66a0",
+    "ink": "#ffffff",
+    "accent": "#126dbb",
+    "font": "Arial",
+    "nameSlot": {
+      "x": 0.5,
+      "y": 0.7,
+      "width": 0.8,
+      "size": 4.5
+    },
+    "titleSlot": {
+      "x": 0.5,
+      "y": 0.79,
+      "width": 0.8,
+      "size": 2.5
+    },
+    "texture": "plain",
+    "frontBackground": "/link-card-designs/social-linkedin-2.svg",
+    "preview": "/link-card-designs/social-linkedin-2.webp",
+    "artworkMode": "social"
+  },
+  {
+    "id": "social-linkedin-3",
+    "name": "LinkedIn Connect",
+    "tagline": "Your LinkedIn link",
+    "tone": "bg-white",
+    "description": "A LinkedIn design based on the supplied reference, personalized with your wording.",
+    "version": 1,
+    "background": "#ffffff",
+    "ink": "#0a66a0",
+    "accent": "#126dbb",
+    "font": "Arial",
+    "nameSlot": {
+      "x": 0.5,
+      "y": 0.7,
+      "width": 0.8,
+      "size": 4.5
+    },
+    "titleSlot": {
+      "x": 0.5,
+      "y": 0.79,
+      "width": 0.8,
+      "size": 2.5
+    },
+    "texture": "plain",
+    "frontBackground": "/link-card-designs/social-linkedin-3.svg",
+    "preview": "/link-card-designs/social-linkedin-3.webp",
+    "artworkMode": "social"
+  },
+  {
+    "id": "social-tiktok-1",
+    "name": "TikTok Classic",
+    "tagline": "Your TikTok link",
+    "tone": "bg-white",
+    "description": "A TikTok design based on the supplied reference, personalized with your wording.",
+    "version": 1,
+    "background": "#191919",
+    "ink": "#ffffff",
+    "accent": "#25f4ee",
+    "font": "Arial",
+    "nameSlot": {
+      "x": 0.5,
+      "y": 0.7,
+      "width": 0.8,
+      "size": 4.5
+    },
+    "titleSlot": {
+      "x": 0.5,
+      "y": 0.79,
+      "width": 0.8,
+      "size": 2.5
+    },
+    "texture": "plain",
+    "frontBackground": "/link-card-designs/social-tiktok-1.svg",
+    "preview": "/link-card-designs/social-tiktok-1.webp",
+    "artworkMode": "social"
   }
 ]

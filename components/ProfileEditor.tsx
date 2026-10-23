@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { prepareImageUpload } from '@/lib/image-upload';
 import type { Profile, ProfileLink } from '@/lib/data/profile';
 import { LINK_PRESETS, LINK_ACCENTS } from '@/lib/data/order';
 import { getCurrentUser } from '@/lib/auth';
@@ -27,13 +28,9 @@ export default function ProfileEditor({profile,uid,onClose,onSaved}:{profile:Pro
   },[]);
   useEffect(()=>()=>{if(preview)URL.revokeObjectURL(preview);},[preview]);
   useEffect(()=>()=>{if(logoPreview)URL.revokeObjectURL(logoPreview);},[logoPreview]);
-  const selectLogo=(file:File|undefined)=>{if(!file)return;if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size<=0||file.size>5*1024*1024){setError('Choose a JPEG, PNG or WebP logo up to 5 MB.');return;}setError('');setLogoFile(file);setLogoPreview(URL.createObjectURL(file));uploadedLogo.current=null;};
+  const selectLogo=async(file:File|undefined)=>{if(!file)return;setError('');try{file=await prepareImageUpload(file,5);setLogoFile(file);setLogoPreview(URL.createObjectURL(file));uploadedLogo.current=null;}catch(error){setError(error instanceof Error?error.message:'Could not open your logo.');}};
   const changeLink=(index:number,patch:Partial<ProfileLink>)=>setDraft(value=>({...value,links:value.links.map((link,i)=>i===index?{...link,...patch}:link)}));
-  const selectPhoto=(file:File|undefined)=>{
-    if(!file)return;
-    if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size<=0||file.size>5*1024*1024){setError('Choose a JPEG, PNG or WebP image up to 5 MB.');return;}
-    setError('');setPhoto(file);setPreview(URL.createObjectURL(file));uploaded.current=null;
-  };
+  const selectPhoto=async(file:File|undefined)=>{if(!file)return;setError('');try{file=await prepareImageUpload(file,5);setPhoto(file);setPreview(URL.createObjectURL(file));uploaded.current=null;}catch(error){setError(error instanceof Error?error.message:'Could not open your photo.');}};
   const save=async(event:FormEvent)=>{
     event.preventDefault();if(operation.current)return;
     if(!draft.displayName.trim()||draft.links.length>linkCapacity||draft.links.some(link=>!link.label.trim()||!isSafeContactUrl(link.url))){setError('Add a name and valid contact URLs within your purchased link allowance.');return;}
@@ -58,7 +55,7 @@ export default function ProfileEditor({profile,uid,onClose,onSaved}:{profile:Pro
       <fieldset disabled={busy} className="profile-editor-fields">
         <div className="flex flex-wrap items-center gap-4">
           <div className="h-20 w-20 overflow-hidden rounded-full">{photo&&preview||draft.avatar?<img src={photo&&preview||draft.avatar} alt="New profile photo preview" className="h-full w-full object-cover"/>:<DefaultAvatar size={44}/>}</div>
-          <div><label className="btn btn-ghost cursor-pointer px-4 py-3"><Icon name="camera" size={18}/>Change photo<input type="file" aria-label="Profile picture" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={event=>selectPhoto(event.target.files?.[0])}/></label><p className="mt-2 text-xs text-[var(--ink-soft)]">Public when saved · Up to 5 MB</p></div>
+          <div><label className="btn btn-ghost cursor-pointer px-4 py-3"><Icon name="camera" size={18}/>Change photo<input type="file" aria-label="Profile picture" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={event=>selectPhoto(event.target.files?.[0])}/></label><p className="mt-2 text-xs text-[var(--ink-soft)]">JPEG, PNG or WebP · Up to 5 MB · Public when saved</p></div>
           {(photo||draft.avatar)&&<button type="button" className="icon-button" aria-label="Remove profile picture" title="Remove photo" onClick={()=>{setPhoto(null);setPreview('');uploaded.current=null;setDraft(value=>({...value,avatar:''}));}}><Icon name="trash"/></button>}
         </div>
         {'logo' in profile&&<div className="flex flex-wrap items-center gap-4">{(logoPreview||draft.logo)&&<img src={logoPreview||draft.logo} alt="Logo preview" className="h-14 max-w-32 object-contain"/>}<label className="btn btn-ghost cursor-pointer px-4 py-3"><Icon name="camera" size={18}/>Logo (optional)<input type="file" aria-label="Profile logo" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={event=>selectLogo(event.target.files?.[0])}/></label>{(logoFile||draft.logo)&&<button type="button" className="icon-button" aria-label="Remove logo" onClick={()=>{setLogoFile(null);setLogoPreview('');uploadedLogo.current=null;setDraft(value=>({...value,logo:''}));}}><Icon name="trash"/></button>}<p className="text-xs text-[var(--ink-soft)]">Public when saved · Digital profile only. Printed cards keep their approved design.</p></div>}

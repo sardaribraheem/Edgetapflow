@@ -14,6 +14,7 @@ export type CardTemplateId = string;
 
 export type CardTemplate = {
   id: CardTemplateId;
+  channel?:string;
   preview?: string;
   name: string;
   tagline: string;
@@ -22,9 +23,9 @@ export type CardTemplate = {
 };
 
 const previewNames: Record<string, string> = { custom:'maincard', simple:'photography', lux:'studio', wood:'botanical', inverted:'honeycomb' };
-export const CARD_TEMPLATES: CardTemplate[] = ['custom','simple','lux','wood','inverted'].map<CardTemplate>(id => {
+export const CARD_TEMPLATES: CardTemplate[] = ['custom','simple','lux','wood','inverted',...templates.filter(t=>t.id.startsWith('social-')).map(t=>t.id)].map<CardTemplate>(id => {
   const t = templates.filter(t => t.id === id).sort((a,b) => b.version-a.version)[0];
-  return { id:t.id, name:t.name, tagline:t.tagline, tone:t.tone, description:t.description, preview:'/card-previews/'+previewNames[id]+'-v'+(id==='custom'?2:1)+'.webp' };
+  return { id:t.id, name:t.name, tagline:t.tagline, tone:t.tone, description:t.description, channel:id.startsWith('social-')?id.split('-')[1]:undefined, preview:id.startsWith('social-')?t.preview:'/card-previews/'+previewNames[id]+'-v'+(id==='custom'?2:1)+'.webp' };
 }).concat([{id:'upload',name:'Upload a design',tagline:'Your front & back',tone:'bg-[--sky-soft]',description:'Upload separate front and back artwork for review.',preview:undefined}]);
 
 // The plan (from /pricing) that seeded an order.
@@ -140,6 +141,7 @@ export const FULFILLMENT_STATES: FulfillmentState[] = FULFILLMENT_FLOW.map((s) =
 
 // ── Order ─────────────────────────────────────────────────────────
 export type Order = {
+  pricingVersion?:3; offer?:'two_card_bundle'|'three_card_bundle'; existingProfileId?:string;
   applicationStatus?: "submitted" | "under_review" | "changes_required" | "accepted" | "rejected" | "cancelled";
   applicationId?: string;
   approvedCardSize?: string;
@@ -156,6 +158,7 @@ export type Order = {
   designSharedAt?:number;
   designProofSentAt?: number;
   designProofDeadlineAt?: number;
+  deliveryIncluded?:boolean;
   deliveryPaymentRecipient?: 'edgetap' | 'rider_direct';
   fixedCardFormat?: boolean;
   riderFee?: number | null;
@@ -227,6 +230,16 @@ export const CARD_PRICES = {direct_link:999,profile:1499,standard:999} as const;
 export const CARD_PRICE = CARD_PRICES.profile;
 export const cardPrice = (product: CardProduct | 'standard' = 'profile') => CARD_PRICES[product];
 
-export function calculateSubtotal(quantity: number, product: CardProduct | 'standard' = 'profile', linkCount = 0): number {
-  return cardPrice(product) * Math.max(1, Math.min(20, Math.floor(quantity))) + (product === 'direct_link' ? 0 : extraLinkCost(linkCount));
+export type CardPricingSelection = {pricingVersion?:3;offer?:'two_card_bundle'|'three_card_bundle';existingProfileId?:string};
+export const EXTRA_CARD_PRICE = 700;
+export const THREE_CARD_BUNDLE_PRICE = 2499;
+export const BUNDLE_PRICES = {profile:{two_card_bundle:2099,three_card_bundle:2499},direct_link:{two_card_bundle:1599,three_card_bundle:1999}} as const;
+export function calculateSubtotal(quantity: number, product: CardProduct | 'standard' = 'profile', linkCount = 0, pricing:CardPricingSelection = {}): number {
+  const count=Math.max(1,Math.min(20,Math.floor(quantity)));
+  if(product!=='standard'&&pricing.pricingVersion===3){
+    const validOffer=pricing.offer && count===(pricing.offer==='two_card_bundle'?2:3);
+    const cards=pricing.existingProfileId?count*EXTRA_CARD_PRICE:validOffer?BUNDLE_PRICES[product][pricing.offer!]:CARD_PRICES[product]+(count-1)*EXTRA_CARD_PRICE;
+    return cards+(product==='profile'&&!pricing.existingProfileId?extraLinkCost(linkCount):0);
+  }
+  return cardPrice(product)*count+(product==='direct_link'?0:extraLinkCost(linkCount));
 }

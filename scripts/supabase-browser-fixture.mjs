@@ -4,7 +4,7 @@ import { chromium } from 'playwright';
 import assert from 'node:assert/strict';
 import { readFile, readdir } from 'node:fs/promises';
 import { createTestDatabase } from './supabase-test-db.mjs';
-export async function createBrowserFixture(){
+export async function createBrowserFixture({websiteReviews=false}={}){
 assert((await readFile('out/privacy.html','utf8')).includes('EdgeTap uses Supabase'), 'Build the isolated Supabase test export before running this suite.');
 const db=await createTestDatabase();
 const owner='22222222-2222-4222-8222-222222222222',staff='11111111-1111-4111-8111-111111111111';
@@ -54,5 +54,6 @@ async function setup(context){context.on('page',p=>{p.on('pageerror',e=>errors.p
  await context.route(/https:\/\/[^/]+[.]supabase[.]co\//,route=>{if(new URL(route.request().url()).origin!==backend){errors.push('Refused unexpected backend');return route.abort();}return route.fallback();});
  context.on('request',req=>{if(/firebase|firestore\.googleapis|identitytoolkit\.googleapis/.test(new URL(req.url()).hostname)) errors.push('Supabase-selected UI contacted Firebase');});}
 
+if(websiteReviews)for(let i=0;i<18;i++){const uid='44444444-4444-4444-8444-'+String(i+1).padStart(12,'0');await db.query('insert into auth.users values($1,$2)',[uid,'public-review-'+i+'@example.test']);await db.query('insert into private.website_reviews(author_id,author_name,rating,body) values($1,$2,$3,$4)',[uid,'Real fixture reviewer '+i,[5,4.5,4][i%3],'Published fixture experience '+i]);}
 return {browser,setup,flags,errors,owner,staff,other,profileId,image,backend,base,jwt,query:(sql,args=[])=>as(undefined,()=>db.query(sql,args)),rpc:(uid,name,args=[])=>as(uid,async()=>(await db.query(`select public.${name}(${args.map((_,i)=>`$${i+1}`).join(',')}) as value`,args)).rows[0].value),close:async()=>{await browser.close();await db.close();}};
 }

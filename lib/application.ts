@@ -7,6 +7,7 @@ import type { ProfileLink } from './data/profile';
 import { blankPhysicalCard, printedWords, type PhysicalCard, type PrintSettings, type PrintSnapshot } from './physical-card';
 
 export type ApplicationPayload = {
+  pricingVersion?:3; offer?:'two_card_bundle'|'three_card_bundle'; existingProfileId?:string;
   product?: 'direct_link' | 'profile';
   directLink?: string;
   customerNotes?: string;
@@ -17,8 +18,9 @@ export type ApplicationPayload = {
   payment: { method: CheckoutMethod; receiptUrl?: string; reference?: string };
 };
 export type ApplicationDraft = { id: string; orderId?: string; payload: ApplicationPayload; step: number; version: number; state: 'draft' | 'changes_required'; updatedAt: number };
-export type OrderSettings = { pickupDetails: string; deliveryDetails: string; hostingDetails: string; cardSizes: string[]; cardDimensions: string; designProofScope: 'pending'|'all_personalized'|'uploaded_only'; jazzcashNumber: string; cardPrice: number; cardEditorVersion?:number; designReviewVersion?:number; offerPrices?: {direct_link:number;profile:number}; checkoutVersion?:number; emailNotificationsEnabled: boolean; version: number };
+export type OrderSettings = { pickupDetails: string; deliveryDetails: string; hostingDetails: string; cardSizes: string[]; cardDimensions: string; designProofScope: 'pending'|'all_personalized'|'uploaded_only'; jazzcashNumber: string; cardPrice: number; cardEditorVersion?:number; designReviewVersion?:number; offerPrices?: {direct_link:number;profile:number}; checkoutVersion?:number; offerPricingVersion?:number; emailNotificationsEnabled: boolean; version: number };
 export type WizardDraft = {
+  pricingVersion?:3; offer?:'two_card_bundle'|'three_card_bundle'; existingProfileId?:string;
   product?: 'direct_link' | 'profile'; directLink?: string;
   cardTemplate: CardTemplateId; quantity: number; size: string;
   physical: PhysicalCard; backDesignPreview?: string; logoPreview?:string; logoUploadPending?:boolean;
@@ -27,11 +29,11 @@ export type WizardDraft = {
   links: ProfileLink[]; customer: CustomerInfo; deliveryMethod: DeliveryMethod; payment: PaymentInfo; customerNotes: string;
 };
 export function blankApplication(email: string): WizardDraft {
-  return { product:'profile', directLink:'', physical:blankPhysicalCard(),customerNotes:'', cardTemplate:'simple', quantity:1, size:STANDARD_CARD_SIZE, avatarUploadPending:false, displayName:'', title:'', bio:'', location:'', handleEdited:false, usernameSuggested:'', links:[{type:'email',label:'Email',url:'mailto:',icon:'email',accent:'#FF6B5B'}], customer:{fullName:'',phone:'',email,address:'',city:''},deliveryMethod:'delivery',payment:{method:'jazzcash',status:'pending'} };
+  return { pricingVersion:3, product:'profile', directLink:'', physical:blankPhysicalCard(),customerNotes:'', cardTemplate:'simple', quantity:1, size:STANDARD_CARD_SIZE, avatarUploadPending:false, displayName:'', title:'', bio:'', location:'', handleEdited:false, usernameSuggested:'', links:[{type:'email',label:'Email',url:'mailto:',icon:'email',accent:'#FF6B5B'}], customer:{fullName:'',phone:'',email,address:'',city:''},deliveryMethod:'delivery',payment:{method:'bank',status:'pending'} };
 }
 export function applicationPayload(d: WizardDraft): ApplicationPayload {
   const words=printedWords(d.physical,d.displayName||d.customer.fullName,d.title);
-  return {...(d.product?{product:d.product}:{}),...(d.product==='direct_link'?{directLink:normaliseDirectLink(d.directLink||'')}:{}),customerNotes:d.customerNotes,card:{template:d.cardTemplate,quantity:d.quantity,size:d.size,physical:{...d.physical,...(words.name?{printedName:words.name}:{}),printedTitle:words.title},...(d.cardTemplate==='upload' && d.customDesignUrl && d.customDesignUrl !== 'pending' ? {customDesignUrl:d.customDesignUrl}: {})},customer:{...d.customer,fullName:d.product==='direct_link'?d.customer.fullName:d.displayName.trim()||d.customer.fullName,...(d.deliveryMethod==='nastp_pickup'?{address:'',city:'',postalCode:''}:{})},profileDraft:d.product==='direct_link'?{displayName:d.customer.fullName||d.displayName,title:'',bio:'',usernameSuggested:'direct-card',links:[]}:{displayName:d.displayName,title:d.title,bio:d.bio,location:d.location||'',handleEdited:!!d.handleEdited,usernameSuggested:d.usernameSuggested||suggestProfileHandle(d.displayName),links:d.links,...(d.avatarUrl?{avatarUrl:d.avatarUrl}:{})},deliveryMethod:d.deliveryMethod,payment:{method:d.payment.method as CheckoutMethod,...(d.payment.receiptUrl?{receiptUrl:d.payment.receiptUrl}:{}),...(d.payment.reference?{reference:d.payment.reference}:{})}};
+  return {...(d.pricingVersion?{pricingVersion:d.pricingVersion}:{}),...(d.offer?{offer:d.offer}:{}),...(d.existingProfileId?{existingProfileId:d.existingProfileId}:{}),...(d.product?{product:d.product}:{}),...(d.product==='direct_link'?{directLink:normaliseDirectLink(d.directLink||'')}:{}),customerNotes:d.customerNotes,card:{template:d.cardTemplate,quantity:d.quantity,size:d.size,physical:{...d.physical,...(words.name?{printedName:words.name}:{}),printedTitle:words.title},...(d.cardTemplate==='upload' && d.customDesignUrl && d.customDesignUrl !== 'pending' ? {customDesignUrl:d.customDesignUrl}: {})},customer:{...d.customer,fullName:d.customer.fullName,...(d.deliveryMethod==='nastp_pickup'?{address:'',city:'',postalCode:''}:{})},profileDraft:d.product==='direct_link'?{displayName:d.customer.fullName||d.displayName,title:'',bio:'',usernameSuggested:'direct-card',links:[]}:{displayName:d.displayName,title:d.title,bio:d.bio,location:d.location||'',handleEdited:!!d.handleEdited,usernameSuggested:d.usernameSuggested||suggestProfileHandle(d.displayName),links:d.links,...(d.avatarUrl?{avatarUrl:d.avatarUrl}:{})},deliveryMethod:d.deliveryMethod,payment:{method:d.payment.method as CheckoutMethod,...(d.payment.receiptUrl?{receiptUrl:d.payment.receiptUrl}:{}),...(d.payment.reference?{reference:d.payment.reference}:{})}};
 }
 export function suggestProfileHandle(name: string): string {
   if (!name.trim()) return '';
@@ -45,7 +47,7 @@ export function contactEmail(links: ProfileLink[]): string {
   return '';
 }
 export function wizardFromApplication(p: ApplicationPayload): WizardDraft {
-  return {...blankApplication(p.customer.email),product:p.product,directLink:p.directLink,physical:p.card.physical||blankPhysicalCard(p.card.template),cardTemplate:p.card.template,quantity:p.card.quantity,size:STANDARD_CARD_SIZE,customDesignUrl:p.card.customDesignUrl,...p.profileDraft,...(p.product==='direct_link'?{displayName:p.card.physical?.printedName||'',title:p.card.physical?.printedTitle||''}:{}),avatarUrl:p.profileDraft.avatarUrl,customer:{...p.customer,fullName:p.product==='direct_link'?p.customer.fullName:p.profileDraft.displayName||p.customer.fullName},customerNotes:p.customerNotes||'',deliveryMethod:p.deliveryMethod,payment:{...p.payment,status:'pending'}};
+  return {...blankApplication(p.customer.email),pricingVersion:p.pricingVersion,offer:p.offer==='two_card_bundle'||p.offer==='three_card_bundle'?p.offer:undefined,existingProfileId:p.existingProfileId,product:p.product,directLink:p.directLink,physical:p.card.physical||blankPhysicalCard(p.card.template),cardTemplate:p.card.template,quantity:p.card.quantity,size:STANDARD_CARD_SIZE,customDesignUrl:p.card.customDesignUrl,...p.profileDraft,...(p.product==='direct_link'?{displayName:p.card.physical?.printedName||'',title:p.card.physical?.printedTitle||''}:{}),avatarUrl:p.profileDraft.avatarUrl,customer:{...p.customer,fullName:p.customer.fullName},customerNotes:p.customerNotes||'',deliveryMethod:p.deliveryMethod,payment:{...p.payment,status:'pending'}};
 }
 async function rpc<T>(name:string,args:Record<string,unknown>={}):Promise<T>{
   const {data,error}=await getSupabase().rpc(name,args); if(error) throw Object.assign(new Error(error.message),{code:error.code}); return data as T;
@@ -53,6 +55,7 @@ async function rpc<T>(name:string,args:Record<string,unknown>={}):Promise<T>{
 export function isOrderingUnavailable(error: unknown): boolean {
   return ['PGRST202','PGRST205','42883','42P01'].includes((error as {code?:string})?.code || '');
 }
+export const attachExistingOrderProfile=(order:Order)=>rpc<void>('attach_existing_order_profile',{p_id:order.id,p_version:order.version});
 export const confirmLinkDestination=(order:Order)=>rpc<void>('confirm_link_destination',{p_id:order.id,p_version:order.version});
 export function supportsCardEditor(settings:OrderSettings|null,draft:WizardDraft):boolean {return (!(draft.physical.logoUrl||draft.logoPreview||draft.physical.templateVersion>=2)||(settings?.cardEditorVersion||0)>=4)&&(!draft.physical.editor||(settings?.cardEditorVersion||0)>=3);}
 export function supportsProofReview(settings:OrderSettings|null,draft:WizardDraft):boolean{return !draft.product||(settings?.designReviewVersion||0)>=1;}
@@ -87,6 +90,7 @@ export function nextOrderAction(o:Order):string{
   if(o.applicationStatus==='rejected'||o.applicationStatus==='cancelled')return 'This application is closed. Contact EdgeTap about any payment or remedy questions.';
   if(o.applicationStatus!=='accepted')return "We're reviewing your request. Any updates will appear here.";
   if(o.fulfillment.status==='ready_for_pickup')return o.fulfillmentInstructions||'Your card is ready at NASTP Delta 3. Pickup Monday–Friday, 9 am–5 pm. Contact +92 304 414 9674 after reaching NASTP.';
+  if(o.fulfillment.status==='shipped'&&o.deliveryIncluded)return 'Your rider is on the way. Follow the delivery updates here.';
   if(o.fulfillment.status==='shipped')return o.deliveryPaymentRecipient==='rider_direct'?'Your rider is on the way. Pay the recorded delivery fare directly to the rider; it is separate from your card payment.':'Your card has been marked dispatched. EdgeTap will confirm delivery details.';
   if(['completed','delivered','picked_up'].includes(o.fulfillment.status))return 'Your card has been marked received. Contact EdgeTap if you need help.';
   if(o.designProofStatus==='changes_requested')return 'EdgeTap is revising your card from your change note. Printing is on hold.';

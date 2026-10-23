@@ -28,7 +28,7 @@ Default `npm run build` uses Turbopack; webpack is the supported fallback when w
 
 Production project: **Firebase Hosting `edgetapflow`**. Supabase project: **`dxyxvervvlxhwwbcbttd`**. Deploy the reviewed export only with owner authorization. `npm run deploy:hosting` rebuilds, checks, then deploys Hosting with Firebase CLI; no Firebase data-service rules should be deployed for the Supabase workflow. Confirm the built configuration before publication and verify public routing/metadata/assets afterward.
 
-Hosted schema is **001–015 plus 017/018**, with **016 unapplied**. Never blindly run `supabase db push`: it could include optional 016. Review exact migrations and linked history and obtain scope-specific authorization before any schema/data operation. Git push itself does not publish Hosting or apply migrations.
+Hosted schema is **001–015 plus 017–021**, with **016 unapplied**. Never blindly run `supabase db push`: it could include optional 016. Review exact migrations and linked history and obtain scope-specific authorization before any schema/data operation. Git push itself does not publish Hosting or apply migrations.
 
 Hosting clean URLs and `/u/** → /profile.html` preserve incoming-handle lookup. Unknown handles render Profile not found without founder fallback, but the static rewrite returns HTTP 200; they remain noindex. No customer profile is included in the five-page sitemap. Preserve both Firebase aliases and saved NFC URLs/approved snapshots.
 

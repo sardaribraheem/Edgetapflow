@@ -48,16 +48,16 @@ The landing page order is the order of components inside `app/page.tsx`. Moving 
 Open `lib/data/motion.ts`:
 
 ```ts
-export const OFFER_MOTION = {pixelsPerSecond:32,minScale:.86,maxScale:1};
+export const OFFER_MOTION = {pixelsPerSecond:48,minScale:.86,maxScale:1};
 ```
 
 - `pixelsPerSecond`: higher is faster. Try `36` for slightly faster or `26` for slower. Keep it positive.
 - `minScale`: edge-card size. `.86` means 86% of its normal size; `.92` gives less shrinking.
 - `maxScale`: centre-card size. Keep `1` unless you also allow more vertical space to prevent clipping.
 
-The centre emphasis changes smoothly as each card moves. Hover pauses; touching/dragging or focusing gives the visitor control. Reduced-motion mode disables autoplay. Do not add pause/resume buttons or animate widths.
+The centre emphasis changes smoothly as each card moves. The local 23 October update keeps autoplay running on hover, supports drag momentum and resumes after a drag. Keyboard focus pauses movement for access; reduced-motion mode disables autoplay. Do not add pause/resume buttons or animate widths.
 
-After changing speed, test on a phone-sized window and a desktop window. Watch a full loop for jumps. Hover to confirm it pauses. Use Tab to confirm links are reachable. Changing these values does not require a database migration.
+After changing speed, test on a phone-sized window and a desktop window. Watch a full loop for jumps. Hover to confirm it continues, then drag/flick and confirm autoplay resumes. Use Tab to confirm links are reachable. Changing these values does not require a database migration.
 
 ## 4. Add or edit a What we offer feature card
 
@@ -130,7 +130,7 @@ If something breaks, read the terminal error and undo your last small edit. Typi
 
 ## 9. Card offers and customizer
 
-See [businessguide.md](businessguide.md) for current offers and [LAUNCH_STATUS.md](LAUNCH_STATUS.md) for release state. `/pricing` has three symmetrical main offers; responsive stacking is in `app/globals.css`. Enquiry rows sit underneath. Keep pricing and legal/landing wording consistent.
+See [businessguide.md](businessguide.md) for current offers and [LAUNCH_STATUS.md](LAUNCH_STATUS.md) for release state. `/pricing` has three main offers with a raised gold/dark Profile Card. `PricingCarousel.tsx` initially centers it in a horizontal mobile row with position buttons; responsive styles are in `app/globals.css`. Enquiry rows sit underneath. Keep pricing and legal/landing wording consistent.
 
 - `lib/data/order.ts`: `CARD_PRICES` and product types. Prices also need a **new server migration**, not just a text edit. Never edit an applied migration to change a price.
 - `components/order/DirectLinkStep.tsx`: the six destination choices and URL field. `lib/nfc-link.ts` validates the normalized public URL and conservative NTAG215 budget. Adding a label/placeholder does not create a new product.
@@ -208,3 +208,6 @@ Checks: `npm run test:design-review` is local SQL. For `npm run test:design-revi
 - Staff A4 print sheet: `components/admin/AdminOrderSheet.tsx`, `lib/print-job.ts`. Final proof review remains the authority; never bypass payment/specification/current-revision checks for exports.
 
 Use [backendguide.md](backendguide.md) for server capability/price changes, [BUILD.md](BUILD.md) for release checks and [RELEASE_HISTORY.md](RELEASE_HISTORY.md) for verification limits. Generated screenshots/logs are disposable; source assets and test scripts are retained.
+
+
+Latest website Link Card gallery: `assets/linkcard/` contains the 11 owner references. Run `node scripts/build-link-card-designs.mjs` for the flat printable SVG layouts and sample previews, and `node scripts/build-link-card-references.mjs` for gallery WebP copies plus the QR-cover manifest. `OrderSteps` overlays the real homepage demo QR on each reference’s stock QR area. These gallery mockups are not used as print backgrounds. Registered template definitions in pending migration 020 must match `card-templates.json`; never change a published template version in place. Marketing `brand-profile-qr.png` now encodes the website root; fulfillment still renders the actual confirmed customer destination.

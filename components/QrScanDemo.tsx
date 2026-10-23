@@ -26,7 +26,7 @@ export default function QrScanDemo() {
     <div ref={stage} className="scan-demo-stage">
       <div className="story-card-target"><StoryLabels target="card"/><EdgeTapCardBack className="scan-demo-card"/></div>
       <div className="story-phone-target"><StoryLabels target="phone"/>
-      <div className={`scan-demo-phone story-device ${phase === 'connected' ? 'is-connected' : ''}`} aria-label={phase === 'connected' ? 'Phone showing Ibraheem’s profile after scanning the QR' : 'Phone camera scanning the card’s QR code'}>
+      <div className={`scan-demo-phone story-device ${phase === 'connected' ? 'is-connected' : ''}`} aria-label={phase === 'connected' ? 'Phone showing a profile after scanning the QR' : 'Phone camera scanning the card’s QR code'}>
         {phase === 'connected' ? <PhoneProfile/> : <div className="scan-camera-screen">
           <Icon name="camera" size={18}/>
           <div className="scan-viewfinder"><img src="/brand-profile-qr.png" alt="QR code in the camera viewfinder" draggable={false}/><span className={phase === 'scanning' ? 'scan-line is-scanning' : 'scan-line'} /></div>

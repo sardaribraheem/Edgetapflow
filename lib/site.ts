@@ -22,8 +22,8 @@ export function profileUrl(username: string): string {
   return `${APP_URL}/u/${encodeURIComponent(username)}`;
 }
 export const SUPPORT_EMAIL = "sardaribraheem277@gmail.com";
-// Set only after the owner supplies the graphic designer’s contact URL.
-export const DESIGNER_URL: string | null = null;
+// Owner-supplied designer contact; separate from payment and general support.
+export const DESIGNER_URL = 'https://wa.me/923271360809';
 export const SUPPORT_URL = "https://wa.me/923044149674";
 
 export function profileReturnPath(value: string | null): string {

@@ -1,9 +1,9 @@
 import { usesSupabase } from './backend';
 import { getSupabase } from './supabase';
+import { prepareImageUpload } from './image-upload';
 
 async function upload(bucket: string, uid: string, file: File, maxMb: number): Promise<string> {
-  if (!['image/jpeg','image/png','image/webp'].includes(file.type)) throw new Error('Use a JPEG, PNG or WebP image.');
-  if (file.size<=0 || file.size>maxMb*1024*1024) throw new Error(`Image must be under ${maxMb} MB.`);
+  file = await prepareImageUpload(file,maxMb);
   const extension = { 'image/jpeg':'jpg','image/png':'png','image/webp':'webp' }[file.type];
   const path = `${uid}/${crypto.randomUUID()}.${extension}`;
   const { error } = await getSupabase().storage.from(bucket).upload(path, file, { contentType: file.type, upsert: false });

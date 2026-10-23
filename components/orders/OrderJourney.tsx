@@ -1,7 +1,15 @@
 import type { Order } from '@/lib/data/order';
 
 export default function OrderJourney({order}:{order:Order}) {
-  const stages:Record<string,number>={new:94,paid:96,profile_created:97,production_ready:97,printing:98,ready_for_nfc:98,nfc_programmed:99,qa_passed:99,ready_to_ship:99,ready_for_pickup:99,shipped:99,delivered:100,picked_up:100,completed:100};
-  const progress=['cancelled','rejected'].includes(order.applicationStatus||'')?0:stages[order.fulfillment.status]||94;
-  return <div role="progressbar" aria-label="Order progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress} className="builder-progress-track"><span style={{transform:`scaleX(${progress/100})`}}/></div>;
+  const closed=['cancelled','rejected'].includes(order.applicationStatus||'');
+  const received=['delivered','picked_up','completed'].includes(order.fulfillment.status);
+  const designApproved=['approved','approved_no_response','not_required'].includes(order.designProofStatus||'');
+  const stages=[
+    {label:'Payment verification',done:order.payment.status==='paid',detail:order.payment.status==='paid'?'Verified':order.payment.status==='failed'?'New payment proof needed':'Verification pending'},
+    {label:'Order review',done:order.applicationStatus==='accepted',detail:order.applicationStatus==='accepted'?'Order approved':order.applicationStatus==='changes_required'?'Changes needed':closed?'Order closed':'Approval pending'},
+    {label:'Design approval',done:designApproved,detail:order.designProofStatus==='not_required'?'Not required for this order':designApproved?'Design approved':order.designProofStatus==='awaiting_response'?'Your approval needed':order.designProofStatus==='changes_requested'?'Design changes requested':'Not approved yet'},
+    {label:'Your card',done:received,detail:received?'Received':order.fulfillment.status==='printing'?'Printing':order.fulfillment.status==='ready_for_pickup'?'Ready to collect':order.fulfillment.status==='shipped'?'On the way':'Not ready yet'},
+  ];
+  const current=closed?-1:stages.findIndex(stage=>!stage.done);
+  return <ol className="order-journey" aria-label="Order stages">{stages.map((stage,index)=><li key={stage.label} data-complete={stage.done} aria-current={index===current?'step':undefined}>{stage.label}<small>{stage.detail}</small></li>)}</ol>;
 }

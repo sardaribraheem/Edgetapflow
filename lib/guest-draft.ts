@@ -14,14 +14,14 @@ export async function readGuestDraft():Promise<GuestDraft|null>{
 export function localPayload(draft:WizardDraft):ApplicationPayload{
  const payload=applicationPayload(draft);
  payload.profileDraft.usernameSuggested=draft.usernameSuggested;
- delete payload.card.customDesignUrl;if(payload.card.physical){delete payload.card.physical.backDesignUrl;delete payload.card.physical.logoUrl;}delete payload.profileDraft.avatarUrl;
- payload.customer.email='';payload.payment={method:'jazzcash'};
+ delete payload.card.customDesignUrl;if(payload.card.physical){delete payload.card.physical.backDesignUrl;if(!draft.existingProfileId)delete payload.card.physical.logoUrl;}if(!draft.existingProfileId)delete payload.profileDraft.avatarUrl;
+ payload.customer.email='';payload.payment={method:'bank'};
  return payload;
 }
 export async function writeGuestDraft(value:GuestDraft):Promise<GuestDraft>{
  const db=await open();
  try{return await new Promise((resolve,reject)=>{const tx=db.transaction(STORE,'readwrite'),store=tx.objectStore(STORE),request=store.get(KEY);let result:GuestDraft;let conflict=false;
- request.onsuccess=()=>{const old=request.result as GuestDraft|undefined;if((old&&(old.id!==value.id||old.revision!==value.revision))||(!old&&value.revision!==0)){conflict=true;tx.abort();return;}result={...value,revision:value.revision+1,updatedAt:Date.now(),step:Math.max(0,Math.min(5,value.step))};result.payload.payment={method:'jazzcash'};store.put(result,KEY);};
+ request.onsuccess=()=>{const old=request.result as GuestDraft|undefined;if((old&&(old.id!==value.id||old.revision!==value.revision))||(!old&&value.revision!==0)){conflict=true;tx.abort();return;}result={...value,revision:value.revision+1,updatedAt:Date.now(),step:Math.max(0,Math.min(5,value.step))};result.payload.payment={method:'bank'};store.put(result,KEY);};
  tx.oncomplete=()=>resolve(result);tx.onerror=()=>reject(new Error('Could not save on this device. Storage may be full or blocked.'));tx.onabort=()=>reject(new Error(conflict?'This device draft changed in another tab. Reload to recover it.':'Could not save on this device. Storage may be full or blocked.'));});}finally{db.close();}
 }
 export async function clearGuestDraft(id:string):Promise<void>{const db=await open();try{await new Promise<void>((resolve,reject)=>{const tx=db.transaction(STORE,'readwrite'),store=tx.objectStore(STORE),request=store.get(KEY);request.onsuccess=()=>{if(request.result?.id===id)store.delete(KEY);};tx.oncomplete=()=>resolve();tx.onerror=()=>reject(new Error('Could not clear the device draft.'));tx.onabort=()=>reject(new Error('Could not clear the device draft.'));});}finally{db.close();}}

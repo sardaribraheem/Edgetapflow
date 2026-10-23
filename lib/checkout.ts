@@ -6,9 +6,9 @@ export const extraLinkCost = (count: number) => Math.max(0, count - INCLUDED_LIN
 export type CheckoutMethod = 'jazzcash' | 'easypaisa' | 'bank';
 export const PAYMENT_RECIPIENT = 'Muhammad Ibraheem Anwar';
 export const PAYMENT_METHODS = [
+  { id: 'bank', label: 'Bank', number: 'PK46MEZN0000300116179673' },
   { id: 'jazzcash', label: 'JazzCash', number: '03044149674' },
   { id: 'easypaisa', label: 'Easypaisa', number: '03044149674' },
-  { id: 'bank', label: 'Meezan Bank', number: 'PK46MEZN0000300116179673' },
 ] as const;
 export function contactLinkValue(link: ProfileLink) {
   if (link.type === 'email') return link.url.replace(/^mailto:/i, '');

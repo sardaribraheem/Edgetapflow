@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useSyncExternalStore } from "react";
-import { gsap } from "@/lib/animations";
 import { solutions } from "@/lib/data/content";
 import SolutionCard from "./SolutionCard";
 import {OFFER_MOTION} from '@/lib/data/motion';
@@ -22,56 +21,44 @@ export default function SolutionGrid() {
   useEffect(() => {
     const row = carousel.current, strip = track.current;
     if (!row || !strip) return;
-    let visible = false, hovered = false, stopped = false;
-    let tween: gsap.core.Tween | undefined;
-    let slots: HTMLElement[] = [], centres: number[] = [];
-    const scaleCards = () => {
-      const x=Number(gsap.getProperty(strip,'x'))||0,centre=row.clientWidth/2+row.scrollLeft;
-      slots.forEach((slot,index)=>{const distance=Math.min(1,Math.abs(centres[index]+x-centre)/(row.clientWidth*.6));const emphasis=(1+Math.cos(Math.PI*distance))/2;const card=slot.firstElementChild as HTMLElement;card.style.transform=`scale(${OFFER_MOTION.minScale+(OFFER_MOTION.maxScale-OFFER_MOTION.minScale)*emphasis})`;});
+    let visible=false, focused=false, frame=0, previous=0, distance=0, velocity=0;
+    let drag: {id:number;x:number;time:number;distance:number} | null=null;
+    let suppressClick=false;
+    const slots=Array.from(strip.querySelectorAll<HTMLElement>('.offer-slot'));
+    const measure=()=>{distance=slots[standard.length].offsetLeft-slots[0].offsetLeft;};
+    const wrap=(value:number)=>distance ? (value % distance + distance) % distance : value;
+    const scaleCards=()=>{
+      const center=row.scrollLeft+row.clientWidth/2;
+      slots.forEach(slot=>{const d=Math.min(1,Math.abs(slot.offsetLeft+slot.offsetWidth/2-center)/(row.clientWidth*.6));const emphasis=(1+Math.cos(Math.PI*d))/2;(slot.firstElementChild as HTMLElement).style.transform=`scale(${OFFER_MOTION.minScale+(OFFER_MOTION.maxScale-OFFER_MOTION.minScale)*emphasis})`;});
     };
-    const update = () => {
-      const moving = !reduced && !hovered && !stopped && visible && !document.hidden;
-      row.dataset.moving = String(moving);
-      if (moving) tween?.play(); else tween?.pause();
+    const tick=(now:number)=>{
+      const elapsed=Math.min(40,now-(previous||now));previous=now;
+      const moving=!reduced&&visible&&!document.hidden&&!focused&&!drag;
+      row.dataset.moving=String(moving);
+      if(moving){row.scrollLeft=wrap(row.scrollLeft+(OFFER_MOTION.pixelsPerSecond/1000+velocity)*elapsed);velocity*=Math.exp(-elapsed/450);if(Math.abs(velocity)<.005)velocity=0;}
+      if(visible&&!document.hidden)scaleCards();frame=requestAnimationFrame(tick);
     };
-    const measure = () => {
-      const progress = tween?.progress() || 0;
-      tween?.kill();
-      gsap.set(strip, { clearProps: "transform" });
-      slots=Array.from(strip.querySelectorAll<HTMLElement>('.offer-slot'));
-      centres=slots.map(slot=>slot.offsetLeft+slot.offsetWidth/2);
-      if (reduced || stopped) {scaleCards();return;}
-      const distance = slots[standard.length].offsetLeft - slots[0].offsetLeft;
-      tween = gsap.fromTo(strip, { x: 0 }, { x: -distance, duration: distance / OFFER_MOTION.pixelsPerSecond, ease: "none", repeat: -1, paused: true, force3D: true,onUpdate:scaleCards });
-      tween.progress(progress);
-      update();
+    const down=(event:PointerEvent)=>{if(event.button!==0)return;drag={id:event.pointerId,x:event.clientX,time:performance.now(),distance:0};velocity=0;suppressClick=false;row.dataset.dragging='true';};
+    const move=(event:PointerEvent)=>{
+      if(!drag||drag.id!==event.pointerId)return;
+      const now=performance.now(),delta=drag.x-event.clientX;
+      drag.distance+=Math.abs(delta);
+      if(drag.distance>6){suppressClick=true;row.setPointerCapture(event.pointerId);row.scrollLeft=reduced?row.scrollLeft+delta:wrap(row.scrollLeft+delta);velocity=.65*velocity+.35*Math.max(-3,Math.min(3,delta/Math.max(1,now-drag.time)));}
+      drag.x=event.clientX;drag.time=now;
     };
-    const stop = () => {
-      if (stopped || reduced) return;
-      const position = -(Number(gsap.getProperty(strip, "x")) || 0);
-      stopped = true; tween?.kill();
-      gsap.set(strip, { clearProps: "transform" });
-      row.scrollLeft = position;
-      scaleCards();
-      update();
-    };
-    const enter = (event: PointerEvent) => { if (event.pointerType === "mouse") { hovered = true; update(); } };
-    const leave = () => { hovered = false; update(); };
-    const wheel = (event: WheelEvent) => { if (event.deltaX || event.shiftKey) stop(); };
-    const observer = new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; update(); });
-    const resize = new ResizeObserver(measure);
-    observer.observe(row); resize.observe(row);
-    row.addEventListener("pointerenter", enter); row.addEventListener("pointerleave", leave);
-    row.addEventListener("pointerdown", stop); row.addEventListener("focusin", stop); row.addEventListener("wheel", wheel, { passive: true });
-    row.addEventListener('scroll',scaleCards,{passive:true});
-    document.addEventListener("visibilitychange", update);
-    measure();
-    return () => {
-      observer.disconnect(); resize.disconnect(); tween?.kill(); gsap.set(strip, { clearProps: "transform" });
-      row.removeEventListener("pointerenter", enter); row.removeEventListener("pointerleave", leave);
-      row.removeEventListener("pointerdown", stop); row.removeEventListener("focusin", stop); row.removeEventListener("wheel", wheel);
-      row.removeEventListener('scroll',scaleCards);
-      document.removeEventListener("visibilitychange", update);
+    const up=(event:PointerEvent)=>{if(drag?.id!==event.pointerId)return;if(row.hasPointerCapture(event.pointerId))row.releasePointerCapture(event.pointerId);drag=null;row.dataset.dragging='false';};
+    const click=(event:MouseEvent)=>{if(suppressClick){event.preventDefault();event.stopPropagation();suppressClick=false;}};
+    const focus=(event:FocusEvent)=>{focused=(event.target as HTMLElement).matches(':focus-visible');velocity=0;};
+    const blur=(event:FocusEvent)=>{if(!row.contains(event.relatedTarget as Node|null))focused=false;};
+    const observer=new IntersectionObserver(([entry])=>{visible=entry.isIntersecting;});
+    const resize=new ResizeObserver(measure);
+    observer.observe(row);resize.observe(row);measure();frame=requestAnimationFrame(tick);
+    row.addEventListener('pointerdown',down);row.addEventListener('pointermove',move);row.addEventListener('pointerup',up);row.addEventListener('pointercancel',up);row.addEventListener('click',click,true);
+    row.addEventListener('focusin',focus);row.addEventListener('focusout',blur);
+    return()=>{
+      cancelAnimationFrame(frame);observer.disconnect();resize.disconnect();
+      row.removeEventListener('pointerdown',down);row.removeEventListener('pointermove',move);row.removeEventListener('pointerup',up);row.removeEventListener('pointercancel',up);row.removeEventListener('click',click,true);row.removeEventListener('focusin',focus);row.removeEventListener('focusout',blur);
+      slots.forEach(slot=>(slot.firstElementChild as HTMLElement).style.removeProperty('transform'));
     };
   }, [reduced, standard.length]);
   return <section id="offer" className="section relative">

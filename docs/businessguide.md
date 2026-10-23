@@ -18,6 +18,14 @@ Cards are PVC NFC, **85.60 × 53.98 mm**; Wood is a printed style. Identical car
 
 Customers may choose a preset, customize both faces or upload separate front/back artwork. Final proof approval is separate from checkout. Designer/custom/bulk work requires an agreed scope/quote; the designer URL and public designer fee remain unset. An internal Rs. 5,000 design-fee idea was never a confirmed public offer.
 
+## Owner-approved website update, 23 October 2026 (local, pending release)
+
+The website source now shows a Rs. 2,200 crossed-out Profile Card price. For new version-3 orders, the profile and first card cost Rs. 1,499, and each additional card costs Rs. 700. Manually selecting three cards totals Rs. 2899. Clicking the separate three-card offer applies **Rs. 2,299**; changing quantity clears that offer. Additional cards for an active profile owned by the signed-in account cost Rs. 700 each, without another profile or duplicate link charges. Existing submitted orders retain their pricing version. Paid extra links for new profiles remain Rs. 50 each above ten; delivery has no separate customer fee on version-3 orders.
+
+These rules require the reviewed additive migration `202610230020_website_offers.sql` and matching frontend release. They have not been applied to the hosted backend by this task. Do not change a price label without the matching server capability. The owner's earlier spoken Rs. 2,700 bundle figure was explicitly corrected to Rs. 2,299.
+
+The designer's owner-supplied WhatsApp is +92 327 1360809, separate from general support and payments. The requested customer policy now asks for a clear unboxing video to support arrival-damage/defect claims, retaining applicable-law remedies and existing EdgeTap-error handling. Sample review cards are labelled as samples; private feedback remains private.
+
 ## Payment, delivery and profile terms
 
 | Method | Receiving details |
@@ -64,3 +72,8 @@ Begin with a few orders within observed capacity. Demonstrate the real tap/QR ou
 Compare supplier samples for actual chip/writability, print consistency, file/bleed/orientation requirements, turnaround and defect handling. Approve the fading sample correction first. Reconcile unfinished paid orders daily; review contribution, defects and support weekly. Record enquiries, paid conversion, actual fulfillment time, repeat/referral orders and failures using real evidence. Expand only when fulfillment and contribution are reliable.
 
 Future menus, review cards, attendance, teams, analytics and companion-app ideas are in [ROADMAP.md](ROADMAP.md). They are not launch-ready offers. No stock purchase, policy change or service activation is implied by this guide.
+
+Latest website revision: Profile bundles 3/2299 and 5/3499; Link bundles 3/1999 and 5/2799. Extra matching cards cost 700 for either product. Bank is the new default display/payment method. Delivery inclusion is stored per order, shown at payment, and rider costs stay staff-only; legacy order terms remain intact. Eleven social design templates are registered additively by pending 020. Their flat vector artwork is rebuilt from the owner’s screenshot references without stock QR codes or contact details. Only marketing QR codes change to the preferred website root.
+
+
+Final owner-approved release correction: Profile Card explicit bundles are two for 2099 and three for 2499; Link Card bundles are two for 1599 and three for 1999, with single Link Card confirmed at 999. There are no five-card offers. Extra matching cards remain 700 under manual quantity selection. Migration 021 adds a separate public website review table and narrowly granted publish/list RPCs. Existing private feedback stays private; anonymous listing is limited to eight entries per keyset page, sorted rating/newest/id descending. Already-public legacy reviews remain visible. One public review per signed-in account can be updated after a one-minute cooldown. The UI explicitly discloses public name/rating/text and offers half-star ratings.

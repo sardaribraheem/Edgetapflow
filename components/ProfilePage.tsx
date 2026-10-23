@@ -63,6 +63,7 @@ export default function ProfilePage({
   const profile = previewOnly ? initialProfile : savedProfile;
   const [user, setUser] = useState<User | null>(null);
   const [ownerAccess, setOwnerAccess] = useState(false);
+  const [accessError, setAccessError] = useState(false), [accessAttempt, setAccessAttempt] = useState(0);
   const ProfileContainer = previewOnly ? "section" : "main";
   const isOwner = !previewOnly && !!user && ownerAccess;
   const [message, setMessage] = useState("");
@@ -77,14 +78,15 @@ export default function ProfilePage({
       const request = ++generation;
       if (accountUid.current !== current?.uid) { accountUid.current=current?.uid; setEditing(false); setOwnerAccess(false); }
       setUser(current);
+      setAccessError(false);
       if (!current) return;
       try {
         const allowed = await canEditProfile(initialProfile);
         if (active && request === generation) setOwnerAccess(allowed);
-      } catch { if (active && request === generation) setOwnerAccess(false); }
+      } catch { if (active && request === generation) {setOwnerAccess(false);setAccessError(true);} }
     });
     return () => { active = false; stop(); };
-  }, [previewOnly, initialProfile]);
+  }, [previewOnly, initialProfile, accessAttempt]);
 
   const downloadContact = async () => {
     if (downloadLock.current) return;
@@ -118,6 +120,8 @@ export default function ProfilePage({
       </DoodleField>
 
       <ProfileContainer className="container-x relative mx-auto w-full max-w-5xl py-6 my-auto">
+        {isOwner && <div className="mb-4 flex justify-end"><button type="button" onClick={()=>{setMessage('');setEditing(true);}} className="btn btn-ink px-5 py-3"><Icon name="edit" size={18}/>Edit profile</button></div>}
+        {!previewOnly && user && accessError && <p role="status" className="mb-4 text-sm">We could not check profile editing access. <button type="button" className="underline" onClick={()=>setAccessAttempt(value=>value+1)}>Try again</button></p>}
         {/* the card */}
         <div className="card-paper relative overflow-hidden">
           <SparkleDoodle className="absolute -right-2 -top-2 h-10 w-10 text-[var(--yellow)] md:hidden" aria-hidden="true" />
@@ -187,9 +191,7 @@ export default function ProfilePage({
                   <SaveIcon className="h-5 w-5" />
                 </span>
                 <span className="flex-1 font-display text-[16px] font-semibold">{downloading?'Creating PDF…':'Save Contact'}</span>
-                <span className="text-[16px] text-white/60 transition-transform group-hover:translate-x-1">
-                  →
-                </span>
+                <span aria-hidden="true" className="profile-download-arrow">↓</span>
               </button>
 
 
@@ -199,7 +201,7 @@ export default function ProfilePage({
           {/* foot bar (hidden in preview mode — the /order shell provides Edit/Continue) */}
           <footer className={`flex items-center justify-between gap-3 border-t border-[var(--ink)]/8 bg-[var(--paper-2)]/60 px-7 py-4 sm:px-10 md:px-12 ${previewOnly ? "hidden" : ""}`}>
             <Link href="/" className="profile-powered" aria-label="Powered by EdgeTap"><span className="grid h-8 w-8 place-items-center rounded-full bg-[var(--yellow)]"><NfcWaves className="h-4 w-4 text-[var(--ink)]"/></span><span>Powered by EdgeTap</span></Link>
-            {isOwner ? <button type="button" onClick={()=>{setMessage('');setEditing(true);}} className="btn btn-ghost px-4 py-2 text-xs"><Icon name="edit" size={17}/>Edit profile</button> : <Link href={user?'/account':`/account?next=${encodeURIComponent('/u/'+profile.username)}`} className="btn btn-ghost px-4 py-2 text-xs">{user?'My account':'Sign in to edit'}</Link>}
+
           </footer>
         </div>
       </ProfileContainer>
