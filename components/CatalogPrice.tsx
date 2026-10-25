@@ -1,0 +1,9 @@
+"use client";
+import {usePricing} from './PricingProvider';
+import {formatPrice} from '@/lib/pricing';
+export function CatalogPrice({product}:{product:'direct_link'|'profile'|'website'}){
+ const {catalog,error,refresh}=usePricing();if(!catalog)return <p role="status" className="pricing-price-detail">{error||'Loading price…'}{error&&<button type="button" className="ml-2 underline" onClick={()=>{void refresh().catch(()=>{});}}>Retry</button>}</p>;
+ const p=catalog[product];return <div className="pricing-discount font-display" aria-label={p.comparison&&p.comparison>p.price?`Previously Rs. ${formatPrice(p.comparison)}, now Rs. ${formatPrice(p.price)}`:`Rs. ${formatPrice(p.price)}`}><p className="pricing-price"><span className="pricing-currency">Rs.</span> {formatPrice(p.price)}</p>{p.comparison!==null&&p.comparison>p.price&&<del>{formatPrice(p.comparison)}</del>}</div>;
+}
+export function CatalogRenewal(){const {catalog}=usePricing();return <>{catalog?'Rs. '+formatPrice(catalog.website.renewal):'Current quoted price'}/year for hosting and domain from year two</>;}
+export function CatalogExtras(){const {catalog}=usePricing();if(!catalog)return null;return <p className="mt-4 text-sm text-[var(--ink-soft)]">Additional matching cards: Rs. {formatPrice(catalog.additionalCardPrice)} each. First ten profile links included; extra links: Rs. {formatPrice(catalog.extraLinkPrice)} each, once per profile. Available card bundles are shown when you order.</p>;}

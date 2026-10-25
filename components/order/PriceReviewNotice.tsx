@@ -1,0 +1,4 @@
+import {calculateSubtotal} from '@/lib/data/order';
+import {formatPrice} from '@/lib/pricing';
+import type {WizardDraft} from '@/lib/application';
+export default function PriceReviewNotice({draft,onAccept}:{draft:WizardDraft;onAccept:()=>void}){return <section role="alert" className="mb-5 rounded-xl border-2 border-[var(--yellow)] bg-[var(--yellow-soft)] p-4"><h2 className="font-bold">Please review the updated price</h2><p className="mt-2 text-sm">Your current total is Rs. {formatPrice(calculateSubtotal(draft.quantity,draft.product||'profile',draft.links.length,draft))}. Prices changed after your payment receipt was added. Check the amount before continuing. If you already paid a different amount, contact EdgeTap.</p><button type="button" className="btn btn-ink mt-3 px-4 py-2 text-sm" onClick={onAccept}>I have reviewed the current total</button></section>;}

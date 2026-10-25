@@ -2,16 +2,19 @@
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
+import type {User} from '@/lib/auth';
 import { nav } from "@/lib/data/content";
 import { NfcWaves, SparkleDoodle } from "./doodles";
 
 type Props = {
+  user:User|null;
+  authReady:boolean;
   open: boolean;
   onClose: () => void;
 };
 
 // Side drawer for mobile navigation — visually consistent with EdgeTap.
-export default function MobileMenu({ open, onClose }: Props) {
+export default function MobileMenu({ open, onClose, user, authReady }: Props) {
   const dialogRef = useRef<HTMLDivElement>(null);
   // lock scroll + Escape to close
   useEffect(() => {
@@ -30,20 +33,16 @@ export default function MobileMenu({ open, onClose }: Props) {
     };
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
-    const onResize = () => {
-      if (window.matchMedia("(min-width: 1024px)").matches) onClose();
-    };
-    window.addEventListener("resize", onResize);
+
     return () => {
       document.removeEventListener("keydown", onKey);
-      window.removeEventListener("resize", onResize);
       document.body.style.overflow = previousOverflow;
       previousFocus?.focus();
     };
   }, [open, onClose]);
 
   return (
-    <div className={`fixed inset-0 z-50 lg:hidden ${open ? "" : "pointer-events-none"}`}>
+    <div className={`fixed inset-0 z-50 ${open ? "" : "pointer-events-none"}`}>
       {/* backdrop */}
       <button
         aria-label="Close menu"
@@ -101,8 +100,9 @@ export default function MobileMenu({ open, onClose }: Props) {
         {/* CTA */}
         <div className="mt-auto px-5 pb-6">
           <Link href="/account" onClick={onClose} className="btn btn-ghost mb-3 w-full px-6 py-3 text-base">
-            Sign in / My account
+            {authReady?(user?'My account':'Sign in / Login'):'Checking account…'}
           </Link>
+          {authReady&&user&&<Link href="/account/profile" onClick={onClose} className="btn btn-ghost mb-3 w-full px-6 py-3 text-base">Edit profile</Link>}
           <a
             href={nav.cta.href}
             onClick={onClose}

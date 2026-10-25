@@ -1,14 +1,17 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { nav } from "@/lib/data/content";
+import {auth,onAuthStateChanged,type User} from '@/lib/auth';
 import MobileMenu from "./MobileMenu";
 
 // Floating rounded pill navigation; collapses to a drawer on mobile.
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [user,setUser]=useState<User|null>(null),[authReady,setAuthReady]=useState(false);
+  useEffect(()=>onAuthStateChanged(auth,current=>{setUser(current);setAuthReady(true);}),[]);
   const closeMenu = useCallback(() => setMenuOpen(false), []);
 
   return (
@@ -44,7 +47,7 @@ export default function Navbar() {
                 {nav.cta.label} <span aria-hidden="true">→</span>
               </a>
               <Link href="/account" prefetch={false} className="nav-account-link btn whitespace-nowrap bg-white px-5 py-2.5 text-[13px] ring-1 ring-[var(--ink)]/15 hover:bg-[var(--cream)]">
-                Sign in
+                {authReady?(user?'My account':'Sign in'):'Account'}
               </Link>
 
               {/* mobile menu button */}
@@ -53,7 +56,7 @@ export default function Navbar() {
                 aria-controls="mobile-menu"
                 onClick={() => setMenuOpen(true)}
                 aria-label="Open menu"
-                className="grid h-11 w-11 place-items-center rounded-full bg-[var(--ink)]/6 text-[var(--ink)] lg:hidden"
+                className="grid h-11 w-11 place-items-center rounded-full bg-[var(--ink)]/6 text-[var(--ink)]"
               >
                 <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2.2} strokeLinecap="round">
                   <path d="M4 7h16M4 12h16M4 17h10" />
@@ -64,7 +67,7 @@ export default function Navbar() {
         </div>
       </header>
 
-      <MobileMenu open={menuOpen} onClose={closeMenu} />
+      <MobileMenu open={menuOpen} onClose={closeMenu} user={user} authReady={authReady} />
     </>
   );
 }

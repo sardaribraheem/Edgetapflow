@@ -1,3 +1,5 @@
+"use client";
+import {useLiveProfile} from '@/lib/use-live-profile';
 import { ibraheemProfile, profileContacts } from "@/lib/data/profile";
 import {
   InstagramIcon,
@@ -24,12 +26,13 @@ const iconFor = (type: string, className: string) => {
 // professional EdgeTap card (use case 01 / MEET SOMEONE).
 export type StoryPerson = { displayName:string; title:string; location:string; avatar:string };
 export default function PhoneProfile({ person }: { person?:StoryPerson } = {}) {
-  const profile = person || ibraheemProfile;
+  const live=useLiveProfile('ibraheem');
+  const profile = person || live || ibraheemProfile;
   const primary = person ? [
     {type:'whatsapp',label:'WhatsApp'},
     {type:'instagram',label:'Instagram'},
     {type:'portfolio',label:'Portfolio'},
-  ] : ibraheemProfile.links.filter((l) =>
+  ] : (live||ibraheemProfile).links.filter((l) =>
     ["whatsapp", "linkedin", "instagram", "portfolio"].includes(l.type),
   );
 

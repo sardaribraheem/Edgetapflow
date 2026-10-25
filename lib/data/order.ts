@@ -1,3 +1,4 @@
+import type {PricingCatalog} from '@/lib/pricing';
 import { extraLinkCost } from '../checkout';
 // Order / fulfillment domain data, kept separate from presentation.
 // Shared by the /order wizard, the admin dashboard, and lib/firestore.ts.
@@ -141,7 +142,7 @@ export const FULFILLMENT_STATES: FulfillmentState[] = FULFILLMENT_FLOW.map((s) =
 
 // ── Order ─────────────────────────────────────────────────────────
 export type Order = {
-  pricingVersion?:3; offer?:'two_card_bundle'|'three_card_bundle'; existingProfileId?:string;
+  pricingVersion?:3|4; pricingCatalogVersion?:number; pricingSnapshot?:PricingCatalog; offer?:'two_card_bundle'|'three_card_bundle'; existingProfileId?:string;
   applicationStatus?: "submitted" | "under_review" | "changes_required" | "accepted" | "rejected" | "cancelled";
   applicationId?: string;
   approvedCardSize?: string;
@@ -230,12 +231,18 @@ export const CARD_PRICES = {direct_link:999,profile:1499,standard:999} as const;
 export const CARD_PRICE = CARD_PRICES.profile;
 export const cardPrice = (product: CardProduct | 'standard' = 'profile') => CARD_PRICES[product];
 
-export type CardPricingSelection = {pricingVersion?:3;offer?:'two_card_bundle'|'three_card_bundle';existingProfileId?:string};
+export type CardPricingSelection = {pricingVersion?:3|4; pricingCatalogVersion?:number; pricingSnapshot?:PricingCatalog;offer?:'two_card_bundle'|'three_card_bundle';existingProfileId?:string};
 export const EXTRA_CARD_PRICE = 700;
 export const THREE_CARD_BUNDLE_PRICE = 2499;
 export const BUNDLE_PRICES = {profile:{two_card_bundle:2099,three_card_bundle:2499},direct_link:{two_card_bundle:1599,three_card_bundle:1999}} as const;
 export function calculateSubtotal(quantity: number, product: CardProduct | 'standard' = 'profile', linkCount = 0, pricing:CardPricingSelection = {}): number {
   const count=Math.max(1,Math.min(20,Math.floor(quantity)));
+  if(product!=='standard'&&pricing.pricingVersion===4){
+    const c=pricing.pricingSnapshot;if(!c)throw new Error('Load the order prices before continuing.');
+    const selected=pricing.offer&&count===(pricing.offer==='two_card_bundle'?2:3);
+    const cards=pricing.existingProfileId?count*c.additionalCardPrice:selected?c[product].offers[pricing.offer!].price:c[product].price+(count-1)*c.additionalCardPrice;
+    return Math.round((cards+(product==='profile'&&!pricing.existingProfileId?extraLinkCost(linkCount,c.extraLinkPrice):0))*100)/100;
+  }
   if(product!=='standard'&&pricing.pricingVersion===3){
     const validOffer=pricing.offer && count===(pricing.offer==='two_card_bundle'?2:3);
     const cards=pricing.existingProfileId?count*EXTRA_CARD_PRICE:validOffer?BUNDLE_PRICES[product][pricing.offer!]:CARD_PRICES[product]+(count-1)*EXTRA_CARD_PRICE;

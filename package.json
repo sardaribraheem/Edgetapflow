@@ -36,7 +36,9 @@
     "test:website-offers": "node scripts/test-website-offers.mjs",
     "test:website-feedback:browser": "node scripts/test-website-feedback-browser.mjs",
     "test:image-uploads": "node scripts/test-image-uploads.mjs",
-    "test:website-reviews": "node scripts/test-website-reviews.mjs"
+    "test:website-reviews": "node scripts/test-website-reviews.mjs",
+    "test:admin-pricing": "node scripts/test-admin-pricing-profiles.mjs",
+    "test:admin-pricing:browser": "node scripts/test-admin-pricing-profiles-browser.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

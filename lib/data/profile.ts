@@ -1,6 +1,5 @@
-// Single source of truth for the EdgeTap profile data.
-// Used by the /u/ibraheem profile route AND the marketing site's
-// use-case storytelling (MEET SOMEONE -> digital profile).
+// Types and demonstration fallback data. Live public profiles and homepage
+// social destinations must read the saved backend profile.
 
 export type ProfileLink = {
   type: string;

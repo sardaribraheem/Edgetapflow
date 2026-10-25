@@ -1,3 +1,4 @@
+import type {PricingCatalog} from '@/lib/pricing';
 import type { CheckoutMethod } from './checkout';
 import { normaliseDirectLink } from './nfc-link';
 import { STANDARD_CARD_SIZE } from './data/order';
@@ -7,7 +8,7 @@ import type { ProfileLink } from './data/profile';
 import { blankPhysicalCard, printedWords, type PhysicalCard, type PrintSettings, type PrintSnapshot } from './physical-card';
 
 export type ApplicationPayload = {
-  pricingVersion?:3; offer?:'two_card_bundle'|'three_card_bundle'; existingProfileId?:string;
+  pricingVersion?:3|4; pricingCatalogVersion?:number; offer?:'two_card_bundle'|'three_card_bundle'; existingProfileId?:string;
   product?: 'direct_link' | 'profile';
   directLink?: string;
   customerNotes?: string;
@@ -18,9 +19,9 @@ export type ApplicationPayload = {
   payment: { method: CheckoutMethod; receiptUrl?: string; reference?: string };
 };
 export type ApplicationDraft = { id: string; orderId?: string; payload: ApplicationPayload; step: number; version: number; state: 'draft' | 'changes_required'; updatedAt: number };
-export type OrderSettings = { pickupDetails: string; deliveryDetails: string; hostingDetails: string; cardSizes: string[]; cardDimensions: string; designProofScope: 'pending'|'all_personalized'|'uploaded_only'; jazzcashNumber: string; cardPrice: number; cardEditorVersion?:number; designReviewVersion?:number; offerPrices?: {direct_link:number;profile:number}; checkoutVersion?:number; offerPricingVersion?:number; emailNotificationsEnabled: boolean; version: number };
+export type OrderSettings = { pickupDetails: string; deliveryDetails: string; hostingDetails: string; cardSizes: string[]; cardDimensions: string; designProofScope: 'pending'|'all_personalized'|'uploaded_only'; jazzcashNumber: string; cardPrice: number; cardEditorVersion?:number; designReviewVersion?:number; offerPrices?: {direct_link:number;profile:number}; checkoutVersion?:number; pricingCatalogVersion?:number; offerPricingVersion?:number; emailNotificationsEnabled: boolean; version: number };
 export type WizardDraft = {
-  pricingVersion?:3; offer?:'two_card_bundle'|'three_card_bundle'; existingProfileId?:string;
+  pricingVersion?:3|4; pricingCatalogVersion?:number; pricingSnapshot?:PricingCatalog; offer?:'two_card_bundle'|'three_card_bundle'; existingProfileId?:string;
   product?: 'direct_link' | 'profile'; directLink?: string;
   cardTemplate: CardTemplateId; quantity: number; size: string;
   physical: PhysicalCard; backDesignPreview?: string; logoPreview?:string; logoUploadPending?:boolean;
@@ -29,11 +30,11 @@ export type WizardDraft = {
   links: ProfileLink[]; customer: CustomerInfo; deliveryMethod: DeliveryMethod; payment: PaymentInfo; customerNotes: string;
 };
 export function blankApplication(email: string): WizardDraft {
-  return { pricingVersion:3, product:'profile', directLink:'', physical:blankPhysicalCard(),customerNotes:'', cardTemplate:'simple', quantity:1, size:STANDARD_CARD_SIZE, avatarUploadPending:false, displayName:'', title:'', bio:'', location:'', handleEdited:false, usernameSuggested:'', links:[{type:'email',label:'Email',url:'mailto:',icon:'email',accent:'#FF6B5B'}], customer:{fullName:'',phone:'',email,address:'',city:''},deliveryMethod:'delivery',payment:{method:'bank',status:'pending'} };
+  return { pricingVersion:4, product:'profile', directLink:'', physical:blankPhysicalCard(),customerNotes:'', cardTemplate:'simple', quantity:1, size:STANDARD_CARD_SIZE, avatarUploadPending:false, displayName:'', title:'', bio:'', location:'', handleEdited:false, usernameSuggested:'', links:[{type:'email',label:'Email',url:'mailto:',icon:'email',accent:'#FF6B5B'}], customer:{fullName:'',phone:'',email,address:'',city:''},deliveryMethod:'delivery',payment:{method:'bank',status:'pending'} };
 }
 export function applicationPayload(d: WizardDraft): ApplicationPayload {
   const words=printedWords(d.physical,d.displayName||d.customer.fullName,d.title);
-  return {...(d.pricingVersion?{pricingVersion:d.pricingVersion}:{}),...(d.offer?{offer:d.offer}:{}),...(d.existingProfileId?{existingProfileId:d.existingProfileId}:{}),...(d.product?{product:d.product}:{}),...(d.product==='direct_link'?{directLink:normaliseDirectLink(d.directLink||'')}:{}),customerNotes:d.customerNotes,card:{template:d.cardTemplate,quantity:d.quantity,size:d.size,physical:{...d.physical,...(words.name?{printedName:words.name}:{}),printedTitle:words.title},...(d.cardTemplate==='upload' && d.customDesignUrl && d.customDesignUrl !== 'pending' ? {customDesignUrl:d.customDesignUrl}: {})},customer:{...d.customer,fullName:d.customer.fullName,...(d.deliveryMethod==='nastp_pickup'?{address:'',city:'',postalCode:''}:{})},profileDraft:d.product==='direct_link'?{displayName:d.customer.fullName||d.displayName,title:'',bio:'',usernameSuggested:'direct-card',links:[]}:{displayName:d.displayName,title:d.title,bio:d.bio,location:d.location||'',handleEdited:!!d.handleEdited,usernameSuggested:d.usernameSuggested||suggestProfileHandle(d.displayName),links:d.links,...(d.avatarUrl?{avatarUrl:d.avatarUrl}:{})},deliveryMethod:d.deliveryMethod,payment:{method:d.payment.method as CheckoutMethod,...(d.payment.receiptUrl?{receiptUrl:d.payment.receiptUrl}:{}),...(d.payment.reference?{reference:d.payment.reference}:{})}};
+  return {...(d.pricingVersion?{pricingVersion:d.pricingVersion}:{}),...(d.pricingCatalogVersion?{pricingCatalogVersion:d.pricingCatalogVersion}:{}),...(d.offer?{offer:d.offer}:{}),...(d.existingProfileId?{existingProfileId:d.existingProfileId}:{}),...(d.product?{product:d.product}:{}),...(d.product==='direct_link'?{directLink:normaliseDirectLink(d.directLink||'')}:{}),customerNotes:d.customerNotes,card:{template:d.cardTemplate,quantity:d.quantity,size:d.size,physical:{...d.physical,...(words.name?{printedName:words.name}:{}),printedTitle:words.title},...(d.cardTemplate==='upload' && d.customDesignUrl && d.customDesignUrl !== 'pending' ? {customDesignUrl:d.customDesignUrl}: {})},customer:{...d.customer,fullName:d.customer.fullName,...(d.deliveryMethod==='nastp_pickup'?{address:'',city:'',postalCode:''}:{})},profileDraft:d.product==='direct_link'?{displayName:d.customer.fullName||d.displayName,title:'',bio:'',usernameSuggested:'direct-card',links:[]}:{displayName:d.displayName,title:d.title,bio:d.bio,location:d.location||'',handleEdited:!!d.handleEdited,usernameSuggested:d.usernameSuggested||suggestProfileHandle(d.displayName),links:d.links,...(d.avatarUrl?{avatarUrl:d.avatarUrl}:{})},deliveryMethod:d.deliveryMethod,payment:{method:d.payment.method as CheckoutMethod,...(d.payment.receiptUrl?{receiptUrl:d.payment.receiptUrl}:{}),...(d.payment.reference?{reference:d.payment.reference}:{})}};
 }
 export function suggestProfileHandle(name: string): string {
   if (!name.trim()) return '';
@@ -47,7 +48,7 @@ export function contactEmail(links: ProfileLink[]): string {
   return '';
 }
 export function wizardFromApplication(p: ApplicationPayload): WizardDraft {
-  return {...blankApplication(p.customer.email),pricingVersion:p.pricingVersion,offer:p.offer==='two_card_bundle'||p.offer==='three_card_bundle'?p.offer:undefined,existingProfileId:p.existingProfileId,product:p.product,directLink:p.directLink,physical:p.card.physical||blankPhysicalCard(p.card.template),cardTemplate:p.card.template,quantity:p.card.quantity,size:STANDARD_CARD_SIZE,customDesignUrl:p.card.customDesignUrl,...p.profileDraft,...(p.product==='direct_link'?{displayName:p.card.physical?.printedName||'',title:p.card.physical?.printedTitle||''}:{}),avatarUrl:p.profileDraft.avatarUrl,customer:{...p.customer,fullName:p.customer.fullName},customerNotes:p.customerNotes||'',deliveryMethod:p.deliveryMethod,payment:{...p.payment,status:'pending'}};
+  return {...blankApplication(p.customer.email),pricingVersion:p.pricingVersion,pricingCatalogVersion:p.pricingCatalogVersion,offer:p.offer==='two_card_bundle'||p.offer==='three_card_bundle'?p.offer:undefined,existingProfileId:p.existingProfileId,product:p.product,directLink:p.directLink,physical:p.card.physical||blankPhysicalCard(p.card.template),cardTemplate:p.card.template,quantity:p.card.quantity,size:STANDARD_CARD_SIZE,customDesignUrl:p.card.customDesignUrl,...p.profileDraft,...(p.product==='direct_link'?{displayName:p.card.physical?.printedName||'',title:p.card.physical?.printedTitle||''}:{}),avatarUrl:p.profileDraft.avatarUrl,customer:{...p.customer,fullName:p.customer.fullName},customerNotes:p.customerNotes||'',deliveryMethod:p.deliveryMethod,payment:{...p.payment,status:'pending'}};
 }
 async function rpc<T>(name:string,args:Record<string,unknown>={}):Promise<T>{
   const {data,error}=await getSupabase().rpc(name,args); if(error) throw Object.assign(new Error(error.message),{code:error.code}); return data as T;

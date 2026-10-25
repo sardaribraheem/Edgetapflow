@@ -1,5 +1,5 @@
 "use client";
-import { BUNDLE_PRICES } from '@/lib/data/order';
+import {selectedOfferPrice} from '@/lib/pricing';
 import type { Order } from '@/lib/data/order';
 import { FULFILLMENT_LABELS, REVIEW_LABELS, nextOrderAction } from '@/lib/application';
 import PrivateFile from './PrivateFile';
@@ -14,7 +14,7 @@ export default function OrderSummary({order:o,onChanged}:{order:Order;onChanged?
  const accountReview=o.designRevisionPolicy==='one_included'||o.designReviewChannel==='account';
  return <section className="space-y-5 break-words"><OrderJourney order={o}/>
   <div className="flex flex-wrap gap-2"><span className="rounded-full bg-[var(--yellow-soft)] px-3 py-1 text-sm font-bold">{REVIEW_LABELS[o.applicationStatus||'']||'Review status unavailable'}</span><span className="rounded-full bg-[var(--mint-soft)] px-3 py-1 text-sm">{o.payment.status==='paid'?'Card Payment Verified':o.payment.status==='failed'?'Card Payment Rejected':'Card Payment Pending'}</span><span className="rounded-full bg-white px-3 py-1 text-sm">{FULFILLMENT_LABELS[o.fulfillment.status]||o.fulfillment.status}</span></div>
-  <p className="rounded-xl bg-white p-4">{nextOrderAction(o)}</p>{o.offer&&<p className="text-sm font-bold">Selected offer: {o.card.quantity} cards for Rs. {BUNDLE_PRICES[o.plan==='direct_link'?'direct_link':'profile'][o.offer]}.</p>}{o.existingProfileId&&<p className="text-sm">Additional cards for your existing profile at Rs. 700 each.</p>}
+  <p className="rounded-xl bg-white p-4">{nextOrderAction(o)}</p>{o.offer&&<p className="text-sm font-bold">Selected offer: {o.card.quantity} cards for Rs. {selectedOfferPrice(o.plan,o.offer,o.pricingSnapshot)}.</p>}{o.existingProfileId&&<p className="text-sm">Additional cards for your existing profile at Rs. {o.pricingSnapshot?.additionalCardPrice??700} each.</p>}
   {!!messages.length&&<section className="customer-message" aria-label="Messages from EdgeTap"><h3 className="font-bold">Messages from EdgeTap</h3>{messages.map(event=><div key={event.id} className="mt-3"><p className="whitespace-pre-wrap">{event.message}</p><time className="text-xs">{new Date(event.at).toLocaleString()}</time></div>)}{o.applicationStatus==='changes_required'&&o.applicationId&&<Link href={'/order?draft='+o.applicationId} className="mt-4 inline-block font-bold underline">Update your details and resubmit</Link>}</section>}
   <details className="rounded-xl bg-white p-4"><summary className="min-h-11 cursor-pointer font-semibold">Your information</summary><dl className="mt-4 grid gap-3 text-sm sm:grid-cols-2">
    <div><dt className="font-bold">Customer</dt><dd>{o.customer.fullName}</dd></div><div><dt className="font-bold">Email</dt><dd>{o.customer.email}</dd></div>

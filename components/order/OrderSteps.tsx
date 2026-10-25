@@ -6,7 +6,7 @@ import ArtworkSlot from "./ArtworkSlot";
 import AvatarCropper from "./AvatarCropper";
 import { suggestProfileHandle } from "@/lib/application";
 import ProfilePage from "@/components/ProfilePage";
-import { CARD_TEMPLATES, BUNDLE_PRICES, calculateSubtotal, type CustomerInfo, type DeliveryMethod } from "@/lib/data/order";
+import { CARD_TEMPLATES, calculateSubtotal, type CustomerInfo, type DeliveryMethod } from "@/lib/data/order";
 import type { Profile } from "@/lib/data/profile";
 import { fileToDataUrl } from "@/lib/upload-service";
 import Icon from "@/components/ui/Icon";
@@ -18,6 +18,7 @@ import Image from 'next/image';
 import CardEditorDialog from './CardEditorDialog';
 import type { WizardDraft } from "@/lib/application";
 import {directLinkChannel} from '@/lib/nfc-link';
+import {selectedOfferPrice,LEGACY_PRICING} from '@/lib/pricing';
 import {blankPhysicalCard} from '@/lib/physical-card';
 export function CardStep({
   draft,
@@ -61,7 +62,7 @@ export function CardStep({
 
       </div>
 
-      {draft.product==='profile'&&draft.pricingVersion===3&&<ExistingProfilePicker draft={draft} onChange={onChange}/>}
+      {draft.product==='profile'&&!!draft.pricingVersion&&<ExistingProfilePicker draft={draft} onChange={onChange}/>}
       <div className="card-design-grid mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
         {CARD_TEMPLATES.filter(t=>draft.product==='direct_link'?t.channel?t.channel===directLinkChannel(draft.directLink||''):['custom','upload'].includes(t.id):!t.channel).map((t) => {const reference=linkReferences[t.id as keyof typeof linkReferences];return (
           <button
@@ -116,8 +117,8 @@ export function CardStep({
           <button type="button" aria-label="Increase quantity" onClick={() => onChange({ quantity: Math.min(20, draft.quantity + 1),offer:undefined })} className="grid h-11 w-11 place-items-center rounded-full bg-[var(--ink)] text-white font-bold">+</button>
         </div>
       </div>
-      {draft.pricingVersion===3&&<div className="mt-4 text-sm"><p>{draft.existingProfileId?'Cards for your existing profile: Rs. 700 each.':'Add another matching card for Rs. 700.'}</p>{!draft.existingProfileId&&<div className="bundle-offers">{(['two_card_bundle','three_card_bundle'] as const).map(offer=>{
-        const quantity=offer==='two_card_bundle'?2:3,price=BUNDLE_PRICES[draft.product==='direct_link'?'direct_link':'profile'][offer];
+      {!!draft.pricingVersion&&<div className="mt-4 text-sm"><p>{draft.existingProfileId?'Cards for your existing profile: ':'Add another matching card for '}Rs. {draft.pricingSnapshot?.additionalCardPrice??700}{draft.existingProfileId?' each.':'.'}</p>{!draft.existingProfileId&&<div className="bundle-offers">{(['two_card_bundle','three_card_bundle'] as const).filter(offer=>(draft.pricingSnapshot||LEGACY_PRICING)[draft.product==='direct_link'?'direct_link':'profile'].offers[offer].enabled).map(offer=>{
+        const quantity=offer==='two_card_bundle'?2:3,price=selectedOfferPrice(draft.product||'profile',offer,draft.pricingSnapshot);
         return <div key={offer} className="bundle-offer mt-3 rounded-xl border-2 border-[var(--yellow)] bg-[var(--yellow-soft)] p-4"><p className="font-bold">Get {quantity} cards for Rs. {price}</p><p className="mt-1 text-xs">{draft.product==='direct_link'?'One link':'One profile'}, matching cards. Select this offer to claim the price.</p><button type="button" aria-pressed={draft.offer===offer} className="btn btn-ink mt-3 px-4 py-2 text-sm" onClick={()=>onChange({quantity,offer:draft.offer===offer?undefined:offer})}>{draft.offer===offer?'Bundle selected · Remove offer':`Claim ${quantity}-card offer`}</button></div>;
       })}</div>}{draft.offer&&<p role="status" className="mt-2 text-xs">Bundle price applied. Changing quantity removes this offer.</p>}</div>}
 

@@ -1,18 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { ibraheemProfile, Profile } from "@/lib/data/profile";
-import { canEditProfile } from "@/lib/data-service";
 import { isSafeContactUrl } from "@/lib/links";
 import { contactPdf } from "@/lib/contact-pdf";
-import { auth } from "@/lib/auth";
-import { onAuthStateChanged, User } from "@/lib/auth";
 import DoodleField from "./DoodleField";
 import DefaultAvatar from "./ui/DefaultAvatar";
 import Icon from "./ui/Icon";
-import dynamic from "next/dynamic";
-const ProfileEditor = dynamic(() => import("./ProfileEditor"));
 import {
   NfcWaves,
   InstagramIcon,
@@ -59,34 +54,10 @@ export default function ProfilePage({
   initialProfile?: Profile;
   previewOnly?: boolean;
 }) {
-  const [savedProfile, setProfile] = useState<Profile>(initialProfile);
-  const profile = previewOnly ? initialProfile : savedProfile;
-  const [user, setUser] = useState<User | null>(null);
-  const [ownerAccess, setOwnerAccess] = useState(false);
-  const [accessError, setAccessError] = useState(false), [accessAttempt, setAccessAttempt] = useState(0);
-  const ProfileContainer = previewOnly ? "section" : "main";
-  const isOwner = !previewOnly && !!user && ownerAccess;
-  const [message, setMessage] = useState("");
-  const [editing,setEditing] = useState(false),[downloading,setDownloading]=useState(false);
-  const accountUid=useRef<string|undefined>(undefined),downloadLock=useRef(false);
-
-  useEffect(() => {
-    if (previewOnly) return;
-    let active = true;
-    let generation = 0;
-    const stop = onAuthStateChanged(auth, async current => {
-      const request = ++generation;
-      if (accountUid.current !== current?.uid) { accountUid.current=current?.uid; setEditing(false); setOwnerAccess(false); }
-      setUser(current);
-      setAccessError(false);
-      if (!current) return;
-      try {
-        const allowed = await canEditProfile(initialProfile);
-        if (active && request === generation) setOwnerAccess(allowed);
-      } catch { if (active && request === generation) {setOwnerAccess(false);setAccessError(true);} }
-    });
-    return () => { active = false; stop(); };
-  }, [previewOnly, initialProfile, accessAttempt]);
+  const profile=initialProfile;
+  const ProfileContainer=previewOnly?'section':'main';
+  const [message,setMessage]=useState(''),[downloading,setDownloading]=useState(false);
+  const downloadLock=useRef(false);
 
   const downloadContact = async () => {
     if (downloadLock.current) return;
@@ -101,7 +72,7 @@ export default function ProfilePage({
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col justify-start overflow-y-auto py-12">
+    <div className={`relative flex min-h-screen flex-col justify-start overflow-y-auto ${previewOnly ? "py-12" : "pb-12 pt-28"}`}>
       {/* soft washes */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
         <div className="absolute left-1/4 top-16 h-72 w-72 rounded-full bg-[var(--yellow-soft)] opacity-60 blur-3xl" />
@@ -119,9 +90,7 @@ export default function ProfilePage({
         <SparkleDoodle className="absolute left-[28%] top-[78%] h-7 w-7 text-[var(--coral)] animate-pulse-soft" />
       </DoodleField>
 
-      <ProfileContainer className="container-x relative mx-auto w-full max-w-5xl py-6 my-auto">
-        {isOwner && <div className="mb-4 flex justify-end"><button type="button" onClick={()=>{setMessage('');setEditing(true);}} className="btn btn-ink px-5 py-3"><Icon name="edit" size={18}/>Edit profile</button></div>}
-        {!previewOnly && user && accessError && <p role="status" className="mb-4 text-sm">We could not check profile editing access. <button type="button" className="underline" onClick={()=>setAccessAttempt(value=>value+1)}>Try again</button></p>}
+      <ProfileContainer id={previewOnly?undefined:"main-content"} tabIndex={previewOnly?undefined:-1} className="container-x relative mx-auto w-full max-w-5xl py-6 my-auto">
         {/* the card */}
         <div className="card-paper relative overflow-hidden">
           <SparkleDoodle className="absolute -right-2 -top-2 h-10 w-10 text-[var(--yellow)] md:hidden" aria-hidden="true" />
@@ -205,7 +174,7 @@ export default function ProfilePage({
           </footer>
         </div>
       </ProfileContainer>
-      {editing && isOwner && user && <ProfileEditor profile={profile} uid={user.uid} onClose={()=>setEditing(false)} onSaved={saved=>{setProfile(saved);setEditing(false);setMessage('Profile updated.');}}/>}
+
     </div>
   );
 }

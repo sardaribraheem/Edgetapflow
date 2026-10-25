@@ -1,6 +1,6 @@
 # EdgeTap business guide
 
-Updated 18 October 2026. [Launch status](LAUNCH_STATUS.md) records readiness; this guide records commercial decisions and operating context.
+Updated 25 October 2026. [Launch status](LAUNCH_STATUS.md) records readiness; this guide records commercial decisions and operating context.
 
 ## Brand and offers
 
@@ -8,23 +8,23 @@ EdgeTap — **One tap. Infinite possibilities.** Help people share useful contac
 
 | Offer | Current price | Owner-confirmed standard price | Scope |
 |---|---:|---:|---|
-| Link Card | Rs. 999/card | Rs. 1,399 | One customer-supplied existing public URL |
-| EdgeTap Profile | Rs. 1,499/card | Rs. 1,899 | Editable profile; first ten links included, each extra link Rs. 50 once per profile, not per card |
+| Link Card | Rs. 999 first card | Rs. 1,399 | One customer-supplied existing public URL |
+| EdgeTap Profile | Rs. 1499 first card + profile | Rs. 2,200 | Editable profile; first ten links included, each extra link Rs. 50 once per profile, not per card |
 | Website + four cards | Rs. 29,999 | Rs. 36,999 | Contact-only agreed website/portfolio scope; first year included, Rs. 3,000 annually from year two; cards now or within first year |
 
-The owner explicitly confirmed the standard prices for crossed-out comparisons. Existing submitted prices/terms remain unchanged. Delivery is extra and paid directly to the rider. Profile links have a technical limit of 100; do not advertise unlimited links.
+These are the initial catalog values. Staff can edit website prices/comparisons, bundles, renewal and extra-card/link rates in Settings. Submitted prices/terms remain unchanged. New version-3/4 orders include delivery, disclosed at payment; historical delivery terms remain intact. Profile links have a technical limit of 100; do not advertise unlimited links.
 
 Cards are PVC NFC, **85.60 × 53.98 mm**; Wood is a printed style. Identical cards in one order share one design and destination. QR is optional and must encode the same destination as NFC. Keep public handles stable and existing printed URLs working. No universal phone-compatibility or instant-open promise.
 
-Customers may choose a preset, customize both faces or upload separate front/back artwork. Final proof approval is separate from checkout. Designer/custom/bulk work requires an agreed scope/quote; the designer URL and public designer fee remain unset. An internal Rs. 5,000 design-fee idea was never a confirmed public offer.
+Customers may choose a preset, customize both faces or upload separate front/back artwork. Final proof approval is separate from checkout. Designer/custom/bulk work requires an agreed scope/quote; the public designer fee requires a separate quote. An internal Rs. 5,000 design-fee idea was never a confirmed public offer.
 
-## Owner-approved website update, 23 October 2026 (local, pending release)
+## Website offers and admin pricing
 
-The website source now shows a Rs. 2,200 crossed-out Profile Card price. For new version-3 orders, the profile and first card cost Rs. 1,499, and each additional card costs Rs. 700. Manually selecting three cards totals Rs. 2899. Clicking the separate three-card offer applies **Rs. 2,299**; changing quantity clears that offer. Additional cards for an active profile owned by the signed-in account cost Rs. 700 each, without another profile or duplicate link charges. Existing submitted orders retain their pricing version. Paid extra links for new profiles remain Rs. 50 each above ten; delivery has no separate customer fee on version-3 orders.
+The website source now shows a Rs. 2,200 crossed-out Profile Card price. For new version-3 orders, the profile and first card cost Rs. 1,499, and each additional card costs Rs. 700. Manually selecting three cards totals Rs. 2899. Clicking the separate three-card offer applies **Rs. 2499**; changing quantity clears that offer. Additional cards for an active profile owned by the signed-in account cost Rs. 700 each, without another profile or duplicate link charges. Existing submitted orders retain their pricing version. Paid extra links for new profiles remain Rs. 50 each above ten; delivery has no separate customer fee on version-3 orders.
 
-These rules require the reviewed additive migration `202610230020_website_offers.sql` and matching frontend release. They have not been applied to the hosted backend by this task. Do not change a price label without the matching server capability. The owner's earlier spoken Rs. 2,700 bundle figure was explicitly corrected to Rs. 2,299.
+Released migrations 020–023 implement these website rules. Initial explicit bundles: Profile two/2099 and three/2499; Link two/1599 and three/1999, with no five-card offer. The dashboard can edit these prices and availability. Manual quantities retain simple unit/additional-card arithmetic and clear a selected offer. The database binds new orders to the current catalog and preserves submitted historical quotes.
 
-The designer's owner-supplied WhatsApp is +92 327 1360809, separate from general support and payments. The requested customer policy now asks for a clear unboxing video to support arrival-damage/defect claims, retaining applicable-law remedies and existing EdgeTap-error handling. Sample review cards are labelled as samples; private feedback remains private.
+The designer's owner-supplied WhatsApp is +92 327 1360809, separate from general support and payments. The requested customer policy now asks for a clear unboxing video to support arrival-damage/defect claims, retaining applicable-law remedies and existing EdgeTap-error handling. Sample reviews have been removed; only intentionally published public reviews appear. Private feedback remains private.
 
 ## Payment, delivery and profile terms
 
@@ -36,7 +36,7 @@ The designer's owner-supplied WhatsApp is +92 327 1360809, separate from general
 
 Recipient for all three: **Muhammad Ibraheem Anwar**. Staff verifies actual funds manually; a receipt screenshot is not payment confirmation. No automatic gateway or courier integration exists.
 
-Current pickup copy: **NASTP Delta 3, Monday–Friday, 9 am–5 pm Pakistan time**. Contact after reaching when ready. NIIT is the launch focus, not an approved pickup-location/hours change. Book delivery manually when ready, record actual fare/message and have the customer pay the rider directly. No invented flat fee, service radius or dispatch deadline.
+Current pickup copy: **NASTP Delta 3, Monday–Friday, 9 am–5 pm Pakistan time**. Contact after reaching when ready. NIIT is the launch focus, not an approved pickup-location/hours change. Book delivery manually when ready and record actual fare/message privately. New version-3/4 website orders have no separate customer delivery fee; honor historical saved terms. No invented flat fee, service radius or dispatch deadline.
 
 Standard profile hosting/updates have no separate fee for now; hosting duration and future-change notice remain unresolved. Do not promise lifetime hosting or unlimited free updates. Owners can edit permitted public fields; handles and ownership stay fixed. Optional public city/location is separate from private delivery addresses. Portrait and logo are public when uploaded to the avatars bucket; receipts/artwork/proofs remain private.
 
@@ -72,8 +72,6 @@ Begin with a few orders within observed capacity. Demonstrate the real tap/QR ou
 Compare supplier samples for actual chip/writability, print consistency, file/bleed/orientation requirements, turnaround and defect handling. Approve the fading sample correction first. Reconcile unfinished paid orders daily; review contribution, defects and support weekly. Record enquiries, paid conversion, actual fulfillment time, repeat/referral orders and failures using real evidence. Expand only when fulfillment and contribution are reliable.
 
 Future menus, review cards, attendance, teams, analytics and companion-app ideas are in [ROADMAP.md](ROADMAP.md). They are not launch-ready offers. No stock purchase, policy change or service activation is implied by this guide.
-
-Latest website revision: Profile bundles 3/2299 and 5/3499; Link bundles 3/1999 and 5/2799. Extra matching cards cost 700 for either product. Bank is the new default display/payment method. Delivery inclusion is stored per order, shown at payment, and rider costs stay staff-only; legacy order terms remain intact. Eleven social design templates are registered additively by pending 020. Their flat vector artwork is rebuilt from the owner’s screenshot references without stock QR codes or contact details. Only marketing QR codes change to the preferred website root.
 
 
 Final owner-approved release correction: Profile Card explicit bundles are two for 2099 and three for 2499; Link Card bundles are two for 1599 and three for 1999, with single Link Card confirmed at 999. There are no five-card offers. Extra matching cards remain 700 under manual quantity selection. Migration 021 adds a separate public website review table and narrowly granted publish/list RPCs. Existing private feedback stays private; anonymous listing is limited to eight entries per keyset page, sorted rating/newest/id descending. Already-public legacy reviews remain visible. One public review per signed-in account can be updated after a one-minute cooldown. The UI explicitly discloses public name/rating/text and offers half-star ratings.

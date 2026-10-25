@@ -1,3 +1,4 @@
+import PricingProvider from '@/components/PricingProvider';
 import type { Metadata, Viewport } from "next";
 import { Fredoka, Inter } from "next/font/google";
 import "./globals.css";
@@ -62,7 +63,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${fredoka.variable} ${inter.variable} antialiased`}
     >
       <body className="min-h-screen flex flex-col bg-[var(--color-bg)] text-[var(--color-fg)] font-sans">
-        {children}
+        <PricingProvider>{children}</PricingProvider>
       </body>
     </html>
   );

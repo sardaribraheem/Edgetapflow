@@ -4,11 +4,26 @@ Consolidated 18 October 2026 from release/audit/implementation reports. [Launch 
 
 | Date/time (Pakistan) | Firebase Hosting version | Scope |
 |---|---|---|
+| 25 Oct, 10:50:53 am | **`39b6167934063bc3`** | Staff pricing catalog, confirmed customer/founder saves, side-menu editing and canonical pre-print publication; exact 022/023 plus Hosting |
 | 18 Oct, 9:01:06 pm | **`f5c31e156838a13f`** | Latest UI/navbar/story/doodles and stable search favicon refinement; Hosting only |
 | 18 Oct, 8:28:35 pm | `d9033a5eb49c54dd` | Checkout/UI/feedback/admin print release after explicit approval of 017/018 and frontend |
 | 17 Oct, 9:15:27 am | `e2af92ed956b5fcd` | Preferred-origin SEO, sitemap/social metadata/noindex/legacy-route compatibility; Hosting only |
 | 16 Oct, 12:50:10 pm | `ae83d57dca84c205` | Card products/editor/public logos/private proof after approved 012–015 |
 | 14 Oct, 10:14 pm | `e4635533ce44dcb1` | Previous verified baseline |
+
+## 25 October: admin pricing and confirmed profiles
+
+Hosting **`39b6167934063bc3`**, **25 October 2026 at 10:50:53 am Pakistan time**, serves the reviewed production export on `https://edgetap.tech`; both Firebase hosts remain supported. Exactly website migrations **022/023** were applied and registered in one guarded transaction after existing 019–021. Optional 016 stays unapplied. Aggregate fingerprints confirmed unchanged existing customer/order/application/profile data and app function definitions; no test customers, orders, payments, uploads or reviews were written to the live backend.
+
+Admin → Settings now edits current/crossed-out prices for both card products and the website package, website renewal, two/three-card offers and availability, additional cards and additional profile links. Initial catalog values retain the existing prices. Immutable revisions bind new checkout quotes to the server; submitted orders and corrections keep agreed historical terms. Old clients must refresh after a genuine pricing change. Public pricing refreshes on focus/at intervals and after same-browser tab notifications.
+
+Customer editing is only through the signed-in side menu → Edit profile (`/account/profile`), with only owned profiles selectable. Public profile pages have no edit button. Unsaved fields survive token refresh. Both customer and founder dashboard saves require matching fresh stored/public fields before success. Homepage social links now read the saved founder profile instead of fixed demo URLs.
+
+New guarded profile publication confirms `https://edgetap.tech/u/<handle>` immediately after actual payment verification, accepted review and confirmed card specification. Printing, proof approval and physical fulfillment continue separately with existing guards. Saved historical destinations and approved snapshots are unchanged.
+
+Validation: production/isolated builds, TypeScript and lint (zero errors; 18 existing warnings); existing isolated Supabase regressions; 17 focused SQL scenarios; 13 legacy offer/ownership and seven review checks; 97 existing browser regressions and 26 new admin/menu/save/publication browser checks. The exact release transaction also passed locally with 019 and 016 excluded. Release guard: 117 SEO/static and 145 text assets; 241 exported files. After publication, the read-only hosted verifier and 20 public HTTP/browser checks passed, including exact reviewed page bytes, both hosts, dynamic prices, menu/guest editor protection, actual saved LinkedIn and unknown handles. Auth/Storage/funds in workflow tests were simulated; no real customer fulfillment, inbox delivery or physical quality is inferred. Email remains disabled.
+
+SHA-256: reviewed export filename/content manifest `83bd5a1b75f3a0a64c8c3b819ebce8667789439d62ffdf948eedf4a16b6fabb7`; migration 022 `9a8aede0b8889c20472be4572701e58753a073fa22ea1071b107c5de5d6956d9`; migration 023 `e93fd97dbf5e335ae409eec1a0fefb4180941a3b42f9f3a68ff6490a93e661a9`.
 
 ## 23 October follow-up: custom profile contact on the first order screen
 

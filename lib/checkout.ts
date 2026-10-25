@@ -2,7 +2,7 @@ import type { ProfileLink } from './data/profile';
 export const INCLUDED_LINKS = 10;
 export const EXTRA_LINK_PRICE = 50;
 export const MAX_PROFILE_LINKS = 100;
-export const extraLinkCost = (count: number) => Math.max(0, count - INCLUDED_LINKS) * EXTRA_LINK_PRICE;
+export const extraLinkCost = (count: number, price=EXTRA_LINK_PRICE) => Math.round(Math.max(0, count - INCLUDED_LINKS) * price * 100)/100;
 export type CheckoutMethod = 'jazzcash' | 'easypaisa' | 'bank';
 export const PAYMENT_RECIPIENT = 'Muhammad Ibraheem Anwar';
 export const PAYMENT_METHODS = [

@@ -1064,3 +1064,5 @@ button:disabled {
 .pricing-option-featured .pricing-discount {font-size:clamp(2.3rem,3.8vw,3.3rem);}
 .pricing-option-featured .pricing-discount .pricing-price {font-size:inherit;}
 @media(max-width:480px){.pricing-discount,.pricing-option-featured .pricing-discount {font-size:2rem;gap:.45rem;}.pricing-discount del {font-size:inherit;}.pricing-option-website .pricing-discount {font-size:1.8rem;}}
+
+.profile-editor-inline {position:static;width:100%;max-width:none;max-height:none;margin:0;overflow:visible;}

@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import Icon from '@/components/ui/Icon';
 import InfoHelp from '@/components/ui/InfoHelp';
 import type { Order } from '@/lib/data/order';
-import { createClientProfileFromOrder, suggestUsername, usernameAvailable } from '@/lib/data-service';
+import { createClientProfileFromOrder, getProfile, suggestUsername, usernameAvailable } from '@/lib/data-service';
 export default function PublishProfileModal({
   order,
   onClose,
@@ -16,6 +16,7 @@ export default function PublishProfileModal({
   const [username, setUsername] = useState(() => order.profileDraft.usernameSuggested || "");
   const [checking, setChecking] = useState(false);
   const [available, setAvailable] = useState<boolean | null>(null);
+  const [published,setPublished]=useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const dialog = useRef<HTMLDialogElement>(null), checkingVersion = useRef(0), operation = useRef(false);
@@ -56,8 +57,11 @@ export default function PublishProfileModal({
     operation.current = true;
     setBusy(true);
     try {
-      await createClientProfileFromOrder(order, username);
-      onDone();
+      const result=await createClientProfileFromOrder(order, username);
+      const visible=await getProfile(username);
+      const expected='https://edgetap.tech/u/'+username;
+      if(result.profileUrl!==expected||visible.profileId!==result.profileId)throw new Error('The public profile could not be confirmed. Refresh the order before retrying.');
+      setPublished(expected);setBusy(false);operation.current=false;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Couldn't create profile.");
       setBusy(false);
@@ -76,10 +80,10 @@ export default function PublishProfileModal({
       >
         <div className="flex items-center justify-between border-b border-[var(--ink)]/10 px-6 py-4">
           <h3 className="font-display text-lg font-bold text-[var(--ink)]">Create Client Profile</h3>
-          <button onClick={onClose} disabled={busy} className="icon-button" aria-label="Close"><Icon name="close"/></button>
+          <button onClick={published?onDone:onClose} disabled={busy} className="icon-button" aria-label="Close"><Icon name="close"/></button>
         </div>
 
-        <div className="space-y-4 p-6">
+        {published?<div className="space-y-4 p-6"><h4 className="font-display text-2xl">Profile is live</h4><p>The digital profile is available now. Printing and delivery can continue separately.</p><a href={published} target="_blank" rel="noreferrer" className="block break-all font-bold underline">{published}</a><button type="button" className="btn btn-ink px-5 py-3" onClick={onDone}>Done</button></div>:<div className="space-y-4 p-6">
           <div>
             <p className="text-[12px] font-bold uppercase tracking-widest text-[var(--ink-faint)]">Customer</p>
             <p className="font-display text-base font-bold text-[var(--ink)]">{order.customer.fullName}</p>
@@ -118,18 +122,18 @@ export default function PublishProfileModal({
             </div>
           </div>
 
-          <p className="text-sm">NFC + QR → <strong>/u/{username}</strong></p>
-          <InfoHelp title="Publishing a profile"><p>Publishes the avatar, name, bio and links from this order. The database reserves the handle in a transaction and rejects collisions or stale orders.</p><p>This requires an accepted application and verified card payment. Once published, the handle stays fixed so existing cards keep working.</p></InfoHelp>
+          <p className="text-sm">Your live link → <strong>https://edgetap.tech/u/{username}</strong></p>
+          <InfoHelp title="Publishing a profile"><p>Publishes the avatar, name, bio and links from this order. The database reserves the handle in a transaction and rejects collisions or stale orders.</p><p>This requires an accepted application, verified card payment and confirmed card details. You can publish now; printing does not need to be finished. Once published, the handle stays fixed so existing cards keep working.</p></InfoHelp>
 
           {error && <p className="rounded-xl bg-[var(--coral)]/10 p-3 text-sm text-[var(--coral)]">{error}</p>}
 
           <div className="flex gap-3">
-            <button onClick={onClose} disabled={busy} className="flex-1 rounded-xl bg-[var(--ink)]/5 px-4 py-2.5 text-sm font-bold text-[var(--ink)]">Cancel</button>
+            <button onClick={published?onDone:onClose} disabled={busy} className="flex-1 rounded-xl bg-[var(--ink)]/5 px-4 py-2.5 text-sm font-bold text-[var(--ink)]">Cancel</button>
             <button onClick={create} disabled={busy||available===false} className="btn btn-ink flex-1 px-4 py-2.5 text-sm"><Icon name="eye" size={18}/>
               {busy ? "Creating…" : "Create profile"}
             </button>
           </div>
-        </div>
+        </div>}
       </dialog>
   );
 }

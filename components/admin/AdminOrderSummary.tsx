@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { BUNDLE_PRICES } from '@/lib/data/order';
+import {selectedOfferPrice} from '@/lib/pricing';
 import type { Order } from '@/lib/data/order';
 import { CARD_TEMPLATES } from '@/lib/data/order';
 import { FULFILLMENT_LABELS, REVIEW_LABELS } from '@/lib/application';
@@ -18,7 +18,7 @@ export default function AdminOrderSummary({order:o}:{order:Order}) {
       <span className="admin-badge"><Icon name="receipt" size={14}/>{o.payment.status==='paid'?'Payment verified':o.payment.status==='failed'?'Payment rejected':'Payment pending'}</span>
       <span className="admin-badge"><Icon name="card" size={14}/>{FULFILLMENT_LABELS[o.fulfillment.status]||o.fulfillment.status}</span>
     </div>
-    {o.offer&&<p className="rounded-xl bg-[var(--yellow-soft)] p-3 text-sm font-bold">Selected offer: {o.card.quantity} cards for Rs. {BUNDLE_PRICES[o.plan==='direct_link'?'direct_link':'profile'][o.offer]}, plus any extra-link charge.</p>}{o.existingProfileId&&<p className="text-sm font-bold">Existing profile: Rs. 700 per additional card. Confirm its destination instead of publishing a duplicate.</p>}<div className="admin-client-heading"><Icon name="user" size={24}/><div><h3 className="font-display text-xl">{o.customer.fullName}</h3><p className="text-xs text-[var(--ink-soft)]">{new Date(o.createdAt).toLocaleString()}</p></div></div>
+    {o.offer&&<p className="rounded-xl bg-[var(--yellow-soft)] p-3 text-sm font-bold">Selected offer: {o.card.quantity} cards for Rs. {selectedOfferPrice(o.plan,o.offer,o.pricingSnapshot)}, plus any extra-link charge.</p>}{o.existingProfileId&&<p className="text-sm font-bold">Existing profile: Rs. {o.pricingSnapshot?.additionalCardPrice??700} per additional card. Confirm its destination instead of publishing a duplicate.</p>}<div className="admin-client-heading"><Icon name="user" size={24}/><div><h3 className="font-display text-xl">{o.customer.fullName}</h3><p className="text-xs text-[var(--ink-soft)]">{new Date(o.createdAt).toLocaleString()}</p></div></div>
     <dl className="grid gap-3 text-sm sm:grid-cols-2">
       <div><dt className="sr-only">Email</dt><dd className="flex items-start gap-2"><Icon name="mail" size={16}/><span>{o.customer.email}</span></dd></div>
       <div><dt className="sr-only">Phone</dt><dd className="flex items-start gap-2"><Icon name="phone" size={16}/><span>{o.customer.phone}</span></dd></div>

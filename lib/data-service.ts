@@ -1,3 +1,4 @@
+import {profileMatches} from './profile-sync';
 import { usesSupabase } from './backend';
 import { getSupabase } from './supabase';
 import type { Profile } from './data/profile';
@@ -27,14 +28,41 @@ export async function canEditProfile(profile: Profile): Promise<boolean> {
   const { getCurrentUser } = await import('./auth');
   return (await getCurrentUser())?.uid === profile.ownerUid && !!profile.ownerUid;
 }
-export async function saveFounderProfile(profile: Profile): Promise<void> {
-  if (usesSupabase) return rpc('save_founder_profile', { p_profile: profile });
+export async function saveFounderProfile(profile: Profile): Promise<Profile> {
+  if (usesSupabase) {
+    let acknowledged:Profile|undefined,writeError:unknown;
+    try{acknowledged=await rpc<Profile>('save_founder_profile_confirmed',{p_profile:profile});}catch(error){writeError=error;}
+    return confirmProfileRead(profile,acknowledged,writeError,true);
+  }
   const [sdk, app] = await Promise.all([import('firebase/firestore'), import('./firebase')]);
   await sdk.setDoc(sdk.doc(app.db, 'profiles', 'ibraheem'), profile, { merge: true });
+  const saved=await getStaffProfile('ibraheem');if(!saved)throw new Error('Profile save could not be confirmed.');return saved;
 }
 export async function saveProfile(username: string, profile: Profile): Promise<void> {
   if (!usesSupabase) return (await firebase()).saveProfile(username, profile);
   return rpc('update_profile', { p_username: username, p_profile: profile });
+}
+export async function saveProfileConfirmed(username:string,profile:Profile):Promise<Profile>{
+ let acknowledged:Profile|undefined,writeError:unknown;
+ try{acknowledged=await rpc<Profile>('save_profile_confirmed',{p_username:username,p_profile:profile});}catch(error){writeError=error;}
+ return confirmProfileRead(profile,acknowledged,writeError);
+}
+async function confirmProfileRead(profile:Profile,acknowledged:Profile|undefined,writeError:unknown,staff=false):Promise<Profile>{
+ for(let attempt=0;attempt<3;attempt++){
+  if(attempt)await new Promise(resolve=>setTimeout(resolve,attempt*250));
+  try{
+   const saved=staff?await getStaffProfile(profile.username):await getProfile(profile.username);
+   if(!saved||!profileMatches(profile,saved)||Number(saved.version)<=Number(profile.version||0)||acknowledged&&Number(saved.version)<Number(acknowledged.version))continue;
+   if(staff){
+    if((saved.active!==false)!==(profile.active!==false))continue;
+    const visible=await rpc<Profile|null>('get_public_profile',{p_username:profile.username});
+    if(saved.active===false?visible!==null:!visible||!profileMatches(profile,visible)||Number(visible.version)<Number(saved.version))continue;
+   }
+   return saved;
+  }catch{}
+ }
+ if(writeError)throw writeError;
+ throw new Error('The public profile has not confirmed these changes yet. Your edits are kept; please retry.');
 }
 export async function getMyProfiles(): Promise<Profile[]> {
   if (!usesSupabase) return [];

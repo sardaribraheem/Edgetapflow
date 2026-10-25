@@ -1,4 +1,6 @@
 "use client";
+import {useDraftPricing} from './useDraftPricing';
+import PriceReviewNotice from './PriceReviewNotice';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ExistingProfileDetails } from './ExistingProfilePicker';
 import Link from 'next/link';
@@ -14,7 +16,6 @@ import { CardStep, ProfileStep, LinksStep, PreviewStep, DeliveryStep } from './O
 import { OrderProgress, OrderNotes } from './OrderChrome';
 import { OrderInformation, OrderHelp as InfoHelp } from './OrderInformation';
 import PaymentStep from './PaymentStep';
-import { SUPPORT_URL } from '@/lib/site';
 import { findOrderSubmission } from '@/lib/data-service';
 import GuestOrderWizard from './GuestOrderWizard';
 import DirectLinkStep from './DirectLinkStep';
@@ -33,7 +34,7 @@ export default function OrderWizard(){
 }
 function CloudOrderWizard(){
  const router=useRouter();
- const [savedOnce,setSavedOnce]=useState(false);
+ const [quoteLocked,setQuoteLocked]=useState(false);
  const [user,setUser]=useState<User|null>(null),[authReady,setAuthReady]=useState(false);
  const [ready,setReady]=useState(false),[draft,setDraft]=useState<WizardDraft>(blankApplication('')),[step,setStep]=useState(0);
  const [settings,setSettings]=useState<OrderSettings|null>(null),[error,setError]=useState(''),[saveError,setSaveError]=useState('');
@@ -43,7 +44,7 @@ function CloudOrderWizard(){
  const meta=useRef({id:'',version:0,uid:''}),latest=useRef({draft,step}),chain=useRef<Promise<unknown>>(Promise.resolve()),timer=useRef<ReturnType<typeof setTimeout>|undefined>(undefined),lock=useRef(false);
  const accountUid=useRef<string|undefined>(undefined);
  useEffect(()=>{latest.current={draft,step};},[draft,step]);
- useEffect(()=>onAuthStateChanged(auth,u=>{if(accountUid.current!==u?.uid){meta.current={id:'',version:0,uid:u?.uid||''};if(timer.current)clearTimeout(timer.current);setSaving(false);setUploading(false);setReady(false);clearCardArtworkCache();setDraft(blankApplication(u?.email||''));setStep(0);setDirty(false);setSavedOnce(false);setSaveError('');setError('');accountUid.current=u?.uid;}setUser(u);setAuthReady(true);}),[]);
+ useEffect(()=>onAuthStateChanged(auth,u=>{if(accountUid.current!==u?.uid){meta.current={id:'',version:0,uid:u?.uid||''};if(timer.current)clearTimeout(timer.current);setSaving(false);setUploading(false);setReady(false);clearCardArtworkCache();setDraft(blankApplication(u?.email||''));setStep(0);setDirty(false);setSaveError('');setError('');accountUid.current=u?.uid;}setUser(u);setAuthReady(true);}),[]);
  useEffect(()=>{
   if(!user||!usesSupabase)return;
   let active=true;
@@ -53,8 +54,9 @@ function CloudOrderWizard(){
    const fresh=new URLSearchParams(window.location.search).get('new')==='true';
    const saved=requested?apps.find(a=>a.id===requested):fresh?undefined:apps[0];
    if(requested&&!saved)throw new Error('This draft is unavailable. View your submitted applications on My orders.');
+   setQuoteLocked(!!saved?.orderId);
    meta.current={id:saved?.id||crypto.randomUUID(),version:saved?.version||0,uid:user.uid};
-   setDraft(saved?{...wizardFromApplication(saved.payload),...(!saved.orderId?{pricingVersion:3 as const}:{}),...(!saved.orderId||orders.find(o=>o.id===saved.orderId)?.plan==='profile'?{product:saved.payload.product||'profile',physical:{...wizardFromApplication(saved.payload).physical,schemaVersion:2 as const}}:{})}:{...blankApplication(user.email||''),size:config.cardSizes[0]});setStep(saved?.step||0);setSavedOnce(!!saved);setSettings(config);setReady(true);
+   setDraft(saved?{...wizardFromApplication(saved.payload),...(!saved.orderId?{pricingVersion:4 as const}:{}),...(!saved.orderId||orders.find(o=>o.id===saved.orderId)?.plan==='profile'?{product:saved.payload.product||'profile',physical:{...wizardFromApplication(saved.payload).physical,schemaVersion:2 as const}}:{})}:{...blankApplication(user.email||''),size:config.cardSizes[0]});setStep(saved?.step||0);setSettings(config);setReady(true);
   }).catch(e=>{if(active)setError(isOrderingUnavailable(e)?'You are signed in, but saved applications are temporarily unavailable. Try again later or contact EdgeTap.':e.message==='This draft is unavailable. View your submitted applications on My orders.'?e.message:'Could not recover your application. Reload to try again.');});
   return()=>{active=false;};
   // Token refresh must not overwrite unsaved fields.
@@ -68,7 +70,7 @@ function CloudOrderWizard(){
    setSaving(true);
    try{
     const saved=await saveApplicationDraft(target.id,payload,snapshot.step,target.version);
-    target.version=saved.version;if(target!==meta.current)return;setSaveError('');setSavedOnce(true);
+    target.version=saved.version;if(target!==meta.current)return;setSaveError('');
     window.history.replaceState(null,'','/order?draft='+target.id);
     if(JSON.stringify(applicationPayload(latest.current.draft))===JSON.stringify(payload)&&latest.current.step===snapshot.step)setDirty(false);
    }catch(e){if(target===meta.current)setSaveError(e instanceof Error?e.message:'Draft could not be saved.');throw e;}
@@ -82,6 +84,7 @@ function CloudOrderWizard(){
  },[draft,step,dirty,ready,uploading,submitting,flush]);
  useEffect(()=>{const warn=(e:BeforeUnloadEvent)=>{if(dirty||saving||uploading){e.preventDefault();e.returnValue='';}};window.addEventListener('beforeunload',warn);return()=>window.removeEventListener('beforeunload',warn);},[dirty,saving,uploading]);
  const patch=(p:Partial<WizardDraft>)=>{setDraft(d=>({...d,...p,...(p.displayName!==undefined&&d.product!=='direct_link'&&(!d.customer.fullName||d.customer.fullName===d.displayName)?{customer:{...d.customer,fullName:p.displayName}}:{})}));setDirty(true);setError('');};
+ const pricing=useDraftPricing(draft,patch,ready,quoteLocked);
  const upload=async(kind:'avatar'|'logo'|'artwork'|'backArtwork'|'receipt',file:File|null)=>{
   if(!user)return;if(!file){setDraft(d=>{if(kind==='logo'){const physical={...d.physical};delete physical.logoUrl;return {...d,physical,logoPreview:undefined};}if(kind==='receipt')return {...d,payment:{...d.payment,receiptUrl:undefined}};if(kind==='artwork')return {...d,customDesignUrl:undefined,customDesignPreview:undefined};if(kind==='backArtwork')return {...d,backDesignPreview:undefined,physical:{...d.physical,standardBack:false,backDesignUrl:undefined}};return {...d,avatarUrl:undefined,avatarPreview:undefined};});setDirty(true);return;}
   const uploadUid=user.uid;const uploadDraft=meta.current;setUploading(true);setError('');
@@ -94,7 +97,7 @@ function CloudOrderWizard(){
  };
  const preview=useMemo<Profile>(()=>({username:draft.usernameSuggested||suggestProfileHandle(draft.displayName)||'yourprofile',displayName:draft.displayName||'Your Name',firstName:draft.customer.fullName.split(' ')[0]||'',lastName:'',title:draft.title,bio:draft.bio,location:draft.location||'',avatar:draft.avatarPreview||draft.avatarUrl||'',logo:draft.logoPreview||draft.physical.logoUrl,links:draft.links.filter(l=>isSafeContactUrl(l.url))}),[draft]);
  const direct=draft.product==='direct_link',sequence=direct?[2,0,1,3,4,5,6]:draft.existingProfileId?[0,3,4,5,6]:[0,1,2,3,4,5,6],position=sequence.indexOf(step),steps=direct?['Link','Card','Details','Review','Fulfillment','Payment','Submit']:draft.existingProfileId?['Card','Profile preview','Fulfillment','Payment','Submit']:STEPS;
- const offerAvailable=(draft.pricingVersion!==3||settings?.offerPricingVersion===3)&&(settings?.checkoutVersion||0)>=2&&(!draft.product||settings?.offerPrices?.[draft.product]===({direct_link:999,profile:1499})[draft.product])&&supportsCardEditor(settings,draft)&&supportsProofReview(settings,draft);
+ const offerAvailable=(draft.pricingVersion!==4||settings?.offerPricingVersion===4)&&(settings?.checkoutVersion||0)>=2&&supportsCardEditor(settings,draft)&&supportsProofReview(settings,draft);
  const validate=(s:number)=>{
   if(s===1&&!draft.displayName.trim())return 'Add a name or main heading.';
   if(direct&&s===2)return directLinkError(draft.directLink||'');
@@ -116,6 +119,8 @@ function CloudOrderWizard(){
   finally{navigationLock.current=false;setNavigating(false);}
  };
  const submit=async()=>{
+  if(pricing.reviewRequired){setError('Review the updated price before submitting.');return;}
+  if(!quoteLocked&&draft.pricingVersion===4){const current=await pricing.refresh().catch(()=>null);if(!current||current.version!==draft.pricingCatalogVersion){setError('Prices changed. Review the current total before submitting.');return;}}
   if(lock.current||uploading)return;
   const invalid=sequence.filter(s=>s<6).map(validate).find(Boolean);if(invalid)return setError(invalid);
   const submittingDraft=meta.current;lock.current=true;setSubmitting(true);setError('');
@@ -137,20 +142,22 @@ function CloudOrderWizard(){
  if(!usesSupabase)return <main className="min-h-screen p-8 pt-28">Applications require the configured Supabase backend.</main>;
  if(!user)return <main className="min-h-screen bg-[var(--cream)] px-4 py-28"><section className="card-paper mx-auto max-w-xl p-8"><h1 className="font-display text-3xl">Resume your saved application</h1><p className="mt-4">This link opens a private account draft. Sign in to My orders and choose your saved application.</p><Link className="btn btn-ink mt-6 px-5 py-3" href="/account?next=/account/orders">Sign in to My orders</Link><p className="mt-4">Building a new card? <Link href="/pricing" className="underline">Choose a plan and start without an account</Link>.</p></section></main>;
  if(!ready||!settings)return <main className="min-h-screen px-4 py-28"><section className="card-paper mx-auto max-w-xl p-8"><p role={error?'alert':'status'}>{error||'Recovering your saved application…'}</p>{error&&<button className="btn btn-ink mt-4 px-5 py-3" onClick={()=>window.location.reload()}>Reload</button>}<Link href="/account/orders" className="block mt-4 underline">My orders</Link></section></main>;
+ if(!pricing.ready)return <main className="min-h-screen px-4 py-28"><p role="status">{pricing.error||'Loading your order prices…'}</p>{pricing.error&&<button type="button" className="mt-4 underline" onClick={()=>{void pricing.refresh().catch(()=>{});}}>Retry prices</button>}</main>;
  return <main className="order-builder min-h-screen bg-[var(--cream)] px-4 py-10 sm:py-14"><div className="mx-auto max-w-3xl">
   <div className="mb-6 flex flex-wrap justify-between gap-3"><Link href="/" className="font-display font-bold">EdgeTap</Link><Link href="/account/orders" className="underline">My orders & applications</Link></div>
   <div className="builder-heading"><OrderProgress steps={[...steps.slice(0,5),direct?'Save order':'Save profile',...steps.slice(5)]} step={position+(position>=5?1:0)}/></div>
 
   {saveError&&<div role="alert" className="mb-4 rounded-xl bg-[var(--coral)]/10 p-4"><p>Draft save failed: {saveError}</p><p>Do not close this page until saving succeeds. If another session changed this draft, reload to recover the saved version.</p><button className="mt-2 underline" onClick={()=>window.location.reload()}>Reload saved draft</button></div>}
   {error&&<p role="alert" className="mb-4 rounded-xl bg-[var(--coral)]/10 p-4">{error}</p>}
+  {pricing.reviewRequired&&<PriceReviewNotice draft={draft} onAccept={pricing.acceptPrices}/>}
   <fieldset disabled={submitting||uploading} className="min-w-0"><OrderInformation>
    {step===0&&<CardStep draft={draft} onChange={patch} onFileChange={(f,face)=>upload(face==='back'?'backArtwork':'artwork',f)}/>}
    {step===1&&(draft.existingProfileId?<ExistingProfileDetails draft={draft}/>:<ProfileStep draft={draft} onChange={patch} onFileChange={f=>upload('avatar',f)} onLogoChange={f=>upload('logo',f)}/>)}
-   {step===2&&(direct?<DirectLinkStep draft={draft} onChange={patch}/>:draft.existingProfileId?<ExistingProfileDetails draft={draft}/>:<LinksStep links={draft.links} onChange={links=>patch({links})}/>)}
+   {step===2&&(direct?<DirectLinkStep draft={draft} onChange={patch}/>:draft.existingProfileId?<ExistingProfileDetails draft={draft}/>:<LinksStep extraLinkPrice={draft.pricingSnapshot?.extraLinkPrice} links={draft.links} onChange={links=>patch({links})}/>)}
    {step===3&&<PreviewStep profile={preview} draft={draft} onChange={patch}/>}
-   {step===4&&<DeliveryStep collectName={true} customer={draft.customer} deliveryMethod={draft.deliveryMethod} pickupDetails={settings.pickupDetails} deliveryDetails={draft.pricingVersion===3?'We arrange delivery when your card is ready. Confirm availability for your location before paying.':settings.deliveryDetails} onDeliveryMethodChange={deliveryMethod=>patch({deliveryMethod,customer:{...draft.customer,...(deliveryMethod==='nastp_pickup'?{address:'',city:'',postalCode:''}:{})}})} onChange={customer=>patch({customer:{...customer,email:user.email||''}})}/>}
+   {step===4&&<DeliveryStep collectName={true} customer={draft.customer} deliveryMethod={draft.deliveryMethod} pickupDetails={settings.pickupDetails} deliveryDetails={draft.pricingVersion?'We arrange delivery when your card is ready. Confirm availability for your location before paying.':settings.deliveryDetails} onDeliveryMethodChange={deliveryMethod=>patch({deliveryMethod,customer:{...draft.customer,...(deliveryMethod==='nastp_pickup'?{address:'',city:'',postalCode:''}:{})}})} onChange={customer=>patch({customer:{...customer,email:user.email||''}})}/>}
    {step===5&&!offerAvailable&&<p role="alert" className="card-paper p-6">This offer is temporarily unavailable for payment. Your design is saved. Contact EdgeTap.</p>}{step===5&&offerAvailable&&<PaymentStep draft={draft} onChange={patch} onFile={file=>upload('receipt',file)}/>}
-   {step===6&&<section className="card-paper mb-6 p-7 sm:p-10"><h1 className="font-display text-3xl">Submit your application</h1><dl className="mt-5 space-y-2"><div>Name: {draft.customer.fullName}</div>{direct?<div className="break-all">Link: {draft.directLink}</div>:<div>Profile: /u/{draft.usernameSuggested||suggestProfileHandle(draft.displayName)}</div>}<div>Card: {draft.cardTemplate} · {draft.quantity} card{draft.quantity===1?'':'s'}</div><div>Fulfillment: {draft.deliveryMethod==='nastp_pickup'?'NASTP Pickup':'Delivery'}</div><div>Payment: {draft.payment.method==='bank'?'Bank':draft.payment.method==='easypaisa'?'Easypaisa':'JazzCash'} · awaiting verification</div><div>Card subtotal: Rs. {calculateSubtotal(draft.quantity,draft.product||'standard',draft.links.length,draft).toLocaleString("en",{useGrouping:false})}</div>{draft.deliveryMethod==='delivery'&&<div className="font-bold">{draft.pricingVersion===3?'Delivery included.':'Delivery is paid separately to the rider under your original order terms.'}</div>}</dl><label className="mt-5 block font-bold">Customer notes<textarea aria-label="Customer notes" value={draft.customerNotes} maxLength={2000} onChange={e=>patch({customerNotes:e.target.value})} className="mt-2 w-full rounded-xl border p-3"/></label><p className="mt-4 text-sm">Payment awaits staff verification. Follow progress in My orders.</p><InfoHelp title="After you submit" label="What happens next?"><p>Submitting sends the saved application to the EdgeTap staff inbox. It does not confirm payment, acceptance, production or dispatch. Follow decisions and requests on My orders.</p></InfoHelp><button type="button" onClick={()=>{void submit();}} disabled={submitting||uploading} className="btn btn-ink mt-6 px-6 py-3">{submitting?'Submitting…':'Submit application'}</button></section>}
+   {step===6&&<section className="card-paper mb-6 p-7 sm:p-10"><h1 className="font-display text-3xl">Submit your application</h1><dl className="mt-5 space-y-2"><div>Name: {draft.customer.fullName}</div>{direct?<div className="break-all">Link: {draft.directLink}</div>:<div>Profile: /u/{draft.usernameSuggested||suggestProfileHandle(draft.displayName)}</div>}<div>Card: {draft.cardTemplate} · {draft.quantity} card{draft.quantity===1?'':'s'}</div><div>Fulfillment: {draft.deliveryMethod==='nastp_pickup'?'NASTP Pickup':'Delivery'}</div><div>Payment: {draft.payment.method==='bank'?'Bank':draft.payment.method==='easypaisa'?'Easypaisa':'JazzCash'} · awaiting verification</div><div>Card subtotal: Rs. {calculateSubtotal(draft.quantity,draft.product||'standard',draft.links.length,draft).toLocaleString("en",{useGrouping:false})}</div>{draft.deliveryMethod==='delivery'&&<div className="font-bold">{draft.pricingVersion? 'Delivery included.':'Delivery is paid separately to the rider under your original order terms.'}</div>}</dl><label className="mt-5 block font-bold">Customer notes<textarea aria-label="Customer notes" value={draft.customerNotes} maxLength={2000} onChange={e=>patch({customerNotes:e.target.value})} className="mt-2 w-full rounded-xl border p-3"/></label><p className="mt-4 text-sm">Payment awaits staff verification. Follow progress in My orders.</p><InfoHelp title="After you submit" label="What happens next?"><p>Submitting sends the saved application to the EdgeTap staff inbox. It does not confirm payment, acceptance, production or dispatch. Follow decisions and requests on My orders.</p></InfoHelp><button type="button" onClick={()=>{void submit();}} disabled={submitting||uploading} className="btn btn-ink mt-6 px-6 py-3">{submitting?'Submitting…':'Submit application'}</button></section>}
    <div className="order-navigation flex justify-between gap-3">{position>0?<button type="button" disabled={navigating} className="btn btn-ghost px-5 py-3" onClick={()=>{void move(sequence[position-1]);}}>← Back</button>:<span/>}{step<6&&<button type="button" disabled={navigating} className="btn btn-ink px-5 py-3" onClick={()=>{void move(sequence[position+1]);}}>Continue →</button>}</div>
    <OrderNotes/></OrderInformation></fieldset>{uploading&&<p role="status" className="mt-4">Uploading securely. Wait until the upload and draft save finish.</p>}
  </div></main>;

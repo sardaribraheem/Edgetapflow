@@ -12,11 +12,12 @@ let id,version;
 const order=()=>as(staff,()=>rpc('get_order',[id]));
 const accept=async()=>{let o=await order();await as(staff,()=>rpc('confirm_card_spec',[id,payload.card.size,'simple',o.version]));o=await order();await as(staff,()=>rpc('verify_application_payment',[id,o.version]));o=await order();await as(staff,()=>rpc('review_application',[id,'accept','',o.version]));return order();};
 try{
- for(const f of (await readdir('supabase/migrations')).filter(f=>f.endsWith('.sql')&&!f.includes('0016_')).sort())await db.exec(await readFile('supabase/migrations/'+f,'utf8'));
+ for(const f of (await readdir('supabase/migrations')).filter(f=>f.endsWith('.sql')&&!f.includes('0016_')&&!f.includes('0023_')).sort())await db.exec(await readFile('supabase/migrations/'+f,'utf8'));
  await q('insert into auth.users values($1,$2),($3,$4),($5,$6)',[owner,'domain@example.test',other,'other@example.test',staff,'staff@example.test']);await q("insert into private.admin_members(user_id,provenance) values($1,'LOCAL DOMAIN TEST')",[staff]);await q("insert into storage.objects(bucket_id,name) values('payment-receipts',$1)",[owner+'/receipt.png']);
  id=await as(owner,()=>rpc('create_order',[payload,crypto.randomUUID()]));let o=await accept();await as(staff,()=>rpc('publish_order_profile',[id,'legacy-domain-test',o.version]));
  const oldId=id;const before=(await q('select to_jsonb(o) value from public.orders o where id=$1',[id])).rows[0].value;
  await db.exec(await readFile('supabase/migrations/202610170016_custom_domain.sql','utf8'));
+ await db.exec(await readFile('supabase/migrations/202610250023_confirmed_profiles_and_publication.sql','utf8'));
  check(JSON.stringify(before)===JSON.stringify((await q('select to_jsonb(o) value from public.orders o where id=$1',[id])).rows[0].value),'Migration preserves every field of an already published legacy order');
  check((await order()).nfcUrl==='https://edgetapflow.web.app/u/legacy-domain-test','Printed legacy destination stays unchanged');
  check((await q('select private.destination_ready(o) value from public.orders o where id=$1',[id])).rows[0].value,'Legacy destination still passes production guard');

@@ -384,3 +384,8 @@ The reviewed production and isolated fixture builds passed, as did TypeScript, l
 The owner could not find the custom profile contact on `/order?product=profile` because it appeared only on the later profile-details step. Add a visible custom digital profile page callout immediately below Choose your card on the first Profile Card screen, linking to support WhatsApp +92 304 414 9674 with the custom-template message. Keep the existing details-step contact. The owner also explicitly authorised pushing the source branch to the configured repository.
 
 The first-screen contact follow-up was published as Hosting version `3e2361e7ecb8e32a` on 23 October 2026 at 10:26:44 am Pakistan time. Build/type checking and release guards passed; the contact was verified above the fold at 320×680, 390×844 and 1440×1000. This follow-up changes no backend contracts.
+
+
+## Follow-up: 25 October admin and profile controls
+
+The owner requested dashboard control of current/crossed-out prices, offers and additional-card/link charges; verified profile saves; sign-in versus owner-edit options in the side menu only; and immediate publication on edgetap.tech before physical printing. Implemented and released in website migrations 022/023 and Hosting `39b6167934063bc3`. See [the admin-controls update](ADMIN_CONTROLS_2026-10-25.md) for decisions and evidence. The app source is untouched.

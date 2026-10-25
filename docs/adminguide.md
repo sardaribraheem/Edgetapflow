@@ -1,16 +1,24 @@
 # EdgeTap admin guide
 
-Updated 18 October 2026. Use [launch status](LAUNCH_STATUS.md) for the current release and limitations. Supabase migrations **001–015 plus 017/018** are applied; **016 remains unapplied**. The website is live; email transport/scheduler remain inactive.
+Updated 25 October 2026. Use [launch status](LAUNCH_STATUS.md) for the current release and limitations. Supabase migrations **001–015 plus 017–023** are applied; **016 remains unapplied**. The website is live; email transport/scheduler remain inactive.
 
 1. Sign in at `/admin`, open **Orders** and select the application. Review customer details, requested links/specification, private receipt and separate front/back artwork.
 2. Verify the **actual transfer** to the selected JazzCash, Easypaisa or Meezan account against the server subtotal. All recipients are Muhammad Ibraheem Anwar; details are in the [business guide](businessguide.md). A screenshot alone is insufficient. Confirm the specification, then **Accept application**.
-3. For **Link Card**, open the supplied URL and **Confirm card link**. For **EdgeTap Profile**, **Publish profile**, check the immutable handle and every link. The owner retains **Edit profile → Save & publish** for permitted public fields.
+3. For **Link Card**, open the supplied URL and **Confirm card link**. For **EdgeTap Profile**, **Publish profile**, check the immutable handle and every link. The confirmed live URL uses `https://edgetap.tech/u/<handle>` and can open immediately, before printing. The customer opens the side menu while signed in, chooses **Edit profile**, then **Save & publish** for permitted public fields. Public profile pages contain no editing button.
 4. Open **Print package**. Prepare both faces, printed name/heading, optional motto/logo and QR. Use **Replace prepared artwork** when necessary. Confirm actual printer settings, inspect both faces, then **Save front & back proof**. Only the saved proof is final; checkout previews are not approval.
 5. Use **Make proof available to customer**, then **Copy review message** or **Open customer WhatsApp** and send the link yourself. Sharing sends no message/email and starts no timer. The customer signs into their order account to review both faces/PDF and approve or submit all changes in one note. Printing waits for explicit approval of the current revision.
 6. One revision request is included on new orders. Save and share a new proof after revising; the used allowance stays used. For another preference edit, agree a fee and verify the transfer, then **Record a further edit payment**, enter the private verification note and acknowledge the actual payment. This grants one additional request without changing the original subtotal. No fixed extra fee is advertised. Existing orders keep their terms; major redesigns need a designer.
 7. After approval of the **current revision**, use **Generate print order PDF** for the one-page A4 printer sheet containing the order name/reference and front/back images. The separate print package provides the two-face card PDF and HD PNGs. Respect the payment/specification/destination/current-proof guards; the sheet does not substitute for the print-resolution files.
 8. Print, program NFC with the exact confirmed destination, and physically inspect spelling, finish, NFC and QR on each card. A changed design needs a new proof/approval. Record production stages only after doing the work.
 9. Arrange the existing pickup or book the rider and record actual fare/message. Mark complete only after handoff. Correct the sample's fading front before approving print quality.
+
+## Website prices and offers
+
+Open **Settings → Website prices and offers**. Edit current and crossed-out prices for Link Card, EdgeTap Profile Card and the website package. Leave the comparison blank to hide it. Set two/three-card offer prices and availability, additional matching-card price, extra profile-link price after ten, and website renewal. Save waits for a confirmed server read; another staff change requires reloading before saving.
+
+The public pricing page and new checkouts use the same immutable catalog revision. Visible tabs refresh on focus and within 30 seconds; the saving browser also notifies its other tabs. Existing submitted orders, corrections and approved snapshots keep their agreed prices. A new checkout whose price changed must review the current total; if already paid, contact staff before proceeding. Manual quantity changes clear an explicit bundle.
+
+**Profiles** edits the founder example. Saving confirms the actual stored fields and public visibility before reporting success; failed/unconfirmed edits stay in the form. The homepage reads the saved social links. Do not replace a customer's profile through this founder editor.
 
 ## Optional email review
 

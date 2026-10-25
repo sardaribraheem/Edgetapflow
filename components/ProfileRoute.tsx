@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Navbar from "@/components/Navbar";
 import ProfilePage from "@/components/ProfilePage";
 import { getProfile } from "@/lib/data-service";
 import { Profile } from "@/lib/data/profile";
@@ -15,7 +16,7 @@ export default function ProfileRoute() {
     setUsername(match?.[1] || "");
   }, []);
   if (username === null) return <main className="min-h-screen grid place-items-center" aria-live="polite">Loading profile…</main>;
-  return <ProfileRouteInner key={username} username={username} />;
+  return <><Navbar/><ProfileRouteInner key={username} username={username} /></>;
 }
 
 function ProfileRouteInner({ username }: { username: string }) {
@@ -46,9 +47,11 @@ function ProfileRouteInner({ username }: { username: string }) {
         clearTimeout(timeout);
       }
     })();
-    return () => {
-      active = false;
-    };
+    const refresh=()=>{if(document.visibilityState==='visible')setAttempt(value=>value+1);};
+    const changed=(event:Event)=>{if((event as CustomEvent).detail===username)refresh();};
+    window.addEventListener('focus',refresh);document.addEventListener('visibilitychange',refresh);window.addEventListener('edgetap-profile-changed',changed);
+    const channel=typeof BroadcastChannel!=='undefined'?new BroadcastChannel('edgetap-profiles'):null;if(channel)channel.onmessage=e=>{if(e.data===username)refresh();};
+    return()=>{active=false;window.removeEventListener('focus',refresh);document.removeEventListener('visibilitychange',refresh);window.removeEventListener('edgetap-profile-changed',changed);channel?.close();};
   }, [username, attempt]);
 
   if (!result) {

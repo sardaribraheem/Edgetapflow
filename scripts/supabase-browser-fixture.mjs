@@ -4,9 +4,10 @@ import { chromium } from 'playwright';
 import assert from 'node:assert/strict';
 import { readFile, readdir } from 'node:fs/promises';
 import { createTestDatabase } from './supabase-test-db.mjs';
-export async function createBrowserFixture({websiteReviews=false}={}){
+export async function createBrowserFixture({websiteReviews=false,excludeOptionalDomain=false}={}){
 assert((await readFile('out/privacy.html','utf8')).includes('EdgeTap uses Supabase'), 'Build the isolated Supabase test export before running this suite.');
-const db=await createTestDatabase();
+const db=await createTestDatabase({migrate:!excludeOptionalDomain});
+if(excludeOptionalDomain)for(const file of (await readdir('supabase/migrations')).filter(f=>f.endsWith('.sql')&&!f.includes('0016_')).sort())await db.exec(await readFile('supabase/migrations/'+file,'utf8'));
 const owner='22222222-2222-4222-8222-222222222222',staff='11111111-1111-4111-8111-111111111111';
 const backend='https://edgetap-migration-test.supabase.co',base=process.env.QA_BASE_URL||'http://127.0.0.1:4173';
 const assets=await readdir('out/_next/static',{recursive:true});

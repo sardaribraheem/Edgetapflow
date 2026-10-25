@@ -12,7 +12,7 @@ try {
   assert.equal(config.hosting.cleanUrls, true, 'Clean account/profile URLs are required.');
   assert(config.hosting.rewrites.some(rule => rule.source === '/u/**' && rule.destination === '/profile.html'), 'Profile handle rewrite is missing.');
 
-  const required = ['index.html', 'admin.html', 'account.html', 'account/recovery.html', 'account/orders.html', 'order.html', 'profile.html', 'privacy.html', 'terms.html', 'cookies.html', 'robots.txt', 'sitemap.xml'];
+  const required = ['index.html', 'admin.html', 'account.html', 'account/recovery.html', 'account/orders.html', 'account/profile.html', 'order.html', 'profile.html', 'privacy.html', 'terms.html', 'cookies.html', 'robots.txt', 'sitemap.xml'];
   for (const file of required) await readFile(join('out', file));
   const files = await readdir('out', { recursive: true });
   // Webpack metadata chunks live inside directories named robots.txt/sitemap.xml.

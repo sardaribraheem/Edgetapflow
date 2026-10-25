@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { getStaffProfile, saveFounderProfile } from "@/lib/data-service";
 import type { User } from "@/lib/auth";
+import {notifyProfileChanged} from '@/lib/profile-sync';
 import Icon from "@/components/ui/Icon";
 import InfoHelp from "@/components/ui/InfoHelp";
 import { ibraheemProfile, Profile, ProfileLink } from "@/lib/data/profile";
@@ -11,6 +12,7 @@ import { ibraheemProfile, Profile, ProfileLink } from "@/lib/data/profile";
 // The owner explicitly requested restoration of this original founder example.
 // Existing service data always takes precedence over the approved original.
 export default function ProfilesView({ user }: { user: User }) {
+  const operation=useRef(false);
   const [profile, setProfile] = useState<Profile>({ username: "ibraheem", displayName: "", firstName: "", lastName: "", title: "", bio: "", location: "", avatar: "", links: [] });
   const [loading, setLoading] = useState(true);
   const [profileExists, setProfileExists] = useState(false);
@@ -33,25 +35,26 @@ export default function ProfilesView({ user }: { user: User }) {
   }, []);
 
   const handleSave = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault();if(operation.current)return;operation.current=true;
     setSaving(true);
     setMessage("");
     try {
       if (profile.links.length > 10) {
         setMessage("Maximum 10 links allowed.");
-        setSaving(false);
+        setSaving(false);operation.current=false;
         return;
       }
       const toSave = { ...profile };
       if (!toSave.ownerUid && user) toSave.ownerUid = user.uid;
-      await saveFounderProfile(toSave);
+      const saved=await saveFounderProfile(toSave);
+      setProfile(saved);notifyProfileChanged('ibraheem');
       setProfileExists(true);
-      setMessage("Profile saved ✓");
+      setMessage("Profile saved and confirmed ✓");
     } catch (err) {
 
       setMessage(err instanceof Error ? err.message : "Could not save the profile. Retry or check your staff access.");
     } finally {
-      setSaving(false);
+      setSaving(false);operation.current=false;
     }
   };
 
@@ -100,7 +103,7 @@ export default function ProfilesView({ user }: { user: User }) {
         <div className="card-paper mt-4 border-l-4 border-[var(--coral)] p-4 text-sm text-[var(--coral)]">{loadError}</div>
       )}
 
-      <form onSubmit={handleSave} className="mt-6 space-y-6">
+      <form onSubmit={handleSave} className="mt-6"><fieldset disabled={saving||loading||!!loadError} className="min-w-0 space-y-6">
         {/* General info */}
         <div className="card-paper p-6">
           <h2 className="mb-4 font-display text-base font-bold text-[var(--ink)]">Profile details</h2>
@@ -254,7 +257,7 @@ export default function ProfilesView({ user }: { user: User }) {
             <Icon name="save" size={18}/>{saving ? "Saving..." : "Save All Changes"}
           </button>
         </div>
-      </form>
+      </fieldset></form>
 
       <InfoHelp title="Publishing client profiles" label="Publication help"><p>Client profiles become public through Orders → Publish profile after review and payment verification. A saved draft or submitted order does not publish a profile.</p><p>Handles are reserved atomically so another profile cannot be overwritten.</p></InfoHelp>
     </div>

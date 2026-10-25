@@ -20,7 +20,7 @@ export default function FinalCTA() {
 
         <p className="mt-6 max-w-xl text-[17px] leading-relaxed text-[var(--ink-soft)]">
           Order a physical NFC card with a QR fallback and your own digital profile.
-          Cards from Rs. 999. Delivery cost and timing are confirmed for your location.
+          Choose your card and make it yours. View current prices and offers when you order.
         </p>
 
         <div className="mt-9 flex flex-wrap items-center justify-center gap-4">

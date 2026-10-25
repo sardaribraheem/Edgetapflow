@@ -2,7 +2,7 @@
 
 Supabase provides Auth, PostgreSQL/RLS/RPCs and Storage; Firebase provides Hosting only. Confirm the project lock in `project.json` before any operation.
 
-**Recorded hosted history: 001–015 plus 017/018. Optional 016 remains unapplied.** Never rerun the clean installer, reset production or blindly push pending migrations. Checkout version 2 is released; email worker/provider/scheduler remain inactive. A queued job is not sent email. See [launch status](../docs/LAUNCH_STATUS.md).
+**Recorded hosted history: 001–015 plus 017–023. Optional 016 remains unapplied.** Never rerun the clean installer, reset production or blindly push pending migrations. Checkout version 2 and website catalog-pricing version 4 are released; 022/023 add staff pricing and confirmed profile publication without applying 016 or changing the app contract; email worker/provider/scheduler remain inactive. A queued job is not sent email. See [launch status](../docs/LAUNCH_STATUS.md).
 
 Use the [backend guide](../docs/backendguide.md) for the migration map, access boundaries, templates, isolated SQL/browser tests and mail activation. Use [BUILD.md](../docs/BUILD.md) for release/recovery and pending Auth/domain settings, and the [admin guide](../docs/adminguide.md) for actual order work.
 

@@ -3,7 +3,8 @@
 import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { gsap, prefersReducedMotion } from "@/lib/animations";
-import {ibraheemProfile} from '@/lib/data/profile';
+import {isSafeContactUrl} from '@/lib/links';
+import {useLiveProfile} from '@/lib/use-live-profile';
 import CardStack from "./CardStack";
 import DoodleField from "./DoodleField";
 import {
@@ -29,13 +30,16 @@ import {
 } from "./doodles";
 
 // Only these five real links are interactive and magnetic. Decorations stay inert.
-const heroDestinations={Instagram:ibraheemProfile.links.find(l=>l.type==='instagram')!.url,WhatsApp:ibraheemProfile.links.find(l=>l.type==='whatsapp')!.url,LinkedIn:ibraheemProfile.links.find(l=>l.type==='linkedin')!.url,Website:ibraheemProfile.links.find(l=>l.type==='portfolio')!.url,'u/you':'/u/ibraheem'};
-function Chip({icon,label,className='',delay=0}:{icon:React.ReactNode;label:keyof typeof heroDestinations;className?:string;delay?:number}){
- const href=heroDestinations[label],external=href.startsWith('https:');
+type HeroLink='Instagram'|'WhatsApp'|'LinkedIn'|'Website'|'u/you';
+const heroTypes={Instagram:'instagram',WhatsApp:'whatsapp',LinkedIn:'linkedin',Website:'portfolio','u/you':''};
+function Chip({icon,label,className='',delay=0,href='/u/ibraheem'}:{icon:React.ReactNode;label:HeroLink;href?:string;className?:string;delay?:number}){
+ const external=href.startsWith('https:');
  return <div data-hero-link={label} className={`hero-chip animate-float absolute ${className}`} style={{animationDelay:`${delay}s`}}><a href={href} className="hero-link" data-magnetic-link aria-label={label==='u/you'?'View Ibraheem’s example profile':`EdgeTap founder on ${label}`} target={external?'_blank':undefined} rel={external?'noopener noreferrer':undefined}><span className="hero-link-icon grid h-12 w-12 place-items-center rounded-full bg-white text-[var(--ink)] shadow-[var(--shadow-doodle)] ring-1 ring-[var(--ink)]/8">{icon}</span><span className="rounded-full bg-[var(--ink)] px-2.5 py-0.5 font-display text-[10px] font-semibold text-[var(--cream)]">{label}</span></a></div>;
 }
 
 export default function Hero() {
+  const liveProfile=useLiveProfile('ibraheem');
+  const destination=(label:HeroLink)=>{const url=liveProfile?.links.find(link=>link.type===heroTypes[label])?.url;return url&&/^https?:\/\//i.test(url)&&isSafeContactUrl(url)?url:'/u/ibraheem';};
   const headlineRef = useRef<HTMLDivElement>(null);
   const heroRef=useRef<HTMLElement>(null);
   useEffect(()=>{
@@ -94,11 +98,11 @@ export default function Hero() {
         <AttendanceDoodle className="absolute left-[16%] top-[10%] h-12 w-12 rotate-[8deg] text-[var(--sky)] animate-wobble" />
 
         {/* social / link chips near headline — all monochrome ink */}
-        <Chip icon={<InstagramIcon className="h-6 w-6" />} label="Instagram" className="left-[10%] top-[200px] rotate-[-6deg]" delay={0} />
-        <Chip icon={<WhatsAppIcon className="h-6 w-6" />} label="WhatsApp" className="right-[8%] top-[160px] rotate-[5deg]" delay={0.4} />
-        <Chip icon={<LinkedInIcon className="h-6 w-6" />} label="LinkedIn" className="left-[6%] top-[62%] rotate-[6deg]" delay={0.8} />
-        <Chip icon={<GlobeIcon className="h-6 w-6" />} label="Website" className="right-[6%] top-[60%] rotate-[-5deg]" delay={1.1} />
-        <Chip icon={<NfcWaves className="h-6 w-6" />} label="u/you" className="left-[9%] top-[120px] rotate-[-4deg]" delay={0.2} />
+        <Chip icon={<InstagramIcon className="h-6 w-6" />} label="Instagram" href={destination('Instagram')} className="left-[10%] top-[200px] rotate-[-6deg]" delay={0} />
+        <Chip icon={<WhatsAppIcon className="h-6 w-6" />} label="WhatsApp" href={destination('WhatsApp')} className="right-[8%] top-[160px] rotate-[5deg]" delay={0.4} />
+        <Chip icon={<LinkedInIcon className="h-6 w-6" />} label="LinkedIn" href={destination('LinkedIn')} className="left-[6%] top-[62%] rotate-[6deg]" delay={0.8} />
+        <Chip icon={<GlobeIcon className="h-6 w-6" />} label="Website" href={destination('Website')} className="right-[6%] top-[60%] rotate-[-5deg]" delay={1.1} />
+        <Chip icon={<NfcWaves className="h-6 w-6" />} label="u/you" href={destination('u/you')} className="left-[9%] top-[120px] rotate-[-4deg]" delay={0.2} />
 
         {/* decorative */}
         <SparkleDoodle className="absolute left-[27%] top-[44%] h-7 w-7 text-[var(--yellow)] animate-pulse-soft" />
