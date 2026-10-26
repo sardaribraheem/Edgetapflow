@@ -23,6 +23,7 @@ Unless stated otherwise, website commands and inline source paths in these guide
 | Owner's website feedback and requested changes, 23 October 2026 | [Website feedback brief](WEBSITE_FEEDBACK_2026-10-23.md) |
 | Admin prices, confirmed profile saves and early publication, 25 October | [Admin controls update](ADMIN_CONTROLS_2026-10-25.md) |
 | Free profiles, optional staff checks and tag fulfillment, 26 October | [Free profile / staff-flow update](FREE_PROFILES_AND_STAFF_FLOW_2026-10-26.md) |
+| Account separation, permanent-profile cleanup and collapsible order decisions, 27 October | [Profile/account admin update](PROFILE_ACCOUNT_ADMIN_2026-10-27.md) |
 | Branded signup/recovery email setup and templates | [Authentication email plan](AUTH_EMAIL_PLAN.md) |
 
 [Repository instructions](../EdgetapFlow/AGENTS.md) apply to engineering work; [Supabase README](../EdgetapFlow/supabase/README.md) is a backend entry point. Plans, duplicate reports, compatibility stubs and their archive copies were removed after consolidation. Use Git history for superseded documents, rather than recreating an archive folder. Generated test artifacts are disposable; test code is retained. Private recovery snapshots under `.private-backups/` remain ignored and are not GitHub backups.

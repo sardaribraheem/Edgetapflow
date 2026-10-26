@@ -1,12 +1,12 @@
 # EdgeTap admin guide
 
-Updated 26 October 2026. Use [launch status](LAUNCH_STATUS.md) for the current release and limitations. Supabase migrations **001–015 plus 017–026** are applied; **016 remains unapplied**. The website is live; email transport/scheduler remain inactive.
+Updated 27 October 2026. Use [launch status](LAUNCH_STATUS.md) for the current release and limitations. Supabase migrations **001–015 plus 017–027** are applied; **016 remains unapplied**. The website is live; email transport/scheduler remain inactive.
 
-The current order screen puts **Profile & NFC destination** first. **Publish profile** is available immediately for an order with valid profile details and an owned customer account. It does not require review, payment verification, specifications, print proofs or email and does not mark those facts completed. The confirmed live URL uses `edgetap.tech`. For an already owned profile, use **Use existing profile now**.
+The current order screen puts **Application decision** first, with **Reject application** and **Request changes**, a required reason and confirmation. These update the customer account without email; rejection does not refund or delete a profile. Closed applications cannot resume publication/production. **Profile & NFC destination** follows the collapsed customer details. **Publish profile** is available immediately for an order with valid profile details and an owned customer account. It does not require review, payment verification, specifications, print proofs or email and does not mark those facts completed. The confirmed live URL uses `edgetap.tech`. For an already owned profile, use **Use existing profile now**.
 
-Choose **Item type → NFC tag / chip only** for a chip, or **Digital profile only** when nothing physical is required. The agreed price is unchanged. Tag/digital modes hide print-proof tools. **Update fulfillment** records the work you actually completed; the eight optional checklist checks at the bottom never block it. Checkbox steps stay private. **Start review** and **Mark review complete** update the customer account only, without automatic email or required notes.
+Open **Delivery & fulfillment**, then choose **Item type → NFC tag / chip only** for a chip, or **Digital profile only** when nothing physical is required. The agreed price is unchanged. Tag/digital modes hide print-proof tools. **Update fulfillment** records the work you actually completed; the eight optional checklist checks at the bottom never block it. Checkbox steps stay private. **Start review** and **Mark review complete** update the customer account only, without automatic email or required notes.
 
-Payment has its own explicit **Mark payment verified** action after checking actual funds; a customer can supply a reference instead of a receipt. Printing/proof files, customer messages and internal notes are separate optional sections. Staff can edit customer public profile details or remove/restore visibility under **Profiles → Customer profiles**, without the customer password. Removing public visibility keeps the reserved handle and order/account records. Tarsil.pk was left unchanged as the owner requested.
+Payment has its own explicit **Mark payment verified** action after checking actual funds; a customer can supply a reference instead of a receipt. Printing/proof files, customer messages and internal notes are separate optional sections. Staff can edit customer public profile details or hide/restore visibility under **Profiles → Customer profiles**, without the customer password. Removing public visibility keeps the reserved handle and order/account records. Tarsil.pk was left unchanged as the owner requested.
 
 The older full proof procedure below is optional when a printed-card proof is actually wanted. It is not a prerequisite for direct publication or manual fulfillment.
 
@@ -19,6 +19,16 @@ The older full proof procedure below is optional when a printed-card proof is ac
 7. After approval of the **current revision**, use **Generate print order PDF** for the one-page A4 printer sheet containing the order name/reference and front/back images. The separate print package provides the two-face card PDF and HD PNGs. Respect the payment/specification/destination/current-proof guards; the sheet does not substitute for the print-resolution files.
 8. Print, program NFC with the exact confirmed destination, and physically inspect spelling, finish, NFC and QR on each card. A changed design needs a new proof/approval. Record production stages only after doing the work.
 9. Arrange the existing pickup or book the rider and record actual fare/message. Mark complete only after handoff. Correct the sample's fading front before approving print quality.
+
+## Account access, contact correction and permanent deletion
+
+Open **Customer & order details** to see the actual login account separately from the submitted order contact. Correct name/phone/email with a reason; this changes the order contact only. **Clients** groups by actual customer identity, including staff-managed records with no login.
+
+Under **Profiles → Customer profiles → Account access & cleanup**, inspect the login and linked orders. **Hide profile** is reversible; **Permanently delete profile** is a distinct operation for eligible hidden profiles and cannot be restored. The latter keeps the handle reserved and retains accounts/files/order/payment history. Open/paid/production orders, reviews, purchased allowances and protected founder/Tarsil profiles block deletion. Ask the owner before deleting any test profile.
+
+**Separate from login account** moves a hidden profile and its linked orders to staff management without a new login. Type the exact handle and give a reason. It clears a copied former-login email only from the moved order contact, preserves public links, and sends no notification. Tarsil's login was retained while the two hidden Umer profiles and Umer order were separated at the owner's request. No profile was permanently deleted. See the [27 October account/admin update](PROFILE_ACCOUNT_ADMIN_2026-10-27.md).
+
+**Optional print proof & files**, **Optional customer message**, **Internal notes**, delivery/customer details and checklist start collapsed with explicit Expand/Collapse controls. Drafts survive closing a section. Sending a customer message remains a separate deliberate action.
 
 ## Website prices and offers
 
@@ -36,4 +46,4 @@ Ordinary signup/confirmation/recovery mail is separate from order notifications 
 
 ## Profiles and test maintenance
 
-Admin → Profiles lists customer/free profiles with confirmed edit and remove/restore controls, plus the founder `/u/ibraheem` editor. Preserve accounts, staff, handles, approved snapshots and shared assets. The owner-authorized test order/application cleanup has already run; do not repeat it as routine maintenance. Never remove real customer records or use the cleanup script without reviewing its scope and obtaining authorization for that data operation. Private backups remain ignored; never upload them to GitHub or share them with the printer.
+Admin → Profiles lists customer/free profiles with confirmed edit and hide/restore controls, plus the founder `/u/ibraheem` editor. Preserve accounts, staff, handles, approved snapshots and shared assets. The owner-authorized test order/application cleanup has already run; do not repeat it as routine maintenance. Never remove real customer records or use the cleanup script without reviewing its scope and obtaining authorization for that data operation. Private backups remain ignored; never upload them to GitHub or share them with the printer.

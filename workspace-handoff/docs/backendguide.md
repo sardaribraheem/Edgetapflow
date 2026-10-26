@@ -55,7 +55,7 @@ References use `ET-MMDDYY-sequence`, Pakistan date and a sequence starting at 10
 
 ## Migration and capability map
 
-Hosted state: **001–015 plus 017–026**. **016 is optional and unapplied**. Never edit/rerun applied migrations, reset production or blindly push all pending files. Confirm `supabase/project.json` and inspect linked history before proposing an exact authorized change.
+Hosted state: **001–015 plus 017–027**. **016 is optional and unapplied**. Never edit/rerun applied migrations, reset production or blindly push all pending files. Confirm `supabase/project.json` and inspect linked history before proposing an exact authorized change.
 
 | Migration | Responsibility |
 |---|---|
@@ -129,3 +129,10 @@ Use `npm run test:admin-pricing`, `npm run test:website-offers`, `npm run test:w
 `create_free_website_profile` requires a confirmed signed-in account, a unique stable handle and at most ten safe links. It creates one owned public profile and no order, payment or email job; retries use the same request key. `private.website_free_profiles` enforces one free website profile per account. Removal changes public visibility while retaining the handle, ownership and records; the customer cannot self-restore or recreate around moderation. Staff can edit existing customer public fields through the confirmed-save path. Existing 019 app definitions remain unchanged.
 
 Run `npm run test:free-profiles` and the isolated `npm run test:free-profiles:browser`. Auth/Storage/funds are simulated there; never run fixtures against production exports. The exact 024/025/026 release transaction checks unchanged existing customer/profile/order/payment/catalog/outbox data and app definitions before commit. Auth SMTP was not changed; see [the sender plan](AUTH_EMAIL_PLAN.md).
+
+
+## 27 October profile/account controls
+
+Migration [027](../EdgetapFlow/supabase/migrations/202610270027_profile_account_admin.sql) adds staff-only versioned account separation, permanent-profile deletion, order contact correction and application decisions, with private audit and revoked wrapper aliases. Public/customer JSON never includes staff account metadata. Installation defines controls only. The exact owner-authorized Umer correction was a separate guarded transaction with a private snapshot; it did not delete profiles or send email. App 019 definitions and optional 016 are unchanged.
+
+Run `npm run test:profile-account-admin` for isolated SQL/security tests (including existing 019), `npm run test:profile-account-admin:browser` against the isolated fixture export on port 4173, and `node scripts/test-profile-account-admin-hosted.mjs` for read-only published checks against the reviewed production export. Do not deploy a fixture export or run cleanup RPCs as tests against real customers. See [account/admin release scope](PROFILE_ACCOUNT_ADMIN_2026-10-27.md).

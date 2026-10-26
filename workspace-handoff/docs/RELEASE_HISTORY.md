@@ -4,6 +4,7 @@ Consolidated 18 October 2026 from release/audit/implementation reports. [Launch 
 
 | Date/time (Pakistan) | Firebase Hosting version | Scope |
 |---|---|---|
+| 27 Oct, 00:52:10 | **`6f8c18e26f9a80c5`** | Collapsible admin orders, application decisions, account cleanup; exact 027 and owner-requested Umer separation, no mail/deletion |
 | 26 Oct, 8:32:34 am | **`cabbc34a2b3f0358`** | Free website profiles, direct staff/tag workflow, reference payments and moderation; exact 024–026 plus Hosting |
 | 25 Oct, 10:50:53 am | **`39b6167934063bc3`** | Staff pricing catalog, confirmed customer/founder saves, side-menu editing and canonical pre-print publication; exact 022/023 plus Hosting |
 | 18 Oct, 9:01:06 pm | **`f5c31e156838a13f`** | Latest UI/navbar/story/doodles and stable search favicon refinement; Hosting only |
@@ -11,6 +12,16 @@ Consolidated 18 October 2026 from release/audit/implementation reports. [Launch 
 | 17 Oct, 9:15:27 am | `e2af92ed956b5fcd` | Preferred-origin SEO, sitemap/social metadata/noindex/legacy-route compatibility; Hosting only |
 | 16 Oct, 12:50:10 pm | `ae83d57dca84c205` | Card products/editor/public logos/private proof after approved 012–015 |
 | 14 Oct, 10:14 pm | `e4635533ce44dcb1` | Previous verified baseline |
+
+## 27 October: account separation and clearer admin order controls
+
+Hosting **`6f8c18e26f9a80c5`**, **27 October 2026 at 00:52:10 Pakistan time**. Website implementation `6ceccc0` pushed to `codex/admin-profile-order-controls-2026-10-27`. Exactly **027** applied and registered after 026, with 016 still unapplied and existing app 019 definitions preserved. See the [account/admin update](PROFILE_ACCOUNT_ADMIN_2026-10-27.md) for behavior, authorization and remaining approval boundaries.
+
+The owner's clarification kept Tarsil's login and separated both hidden Umer profiles plus the one Umer order into staff management. All six profiles/four orders remain; no new Auth account, permanent deletion, rejection, email or contact message. A private ignored snapshot preceded the atomic transaction. Guards compared 21 relevant tables, Auth and app-function hashes, protecting Tarsil's exact current fields/links/account/order/contact, all payments/prices/files and unrelated records. Copied login email was cleared only from the moved Umer contact; pending Umer mail jobs were superseded without sending. Read-only hosted owner-access verification confirmed Tarsil's own profile/order remained accessible and Umer's records were no longer accessible from that login. Email remains disabled.
+
+Verification: production/fixture builds; TypeScript; lint zero errors/18 existing warnings; full legacy SQL suite; 16 free-profile, 17 pricing and 17 new account/admin SQL groups; 28 existing and 26 new isolated browser assertions. The reviewed 249-file export passed 119 static/SEO checks and 153 public-text asset guards. Hosted migration/RLS/RPC verifier passed. All 30 read-only hosted checks passed: reviewed homepage/admin bytes on both hosts, noindex, capability flags, disabled mail, protected/hidden/unknown routes, anonymous RPC denial, guest admin access, mobile fit and zero browser errors/email-worker calls; local Auth/Storage/funds remained simulated and no physical/inbox/private-upload success is inferred.
+
+Migration 027 SHA-256: `155aeb0f84e40a718a95d6843f149a740ef7262247ca3178ed992834f58d68b2`. Private recovery SQL and customer identity/contact values remain out of Git. Test-profile permanent deletion still requires owner approval; other profiles were untouched.
 
 ## 26 October: free profiles, payment alternatives and flexible staff fulfillment
 

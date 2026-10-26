@@ -1,14 +1,14 @@
 # EdgeTap update plan
 
-Updated **27 October 2026**, Pakistan time. Work through the milestones in order. This file is the main execution plan; supporting research and operating guides are in [docs/](docs/README.md). Creating this plan and moving documentation do not mark any website, data-cleanup or app milestone complete.
+Updated **27 October 2026**, Pakistan time. Work through the milestones in order. This file is the main execution plan; supporting research and operating guides are in [docs/](docs/README.md). The first admin/account cleanup release is complete; the broader milestone remains active.
 
-Current scope: plan the website cleanup and improvements, then align the existing Android companion. No production deployment, profile removal, account deletion, price change or app implementation has been performed for this plan.
+Current scope: website cleanup and improvements, then separately authorized Android alignment. On 27 October, the requested dashboard controls and scoped Umer account separation were released. No profile/account was permanently deleted, no email was sent, prices were unchanged and app source was untouched. See [release scope](docs/PROFILE_ACCOUNT_ADMIN_2026-10-27.md).
 
 ## Milestone order
 
 | Order | Milestone | Completion evidence | Status |
 |---|---|---|---|
-| 1 | Clean the existing site and review test profiles | Exact profile inventory reviewed; owner approves each removal scope; approved cleanup and core-page checks pass | Pending |
+| 1 | Clean the existing site and review test profiles | Admin/account fixes released; public audit and owner approval before any permanent test deletion remain | In progress |
 | 2 | Make signup, profile editing and card ordering dependable | Ordinary-user journey works; saves are confirmed; current prices/terms match checkout | Pending |
 | 3 | Run a small customer pilot with the working offer | Real use, paid orders, fulfillment costs and buyer objections recorded privately | Pending |
 | 4 | Add three useful profile presets | Professional, Portfolio and Local Business share one reliable profile system | Pending |
@@ -23,17 +23,19 @@ Use completion evidence to advance rather than an assumed release date. Keep one
 
 **First work: clean up what is already there.** Review the live public profile routes and the website's existing content before adding features.
 
-Owner clarification on 27 October: **Tarsil.pk / TarsilPK and Ibraheem are the only currently confirmed valid public profiles.** Preserve their profile records, URLs, ownership, links and customer/order/payment relationships. Keep Tarsil.pk's public Email link unchanged. The confirmed founder route is `/u/ibraheem`; resolve Tarsil.pk's actual stored handle rather than guessing its spelling from the business name.
+Owner clarification on 27 October: **Tarsil.pk / TarsilPK and Ibraheem are the only currently confirmed valid public profiles.** Preserve their profile records, URLs, ownership, links and customer/order/payment relationships. Keep every currently stored Tarsil.pk public link unchanged; account cleanup must not add or restore an Email link. The confirmed founder route is `/u/ibraheem`; resolve Tarsil.pk's actual stored handle rather than guessing its spelling from the business name.
 
 The owner identifies **Umar Khan, Enfotize and Adolf** as test profiles and says other profiles in the present set are tests. These are owner-supplied names, not an inspected list of exact handles or IDs. New signups after this instruction may be real customers; never treat every future profile outside the two protected names as disposable.
 
-- [ ] Prepare a read-only inventory with exact handles/IDs, visibility, ownership and related records. Keep private account/contact/payment details out of versioned documents.
-- [ ] Match the owner-named test profiles to exact records and list anything ambiguous separately.
+- [x] Prepare a read-only inventory with exact handles/IDs, visibility, ownership and related records. Keep private account/contact/payment details out of versioned documents.
+- [x] Match the owner-named test profiles to exact records and list anything ambiguous separately.
 - [ ] **Before deleting any test profile, show the owner the exact candidates, related-record impact and proposed action, then ask for explicit confirmation.** This applies to the named tests too. Do not delete, hide or alter them during the documentation task.
 - [ ] Agree whether a confirmed test should be hidden or permanently deleted; do not treat those actions as interchangeable. Customer accounts, orders, payments, files, reviews and other linked data need their own explicit scope.
 - [ ] For a later approved cleanup, retain an appropriate private recovery record, act only on the approved exact records, and verify the protected profiles and their existing links afterward. No wildcard deletion, reseeding or old cleanup-script rerun.
 - [ ] Audit public pages for stale copy, broken links, inconsistent button labels, confusing duplicate actions and unused test/demo content. Keep licensed assets and the owner-approved story/tap/QR demonstrations.
 - [ ] Prepare the concrete visual/content changes; verify mobile/desktop, navigation, unknown-handle behavior and accessibility before an authorized release.
+
+Completed first implementation: clear Hide/Restore versus permanent-delete controls, account/linked-order directory, exact-handle confirmations, safe order-contact correction, visible Reject application/Request changes, customer identity grouping and collapsible optional sections. Both hidden Umer handles and their one order were separated from Tarsil's login into staff management under the owner's explicit clarification. All six profiles and four orders remain; Tarsil's fields/links/order/payments and login are unchanged. No messages or permanent deletions occurred. Owner-named Enfotize was not matched to a current stored handle; do not guess. Permanent deletion of tests remains pending explicit approval.
 
 **Done when:** the owner has approved the exact data action before it is taken, approved changes are verified, protected profiles remain unchanged, and the existing site has a clear usable baseline. If deletion approval is pending, continue independent read-only/UI work and keep the data step visibly pending.
 
