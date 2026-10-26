@@ -24,3 +24,5 @@ export function contactLinkUrl(type: string, value: string) {
   const prefixes: Record<string, string> = { instagram: 'https://www.instagram.com/', linkedin: 'https://www.linkedin.com/in/', github: 'https://github.com/', telegram: 'https://t.me/', tiktok: 'https://www.tiktok.com/@', youtube: 'https://www.youtube.com/@', facebook: 'https://www.facebook.com/' };
   return prefixes[type] && handle && !handle.includes('/') && !/^(?:www\.)?(?:instagram\.com|linkedin\.com|github\.com|t\.me|tiktok\.com|youtube\.com|facebook\.com)$/i.test(handle) ? prefixes[type] + encodeURIComponent(handle) : clean ? `https://${handle}` : 'https://';
 }
+
+export function paymentEvidenceError(payment:{reference?:string;receiptUrl?:string}):string{const reference=payment.reference?.trim()||'';if(reference&&(reference.length>120||/[\u0000-\u001f\u007f]/.test(reference)))return 'Enter a payment reference between 3 and 120 characters.';return payment.receiptUrl||reference.length>=3?'':'Enter your payment reference or upload a receipt.';}

@@ -10,6 +10,7 @@ export type ProfileLink = {
 };
 
 export type Profile = {
+  freeProfile?: boolean;
   username: string;
   displayName: string;
   firstName: string;

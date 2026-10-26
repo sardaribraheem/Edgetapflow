@@ -37,6 +37,8 @@
     "test:website-feedback:browser": "node scripts/test-website-feedback-browser.mjs",
     "test:image-uploads": "node scripts/test-image-uploads.mjs",
     "test:website-reviews": "node scripts/test-website-reviews.mjs",
+    "test:free-profiles": "node scripts/test-free-profiles-staff.mjs",
+    "test:free-profiles:browser": "node scripts/test-free-profiles-staff-browser.mjs",
     "test:admin-pricing": "node scripts/test-admin-pricing-profiles.mjs",
     "test:admin-pricing:browser": "node scripts/test-admin-pricing-profiles-browser.mjs"
   },

@@ -1,6 +1,6 @@
 # EdgeTap business guide
 
-Updated 25 October 2026. [Launch status](LAUNCH_STATUS.md) records readiness; this guide records commercial decisions and operating context.
+Updated 26 October 2026. [Launch status](LAUNCH_STATUS.md) records readiness; this guide records commercial decisions and operating context.
 
 ## Brand and offers
 
@@ -8,6 +8,7 @@ EdgeTap — **One tap. Infinite possibilities.** Help people share useful contac
 
 | Offer | Current price | Owner-confirmed standard price | Scope |
 |---|---:|---:|---|
+| Free website profile | Rs. 0 | Not applicable | One per confirmed account, up to ten links, owner edits, EdgeTap branding and card-order CTA; staff can remove/restore public visibility |
 | Link Card | Rs. 999 first card | Rs. 1,399 | One customer-supplied existing public URL |
 | EdgeTap Profile | Rs. 1499 first card + profile | Rs. 2,200 | Editable profile; first ten links included, each extra link Rs. 50 once per profile, not per card |
 | Website + four cards | Rs. 29,999 | Rs. 36,999 | Contact-only agreed website/portfolio scope; first year included, Rs. 3,000 annually from year two; cards now or within first year |
@@ -75,3 +76,11 @@ Future menus, review cards, attendance, teams, analytics and companion-app ideas
 
 
 Final owner-approved release correction: Profile Card explicit bundles are two for 2099 and three for 2499; Link Card bundles are two for 1599 and three for 1999, with single Link Card confirmed at 999. There are no five-card offers. Extra matching cards remain 700 under manual quantity selection. Migration 021 adds a separate public website review table and narrowly granted publish/list RPCs. Existing private feedback stays private; anonymous listing is limited to eight entries per keyset page, sorted rating/newest/id descending. Already-public legacy reviews remain visible. One public review per signed-in account can be updated after a one-minute cooldown. The UI explicitly discloses public name/rating/text and offers half-star ratings.
+
+## First buyer and flexible service, 26 October
+
+The owner reports the first paying customer, Tarsil.pk, wanted a chip/tag linked to an EdgeTap profile rather than a printed card. The existing profile/order/payment were explicitly left unchanged. Actual tag programming, phone checks and handoff remain separate evidence. No separate public tag price was invented by this release; agree that hardware scope and amount with the customer. Staff item-type changes preserve the saved invoice.
+
+Free website profiles are now the entry point to the product: one confirmed account, one profile, up to ten chosen links, no payment or staff acceptance. Public Email links are optional; the private sign-in email remains separate. A profile owner can order cards using the existing saved profile and the catalog's additional-card rate, without re-entering details or buying another profile. Branding and card-order CTAs remain on shared profiles.
+
+Card checkout accepts a payment reference or a private receipt. Staff still decides when actual funds are verified. Direct profile publication and optional staff checks do not automatically verify payment or send customer email. The [branded Auth email plan](AUTH_EMAIL_PLAN.md) is prepared; no sender/DNS/SMTP change or test mail was made.

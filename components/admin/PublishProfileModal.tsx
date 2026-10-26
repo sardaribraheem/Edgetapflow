@@ -11,7 +11,7 @@ export default function PublishProfileModal({
 }: {
   order: Order;
   onClose: () => void;
-  onDone: () => void;
+  onDone: () => void | Promise<void>;
 }) {
   const [username, setUsername] = useState(() => order.profileDraft.usernameSuggested || "");
   const [checking, setChecking] = useState(false);
@@ -69,21 +69,29 @@ export default function PublishProfileModal({
     }
   };
 
+  const finish=async()=>{
+    if(operation.current)return;
+    if(!published){onClose();return;}
+    operation.current=true;setBusy(true);setError('');
+    try{await onDone();}catch{setError('The profile is live, but the order could not be refreshed. Try again.');}
+    finally{operation.current=false;setBusy(false);}
+  };
+
   const availableNow = available === true || (available === null && username.trim().toLowerCase() === (order.usernameFinal || "").toLowerCase());
 
   return (
       <dialog ref={dialog}
         className="publication-dialog w-[calc(100%_-_2rem)] max-w-lg overflow-auto rounded-3xl bg-[var(--cream)] p-0 text-[var(--ink)] shadow-2xl"
-        onCancel={event=>{event.preventDefault();if(!operation.current)onClose();}}
-        onClick={event=>{if(event.target===event.currentTarget&&!operation.current)onClose();}}
+        onCancel={event=>{event.preventDefault();if(!operation.current)void finish();}}
+        onClick={event=>{if(event.target===event.currentTarget&&!operation.current)void finish();}}
         aria-modal="true" aria-label="Create Client Profile"
       >
         <div className="flex items-center justify-between border-b border-[var(--ink)]/10 px-6 py-4">
           <h3 className="font-display text-lg font-bold text-[var(--ink)]">Create Client Profile</h3>
-          <button onClick={published?onDone:onClose} disabled={busy} className="icon-button" aria-label="Close"><Icon name="close"/></button>
+          <button onClick={()=>{void finish();}} disabled={busy} className="icon-button" aria-label="Close"><Icon name="close"/></button>
         </div>
 
-        {published?<div className="space-y-4 p-6"><h4 className="font-display text-2xl">Profile is live</h4><p>The digital profile is available now. Printing and delivery can continue separately.</p><a href={published} target="_blank" rel="noreferrer" className="block break-all font-bold underline">{published}</a><button type="button" className="btn btn-ink px-5 py-3" onClick={onDone}>Done</button></div>:<div className="space-y-4 p-6">
+        {published?<div className="space-y-4 p-6"><h4 className="font-display text-2xl">Profile is live</h4><p>The digital profile is available now. Printing and delivery can continue separately.</p><a href={published} target="_blank" rel="noreferrer" className="block break-all font-bold underline">{published}</a><button type="button" className="btn btn-ink px-5 py-3" disabled={busy} onClick={()=>{void finish();}}>{busy?'Refreshing order…':'Done'}</button>{error&&<p role="alert">{error}</p>}</div>:<div className="space-y-4 p-6">
           <div>
             <p className="text-[12px] font-bold uppercase tracking-widest text-[var(--ink-faint)]">Customer</p>
             <p className="font-display text-base font-bold text-[var(--ink)]">{order.customer.fullName}</p>
@@ -123,12 +131,12 @@ export default function PublishProfileModal({
           </div>
 
           <p className="text-sm">Your live link → <strong>https://edgetap.tech/u/{username}</strong></p>
-          <InfoHelp title="Publishing a profile"><p>Publishes the avatar, name, bio and links from this order. The database reserves the handle in a transaction and rejects collisions or stale orders.</p><p>This requires an accepted application, verified card payment and confirmed card details. You can publish now; printing does not need to be finished. Once published, the handle stays fixed so existing cards keep working.</p></InfoHelp>
+          <InfoHelp title="Publishing a profile"><p>Publishes the avatar, name, bio and links from this order. The database reserves the handle in a transaction and rejects collisions or stale orders.</p><p>As admin, you can publish this profile now without payment verification, review, a print proof or card production. Those remain separate optional actions. Publishing does not mark them as completed. Once published, the handle stays fixed so existing cards keep working.</p></InfoHelp>
 
           {error && <p className="rounded-xl bg-[var(--coral)]/10 p-3 text-sm text-[var(--coral)]">{error}</p>}
 
           <div className="flex gap-3">
-            <button onClick={published?onDone:onClose} disabled={busy} className="flex-1 rounded-xl bg-[var(--ink)]/5 px-4 py-2.5 text-sm font-bold text-[var(--ink)]">Cancel</button>
+            <button onClick={()=>{void finish();}} disabled={busy} className="flex-1 rounded-xl bg-[var(--ink)]/5 px-4 py-2.5 text-sm font-bold text-[var(--ink)]">Cancel</button>
             <button onClick={create} disabled={busy||available===false} className="btn btn-ink flex-1 px-4 py-2.5 text-sm"><Icon name="eye" size={18}/>
               {busy ? "Creating…" : "Create profile"}
             </button>

@@ -90,6 +90,7 @@ export default function ProfilePage({
         <SparkleDoodle className="absolute left-[28%] top-[78%] h-7 w-7 text-[var(--coral)] animate-pulse-soft" />
       </DoodleField>
 
+      {!previewOnly&&<p className="relative mx-auto mb-4 text-center text-xs"><Link href="/create-profile" className="font-semibold underline">Powered by EdgeTap · Create your free profile</Link></p>}
       <ProfileContainer id={previewOnly?undefined:"main-content"} tabIndex={previewOnly?undefined:-1} className="container-x relative mx-auto w-full max-w-5xl py-6 my-auto">
         {/* the card */}
         <div className="card-paper relative overflow-hidden">
@@ -167,6 +168,7 @@ export default function ProfilePage({
             </section>
           </div>
 
+          {!previewOnly&&<section className="border-t border-[var(--ink)]/8 px-7 py-6 sm:px-10"><p className="font-display text-xl">Take your profile with you.</p><p className="mt-2 text-sm">Share your links with a tap. Order an EdgeTap card for your profile.</p><Link href={'/order?product=profile&profile='+encodeURIComponent(profile.username)} className="btn btn-ink mt-4 px-5 py-3">Order an EdgeTap card</Link></section>}
           {/* foot bar (hidden in preview mode — the /order shell provides Edit/Continue) */}
           <footer className={`flex items-center justify-between gap-3 border-t border-[var(--ink)]/8 bg-[var(--paper-2)]/60 px-7 py-4 sm:px-10 md:px-12 ${previewOnly ? "hidden" : ""}`}>
             <Link href="/" className="profile-powered" aria-label="Powered by EdgeTap"><span className="grid h-8 w-8 place-items-center rounded-full bg-[var(--yellow)]"><NfcWaves className="h-4 w-4 text-[var(--ink)]"/></span><span>Powered by EdgeTap</span></Link>

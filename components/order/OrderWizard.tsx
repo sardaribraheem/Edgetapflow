@@ -1,4 +1,5 @@
 "use client";
+import {paymentEvidenceError} from '@/lib/checkout';
 import {useDraftPricing} from './useDraftPricing';
 import PriceReviewNotice from './PriceReviewNotice';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -7,7 +8,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { auth, onAuthStateChanged, type User } from '@/lib/auth';
 import { usesSupabase } from '@/lib/backend';
-import { deliverOrderNotifications, applicationPayload, suggestProfileHandle, blankApplication, getMyApplications, getMyOrders, getOrderSettings, supportsCardEditor, supportsProofReview, isOrderingUnavailable, saveApplicationDraft, submitApplication, wizardFromApplication, type OrderSettings, type WizardDraft } from '@/lib/application';
+import { applicationPayload, suggestProfileHandle, blankApplication, getMyApplications, getMyOrders, getOrderSettings, supportsCardEditor, supportsProofReview, isOrderingUnavailable, saveApplicationDraft, submitApplication, wizardFromApplication, type OrderSettings, type WizardDraft } from '@/lib/application';
 import { uploadCustomDesign, uploadPaymentReceipt, uploadPublicAvatar } from '@/lib/upload-service';
 import { isSafeContactUrl } from '@/lib/links';
 import { calculateSubtotal } from '@/lib/data/order';
@@ -107,7 +108,7 @@ function CloudOrderWizard(){
   if(!direct&&s===1&&(!draft.displayName.trim()||(!!draft.usernameSuggested&&(!/^[a-z0-9._-]{1,30}$/.test(draft.usernameSuggested)||['.','..'].includes(draft.usernameSuggested)))))return 'Add your name. If requesting a handle, use letters, numbers, dots, hyphens or underscores.';
   if(!direct&&s===2&&(!draft.links.length||draft.links.some(l=>!isSafeContactUrl(l.url))))return 'Add complete contact links before continuing.';
   if(s===4&&(!draft.customer.fullName.trim()||!/^\+?[\d ()-]{7,30}$/.test(draft.customer.phone)||(draft.deliveryMethod==='delivery'&&(!draft.customer.address.trim()||!draft.customer.city?.trim()))))return 'Enter your name, phone and delivery address/city where applicable.';
-  if(s===5&&!draft.payment.receiptUrl)return 'Upload your private JazzCash payment proof before submitting.';
+  if(s===5)return paymentEvidenceError(draft.payment);
   return '';
  };
  const move=async(next:number)=>{
@@ -133,7 +134,7 @@ function CloudOrderWizard(){
     if(received&&submittingDraft===meta.current){router.push('/order/thank-you?order='+encodeURIComponent(received.id));return;}
     throw new Error('Application changed; reload your saved draft before submitting.');
    }
-   await flush();if(submittingDraft!==meta.current)throw new Error('Account changed; reopen your own application.');const id=await submitApplication(submittingDraft.id,submittingDraft.version);if(submittingDraft!==meta.current)return;void deliverOrderNotifications({id} as import('@/lib/data/order').Order).catch(()=>{});router.push('/order/thank-you?order='+encodeURIComponent(id));
+   await flush();if(submittingDraft!==meta.current)throw new Error('Account changed; reopen your own application.');const id=await submitApplication(submittingDraft.id,submittingDraft.version);if(submittingDraft!==meta.current)return;router.push('/order/thank-you?order='+encodeURIComponent(id));
   }
   catch(e){setError((e instanceof Error?e.message:'Submission could not be confirmed.')+' Check My orders before paying again; retry uses this same application.');}
   finally{lock.current=false;setSubmitting(false);}

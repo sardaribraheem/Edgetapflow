@@ -126,6 +126,6 @@ export async function suggestUsername(firstName?: string, lastName?: string): Pr
 export async function createClientProfileFromOrder(order: Order, username: string): Promise<{ profileId: string; profileUrl: string }> {
   if (!usesSupabase) return (await firebase()).createClientProfileFromOrder(order, username);
   if (!order.id || !order.version) throw new Error('Refresh the order before publishing.');
-  return rpc('publish_order_profile', { p_id: order.id, p_username: username.toLowerCase().replace(/[^a-z0-9._-]/g,'').slice(0,30), p_version: order.version });
+  return rpc('admin_publish_order_profile_now', { p_id: order.id, p_username: username.toLowerCase().replace(/[^a-z0-9._-]/g,'').slice(0,30), p_version: order.version });
 }
 export type { CustomerInfo };

@@ -30,7 +30,7 @@ export type WizardDraft = {
   links: ProfileLink[]; customer: CustomerInfo; deliveryMethod: DeliveryMethod; payment: PaymentInfo; customerNotes: string;
 };
 export function blankApplication(email: string): WizardDraft {
-  return { pricingVersion:4, product:'profile', directLink:'', physical:blankPhysicalCard(),customerNotes:'', cardTemplate:'simple', quantity:1, size:STANDARD_CARD_SIZE, avatarUploadPending:false, displayName:'', title:'', bio:'', location:'', handleEdited:false, usernameSuggested:'', links:[{type:'email',label:'Email',url:'mailto:',icon:'email',accent:'#FF6B5B'}], customer:{fullName:'',phone:'',email,address:'',city:''},deliveryMethod:'delivery',payment:{method:'bank',status:'pending'} };
+  return { pricingVersion:4, product:'profile', directLink:'', physical:blankPhysicalCard(),customerNotes:'', cardTemplate:'simple', quantity:1, size:STANDARD_CARD_SIZE, avatarUploadPending:false, displayName:'', title:'', bio:'', location:'', handleEdited:false, usernameSuggested:'', links:[], customer:{fullName:'',phone:'',email,address:'',city:''},deliveryMethod:'delivery',payment:{method:'bank',status:'pending'} };
 }
 export function applicationPayload(d: WizardDraft): ApplicationPayload {
   const words=printedWords(d.physical,d.displayName||d.customer.fullName,d.title);
@@ -89,7 +89,7 @@ export const FULFILLMENT_LABELS:Record<string,string>={new:'Awaiting review',pai
 export function nextOrderAction(o:Order):string{
   if(o.applicationStatus==='changes_required')return 'Read the EdgeTap message, update your saved application and resubmit it.';
   if(o.applicationStatus==='rejected'||o.applicationStatus==='cancelled')return 'This application is closed. Contact EdgeTap about any payment or remedy questions.';
-  if(o.applicationStatus!=='accepted')return "We're reviewing your request. Any updates will appear here.";
+  if(o.applicationStatus!=='accepted'&&!o.profileId&&!o.nfcUrl)return "We're reviewing your request. Any updates will appear here.";
   if(o.fulfillment.status==='ready_for_pickup')return o.fulfillmentInstructions||'Your card is ready at NASTP Delta 3. Pickup Monday–Friday, 9 am–5 pm. Contact +92 304 414 9674 after reaching NASTP.';
   if(o.fulfillment.status==='shipped'&&o.deliveryIncluded)return 'Your rider is on the way. Follow the delivery updates here.';
   if(o.fulfillment.status==='shipped')return o.deliveryPaymentRecipient==='rider_direct'?'Your rider is on the way. Pay the recorded delivery fare directly to the rider; it is separate from your card payment.':'Your card has been marked dispatched. EdgeTap will confirm delivery details.';
@@ -98,10 +98,14 @@ export function nextOrderAction(o:Order):string{
   if(o.designReviewChannel==='account'&&o.designProofStatus==='awaiting_response')return 'Your card proof is ready in My orders. Check both sides, then approve it or submit your changes in one note. Printing waits for your decision.';
  if(o.designProofStatus==='awaiting_email')return 'Your final design is prepared, but its email has not been sent yet. The 10-hour reply window has not started. Printing is on hold.';
  if(o.designProofStatus==='awaiting_response')return 'Reply to the final-design email within 10 hours to confirm or request changes. The actual deadline appears below. Printing is on hold until review is complete.';
- return 'Your order is accepted. EdgeTap will update the production, NFC programming and quality-check stages here.';
+ if(o.physicalFormat==='profile_only'&&o.profileId)return 'Your digital profile is live and ready to share.';
+ if(o.physicalFormat==='nfc_tag')return 'Follow your NFC tag preparation and collection updates here. A printed card proof is not needed.';
+ return o.profileId?'Your digital profile is live. Follow physical card updates here.':'EdgeTap will update your order here.';
 }
 export function nextFulfillment(o:Order):string|undefined{
-  if(o.applicationStatus!=='accepted')return;
+  if(o.applicationStatus!=='accepted'&&!o.profileId&&!o.nfcUrl)return;
   const next:Record<string,string>={profile_created:'production_ready',production_ready:'printing',printing:'ready_for_nfc',ready_for_nfc:'nfc_programmed',nfc_programmed:'qa_passed',qa_passed:o.deliveryMethod==='nastp_pickup'?'ready_for_pickup':'ready_to_ship',ready_for_pickup:'picked_up',ready_to_ship:'shipped',shipped:'delivered',delivered:'completed',picked_up:'completed'};
   return next[o.fulfillment.status];
 }
+
+export const adminManageOrder=(order:Order,action:string,value:Record<string,unknown>={})=>rpc<{saved:boolean;version:number}>('admin_manage_order',{p_id:order.id,p_version:order.version,p_action:action,p_value:value});

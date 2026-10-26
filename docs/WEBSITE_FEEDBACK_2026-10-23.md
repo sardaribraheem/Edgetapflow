@@ -389,3 +389,8 @@ The first-screen contact follow-up was published as Hosting version `3e2361e7ecb
 ## Follow-up: 25 October admin and profile controls
 
 The owner requested dashboard control of current/crossed-out prices, offers and additional-card/link charges; verified profile saves; sign-in versus owner-edit options in the side menu only; and immediate publication on edgetap.tech before physical printing. Implemented and released in website migrations 022/023 and Hosting `39b6167934063bc3`. See [the admin-controls update](ADMIN_CONTROLS_2026-10-25.md) for decisions and evidence. The app source is untouched.
+
+
+## Follow-up: first-customer feedback, 26 October
+
+Implemented optional public Email links, payment reference-or-receipt, direct staff profile publication, printed-card/tag/digital-only modes, an optional eight-step private checklist, staff customer-profile editing/moderation and one free ten-link website profile per confirmed account. See [the detailed update](FREE_PROFILES_AND_STAFF_FLOW_2026-10-26.md). The owner chose to leave Tarsil.pk's existing profile unchanged. Branded signup/recovery templates and the [SMTP plan](AUTH_EMAIL_PLAN.md) are prepared; email configuration is unchanged.

@@ -1,9 +1,14 @@
 -- Post-upgrade verification permits existing real accounts/data. No fixtures.
 begin read only;
 do $$
-declare versions text[]; t text; fn text; settings jsonb; products boolean; offers boolean; website_reviews boolean; catalog_enabled boolean; console_enabled boolean; catalog jsonb;
+declare versions text[]; t text; fn text; settings jsonb; products boolean; offers boolean; website_reviews boolean; catalog_enabled boolean; console_enabled boolean; free_enabled boolean; catalog jsonb;
 begin
  select array_agg(version::text order by version) into versions from supabase_migrations.schema_migrations;
+ free_enabled='202610260026'=any(versions);
+ if '202610260026'=any(versions) and not ('202610260025'=any(versions)) then raise exception 'Free profile foundation missing';end if;
+ if '202610260025'=any(versions) and not ('202610260024'=any(versions)) then raise exception 'Staff workflow foundation missing';end if;
+ if '202610260024'=any(versions) and not ('202610250023'=any(versions)) then raise exception 'Payment foundation missing';end if;
+ versions=array_remove(array_remove(array_remove(versions,'202610260026'),'202610260025'),'202610260024');
  console_enabled='202610250023'=any(versions);catalog_enabled='202610250022'=any(versions);
  if console_enabled and not catalog_enabled then raise exception 'Admin profile release requires its pricing foundation';end if;
  if catalog_enabled and not ('202610230021'=any(versions)) then raise exception 'Pricing catalog requires the released website foundation';end if;
@@ -49,6 +54,15 @@ begin
  end if;
  if console_enabled and (settings->>'profileOrigin' is distinct from 'https://edgetap.tech' or settings->>'confirmedProfileSaves' is distinct from 'true' or has_function_privilege('anon','public.save_profile_confirmed(text,jsonb)','EXECUTE')) then raise exception 'Missing or unsafe profile confirmation capability';end if;
  if products and not catalog_enabled and settings->'offerPrices' is distinct from '{"direct_link":999,"profile":1499}'::jsonb then raise exception 'Unexpected card product prices';end if;
+ if free_enabled then
+  if settings->>'freeWebsiteProfiles' is distinct from 'true' or settings->>'freeProfilesPerAccount' is distinct from '1' or settings->>'freeProfileLinkLimit' is distinct from '10' or settings->>'staffDirectPublication' is distinct from 'true' or settings->>'paymentReferenceAllowed' is distinct from 'true' then raise exception 'Missing free-profile/staff/payment capabilities';end if;
+  foreach fn in array array['create_free_website_profile(jsonb,uuid)','get_my_free_website_profile()','website_handle_available(text)','admin_publish_order_profile_now(text,text,bigint)','admin_manage_order(text,bigint,text,jsonb)','list_managed_website_profiles(text)','admin_set_profile_visibility(uuid,boolean,bigint)'] loop
+   if has_function_privilege('anon','public.'||fn,'execute') or not has_function_privilege('authenticated','public.'||fn,'execute') then raise exception 'Unsafe website RPC grant: %',fn;end if;
+  end loop;
+  foreach t in array array['private.order_admin_workflows','private.admin_order_actions','private.website_free_profiles','private.profile_moderation_actions'] loop
+   if not exists(select 1 from pg_class where oid=to_regclass(t) and relrowsecurity) or has_table_privilege('anon',t,'SELECT,INSERT,UPDATE,DELETE') or has_table_privilege('authenticated',t,'SELECT,INSERT,UPDATE,DELETE') then raise exception 'Unsafe private website table: %',t;end if;
+  end loop;
+ end if;
  if settings->>'cardPrice'<>'999' or settings->>'jazzcashNumber'<>'0304 4149674' or settings->>'emailNotificationsEnabled'<>'false' or settings->>'designProofScope'<>'all_personalized' then raise exception 'Unexpected ordering configuration'; end if;
 end $$;
 -- SQL role simulation against an existing, unenrolled account. This is not a
@@ -66,5 +80,5 @@ do $$ begin
  begin perform 1 from private.admin_members;raise exception 'Private staff directory visible';exception when insufficient_privilege then null;end;
 end $$;
 reset role;
-select 'Ordering upgrade verified against allowed histories through 015/016 and optional 017–023, pricing catalogs, profile confirmation, RLS/RPC grants, private artwork/receipts and proof-email gates. No data changed.' as result;
+select 'Ordering upgrade verified against allowed histories through 015/016 and optional 017–026, pricing catalogs, profile confirmation, RLS/RPC grants, private artwork/receipts and proof-email gates. No data changed.' as result;
 commit;

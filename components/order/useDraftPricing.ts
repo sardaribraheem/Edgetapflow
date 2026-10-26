@@ -11,7 +11,7 @@ export function useDraftPricing(draft:WizardDraft,onChange:(p:Partial<WizardDraf
   let active=true;void (locked?getPricingCatalog(target):Promise.resolve(catalog!)).then(value=>{
    if(!active)return;const offer=draft.offer&&value[draft.product==='direct_link'?'direct_link':'profile'].offers[draft.offer].enabled?draft.offer:undefined;
    const next={...draft,pricingVersion:4 as const,pricingCatalogVersion:value.version,pricingSnapshot:value,offer};
-   if(!locked&&draft.payment.receiptUrl){let oldTotal:number|undefined;try{oldTotal=calculateSubtotal(draft.quantity,draft.product||'profile',draft.links.length,draft);}catch{}if(draft.pricingVersion===4?draft.pricingCatalogVersion!==value.version:oldTotal!==calculateSubtotal(next.quantity,next.product||'profile',next.links.length,next))setReviewRequired(true);}
+   if(!locked&&(draft.payment.receiptUrl||draft.payment.reference?.trim())){let oldTotal:number|undefined;try{oldTotal=calculateSubtotal(draft.quantity,draft.product||'profile',draft.links.length,draft);}catch{}if(draft.pricingVersion===4?draft.pricingCatalogVersion!==value.version:oldTotal!==calculateSubtotal(next.quantity,next.product||'profile',next.links.length,next))setReviewRequired(true);}
    onChange({pricingVersion:4,pricingCatalogVersion:value.version,pricingSnapshot:value,offer});setError('');
   }).catch(()=>{if(active)setError('Your saved order prices could not be loaded. Please retry.');});return()=>{active=false;};
  },[hydrated,locked,target,draft,onChange,catalog]);

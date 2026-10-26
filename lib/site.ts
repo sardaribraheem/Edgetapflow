@@ -27,7 +27,7 @@ export const DESIGNER_URL = 'https://wa.me/923271360809';
 export const SUPPORT_URL = "https://wa.me/923044149674";
 
 export function profileReturnPath(value: string | null): string {
-  return value === "/account/profile" || value === "/#custom" || value === "/order" || value === "/account/orders" || (value && (/^\/account\/orders\?order=[a-zA-Z0-9_-]{1,128}$/.test(value) || (/^\/u\/[a-z0-9._-]{1,30}$/.test(value) && !["/u/.", "/u/.."].includes(value)))) ? value : "/account/orders";
+  return (!!value&&/^\/order\?product=profile&profile=[a-z0-9._-]{1,30}$/.test(value)&&!['.','..'].includes(value.split('profile=')[1])) || value === "/create-profile" || value === "/account/profile" || value === "/#custom" || value === "/order" || value === "/account/orders" || (value && (/^\/account\/orders\?order=[a-zA-Z0-9_-]{1,128}$/.test(value) || (/^\/u\/[a-z0-9._-]{1,30}$/.test(value) && !["/u/.", "/u/.."].includes(value)))) ? value : "/account/orders";
 }
 
 export function accountReturnPath(requested: string | null, draftEmail?: string, accountEmail?: string | null): string {

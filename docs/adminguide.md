@@ -1,6 +1,14 @@
 # EdgeTap admin guide
 
-Updated 25 October 2026. Use [launch status](LAUNCH_STATUS.md) for the current release and limitations. Supabase migrations **001–015 plus 017–023** are applied; **016 remains unapplied**. The website is live; email transport/scheduler remain inactive.
+Updated 26 October 2026. Use [launch status](LAUNCH_STATUS.md) for the current release and limitations. Supabase migrations **001–015 plus 017–026** are applied; **016 remains unapplied**. The website is live; email transport/scheduler remain inactive.
+
+The current order screen puts **Profile & NFC destination** first. **Publish profile** is available immediately for an order with valid profile details and an owned customer account. It does not require review, payment verification, specifications, print proofs or email and does not mark those facts completed. The confirmed live URL uses `edgetap.tech`. For an already owned profile, use **Use existing profile now**.
+
+Choose **Item type → NFC tag / chip only** for a chip, or **Digital profile only** when nothing physical is required. The agreed price is unchanged. Tag/digital modes hide print-proof tools. **Update fulfillment** records the work you actually completed; the eight optional checklist checks at the bottom never block it. Checkbox steps stay private. **Start review** and **Mark review complete** update the customer account only, without automatic email or required notes.
+
+Payment has its own explicit **Mark payment verified** action after checking actual funds; a customer can supply a reference instead of a receipt. Printing/proof files, customer messages and internal notes are separate optional sections. Staff can edit customer public profile details or remove/restore visibility under **Profiles → Customer profiles**, without the customer password. Removing public visibility keeps the reserved handle and order/account records. Tarsil.pk was left unchanged as the owner requested.
+
+The older full proof procedure below is optional when a printed-card proof is actually wanted. It is not a prerequisite for direct publication or manual fulfillment.
 
 1. Sign in at `/admin`, open **Orders** and select the application. Review customer details, requested links/specification, private receipt and separate front/back artwork.
 2. Verify the **actual transfer** to the selected JazzCash, Easypaisa or Meezan account against the server subtotal. All recipients are Muhammad Ibraheem Anwar; details are in the [business guide](businessguide.md). A screenshot alone is insufficient. Confirm the specification, then **Accept application**.
@@ -28,4 +36,4 @@ Ordinary signup/confirmation/recovery mail is separate from order notifications 
 
 ## Profiles and test maintenance
 
-Admin → Profiles manages the founder `/u/ibraheem`. Preserve accounts, staff, handles, approved snapshots and shared assets. The owner-authorized test order/application cleanup has already run; do not repeat it as routine maintenance. Never remove real customer records or use the cleanup script without reviewing its scope and obtaining authorization for that data operation. Private backups remain ignored; never upload them to GitHub or share them with the printer.
+Admin → Profiles lists customer/free profiles with confirmed edit and remove/restore controls, plus the founder `/u/ibraheem` editor. Preserve accounts, staff, handles, approved snapshots and shared assets. The owner-authorized test order/application cleanup has already run; do not repeat it as routine maintenance. Never remove real customer records or use the cleanup script without reviewing its scope and obtaining authorization for that data operation. Private backups remain ignored; never upload them to GitHub or share them with the printer.

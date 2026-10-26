@@ -33,3 +33,8 @@ const {dispatchRider}=await import(`data:text/javascript;base64,${Buffer.from(st
 for(const [rupees,minor] of [[250,25000],[250.10,25010],[1.10,110],[0,0]]){const sent=await dispatchRider({id:'local-order',version:7},rupees,'Local booked fare');assert.equal(sent.name,'dispatch_rider');assert.equal(sent.args.p_fee_minor,minor);assert.equal(sent.args.p_version,7);}
 for(const invalid of [NaN,Infinity,250.123])assert.throws(()=>dispatchRider({id:'local-order',version:7},invalid,''));
 console.log('PASS rider fare RPC receives exact minor units for whole/decimal rupees and rejects non-money values. No network call.');
+
+assert.equal(profileReturnPath('/create-profile'),'/create-profile');
+assert.equal(profileReturnPath('/order?product=profile&profile=owned-handle'),'/order?product=profile&profile=owned-handle');
+for(const path of ['/order?product=profile&profile=..','/order?product=profile&profile=good&next=https://outside.example','/order?product=profile&profile=%2f%2foutside.example'])assert.equal(profileReturnPath(path),'/account/orders');
+console.log('PASS free-profile and owned-card return paths preserve only explicit safe internal destinations.');

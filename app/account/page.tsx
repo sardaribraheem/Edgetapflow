@@ -64,7 +64,7 @@ export default function AccountPage() {
       if (code === "email_confirmation_required") {
         setPassword("");
         setMode("signIn");
-        setMessage("Confirm your email, then sign in here to continue. Your card draft stays on this device. If you already have an account, use its password.");
+        setMessage("Confirm your email, then sign in here to continue. Return here to continue after confirming your email. Your sign-in email is private; it is not added to your public profile.");
       } else if (["auth/invalid-credential", "auth/wrong-password", "auth/user-not-found", "invalid_credentials"].includes(code)) {
         setError("That email and password do not match an EdgeTap account.");
       } else if (["auth/too-many-requests", "over_request_rate_limit", "over_email_send_rate_limit"].includes(code)) {

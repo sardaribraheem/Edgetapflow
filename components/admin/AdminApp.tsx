@@ -35,7 +35,7 @@ export default function AdminApp({ user, onLogout }: { user: User; onLogout: () 
   const [loadedOnce, setLoadedOnce] = useState(false);
 
   const applyData = (o: Order[], r: Review[]) => {
-    setOrders(o);
+    setOrders(current=>o.map(next=>{const known=current.find(order=>order.id===next.id);return known&&Number(known.version)>Number(next.version)?known:next;}));
     setReviews(r);
     setLoadError("");
   };
@@ -206,7 +206,7 @@ function DashboardView({
   const metrics = [
     { label: "Orders awaiting action", value: awaiting, tone: "text-[var(--coral)]" },
     { label: "Total clients", value: clients, tone: "text-[var(--ink)]" },
-    { label: "Active profiles", value: profiles, tone: "text-[var(--ink)]" },
+    { label: "Order profiles", value: profiles, tone: "text-[var(--ink)]" },
     { label: "Reviews", value: freshReviews, tone: "text-[var(--ink)]" },
     { label: "In production", value: inProduction, tone: "text-[var(--ink)]" },
     { label: "Ready for NFC", value: orders.filter((o) => o.fulfillment.status === "ready_for_nfc").length, tone: "text-[var(--ink)]" },

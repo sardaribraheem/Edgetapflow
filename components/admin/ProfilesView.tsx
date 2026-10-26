@@ -5,6 +5,7 @@ import Link from "next/link";
 import { getStaffProfile, saveFounderProfile } from "@/lib/data-service";
 import type { User } from "@/lib/auth";
 import {notifyProfileChanged} from '@/lib/profile-sync';
+import ManagedProfiles from './ManagedProfiles';
 import Icon from "@/components/ui/Icon";
 import InfoHelp from "@/components/ui/InfoHelp";
 import { ibraheemProfile, Profile, ProfileLink } from "@/lib/data/profile";
@@ -76,6 +77,7 @@ export default function ProfilesView({ user }: { user: User }) {
 
   return (
     <div>
+      <ManagedProfiles/>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-2xl font-bold text-[var(--ink)]">Profiles</h1>
@@ -259,7 +261,7 @@ export default function ProfilesView({ user }: { user: User }) {
         </div>
       </fieldset></form>
 
-      <InfoHelp title="Publishing client profiles" label="Publication help"><p>Client profiles become public through Orders → Publish profile after review and payment verification. A saved draft or submitted order does not publish a profile.</p><p>Handles are reserved atomically so another profile cannot be overwritten.</p></InfoHelp>
+      <InfoHelp title="Publishing client profiles" label="Publication help"><p>Free profiles publish directly after account verification. For orders, you can use Publish profile at any time. Payment, optional review and printing remain separate.</p><p>Handles are reserved atomically so another profile cannot be overwritten.</p></InfoHelp>
     </div>
   );
 }

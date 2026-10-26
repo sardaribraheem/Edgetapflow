@@ -4,12 +4,25 @@ Consolidated 18 October 2026 from release/audit/implementation reports. [Launch 
 
 | Date/time (Pakistan) | Firebase Hosting version | Scope |
 |---|---|---|
+| 26 Oct, 8:32:34 am | **`cabbc34a2b3f0358`** | Free website profiles, direct staff/tag workflow, reference payments and moderation; exact 024–026 plus Hosting |
 | 25 Oct, 10:50:53 am | **`39b6167934063bc3`** | Staff pricing catalog, confirmed customer/founder saves, side-menu editing and canonical pre-print publication; exact 022/023 plus Hosting |
 | 18 Oct, 9:01:06 pm | **`f5c31e156838a13f`** | Latest UI/navbar/story/doodles and stable search favicon refinement; Hosting only |
 | 18 Oct, 8:28:35 pm | `d9033a5eb49c54dd` | Checkout/UI/feedback/admin print release after explicit approval of 017/018 and frontend |
 | 17 Oct, 9:15:27 am | `e2af92ed956b5fcd` | Preferred-origin SEO, sitemap/social metadata/noindex/legacy-route compatibility; Hosting only |
 | 16 Oct, 12:50:10 pm | `ae83d57dca84c205` | Card products/editor/public logos/private proof after approved 012–015 |
 | 14 Oct, 10:14 pm | `e4635533ce44dcb1` | Previous verified baseline |
+
+## 26 October: free profiles, payment alternatives and flexible staff fulfillment
+
+Hosting **`cabbc34a2b3f0358`**, **26 October 2026 at 8:32:34 am Pakistan time**, publishes the reviewed website export on `https://edgetap.tech`. Exactly migrations **024/025/026** were applied and registered atomically after existing 019–023; optional 016 remains unapplied. The transaction verified unchanged existing customer/order/profile/payment/catalog/outbox data and app function definitions. No live customer QA writes, signups, funds, messages, emails or moderation actions were performed. Tarsil.pk's existing profile was explicitly left unchanged.
+
+New card drafts have no forced public Email link. Payment evidence is a reference/transaction ID or an owned private receipt; old receipt-based references retain compatibility. Neither verifies funds automatically. Staff can directly publish to `edgetap.tech/u/<handle>` without review/payment/specification/proof steps, with no fabricated status changes. Item type supports printed card, tag/chip only and digital-only fulfillment without repricing an agreed order. Eight private checklist steps are optional; explicit review start/completion appears in-account but does not queue/send customer email. Manual fulfillment is independent of optional print tools. Customer profiles can be edited or removed/restored from public view by staff without their passwords or deleting records.
+
+One confirmed account can self-publish one free website profile with up to ten links, no payment/order/staff approval, branded shared pages and a card-order CTA. Owner card ordering reuses the owned profile and current catalog rate. Unrelated visitors cannot gain ownership via the URL hint. The creator/account/profile routes remain noindex. Auth email confirmation stays enabled; branded confirmation/recovery templates and an SMTP/DNS/provider plan were prepared without changing the live sender or activating order email.
+
+Validation: production/isolated builds and TypeScript; lint zero errors (18 existing warnings); existing Supabase regressions, 17 pricing/profile SQL scenarios and 16 new payment/free/staff/privacy scenarios; redirect/payment-evidence unit checks; exact guarded release transaction with 019; 97 existing website browser checks, 26 pricing/profile-save checks and 28 focused free-profile/tag/admin checks. Workflow Auth/Storage/money were simulated. Release guard: 119 SEO/static assertions and 153 text assets; 249 exported files. The hosted read-only verifier and 24 anonymous HTTP/browser checks passed, including exact reviewed artifact bytes, both hosts, free-profile entry, owner intent, branding and the unchanged existing customer public profile. Real new-user inbox delivery, hosted signed-in private-byte access and physical tag handoff are not inferred from those checks.
+
+Reviewed export manifest SHA-256: `a9f902e75bc6f2b0a2692860277e9f066cc7fe54f19189d04e6be3a8eb604318`. Migration hashes: 024 `89fc62c64c1ef4ecb0cdb4fc5d5eb7c5507acc5d59bf6fa9f62d6a7c6223dfa2`; 025 `fb92a0330a8c9158e49b218b2e74c092c253c511e5f80743db220bfa1f443840`; 026 `e1d79b810ddfd6b656b309719ee1ef5e2a31f890d73d3ed049725538d90f56df`.
 
 ## 25 October: admin pricing and confirmed profiles
 

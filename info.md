@@ -423,9 +423,9 @@ Marketing and policy pages are the intended indexable pages. Public profiles and
 
 ## 16. Current release and operating limits
 
-The latest recorded website release is **25 October 2026 at 10:50:53 am Pakistan time**, Firebase Hosting version **`39b6167934063bc3`**. It includes admin-managed current/comparison prices, offers and additional-card/link fees, confirmed profile saves and signed-in side-menu editing. New customer profiles can be published on `edgetap.tech/u/<handle>` after verified payment, acceptance and confirmed details, before card printing.
+The latest recorded website release is **26 October 2026 at 8:32:34 am Pakistan time**, Firebase Hosting version **`cabbc34a2b3f0358`**. It includes admin-managed current/comparison prices, offers and additional-card/link fees, confirmed profile saves and signed-in side-menu editing. Staff can publish an order profile directly on `edgetap.tech/u/<handle>` without mandatory review/payment/printing steps. Confirmed users can self-publish one free website profile with up to ten links.
 
-The recorded backend history is migrations 001–015 plus 017–023. Optional migration 016 remains unapplied. The website releases preserved existing order, profile and application records and other existing backend contracts. The initial catalog retains the prices in this overview; dashboard changes control the public pricing page and new checkouts, while submitted orders keep their agreed revision.
+The recorded backend history is migrations 001–015 plus 017–026. Optional migration 016 remains unapplied. The website releases preserved existing order, profile and application records and other existing backend contracts. The initial catalog retains the prices in this overview; dashboard changes control the public pricing page and new checkouts, while submitted orders keep their agreed revision.
 
 Release records report production builds, static/release checks, isolated SQL tests, integrated browser tests and read-only live checks. They distinguish local simulated Auth/Storage/payment workflows from actual customer activity. Those recorded checks are not new tests performed while writing this overview.
 
@@ -481,3 +481,12 @@ The present description of EdgeTap should remain centered on the products it act
 | What policy wording is published? | [Terms](app/terms/page.tsx), [privacy](app/privacy/page.tsx) and [browser storage](app/cookies/page.tsx) |
 
 When updating this overview, reconcile the current source with the newest recorded owner decision and release. Preserve the difference between a released feature, a proposed service, a historical cost and a verified business outcome.
+
+
+## Free profiles and flexible fulfillment, 26 October 2026
+
+The website also offers one free profile per confirmed account with up to ten chosen links. No order, payment or admin acceptance is required to publish it. A public Email link is optional and independent of private account email. The profile carries EdgeTap branding and a card-order CTA; its owner can reuse that profile when ordering cards at the catalog's existing-profile rate.
+
+Staff can directly publish an order profile and choose printed-card, NFC-tag-only or digital-only fulfillment. Payment verification, optional review, print files and email remain separate decisions. Eight optional staff checks stay private; explicit review start/completion appears in My orders without automatic email. Staff can edit customer public details and remove/restore public visibility without deleting ownership or order records. Payment checkout accepts a reference or private receipt; neither automatically verifies funds.
+
+The owner reports the first paying customer requested an NFC tag rather than printing. That customer's existing profile/order/payment were kept unchanged. Actual programming/QA/handoff remain manual. Branded signup/recovery email templates and an SMTP setup plan are prepared, with actual sender configuration unchanged.

@@ -1,6 +1,6 @@
 # EdgeTap backend guide
 
-Updated 25 October 2026. [Launch status](LAUNCH_STATUS.md) records verified service state. Supabase handles Auth, PostgreSQL/RLS/RPCs and Storage; Firebase provides Hosting only. No automatic payment gateway or courier integration exists.
+Updated 26 October 2026. [Launch status](LAUNCH_STATUS.md) records verified service state. Supabase handles Auth, PostgreSQL/RLS/RPCs and Storage; Firebase provides Hosting only. No automatic payment gateway or courier integration exists.
 
 ## Files and configuration
 
@@ -55,7 +55,7 @@ References use `ET-MMDDYY-sequence`, Pakistan date and a sequence starting at 10
 
 ## Migration and capability map
 
-Hosted state: **001–015 plus 017–023**. **016 is optional and unapplied**. Never edit/rerun applied migrations, reset production or blindly push all pending files. Confirm `supabase/project.json` and inspect linked history before proposing an exact authorized change.
+Hosted state: **001–015 plus 017–026**. **016 is optional and unapplied**. Never edit/rerun applied migrations, reset production or blindly push all pending files. Confirm `supabase/project.json` and inspect linked history before proposing an exact authorized change.
 
 | Migration | Responsibility |
 |---|---|
@@ -71,7 +71,10 @@ Hosted state: **001–015 plus 017–023**. **016 is optional and unapplied**. N
 | 019 | Existing separate app contract; preserve definitions |
 | 020–021 | Version-3 website offers, included delivery, owned-profile cards and public reviews |
 | 022 | Staff-only immutable pricing catalog and revision-bound version-4 quotes |
-| 023 | Confirmed customer/founder saves and new canonical profile publication before printing |
+| 023 | Confirmed customer/founder saves and canonical profile publication |
+| 024 | Reference or owned receipt as payment evidence, without automatic funds verification |
+| 025 | Staff direct publication/manual fulfillment, private optional checklist/audit and silent review actions |
+| 026 | One free ten-link website profile per confirmed account and staff moderation |
 
 Released capability checks include `offerPrices`, `cardEditorVersion: 4`, `designReviewVersion: 1` and checkout version 2. First ten profile links are included; the website catalog controls the additional-link rate once per profile, with a technical maximum of 100. Validate price, editor scene and link limits on both client and server. Historical schema-1 scenes/templates remain supported. Direct URLs use normalized UTF-8/NDEF capacity checks in `lib/nfc-link.ts`; actual chip/writability still requires physical testing.
 
@@ -118,3 +121,11 @@ Migration 022 stores public price data in restricted immutable `private.pricing_
 Migration 023 adds `save_profile_confirmed` and `save_founder_profile_confirmed`, preserving owner/staff/version and upload guards. Clients verify the fresh public fields before success; staff also confirms intended visibility. Public-profile refreshes and homepage social links read the actual backend profile. New guarded publications use `https://edgetap.tech/u/<handle>` immediately, while printing/proof gates remain separate. No old URL or approved snapshot is rewritten, and optional 016 is not applied.
 
 Use `npm run test:admin-pricing`, `npm run test:website-offers`, `npm run test:website-reviews` and `npm run test:admin-pricing:browser` against the isolated fixture export. The new browser suite excludes 016, uses local SQL and simulates Auth/Storage. The guarded release transaction was also tested after the existing 019 contract; app function fingerprints are checked unchanged during publication. No live customer QA writes are required.
+
+## Current free-profile and staff controls
+
+`admin_publish_order_profile_now` keeps staff/row-version/handle/ownership/upload/link checks while removing mandatory payment/review/specification/print steps. It does not fabricate those facts. The existing guarded publication RPC stays available for legacy clients. `admin_manage_order` records optional checks, physical format, explicit review/payment decisions and actual manual fulfillment in restricted audit tables. The customer sees review start/completion and item type, never individual staff checks. Its silent-update scope prevents automatic accepted-email jobs; the website no longer automatically calls the order email worker on submission/staff actions. Explicit proof email remains separate and inactive until configured.
+
+`create_free_website_profile` requires a confirmed signed-in account, a unique stable handle and at most ten safe links. It creates one owned public profile and no order, payment or email job; retries use the same request key. `private.website_free_profiles` enforces one free website profile per account. Removal changes public visibility while retaining the handle, ownership and records; the customer cannot self-restore or recreate around moderation. Staff can edit existing customer public fields through the confirmed-save path. Existing 019 app definitions remain unchanged.
+
+Run `npm run test:free-profiles` and the isolated `npm run test:free-profiles:browser`. Auth/Storage/funds are simulated there; never run fixtures against production exports. The exact 024/025/026 release transaction checks unchanged existing customer/profile/order/payment/catalog/outbox data and app definitions before commit. Auth SMTP was not changed; see [the sender plan](AUTH_EMAIL_PLAN.md).

@@ -142,6 +142,8 @@ export const FULFILLMENT_STATES: FulfillmentState[] = FULFILLMENT_FLOW.map((s) =
 
 // ── Order ─────────────────────────────────────────────────────────
 export type Order = {
+  physicalFormat?:'printed_card'|'nfc_tag'|'profile_only';
+  staffReviewStarted?:boolean;staffReviewComplete?:boolean;staffChecks?:Record<string,boolean>;
   pricingVersion?:3|4; pricingCatalogVersion?:number; pricingSnapshot?:PricingCatalog; offer?:'two_card_bundle'|'three_card_bundle'; existingProfileId?:string;
   applicationStatus?: "submitted" | "under_review" | "changes_required" | "accepted" | "rejected" | "cancelled";
   applicationId?: string;

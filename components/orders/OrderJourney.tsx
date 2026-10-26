@@ -1,15 +1,12 @@
-import type { Order } from '@/lib/data/order';
-
-export default function OrderJourney({order}:{order:Order}) {
-  const closed=['cancelled','rejected'].includes(order.applicationStatus||'');
-  const received=['delivered','picked_up','completed'].includes(order.fulfillment.status);
-  const designApproved=['approved','approved_no_response','not_required'].includes(order.designProofStatus||'');
-  const stages=[
-    {label:'Payment verification',done:order.payment.status==='paid',detail:order.payment.status==='paid'?'Verified':order.payment.status==='failed'?'New payment proof needed':'Verification pending'},
-    {label:'Order review',done:order.applicationStatus==='accepted',detail:order.applicationStatus==='accepted'?'Order approved':order.applicationStatus==='changes_required'?'Changes needed':closed?'Order closed':'Approval pending'},
-    {label:'Design approval',done:designApproved,detail:order.designProofStatus==='not_required'?'Not required for this order':designApproved?'Design approved':order.designProofStatus==='awaiting_response'?'Your approval needed':order.designProofStatus==='changes_requested'?'Design changes requested':'Not approved yet'},
-    {label:'Your card',done:received,detail:received?'Received':order.fulfillment.status==='printing'?'Printing':order.fulfillment.status==='ready_for_pickup'?'Ready to collect':order.fulfillment.status==='shipped'?'On the way':'Not ready yet'},
-  ];
-  const current=closed?-1:stages.findIndex(stage=>!stage.done);
-  return <ol className="order-journey" aria-label="Order stages">{stages.map((stage,index)=><li key={stage.label} data-complete={stage.done} aria-current={index===current?'step':undefined}>{stage.label}<small>{stage.detail}</small></li>)}</ol>;
+import type {Order} from '@/lib/data/order';
+export default function OrderJourney({order:o}:{order:Order}){
+ const received=['delivered','picked_up','completed'].includes(o.fulfillment.status),tag=o.physicalFormat==='nfc_tag',digital=o.physicalFormat==='profile_only';
+ const reviewDone=o.staffReviewComplete||o.applicationStatus==='accepted';
+ const stages=[
+  {label:'Your profile / link',done:!!o.nfcUrl,detail:o.nfcUrl?'Live and ready to share':'Not published yet'},
+  {label:'Payment',done:o.payment.status==='paid',detail:o.payment.status==='paid'?'Verified':o.payment.status==='failed'?'Contact EdgeTap':'Awaiting verification'},
+  {label:'Order review',done:reviewDone,detail:reviewDone?'Review complete':o.staffReviewStarted||o.applicationStatus==='under_review'?'Review started':'Not started (optional)'},
+  {label:digital?'Digital profile':tag?'Your NFC tag':'Your card',done:digital?!!o.profileId:received,detail:digital?o.profileId?'Live':'Not published yet':received?'Received':o.fulfillment.status==='ready_for_pickup'?'Ready to collect':o.fulfillment.status==='shipped'?'On the way':tag?['nfc_programmed','qa_passed','ready_to_ship'].includes(o.fulfillment.status)?'Tag programmed':'Tag preparation':o.fulfillment.status==='printing'?'Printing':'Preparation'},
+ ];
+ return <ol className="order-journey" aria-label="Order stages">{stages.map(stage=><li key={stage.label} data-complete={stage.done}>{stage.label}<small>{stage.detail}</small></li>)}</ol>;
 }
