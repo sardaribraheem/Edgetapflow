@@ -1,9 +1,12 @@
 -- Post-upgrade verification permits existing real accounts/data. No fixtures.
 begin read only;
 do $$
-declare versions text[]; t text; fn text; settings jsonb; products boolean; offers boolean; website_reviews boolean; catalog_enabled boolean; console_enabled boolean; free_enabled boolean; catalog jsonb;
+declare versions text[]; t text; fn text; settings jsonb; products boolean; offers boolean; website_reviews boolean; catalog_enabled boolean; console_enabled boolean; free_enabled boolean; account_admin_enabled boolean; catalog jsonb;
 begin
  select array_agg(version::text order by version) into versions from supabase_migrations.schema_migrations;
+ account_admin_enabled='202610270027'=any(versions);
+ if account_admin_enabled and not ('202610260026'=any(versions)) then raise exception 'Account controls require the free-profile foundation';end if;
+ versions=array_remove(versions,'202610270027');
  free_enabled='202610260026'=any(versions);
  if '202610260026'=any(versions) and not ('202610260025'=any(versions)) then raise exception 'Free profile foundation missing';end if;
  if '202610260025'=any(versions) and not ('202610260024'=any(versions)) then raise exception 'Staff workflow foundation missing';end if;
@@ -63,6 +66,15 @@ begin
    if not exists(select 1 from pg_class where oid=to_regclass(t) and relrowsecurity) or has_table_privilege('anon',t,'SELECT,INSERT,UPDATE,DELETE') or has_table_privilege('authenticated',t,'SELECT,INSERT,UPDATE,DELETE') then raise exception 'Unsafe private website table: %',t;end if;
   end loop;
  end if;
+ if account_admin_enabled then
+  if settings->>'profileAccountAdmin' is distinct from 'true' or settings->>'permanentProfileDeletion' is distinct from 'true' or settings->>'staffApplicationDecisions' is distinct from 'true' then raise exception 'Account controls capability missing';end if;
+  foreach fn in array array['admin_detach_profile_account(uuid,bigint,text,text)','admin_delete_website_profile(uuid,bigint,text,text)','admin_review_application(text,bigint,text,text)','admin_update_order_contact(text,bigint,jsonb,text)'] loop
+   if to_regprocedure('public.'||fn) is null or has_function_privilege('anon','public.'||fn,'execute') or not has_function_privilege('authenticated','public.'||fn,'execute') then raise exception 'Unsafe account admin RPC: %',fn;end if;
+   if not exists(select 1 from pg_proc where oid=to_regprocedure('public.'||fn) and prosecdef and 'search_path=""'=any(proconfig)) then raise exception 'Unsafe account admin definer: %',fn;end if;
+  end loop;
+  if not exists(select 1 from pg_class where oid='private.profile_admin_actions'::regclass and relrowsecurity) or has_table_privilege('authenticated','private.profile_admin_actions','SELECT,INSERT,UPDATE,DELETE') or has_table_privilege('anon','private.profile_admin_actions','SELECT,INSERT,UPDATE,DELETE') then raise exception 'Profile audit exposed';end if;
+  if has_function_privilege('authenticated','public.admin_manage_order_before_account_controls(text,bigint,text,jsonb)','execute') or has_function_privilege('authenticated','public.admin_publish_order_profile_before_account_controls(text,text,bigint)','execute') then raise exception 'Legacy account admin aliases exposed';end if;
+ end if;
  if settings->>'cardPrice'<>'999' or settings->>'jazzcashNumber'<>'0304 4149674' or settings->>'emailNotificationsEnabled'<>'false' or settings->>'designProofScope'<>'all_personalized' then raise exception 'Unexpected ordering configuration'; end if;
 end $$;
 -- SQL role simulation against an existing, unenrolled account. This is not a
@@ -80,5 +92,5 @@ do $$ begin
  begin perform 1 from private.admin_members;raise exception 'Private staff directory visible';exception when insufficient_privilege then null;end;
 end $$;
 reset role;
-select 'Ordering upgrade verified against allowed histories through 015/016 and optional 017–026, pricing catalogs, profile confirmation, RLS/RPC grants, private artwork/receipts and proof-email gates. No data changed.' as result;
+select 'Ordering upgrade verified against allowed histories through 015/016 and optional 017–027, pricing catalogs, profile confirmation, account controls, RLS/RPC grants, private artwork/receipts and proof-email gates. No data changed.' as result;
 commit;

@@ -109,3 +109,5 @@ export function nextFulfillment(o:Order):string|undefined{
 }
 
 export const adminManageOrder=(order:Order,action:string,value:Record<string,unknown>={})=>rpc<{saved:boolean;version:number}>('admin_manage_order',{p_id:order.id,p_version:order.version,p_action:action,p_value:value});
+export const adminReviewApplication=(order:Order,action:'reject'|'request_changes',reason:string)=>rpc<{saved:boolean;version:number}>('admin_review_application',{p_id:order.id,p_version:order.version,p_action:action,p_reason:reason});
+export const adminUpdateOrderContact=(order:Order,contact:Pick<Order['customer'],'fullName'|'phone'|'email'>,reason:string)=>rpc<{saved:boolean;version:number}>('admin_update_order_contact',{p_id:order.id,p_version:order.version,p_contact:contact,p_reason:reason});

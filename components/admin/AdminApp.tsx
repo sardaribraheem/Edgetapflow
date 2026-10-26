@@ -13,6 +13,7 @@ import OrderSettingsPanel from './OrderSettings';
 import Icon, { type IconName } from '@/components/ui/Icon';
 import InfoHelp from '@/components/ui/InfoHelp';
 import DefaultAvatar from '@/components/ui/DefaultAvatar';
+import {orderCustomerKey} from '@/lib/admin-account';
 
 export type AdminView = "dashboard" | "orders" | "clients" | "profiles" | "reviews" | "settings";
 
@@ -27,8 +28,13 @@ const VIEWS: { id: AdminView; label: string }[] = [
 const VIEW_ICONS: Record<AdminView, IconName> = {dashboard:'eye',orders:'card',clients:'user',profiles:'avatar',reviews:'check',settings:'shield'};
 
 export default function AdminApp({ user, onLogout }: { user: User; onLogout: () => void }) {
-  const [view, setView] = useState<AdminView>("dashboard");
-  const [selectedOrder, setSelectedOrder] = useState('');
+  const [initialOrder] = useState(()=>{
+    if(typeof window==='undefined')return '';
+    const id=new URLSearchParams(window.location.search).get('order');
+    return id&&/^[a-zA-Z0-9_-]{1,128}$/.test(id)?id:'';
+  });
+  const [view, setView] = useState<AdminView>(initialOrder?'orders':'dashboard');
+  const [selectedOrder, setSelectedOrder] = useState(initialOrder);
   const [orders, setOrders] = useState<Order[]>([]);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loadError, setLoadError] = useState("");
@@ -166,7 +172,7 @@ export default function AdminApp({ user, onLogout }: { user: User; onLogout: () 
           ) : view === "clients" ? (
             <ClientsView orders={orders} onOpenOrder={id=>{setSelectedOrder(id);setView('orders');}} />
           ) : view === "profiles" ? (
-            <ProfilesView user={user} />
+            <ProfilesView user={user} onChanged={refresh}/>
           ) : view === "reviews" ? (
             <ReviewsView reviews={reviews} />
           ) : (
@@ -188,18 +194,19 @@ function DashboardView({
   reviews: Review[];
   onOpenOrders: () => void;
 }) {
-  const awaiting = orders.filter((o) =>
+  const openOrders = orders.filter(o=>!['rejected','cancelled'].includes(o.applicationStatus||''));
+  const awaiting = openOrders.filter((o) =>
     ["new", "payment_pending", "paid", "cod_pending_confirmation"].includes(o.fulfillment.status)
   ).length;
-  const inProduction = orders.filter((o) =>
+  const inProduction = openOrders.filter((o) =>
     ["profile_created", "production_ready", "printing", "ready_for_nfc", "nfc_programmed", "qa_passed"].includes(o.fulfillment.status)
   ).length;
-  const readyToShip = orders.filter((o) =>
+  const readyToShip = openOrders.filter((o) =>
     ["ready_to_ship", "shipped"].includes(o.fulfillment.status)
   ).length;
   const completed = orders.filter((o) => o.fulfillment.status === "delivered").length;
   const recentCompleted = orders.filter((o) => o.fulfillment.status === "delivered").slice(0, 5);
-  const clients = orders.map((o) => o.customer.email).filter((e, i, a) => e && a.indexOf(e) === i).length;
+  const clients = new Set(orders.map(orderCustomerKey)).size;
   const profiles = orders.filter((o) => o.profileId).length; // profiles created from orders
   const freshReviews = reviews.length;
 
@@ -235,7 +242,7 @@ function DashboardView({
             <button onClick={onOpenOrders} className="text-[12px] font-bold text-[var(--sky)] hover:underline">View all →</button>
           </div>
           <div className="mt-4 space-y-2">
-            {orders.slice(0, 6).map((o) => (
+            {openOrders.slice(0, 6).map((o) => (
               <div key={o.id} className="flex items-center justify-between rounded-xl bg-white px-4 py-3 ring-1 ring-[var(--ink)]/8">
                 <div>
                   <p className="text-sm font-bold text-[var(--ink)]">{o.customer.fullName}</p>
@@ -246,7 +253,7 @@ function DashboardView({
                 </span>
               </div>
             ))}
-            {orders.length === 0 && <p className="text-sm text-[var(--ink-faint)]">No orders yet.</p>}
+            {openOrders.length === 0 && <p className="text-sm text-[var(--ink-faint)]">No open orders.</p>}
           </div>
         </div>
 
@@ -284,24 +291,25 @@ function DashboardView({
 // ── Clients ──────────────────────────────────────────────────────
 function ClientsView({ orders, onOpenOrder }: { orders: Order[]; onOpenOrder:(id:string)=>void }) {
   const [query, setQuery] = useState('');
-  const clients: (Order["customer"] & { orderId: string; orderNumber: string; createdAt: number })[] = [];
+  const clients: (Order["customer"] & { customerKey:string; account:Order['account']; orderId: string; orderNumber: string; createdAt: number })[] = [];
   for (const o of orders) {
-    const entry = { ...o.customer, orderId: o.id || "", orderNumber: o.orderNumber, createdAt: o.createdAt };
-    if (o.customer.email && !clients.some((x) => x.email === entry.email)) clients.push(entry);
+    const entry = { ...o.customer, customerKey:orderCustomerKey(o), account:o.account, orderId: o.id || "", orderNumber: o.orderNumber, createdAt: o.createdAt };
+    if (!clients.some((x) => x.customerKey === entry.customerKey)) clients.push(entry);
   }
 
   return (
     <div>
       <h1 className="font-display text-2xl font-bold text-[var(--ink)]">Clients</h1>
-      <p className="text-sm text-[var(--ink-soft)]">{clients.length} clients</p>
+      <p className="text-sm text-[var(--ink-soft)]">{clients.length} customer records · Grouped by customer identity</p>
       <input aria-label="Search clients" placeholder="Find a client" value={query} onChange={event=>setQuery(event.target.value)} className="mt-5 w-full rounded-xl border bg-white p-3"/>
       <div className="mt-6 space-y-3">
-        {clients.filter(c=>[c.fullName,c.email,c.phone].some(value=>value.toLowerCase().includes(query.toLowerCase()))).map((c) => (
+        {clients.filter(c=>[c.fullName,c.email,c.phone,c.account?.email||''].some(value=>value.toLowerCase().includes(query.toLowerCase()))).map((c) => (
           <div key={c.orderId} className="card-paper flex flex-wrap items-center justify-between gap-3 p-5">
             <div className="flex min-w-0 items-center gap-3">
               <div className="h-11 w-11 shrink-0"><DefaultAvatar size={28}/></div><div className="min-w-0">
               <p className="font-display font-bold text-[var(--ink)]">{c.fullName}</p>
-              <p className="break-all text-[13px] text-[var(--ink-soft)]">{c.email}</p>
+              <p className="break-all text-[13px] text-[var(--ink-soft)]">{c.account?.kind==='staff_managed'?'Staff-managed · No login':c.account?.email?'Login: '+c.account.email:'Login unavailable'}</p>
+              <p className="break-all text-xs text-[var(--ink-soft)]">Order contact: {c.email||'Email not set'}</p>
               </div>
             </div>
             <div className="flex items-center gap-2">

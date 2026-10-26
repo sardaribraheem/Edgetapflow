@@ -1,4 +1,5 @@
 import type {PricingCatalog} from '@/lib/pricing';
+import type {StaffAccount} from '@/lib/admin-account';
 import { extraLinkCost } from '../checkout';
 // Order / fulfillment domain data, kept separate from presentation.
 // Shared by the /order wizard, the admin dashboard, and lib/firestore.ts.
@@ -142,6 +143,7 @@ export const FULFILLMENT_STATES: FulfillmentState[] = FULFILLMENT_FLOW.map((s) =
 
 // ── Order ─────────────────────────────────────────────────────────
 export type Order = {
+  account?: StaffAccount | null; // Staff-only account identity, separate from submitted contact details.
   physicalFormat?:'printed_card'|'nfc_tag'|'profile_only';
   staffReviewStarted?:boolean;staffReviewComplete?:boolean;staffChecks?:Record<string,boolean>;
   pricingVersion?:3|4; pricingCatalogVersion?:number; pricingSnapshot?:PricingCatalog; offer?:'two_card_bundle'|'three_card_bundle'; existingProfileId?:string;

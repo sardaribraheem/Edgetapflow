@@ -1073,5 +1073,9 @@ button:disabled {
 .admin-orders-grid { display:grid; gap:1.25rem; margin-top:1.25rem; align-items:start; }
 .admin-order-list { max-height:22rem; overflow:auto; padding:.2rem; }
 .staff-section { border-top:1px solid var(--ink-wash); padding-top:1.25rem; margin-top:1.25rem; }
+.admin-disclosure > summary { display:flex; min-height:48px; align-items:center; justify-content:space-between; gap:1rem; padding:.5rem 0; cursor:pointer; list-style:none; }
+.admin-disclosure > summary::-webkit-details-marker { display:none; }
+.admin-disclosure > summary:focus-visible { outline:2px solid var(--ink); outline-offset:4px; border-radius:8px; }
+.admin-disclosure-toggle { flex-shrink:0; font-size:.75rem; font-weight:700; color:var(--ink-soft); }
 @media(min-width:1100px) { .admin-orders-grid { grid-template-columns:minmax(230px,.7fr) minmax(0,1.5fr); } .admin-order-list { position:sticky;top:1.5rem;max-height:80vh; } }
 @media(max-width:639px) { .free-profile-offer { align-items:flex-start;flex-direction:column; } .free-profile-offer .btn { width:100%; } }

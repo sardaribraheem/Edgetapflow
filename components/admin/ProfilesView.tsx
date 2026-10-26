@@ -12,7 +12,7 @@ import { ibraheemProfile, Profile, ProfileLink } from "@/lib/data/profile";
 
 // The owner explicitly requested restoration of this original founder example.
 // Existing service data always takes precedence over the approved original.
-export default function ProfilesView({ user }: { user: User }) {
+export default function ProfilesView({ user,onChanged }: { user: User;onChanged?:()=>Promise<void> }) {
   const operation=useRef(false);
   const [profile, setProfile] = useState<Profile>({ username: "ibraheem", displayName: "", firstName: "", lastName: "", title: "", bio: "", location: "", avatar: "", links: [] });
   const [loading, setLoading] = useState(true);
@@ -77,7 +77,7 @@ export default function ProfilesView({ user }: { user: User }) {
 
   return (
     <div>
-      <ManagedProfiles/>
+      <ManagedProfiles onChanged={onChanged}/>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-2xl font-bold text-[var(--ink)]">Profiles</h1>

@@ -3,6 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "test:profile-account-admin": "node scripts/test-profile-account-admin.mjs",
+    "test:profile-account-admin:browser": "node scripts/test-profile-account-admin-browser.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "node scripts/serve-export.mjs",
