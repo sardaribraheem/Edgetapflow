@@ -4,7 +4,7 @@ Prepared **24 October 2026, Pakistan time**, from the EdgeTap website repository
 
 This document describes the website and the business it supports. It covers the commercial offering, customer experience, brand, operations, technology and current limits. Companion mobile application development is outside its scope.
 
-The current website code, [launch status](docs/LAUNCH_STATUS.md), latest [release records](docs/RELEASE_HISTORY.md) and final owner decisions in the [website feedback brief](docs/WEBSITE_FEEDBACK_2026-10-23.md) take precedence over earlier notes. Some older guide sections retain superseded prices, delivery charges and proposed offers; those are historical context, not the current offer.
+The current website code, [launch status](../docs/LAUNCH_STATUS.md), latest [release records](../docs/RELEASE_HISTORY.md) and final owner decisions in the [website feedback brief](../docs/WEBSITE_FEEDBACK_2026-10-23.md) take precedence over earlier notes. Some older guide sections retain superseded prices, delivery charges and proposed offers; those are historical context, not the current offer.
 
 ## 1. What EdgeTap is
 
@@ -464,15 +464,15 @@ The present description of EdgeTap should remain centered on the products it act
 
 | Question | Primary repository reference |
 |---|---|
-| What is recorded as live, and what remains unverified? | [Launch status](docs/LAUNCH_STATUS.md) |
-| What was released and checked? | [Release history](docs/RELEASE_HISTORY.md) |
-| What did the owner request and later correct? | [Website feedback brief](docs/WEBSITE_FEEDBACK_2026-10-23.md) |
-| How are commercial decisions and costs recorded? | [Business guide](docs/businessguide.md) |
-| How does staff fulfill orders? | [Admin guide](docs/adminguide.md) |
-| How are website pages and artwork maintained? | [Developer guide](docs/developerguide.md) |
-| How are data and permissions organized? | [Backend guide](docs/backendguide.md) |
-| How is the website built and published? | [Build guide](docs/BUILD.md) |
-| Which expansion ideas are only proposals? | [Roadmap](docs/ROADMAP.md), website/business portions |
+| What is recorded as live, and what remains unverified? | [Launch status](../docs/LAUNCH_STATUS.md) |
+| What was released and checked? | [Release history](../docs/RELEASE_HISTORY.md) |
+| What did the owner request and later correct? | [Website feedback brief](../docs/WEBSITE_FEEDBACK_2026-10-23.md) |
+| How are commercial decisions and costs recorded? | [Business guide](../docs/businessguide.md) |
+| How does staff fulfill orders? | [Admin guide](../docs/adminguide.md) |
+| How are website pages and artwork maintained? | [Developer guide](../docs/developerguide.md) |
+| How are data and permissions organized? | [Backend guide](../docs/backendguide.md) |
+| How is the website built and published? | [Build guide](../docs/BUILD.md) |
+| Which expansion ideas are only proposals? | [Roadmap](../docs/ROADMAP.md), website/business portions |
 | What are the current public offer descriptions? | [Pricing page](app/pricing/page.tsx) and [shared content](lib/data/content.ts) |
 | What enforces card prices? | [Order pricing](lib/data/order.ts) and [migration 020](supabase/migrations/202610230020_website_offers.sql) |
 | What enforces public review publishing and pagination? | [Migration 021](supabase/migrations/202610230021_website_reviews.sql) |

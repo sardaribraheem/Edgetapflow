@@ -2,9 +2,11 @@
 
 One tap. Infinite possibilities.
 
-Next.js static website at **https://edgetap.tech**, backed by Supabase Auth, PostgreSQL and Storage. Firebase provides Hosting only. Start with [current status](docs/LAUNCH_STATUS.md) and the [guide index](docs/README.md).
+Next.js static website at **https://edgetap.tech**, backed by Supabase Auth, PostgreSQL and Storage. Firebase provides Hosting only. Start with [current status](../docs/LAUNCH_STATUS.md) and the [guide index](../docs/README.md).
 
-The latest recorded production release is `f5c31e156838a13f` (18 October 2026). Hosted migrations are **001–015 plus 017/018**; **016 remains unapplied**. Email delivery and its scheduler remain inactive. Real customer checkout/uploads and complete paid physical fulfillment still need verification. The companion app is deferred.
+The latest recorded production release is `cabbc34a2b3f0358` (26 October 2026). Hosted migrations are **001–015 plus 017–026**; **016 remains unapplied**. Order email delivery and its scheduler remain inactive. Real customer checkout/uploads and complete paid physical fulfillment still need verification. App next steps remain planning scope.
+
+The owner moved maintained guides to workspace root `../docs/` on 27 October. The [update plan](../updateplan.md) starts with site cleanup and explicit approval before test-profile deletion. Root guides belong to the separate workspace repository and are not included in a standalone clone of this website repository. Earlier documentation remains in website Git history.
 
 ```sh
 npm ci
@@ -15,11 +17,11 @@ Keep `.env.local` private. For another checkout, copy `.env.example` and supply 
 
 | Task | Guide |
 |---|---|
-| Edit pages, artwork and interactions | [Developer guide](docs/developerguide.md) |
-| Operate orders, proof review and printing | [Admin guide](docs/adminguide.md) |
-| Understand data, permissions and isolated tests | [Backend guide](docs/backendguide.md) |
-| Build, deploy, recover or configure domains | [Build guide](docs/BUILD.md) |
-| Prices, payments, policies and costs | [Business guide](docs/businessguide.md) |
-| Release versions and verification limits | [Release history](docs/RELEASE_HISTORY.md) |
+| Edit pages, artwork and interactions | [Developer guide](../docs/developerguide.md) |
+| Operate orders, proof review and printing | [Admin guide](../docs/adminguide.md) |
+| Understand data, permissions and isolated tests | [Backend guide](../docs/backendguide.md) |
+| Build, deploy, recover or configure domains | [Build guide](../docs/BUILD.md) |
+| Prices, payments, policies and costs | [Business guide](../docs/businessguide.md) |
+| Release versions and verification limits | [Release history](../docs/RELEASE_HISTORY.md) |
 
 Generated browser screenshots/logs, build outputs and private recovery snapshots stay out of Git. Source artwork and reproducible test scripts remain in the repository. Older plans and reports were consolidated on 18 October; tracked history remains available through Git.

@@ -1,6 +1,6 @@
 # EdgeTap project instructions
 
-Read [docs/LAUNCH_STATUS.md](docs/LAUNCH_STATUS.md) first for current verified findings, costs/stock, evidence limits and owner scope. Use [docs/README.md](docs/README.md) for supporting guides. [Release history](docs/RELEASE_HISTORY.md) summarizes past verification; superseded reports remain in Git history and are not instructions to repeat old clean-project steps.
+Read [docs/LAUNCH_STATUS.md](../docs/LAUNCH_STATUS.md) first for current verified findings, costs/stock, evidence limits and owner scope. Use [docs/README.md](../docs/README.md) for supporting guides. [Release history](../docs/RELEASE_HISTORY.md) summarizes past verification; superseded reports remain in Git history and are not instructions to repeat old clean-project steps.
 
 Current priority is a small, personally managed physical-card launch at NASTP NIIT. App work, including its phone-NFC prototype, is deferred until the owner explicitly resumes it. Preserve existing uncommitted work.
 
