@@ -1,0 +1,23 @@
+{
+  "docs/ADMIN_CONTROLS_2026-10-25.md": "7e13d99d9bc0712ccbef65370fcf6c98fe93127264215c7d54d5165d4a5c1e30",
+  "docs/AUTH_EMAIL_PLAN.md": "d04f1cc72156ce7a0f2eb99e1769c07cfb394133b48ba0c8e03e531086f8d309",
+  "docs/BUILD.md": "62d189662654d3786f6099386d30d44d8067d1bfb928f37e9e444af3eefc16c0",
+  "docs/CUSTOMER_GROWTH_PLAN.md": "3a73bd0cd78b87cf174613338287618370efdbbccd1f58ec5c6c06a437599574",
+  "docs/FREE_PROFILES_AND_STAFF_FLOW_2026-10-26.md": "e6cef3b5ee5c6a23df5e76687e9ffa57bcd7bf0a060bbd4eefed6a188119eb10",
+  "docs/LAUNCH_STATUS.md": "a7526124b384c66ce6803faed1e0dbaa89e86be390da696b7b4558936a5e9ad9",
+  "docs/README.md": "937748e07b07c94521fd941e54872452ba55d04a74df5aa6c20a336e1e7ba714",
+  "docs/RELEASE_HISTORY.md": "111fb1c0d57cd0629edc4eaa8a071a3beb7503f7e62da80d8034fc1882d93513",
+  "docs/ROADMAP.md": "8ff163f7d9d88751ceb18479b1f3e631b367415acfcba7075440f8175610da91",
+  "docs/USAMA_MEETING_2026-10-27.md": "2d182328920fb2ced0a713cc2f99b16471cbe66b35130b98db54351af795f67d",
+  "docs/WEBSITE_FEEDBACK_2026-10-23.md": "a6dabf703e1e8085ca848d9a63cbc1dcbd607320d0ddc437021cf8232e9d3f34",
+  "docs/adminguide.md": "66dc0fb63ab4007eca9f9c88974210ad486a9515408ad51435304e06a346c663",
+  "docs/backendguide.md": "87eb88fb41bcfa716738e771c87887fb8f9ca0d1af0b8344e718f0b8c534d35b",
+  "docs/businessguide.md": "07244eb135204a29a11cfde577cfc43bebebe0dbd3ee6fcefce40a0fd6d4e905",
+  "docs/developerguide.md": "52c2aaf87195630a42f7f7f290ec05e25afca9cf45b1f74bcaa5fbadcc04450d",
+  "docs/email-templates/confirm-signup.html": "b4f91c50889b9bd852bcde33fad6dd8b0d03a0621db2125a632f0eee34a663a4",
+  "docs/email-templates/reset-password.html": "8aaa117c4436c417f10d05479f9942ad282b0550d1519463c2434cfdc0560c03",
+  "context.md": "bcf583cc6465341b3f6220fa35406040bfbe20f902bdb2de9fcaa3c8619b5334",
+  "updateplan.md": "126464ac1a63c41f906b14b108a57f7e8aca5e5bbf61247d405a869f8d523888",
+  "AGENTS.md": "3d8e29b94a88ebc6cf5583f5ee80e32b4d8646603d009c5877d65c2f323d48ec",
+  "README.md": "b856a3d648185133b18a6d704fa2ff77bb7cfdd2332d74132eca12ea020033ce"
+}
