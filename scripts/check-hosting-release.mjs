@@ -10,6 +10,8 @@ try {
   assert.equal(project.project_ref, 'dxyxvervvlxhwwbcbttd', 'Unexpected Supabase project.');
   assert.equal(config.hosting.public, 'out', 'Hosting must serve the static export.');
   assert.equal(config.hosting.cleanUrls, true, 'Clean account/profile URLs are required.');
+  assert(config.hosting.headers.some(rule => rule.source === '**' && rule.headers.some(header => header.key === 'Cache-Control' && header.value === 'public, max-age=0, must-revalidate')), 'Page HTML must revalidate so browsers receive current release and pricing copy.');
+  assert(config.hosting.headers.some(rule => rule.source === '/_next/static/**' && rule.headers.some(header => header.key === 'Cache-Control' && header.value.includes('immutable'))), 'Hashed framework assets should retain immutable caching.');
   assert(config.hosting.rewrites.some(rule => rule.source === '/u/**' && rule.destination === '/profile.html'), 'Profile handle rewrite is missing.');
 
   const required = ['index.html', 'admin.html', 'account.html', 'account/recovery.html', 'account/orders.html', 'account/profile.html', 'create-profile.html', 'order.html', 'profile.html', 'privacy.html', 'terms.html', 'cookies.html', 'robots.txt', 'sitemap.xml', 'tools/edgetap-unlock.mjs'];
