@@ -136,3 +136,10 @@ Run `npm run test:free-profiles` and the isolated `npm run test:free-profiles:br
 Migration [027](../EdgetapFlow/supabase/migrations/202610270027_profile_account_admin.sql) adds staff-only versioned account separation, permanent-profile deletion, order contact correction and application decisions, with private audit and revoked wrapper aliases. Public/customer JSON never includes staff account metadata. Installation defines controls only. The exact owner-authorized Umer correction was a separate guarded transaction with a private snapshot; it did not delete profiles or send email. App 019 definitions and optional 016 are unchanged.
 
 Run `npm run test:profile-account-admin` for isolated SQL/security tests (including existing 019), `npm run test:profile-account-admin:browser` against the isolated fixture export on port 4173, and `node scripts/test-profile-account-admin-hosted.mjs` for read-only published checks against the reviewed production export. Do not deploy a fixture export or run cleanup RPCs as tests against real customers. See [account/admin release scope](PROFILE_ACCOUNT_ADMIN_2026-10-27.md).
+
+
+## Pending read-only business backup RPCs, 30 October
+
+Migration `202610300028_admin_business_backups.sql` is implemented/tested locally and **not applied**. It adds staff-only read-only overview/export RPCs, explicit table/file-bucket allowlists and scoped account identities without credentials. Existing migrations/functions, especially 019, remain intact; no customer row or file write occurs on installation or export. See [coverage and release boundary](ADMIN_WORKSPACE_AND_BACKUPS_2026-10-30.md).
+
+Run `npm run test:admin-backups` for isolated SQL plus ZIP/encryption/offline tests, and `npm run test:admin-workspace:browser` against the separately built synthetic fixture export. `supabase/verify-ordering-upgrade.sql` accepts optional 028 only after 027 and verifies its function grants/search paths. Do not mistake business JSON for an operator SQL/Auth backup or apply pending 016 with 028.

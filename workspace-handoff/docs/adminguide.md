@@ -32,7 +32,7 @@ Under **Profiles → Customer profiles → Account access & cleanup**, inspect t
 
 ## Website prices and offers
 
-Open **Settings → Website prices and offers**. Edit current and crossed-out prices for Link Card, EdgeTap Profile Card and the website package. Leave the comparison blank to hide it. Set two/three-card offer prices and availability, additional matching-card price, extra profile-link price after ten, and website renewal. Save waits for a confirmed server read; another staff change requires reloading before saving.
+In the currently recorded live release, open **Settings → Website prices and offers**. The pending 30 October workspace update moves this to **Pricing → Website prices and offers**. Edit current and crossed-out prices for Link Card, EdgeTap Profile Card and the website package. Leave the comparison blank to hide it. Set two/three-card offer prices and availability, additional matching-card price, extra profile-link price after ten, and website renewal. Save waits for a confirmed server read; another staff change requires reloading before saving.
 
 The public pricing page and new checkouts use the same immutable catalog revision. Visible tabs refresh on focus and within 30 seconds; the saving browser also notifies its other tabs. Existing submitted orders, corrections and approved snapshots keep their agreed prices. A new checkout whose price changed must review the current total; if already paid, contact staff before proceeding. Manual quantity changes clear an explicit bundle.
 
@@ -47,3 +47,8 @@ Ordinary signup/confirmation/recovery mail is separate from order notifications 
 ## Profiles and test maintenance
 
 Admin → Profiles lists customer/free profiles with confirmed edit and hide/restore controls, plus the founder `/u/ibraheem` editor. Preserve accounts, staff, handles, approved snapshots and shared assets. The owner-authorized test order/application cleanup has already run; do not repeat it as routine maintenance. Never remove real customer records or use the cleanup script without reviewing its scope and obtaining authorization for that data operation. Private backups remain ignored; never upload them to GitHub or share them with the printer.
+
+
+## Pending workspace and backup controls
+
+The [30 October implementation](ADMIN_WORKSPACE_AND_BACKUPS_2026-10-30.md) adds a LifeOS-style sidebar/header, dedicated Pricing and Data & backups, scoped encrypted business/file downloads, local/offline unlock and directly visible profile deletion guidance. It is locally tested but not deployed; migration 028 is pending. No existing profile has been deleted or file exported from production. These business exports exclude Auth credentials and SQL schema and do not restore live data. Follow the guide for exact coverage, limits and recovery.

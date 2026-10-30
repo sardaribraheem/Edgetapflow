@@ -12,10 +12,14 @@ Unless stated otherwise, website commands and inline source paths in these guide
 | Detailed website, product and business overview | [Project information](../EdgetapFlow/info.md) |
 | Current release and unresolved launch work | [Launch status](LAUNCH_STATUS.md) |
 | Frontend editing, card templates and visual controls | [Developer guide](developerguide.md) |
+| LifeOS-inspired admin layout, local business exports, encryption and offline recovery (pending release) | [Admin workspace and backups](ADMIN_WORKSPACE_AND_BACKUPS_2026-10-30.md) |
 | Staff review, payments, proofs and printer handoff | [Admin guide](adminguide.md) |
 | Database, permissions, migrations and isolated testing | [Backend guide](backendguide.md) |
 | Local build, Hosting, Git recovery and domain setup | [Build guide](BUILD.md) |
 | Commercial decisions, launch operations and cost ledger | [Business guide](businessguide.md) |
+| Compressed-profile capacity, 14-day trial proposal, Rs. 260 production and $30 renewal inputs | [Capacity and trial model](PROFILE_CAPACITY_AND_TRIAL_MODEL_2026-10-28.md) |
+| Final product combinations, owner pricing, profit at 100 payers, archive and dashboard design | [Catalog and operations plan](PRODUCT_CATALOG_AND_OPERATIONS_PLAN.md) |
+| Hosting quotas, managed versus server costs and proposed annual profile pricing | [Hosting cost and pricing review](HOSTING_COST_AND_PRICING_REVIEW_2026-10-28.md) |
 | Customer acquisition, profession profiles, operations and Let's Connect/ITSE research (proposal) | [Customer growth plan](CUSTOMER_GROWTH_PLAN.md) |
 | Usama meeting on 27 October: questions, paid trial and salary/equity/revenue options | [Meeting and offer brief](USAMA_MEETING_2026-10-27.md) |
 | Published releases and validation evidence | [Release history](RELEASE_HISTORY.md) |

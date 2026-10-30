@@ -1,6 +1,6 @@
 # EdgeTap business guide
 
-Updated 26 October 2026. [Launch status](LAUNCH_STATUS.md) records readiness; this guide records commercial decisions and operating context.
+Updated 30 October 2026; operating plan and 100-payer profit model added, live offer unchanged. [Launch status](LAUNCH_STATUS.md) records readiness; this guide records commercial decisions and operating context.
 
 ## Brand and offers
 
@@ -53,14 +53,17 @@ Support: **WhatsApp +92 304 414 9674**. Public email is the approved `SUPPORT_EM
 
 | Item | Amount | Classification |
 |---|---:|---|
+| Current card production | Rs. 260/card | Owner-reported 28 October; excludes delivery, packaging/labor/tax scope unverified |
+| Current domain year | Rs. 0 | Owner-reported student benefit |
+| Next domain renewal | US$30/year | Owner-reported 28 October; actual invoice/FX unverified |
 | Obtained sample blank | Rs. 350 | Owner-reported actual expense |
-| Sample/current printing | Rs. 150/card | Reported actual sample expense/current rate; quality not approved by price |
+| Earlier sample printing | Rs. 150/card | Historical reported sample expense; quality not approved by price |
 | Obtained sample total | Rs. 500 | In hand; fading front needs correction |
 | Temu: 18 advertised NTAG215 cards | Rs. 2,300 total | Ordered; arrival/specification/usability unverified |
 | Temu order-price unit cost | Rs. 127.78 | Before extra charges and rejects |
 | Small envelope | Rs. 10–20/card | Estimate, not a recorded purchase |
 
-Sample-cost remainder before packaging/other costs: **Rs. 499 Link Card / Rs. 999 Profile**. With estimated envelopes: Rs. 479–489 / Rs. 979–989. These are not net profit.
+Historical sample-cost remainder before packaging/other costs (use the newer Rs. 260 input for forward modeling): **Rs. 499 Link Card / Rs. 999 Profile**. With estimated envelopes: Rs. 479–489 / Rs. 979–989. These are not net profit.
 
 If all Temu cards arrive usable, blank + print + estimated envelope is Rs. 287.78–297.78, leaving Rs. 701.22–711.22 on a Link Card before other costs. Use `(actual batch price + extra charges) / usable cards` after intake. Track rejects/reprints, payment costs, support/programming/QA time, marketing/software and applicable taxes. Rider fare remains separate.
 
@@ -84,3 +87,19 @@ The owner reports the first paying customer, Tarsil.pk, wanted a chip/tag linked
 Free website profiles are now the entry point to the product: one confirmed account, one profile, up to ten chosen links, no payment or staff acceptance. Public Email links are optional; the private sign-in email remains separate. A profile owner can order cards using the existing saved profile and the catalog's additional-card rate, without re-entering details or buying another profile. Branding and card-order CTAs remain on shared profiles.
 
 Card checkout accepts a payment reference or a private receipt. Staff still decides when actual funds are verified. Direct profile publication and optional staff checks do not automatically verify payment or send customer email. The [branded Auth email plan](AUTH_EMAIL_PLAN.md) is prepared; no sender/DNS/SMTP change or test mail was made.
+
+
+## Hosting cost review, 28 October
+
+The [hosting cost and pricing review](HOSTING_COST_AND_PRICING_REVIEW_2026-10-28.md) checks current provider rates, aggregate-only live sizes, public transfer, a paid infrastructure budget and a proposed new assisted annual offer. Its figures are scenarios, not invoices or accepted pricing. Current catalog, free-profile rights and customer terms remain unchanged. Use actual delivery/support costs and registrar renewal rather than promotional prices before a later offer decision.
+
+
+The [updated capacity/trial model](PROFILE_CAPACITY_AND_TRIAL_MODEL_2026-10-28.md) uses Rs. 260 card production and $30 next-domain renewal, estimates public/private storage and traffic separately, and compares a Rs. 1,000 annual digital offer with a separately purchased card. A 14-day new-user trial is a proposal; existing free profiles and agreed paid terms are unchanged. No recurring profile billing, expiry, account blacklist or customer/file deletion is authorized/implemented by these notes.
+
+
+## Final operating plan, 30 October
+
+Use the [catalog and operations specification](PRODUCT_CATALOG_AND_OPERATIONS_PLAN.md) for supported hardware/profile/finish combinations, owner-controlled future selling prices, the 100-payer cash/labor model and encrypted historical-file archiving. The latest preferred Basic planning price is Rs. 1,499/year plus a Rs. 700 card add-on (Rs. 2,199 total, or an explicit Rs. 2,200 bundle), superseding the earlier Rs. 1,000 anchor; its profit is conditional on actual infrastructure, payer count, support and value mix. The model explicitly compares Rs. 1,499/1,599 alternatives without changing the live catalog. Local archives retain a minimal online operational/financial ledger and do not automatically remove receipts upon confirmation. The [milestone plan](../updateplan.md) orders implementation; existing customer terms remain intact.
+
+
+The [30 October admin/backup implementation](ADMIN_WORKSPACE_AND_BACKUPS_2026-10-30.md) adds local business exports and clearer cleanup controls in a reviewed source branch. It has not changed production or enabled annual billing. Export downloads consume provider egress and do not reduce stored cloud bytes. Full SQL/Auth recovery remains an operator task; no file purge or actual customer deletion is included.

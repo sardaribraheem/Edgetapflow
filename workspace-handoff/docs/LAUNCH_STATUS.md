@@ -1,8 +1,12 @@
 # EdgeTap launch status
 
-Updated 27 October 2026, Pakistan time. This is the current status authority; procedures live in the other [guides](README.md). The priority is a personally managed physical-card launch at NASTP NIIT. This website release leaves companion app source and its existing database functions unchanged.
+Updated 30 October 2026, Pakistan time; recorded production release remains 27 October. This is the current status authority; procedures live in the other [guides](README.md). The priority is a personally managed physical-card launch at NASTP NIIT. This website release leaves companion app source and its existing database functions unchanged.
 
 **27 October admin/account release:** the requested order sections now collapse, application rejection/contact correction are visible, and profile visibility, account separation and guarded permanent deletion are distinct controls. At the owner's explicit direction, both hidden Umer profiles and their one order were separated from Tarsil's existing login into staff management without email, a new Auth account or any permanent deletion. All six profiles/four orders remain. Tarsil's actual current public fields/links, account, order and payments were preserved. See [release details and verification](PROFILE_ACCOUNT_ADMIN_2026-10-27.md). The [milestone plan](../updateplan.md) keeps broader cleanup active; ask before any actual test-profile deletion.
+
+**30 October planning update:** the owner requested a final detailed plan before implementation. The [catalog/operations specification](PRODUCT_CATALOG_AND_OPERATIONS_PLAN.md) and [milestone order](../updateplan.md) now cover configurable digital/tag/card/print combinations, a cleaner dashboard, annual/trial rules, cost/profit scenarios and verified encrypted local archives of eligible historical files. The [app plan](../EdgeTapApp/docs/NEXT_STEPS_PLAN.md) is aligned at documentation level. No new code, prices, trial expiry, archive export/purge, email, provider billing or app release was performed; existing customer records/terms are unchanged.
+
+**30 October local implementation:** the owner subsequently requested the LifeOS-style admin alignment, more visible cleanup and local data controls. These are [implemented and tested locally](ADMIN_WORKSPACE_AND_BACKUPS_2026-10-30.md), with dedicated Pricing/Data & backups sections, encrypted/scoped business and file exports and offline unlock. **No deployment or hosted migration 028 has occurred.** The latest proposed annual price is Rs. 1,499 plus an optional Rs. 700 card (Rs. 2,199, or explicit Rs. 2,200 bundle); 100 users alone does not require Pro. These new prices and annual entitlements remain proposals.
 
 ## Recorded production state
 

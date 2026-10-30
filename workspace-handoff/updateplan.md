@@ -1,130 +1,132 @@
-# EdgeTap update plan
+# EdgeTap implementation milestones
 
-Updated **27 October 2026**, Pakistan time. Work through the milestones in order. This file is the main execution plan; supporting research and operating guides are in [docs/](docs/README.md). The first admin/account cleanup release is complete; the broader milestone remains active.
+Updated **30 October 2026**, Pakistan time. This is the ordered execution plan. The [product, pricing and operations specification](docs/PRODUCT_CATALOG_AND_OPERATIONS_PLAN.md) contains the detailed combination chart, profit calculations, cloud/archive design and acceptance rules. App-specific work is maintained in [app next steps](EdgeTapApp/docs/NEXT_STEPS_PLAN.md).
 
-Current scope: website cleanup and improvements, then separately authorized Android alignment. On 27 October, the requested dashboard controls and scoped Umer account separation were released. No profile/account was permanently deleted, no email was sent, prices were unchanged and app source was untouched. See [release scope](docs/PROFILE_ACCOUNT_ADMIN_2026-10-27.md).
+**Current scope: implement the owner-requested website admin layout, visible profile cleanup and local business backups.** These are implemented locally; [details and pending release](docs/ADMIN_WORKSPACE_AND_BACKUPS_2026-10-30.md). New catalog combinations, annual billing, trial expiry, compression, cloud-file deletion and app source remain planned. The latest preferred offer is **Rs. 1,499/year plus a Rs. 700 card**, total Rs. 2,199, or an explicit Rs. 2,200 bundle. No live price/term change has been made. 100 customers alone does not require Pro; see the revised cost scenarios.
+
+## Starting point and protections
+
+The 27 October admin/account release is complete: collapsible optional order sections, application decisions, contact corrections, identity-based Clients grouping and protected account/profile cleanup. The explicitly requested Umer separation is complete; no profiles were permanently deleted. The broader public cleanup/audit remains open. See [release evidence](docs/PROFILE_ACCOUNT_ADMIN_2026-10-27.md) and [current service authority](docs/LAUNCH_STATUS.md). Counts recorded during earlier work are historical snapshots, not a current deletion list.
+
+Preserve Tarsil.pk, founder Ibraheem, every customer's currently stored public fields/links, handles, accounts, paid rights and order/payment history. The owner identified Umar Khan, Enfotize and Adolf as tests, but **ask before deleting any exact test profile**, including named ones. New signups are not automatically tests. No account/order/file cleanup follows from a profile label or this plan.
+
+Maintain general docs at root `docs/`. Website source/Git lives in the separate `EdgetapFlow/` repository. App source and app technical docs live in `EdgeTapApp/`; preserve the owner's edited PRD and unrelated `revenue.nd`/untracked work. Do not rerun applied 019, edit applied migrations or blindly include optional 016. Recheck current history before any later implementation/release.
 
 ## Milestone order
 
-| Order | Milestone | Completion evidence | Status |
+| Order | Milestone | Status | Evidence needed to finish |
 |---|---|---|---|
-| 1 | Clean the existing site and review test profiles | Admin/account fixes released; public audit and owner approval before any permanent test deletion remain | In progress |
-| 2 | Make signup, profile editing and card ordering dependable | Ordinary-user journey works; saves are confirmed; current prices/terms match checkout | Pending |
-| 3 | Run a small customer pilot with the working offer | Real use, paid orders, fulfillment costs and buyer objections recorded privately | Pending |
-| 4 | Add three useful profile presets | Professional, Portfolio and Local Business share one reliable profile system | Pending |
-| 5 | Add review and business actions | Correct review/WhatsApp/service actions work on real customer-approved examples | Pending |
-| 6 | Finalize paid upgrades and the free allowance | Clear paid value, server-enforced access and agreed new-user limits without losing existing rights | Pending |
-| 7 | Align and verify the companion app | Current commercial terms, correct ordering handoff and actual phone acceptance | Pending |
-| 8 | Add genuine measurement and expand proven offers | Real activity data, repeatable acquisition and sustainable fulfillment | Pending |
+| 1 | Finish existing-site cleanup and customer baseline | Partly complete | Public/mobile audit, ordinary core-flow evidence, protected records preserved |
+| 2 | Control costs: images, recovery and archive prototype | Partly implemented locally | Measured uploads/usage, verified non-destructive archive/restore, clear cost baseline |
+| 3 | Build the configurable catalog and quote contract | Planned | All supported combinations priced server-side, private costs isolated, old quotes intact |
+| 4 | Clean the dashboard and publish a consistent pricing/checkout UI | Admin shell implemented locally | Owner price control/read-back, chart matches checkout, mobile/keyboard checks |
+| 5 | Add annual entitlements and future-cohort trial/renewal | Planned | Server-enforced lifecycle, same-profile upgrades, legacy/app compatibility |
+| 6 | Add useful business sections and a small set of presets | Planned | Actual hours/review/service workflows, preserved fields/URLs, bounded storage |
+| 7 | Align and verify the Android companion | Planned | Current catalog/lifecycle, correct profile order handoff, genuine phone evidence |
+| 8 | Validate, release a controlled pilot and check profit | Planned | Reviewed release, actual consenting customer results and contribution/retention data |
+| 9 | Expand only the measured offer | Later | Repeat demand, funded operating budget, real analytics before app statistics |
 
-Use completion evidence to advance rather than an assumed release date. Keep one main implementation milestone active at a time. An early pilot can start as soon as the current experience is dependable; it does not depend on building every proposed feature.
+Work on one main milestone at a time. New catalog rows, paid features and trials stay disabled until their dependencies are ready. Milestone 4 can preview annual offers, but cannot sell an unimplemented subscription before Milestone 5. Existing working offers can support an earlier scoped pilot; app completion and every business feature are not prerequisites for a sale.
 
-## 1. Clean the existing site and review test profiles
+## 1. Finish existing-site cleanup and customer baseline
 
-**First work: clean up what is already there.** Review the live public profile routes and the website's existing content before adding features.
+- [x] Record the owner's protected-profile/test-cleanup boundary and maintained docs structure.
+- [x] Release the first admin/account fixes and exact owner-authorized Umer separation; preserve Tarsil and all profile/order records.
+- [ ] Refresh actual Git/service state and inventory only what is needed; keep private values out of docs/Git.
+- [ ] Audit homepage, pricing, profile, account, order and admin navigation on mobile/desktop: stale copy, duplicate buttons, broken links, optional Email, unknown handles, save/read-back and recoverable failures.
+- [ ] Verify ordinary confirmed-account creation/sign-in/edit/order using an explicitly scoped consenting test journey; real mail/uploads are separate from mocks.
+- [ ] Check real card/tag destination, QR where printed, print quality and handoff. Do not mark payment/printing/NFC complete without doing it.
+- [ ] If actual test deletion is desired, present exact handles/related records and ask; independent UI work continues while that data decision remains pending.
 
-Owner clarification on 27 October: **Tarsil.pk / TarsilPK and Ibraheem are the only currently confirmed valid public profiles.** Preserve their profile records, URLs, ownership, links and customer/order/payment relationships. Keep every currently stored Tarsil.pk public link unchanged; account cleanup must not add or restore an Email link. The confirmed founder route is `/u/ibraheem`; resolve Tarsil.pk's actual stored handle rather than guessing its spelling from the business name.
+**Exit:** the owner can demonstrate the current real core journey without confusing account/profile or order facts. Existing valid profiles and NFC URLs remain unchanged. Reference: [admin guide](docs/adminguide.md).
 
-The owner identifies **Umar Khan, Enfotize and Adolf** as test profiles and says other profiles in the present set are tests. These are owner-supplied names, not an inspected list of exact handles or IDs. New signups after this instruction may be real customers; never treat every future profile outside the two protected names as disposable.
+## 2. Control costs and prove recovery
 
-- [x] Prepare a read-only inventory with exact handles/IDs, visibility, ownership and related records. Keep private account/contact/payment details out of versioned documents.
-- [x] Match the owner-named test profiles to exact records and list anything ambiguous separately.
-- [ ] **Before deleting any test profile, show the owner the exact candidates, related-record impact and proposed action, then ask for explicit confirmation.** This applies to the named tests too. Do not delete, hide or alter them during the documentation task.
-- [ ] Agree whether a confirmed test should be hidden or permanently deleted; do not treat those actions as interchangeable. Customer accounts, orders, payments, files, reviews and other linked data need their own explicit scope.
-- [ ] For a later approved cleanup, retain an appropriate private recovery record, act only on the approved exact records, and verify the protected profiles and their existing links afterward. No wildcard deletion, reseeding or old cleanup-script rerun.
-- [ ] Audit public pages for stale copy, broken links, inconsistent button labels, confusing duplicate actions and unused test/demo content. Keep licensed assets and the owner-approved story/tap/QR demonstrations.
-- [ ] Prepare the concrete visual/content changes; verify mobile/desktop, navigation, unknown-handle behavior and accessibility before an authorized release.
+- [ ] Verify actual provider plan, monthly egress/reset periods, per-bucket growth, production SMTP readiness and domain-renewal input. Record unavailable figures honestly.
+- [ ] Confirm production, packaging, delivery, payment fees and time by SKU. Use owner-reported Rs. 260 finished-card cost and $30 next-domain renewal as inputs pending invoices; do not infer tag/blank costs.
+- [ ] Resize/re-encode **new public portraits/logos**, aiming for about 150 KB/50 KB with acceptable quality; enforce output sizes/ownership on the server. Keep print masters private and print quality intact.
+- [ ] Preserve old customer images unless a separate approved batch change is planned. Check corrupt images, orientation, transparency, oversized output, interrupted uploads and replacement failures.
+- [x] Implement non-destructive encrypted **business** exports with optional files, SHA-256 manifest, per-profile/customer scope and isolated decrypt/offline recovery checks. This does not provide a full SQL/Auth restore.
+- [ ] Add historical archive eligibility/hold tracking, independent second-copy confirmation and a separately reviewed restore/import workflow; no cloud-file purge is enabled.
+- [ ] Keep cloud Auth/ownership/profile/subscription and minimal order/payment/audit records. Keep files required for open production/revisions/support online.
+- [ ] Define retention/customer-download behavior before removing cloud blobs. **No automatic deletion on order confirmation.** Build export/recovery first; any actual removal is separately scoped after concrete backup evidence.
 
-Completed first implementation: clear Hide/Restore versus permanent-delete controls, account/linked-order directory, exact-handle confirmations, safe order-contact correction, visible Reject application/Request changes, customer identity grouping and collapsible optional sections. Both hidden Umer handles and their one order were separated from Tarsil's login into staff management under the owner's explicit clarification. All six profiles and four orders remain; Tarsil's fields/links/order/payments and login are unchanged. No messages or permanent deletions occurred. Owner-named Enfotize was not matched to a current stored handle; do not guess. Permanent deletion of tests remains pending explicit approval.
+**Exit:** compression is measured, archive restoration succeeds and actual usage/costs are visible. Local archiving is not mistaken for a way to eliminate a managed provider's fixed fee. Reference: [operations and archive design](docs/PRODUCT_CATALOG_AND_OPERATIONS_PLAN.md#5-cloud-data-and-encrypted-local-archive), [capacity model](docs/PROFILE_CAPACITY_AND_TRIAL_MODEL_2026-10-28.md).
 
-**Done when:** the owner has approved the exact data action before it is taken, approved changes are verified, protected profiles remain unchanged, and the existing site has a clear usable baseline. If deletion approval is pending, continue independent read-only/UI work and keep the data step visibly pending.
+## 3. Configurable catalog and quote contract
 
-Reference: [launch status](docs/LAUNCH_STATUS.md), [admin guide](docs/adminguide.md), [backend guide](docs/backendguide.md).
+- [ ] Model digital service, new/existing profile, hardware tag/card, finish printed/unprinted, direct/profile/unprogrammed destination, assistance, quantity and delivery independently.
+- [ ] Cover the [full product combination chart](docs/PRODUCT_CATALOG_AND_OPERATIONS_PLAN.md#3-product-combinations-and-pricing-chart), including hardware without a profile, existing-profile hardware and renewal without hardware.
+- [ ] Build versioned draft/publish/read-back prices, optional comparisons, stock/availability, explicit bundles, future plan prices and revision history.
+- [ ] Keep private SKU costs/contribution inputs separate from publicly readable selling prices. An unknown cost is not zero.
+- [ ] Produce server-calculated immutable quotes/line items. Reject invalid combinations, client price tampering, stale revisions, another customer's profile and unsupported stock.
+- [ ] Charge annual service once per profile/period, regardless of matching hardware quantity. Additional/replacement hardware does not create a duplicate subscription/profile.
+- [ ] Preserve agreed legacy order prices, delivery terms, allowances and existing app 019 behavior through tested compatible/versioned contracts. Keep unready/unpriced products disabled.
 
-## 2. Make the core journey dependable
+**Exit:** isolated quote/security tests exercise every supported row and invalid option, and old orders/clients still work. No price change rewrites a saved quote. Reference: [catalog contract](docs/PRODUCT_CATALOG_AND_OPERATIONS_PLAN.md#4-owner-controlled-catalog-and-quotes).
 
-- [ ] Verify real signup confirmation, password sign-in and recovery with an agreed test recipient. Review the prepared Auth email plan separately from order emails.
-- [ ] Verify profile creation, owner editing, public-photo disclosure/upload, successful-save read-back and recoverable failures.
-- [ ] Confirm the same owned profile is reused when ordering hardware; browser sign-in remains separate where applicable.
-- [ ] Make free profile, Link Card, existing-profile card and assisted package scope/pricing understandable and consistent with the current server catalog. Preserve submitted order quotes.
-- [ ] Verify current delivery terms, payment-reference/receipt submission and manual funds verification without inventing payment or fulfillment success.
-- [ ] Confirm usable print/tag quality, the correct encoded destination, matching QR where included, phone checks and actual handoff for the physical pilot.
+## 4. Dashboard cleanup and public pricing/checkout
 
-**Done when:** a consenting ordinary user can complete the applicable flow and the resulting profile/order facts match reality. Build and mocked-test success alone are not this evidence.
+- [ ] Build **Catalog & plans** so the owner changes prices/availability later without deployment. Preview the exact chart and example totals before publishing; show confirmed save/current revision.
+- [x] Build the LifeOS-inspired sidebar, compact header, aligned overview, mobile drawer and command search while preserving EdgeTap colours. Separate Dashboard, Orders, Clients, Profiles, Reviews, Pricing, Data & backups and Settings. Keep existing identity/security safeguards.
+- [ ] Release the reviewed admin update plus definitions-only migration 028 under the production authorization boundary.
+- [ ] Expand Pricing into the full future catalog and backups into reviewed historical-archive states as their contracts become ready.
+- [ ] Put actionable status/product/amount/destination first in orders. Group secondary details, keep Reject/Request changes and payment actions visible, and retain collapsible print/message/notes/checklist drafts.
+- [ ] Add clear list filters/search, trial/paid/legacy labels, archive states, loading/stale/error recovery and keyboard/mobile support. Closed records remain searchable rather than deleted for tidiness.
+- [ ] Build a readable pricing chart and filters for digital-only/tag/card, printed/unprinted, with/without a new profile and existing owners. Show first-year total, renewal, quantity, assistance and delivery explicitly.
+- [ ] Connect each valid row to matching checkout selections; prove the UI and server quote agree. Disabled or quote-only products cannot accidentally be purchased for zero.
+- [ ] Preview new annual products without enabling public purchase until entitlement/renewal readiness in Milestone 5.
 
-Reference: [Auth email plan](docs/AUTH_EMAIL_PLAN.md), [business guide](docs/businessguide.md), [build guide](docs/BUILD.md).
+**Exit:** the owner can edit a future price once and see it consistently in the pricing page, checkout and supported app handoff; mobile/desktop and accessibility checks pass. No giant always-open admin forms or duplicate confusing actions. Reference: [dashboard design](docs/PRODUCT_CATALOG_AND_OPERATIONS_PLAN.md#7-cleaner-dashboard).
 
-## 3. Run a small customer pilot
+## 5. Annual service, trials and renewal
 
-- [ ] Speak with reachable NIIT professionals/freelancers and nearby service businesses; test which next action they want visitors to take.
-- [ ] Demonstrate working contact/portfolio sharing and an agreed review/WhatsApp use case, marking any proposed feature clearly.
-- [ ] Use ten voluntarily published profiles and three to five paid hardware/setup orders as initial learning targets, subject to stock and capacity. These are targets, not promised results.
-- [ ] Privately record acquisition source, genuine payment/fulfillment, actual print/delivery/reprint/setup costs, repeat sharing and objections.
-- [ ] Ask fulfilled customers for honest feedback and introductions; request permission for any public example.
+- [ ] Record the exact launch cohort/effective date and Basic price/support/delivery terms. Preserve current free profiles and existing purchased rights.
+- [ ] Claim one server-owned 14-day trial at first confirmed publication; do not reset it via edits, removed profiles, email changes or web/app switching.
+- [ ] Display trial/annual terms before creation. On expiry, suspend the future cohort's public trial with a recoverable draft/status page; keep account/handle. Define retention separately; do not automatically destroy data.
+- [ ] Activate after real verified payment on the same profile ID/URL. Idempotent billing events grant one defined 12-month period; early renewal preserves remaining paid time.
+- [ ] Separate staff moderation, paid entitlement, purchased link allowance and hardware ownership. A payment cannot silently restore a staff-hidden profile; a hardware order cannot silently change a legacy free entitlement.
+- [ ] Test old/new web/app creation/read/save paths and safe unavailable states. No browser-only enforcement or old-RPC bypass for new cohorts.
+- [ ] Use in-account notices first. Activate customer email or recurring debit only under its own authorized, verified setup; this plan sends nothing.
 
-**Done when:** real buyer evidence identifies the first useful preset/section and the full contribution per order is understood. Keep personal sales outreach with the owner unless separately assigned.
+**Exit:** trial, paid, early/late renewal, retry, unpaid/rejected, staff-comp, legacy and account-isolation cases pass across clients. Saved physical destinations remain safe. Reference: [lifecycle rules](docs/PRODUCT_CATALOG_AND_OPERATIONS_PLAN.md#6-storage-trial-and-subscription-rules).
 
-Reference: [customer growth research](docs/CUSTOMER_GROWTH_PLAN.md).
+## 6. Useful business profiles
 
-## 4. Add three profile presets through one system
+- [ ] Add business hours with timezone/closed/split-day handling, services/WhatsApp actions and an approved outbound Google review link.
+- [ ] Keep EdgeTap product reviews, business review destinations and hosted testimonials distinct. Build real review submission/moderation/spam controls before advertising hosted reviews.
+- [ ] Reuse one profile/section model for Professional, Portfolio and Local Business presets. Preserve content on theme switches and unknown fields on old-client saves.
+- [ ] Add only a capped gallery when the paid offer/usage supports it; no unlimited uploaded video. Keep enquiry forms, bookings and imported ratings as separate scoped dependencies.
 
-- [ ] Professional: expertise/services/contact choices and a clear contact or consultation action.
-- [ ] Portfolio: selected work, project descriptions and a project enquiry action.
-- [ ] Local Business: services, optional prices, public hours/directions and a relevant enquiry/review action.
-- [ ] Reuse profile identity, shared sections, editor, preview and access rules. Use the customer's purpose to suggest a preset.
-- [ ] Keep name/role and the main action readable near the top. Make QR/share secondary and avoid popups interrupting contact.
-- [ ] Preserve content when switching presets, stable profile URLs, purchased allowances, staff moderation and older-client compatibility.
+**Exit:** the advertised action works on real approved examples; feature availability, storage and annual value match what checkout sells. Reference: [feature sequence](docs/PRODUCT_CATALOG_AND_OPERATIONS_PLAN.md#8-useful-profile-features-and-app-alignment).
 
-**Done when:** the initial buyer-selected preset works end to end, then the remaining presets can be added without separate profile implementations. No need to match a competitor's 40-preview count before selling.
+## 7. Android companion alignment and evidence
 
-Reference: [profile direction and website sequence](docs/CUSTOMER_GROWTH_PLAN.md).
+- [ ] Follow the app's own instructions and [maintained app plan](EdgeTapApp/docs/NEXT_STEPS_PLAN.md); preserve the original owner-edited PRD.
+- [ ] Use the same account/profile/URL and current catalog, selected-profile hardware order, plan/trial dates and supported upload output. Never pass tokens in purchase URLs.
+- [ ] Make unavailable/archived/order states truthful; retain QR/link fallback and preserve new web fields.
+- [ ] Plan the owner-requested per-link QR feature flag initially off. Additional-profile/device-limit and account-deletion semantics need explicit shared policy; do not silently increase trial/profile quotas.
+- [ ] Test native Auth, crop/upload, save conflicts, selection, sign-out and background cleanup on actual Android devices.
+- [ ] Prove NFC on documented sender/recipient pairs before claiming it works. Statistics stays unavailable without a genuine API; check current digital-purchase/distribution rules before public release.
 
-## 5. Add review and business actions
+**Exit:** current commercial rules work, no duplicate profile/charge appears, and real device results bound release claims. A browser compile is not real NFC/mail/upload evidence.
 
-- [ ] Add an optional Google review destination/action and a clearly scoped review-card/tag offer using proven hardware.
-- [ ] Add the service/portfolio sections buyers need and direct WhatsApp enquiries.
-- [ ] Keep ordinary review/booking URLs usable as links. Charge for useful features, setup and hardware rather than a bare hyperlink.
-- [ ] Keep reviews about EdgeTap separate from outbound reviews about a customer's business. A review click does not prove a submitted review.
-- [ ] Add a private enquiry inbox only when demand justifies collection, owner-only access, spam controls and a retention decision. Use existing booking links before considering a full scheduler.
+## 8. Controlled pilot, release and contribution check
 
-**Done when:** destinations and owner workflows have been checked, no real form submissions were fabricated during QA, and the advertised capability is actually available.
+- [ ] Run appropriate SQL/security/legacy, browser, release-guard and app/native checks; retain private before-state recovery evidence and rollback plan.
+- [ ] Prepare concrete release contents and disabled/enabled offer flags; obtain any required release/data/file-removal authorization only after results are reviewable.
+- [ ] Release a small consenting new cohort, verify live read-only behavior and separately scoped real Auth/upload/fulfillment results. Never deploy a fixture export.
+- [ ] Start with three to five paid fulfillments; record actual production, delivery, support minutes, acquisition, fees and usable card counts privately.
+- [ ] Review 25/50/100 **paying** customers against invoices and contribution, not signup count. At 100 payers, Rs. 1,000/year alone is not a profit guarantee on paid infrastructure; compare the financial table and adjust future prices/tiers or budget consciously.
+- [ ] Attempt actual archive/restore before any approved cloud purge; verify customer/staff archived-file messaging and protection of unresolved orders.
+- [ ] Update context/launch/release evidence with what actually happened and what remains unverified.
 
-## 6. Finalize paid upgrades and the free allowance
+**Exit:** the paid promise is deliverable, annual revenue funds the chosen operating model or an explicit capped launch subsidy, and customer records/old cards remain safe.
 
-- [ ] Separate hardware, richer digital features and assisted setup in the offer; state which are bundled.
-- [ ] Keep the current ten-link free allowance until a specific change is chosen. Five links for future profiles is a proposal, not an implemented decision.
-- [ ] Preserve existing free allowances, purchased capacity and historical quotes. Never truncate or remove existing links to create upgrade pressure.
-- [ ] If a new limit is approved, define migration/cohort rules and enforce them on the server across web and app. Show the owner's plan/capacity clearly without making the public profile unattractive.
-- [ ] Set paid features, limits, price, renewal/hosting terms and support scope using pilot evidence and actual operating costs.
+## 9. Measured expansion
 
-**Done when:** the owner has chosen the offer and limit rules, customers can understand them, and access/payment/legacy behavior is verified before release.
+Add real permitted opens/clicks/enquiries and protected owner aggregates before app statistics. Do not claim exact people, physical tap counts, contact saves or submitted Google reviews from weaker events. Expand the preset/gallery/team/booking/iPhone offer only after repeated buyer demand, budget and operating capacity justify it. Printers/riders remain supplier/economic decisions rather than prerequisites for a usable product.
 
-## 7. Align and verify the companion app
+## Implementation handoff
 
-- [ ] Update stale delivery copy, fixed pricing assumptions and the older staff-assisted existing-profile card route against the current website contracts.
-- [ ] Verify selected-profile ordering without auth tokens in URLs or duplicate profile creation.
-- [ ] Test actual Android sign-in, editing/photo lifecycle, conflict recovery, QR/link sharing and sign-out/background cleanup.
-- [ ] Prove NFC on documented real-device pairs before making support claims; keep QR/link usable.
-- [ ] Keep rich public sections on the shared website first; make later native editing preserve unknown fields and existing content.
-- [ ] Review current dependencies, signing, privacy/deletion and distribution requirements before any public app release. iPhone and full native checkout remain later decisions.
-
-**Done when:** current terms and identity/order association are correct, real-device results support the chosen release scope, and remaining limits are honestly disclosed.
-
-Reference: [app next steps](EdgeTapApp/docs/NEXT_STEPS_PLAN.md).
-
-## 8. Measure real activity and expand what works
-
-- [ ] Add permitted public-profile events and protected owner aggregates before showing app analytics.
-- [ ] Distinguish recorded opens, outbound clicks, submitted enquiries, unavailable data and measured zero. Do not claim exact people, physical taps, contact saves or submitted Google reviews from weaker signals.
-- [ ] Repeat the best-performing audience/offer and publish permitted real examples. Judge acquisition against contribution and fulfillment capacity.
-- [ ] Consider more profession presets, team tools, a scheduler/CRM, printers, a dedicated rider or iPhone only when repeated demand, costs and operational capacity justify them.
-
-**Done when:** genuine measurement informs the next change and the offer can be fulfilled reliably at a sustainable cost.
-
-## Meeting and capacity
-
-The [Usama meeting brief for 27 October](docs/USAMA_MEETING_2026-10-27.md) runs alongside this product plan. No development role or ownership agreement has been accepted. If a paid role is agreed, cap hours and protect independent EdgeTap work in writing, then adjust milestone capacity. Keep private negotiations and company/customer documents out of project notes.
-
-## How to record progress
-
-For each milestone, record the completed work, validation evidence, open decisions and next action. Mark a production change complete only after its agreed checks and actual release evidence. Update [context.md](context.md) and [launch status](docs/LAUNCH_STATUS.md) when material decisions or releases change; link topic guides rather than duplicating chat transcripts.
+On the next implementation task, refresh root context, repository instructions, current Git/service state and the active milestone. Start with remaining Milestone 1 and the non-destructive cost/recovery work. Do not treat “final plan” as evidence that any new feature already exists. Record changes, checks, unresolved inputs and next concrete step per milestone. Use the topic specification instead of duplicating full conversation transcripts. University/EdgeTap operating capacity sets the pace; no outside affiliate arrangement is accepted by this plan.
