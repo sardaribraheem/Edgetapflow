@@ -19,12 +19,17 @@ create temp table _edgetap_app_guard on commit drop as select oid::regprocedure:
 """
 sql+="do $$ declare history text[];begin select array_agg(version::text order by version) into history from supabase_migrations.schema_migrations;if history is distinct from array["+','.join("'"+v+"'" for v in expected)+"] then raise exception 'Unexpected migration history; no release applied';end if;end $$;\n"
 sql+="""do $$ declare t record;n bigint;h text;expr text;begin
- for t in select n.nspname,c.relname from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname in ('public','private','auth','storage') and c.relkind in ('r','p') order by n.nspname,c.relname loop
-  execute format('lock table %I.%I in share row exclusive mode',t.nspname,t.relname);
+ for t in select n.nspname,c.relname from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname in ('public','private','auth','storage') and c.relkind in ('r','p') and has_table_privilege(current_user,c.oid,'SELECT') order by n.nspname,c.relname loop
+  if t.nspname in ('public','private') then
+   execute format('lock table %I.%I in share row exclusive mode',t.nspname,t.relname);
+  else
+   execute format('lock table %I.%I in access share mode',t.nspname,t.relname);
+  end if;
   expr=case when t.nspname='public' and t.relname='orders' then 'to_jsonb(x)-''product_catalog_version''-''product_quote''' else 'to_jsonb(x)' end;
   execute format('select count(*),md5(coalesce(string_agg((%s)::text,E''\\n'' order by (%s)::text),'''')) from %I.%I x',expr,expr,t.nspname,t.relname) into n,h;
   insert into _edgetap_product_guard values(t.nspname||'.'||t.relname,n,h);
  end loop;
+ if not exists(select 1 from _edgetap_product_guard where table_name='auth.users') or not exists(select 1 from _edgetap_product_guard where table_name='storage.objects') or not exists(select 1 from _edgetap_product_guard where table_name='storage.buckets') then raise exception 'Required Auth/Storage preservation guards unavailable';end if;
  if (public.get_order_settings()->>'emailNotificationsEnabled') is distinct from 'false' then raise exception 'Email settings changed; review before release';end if;
 end $$;
 """
