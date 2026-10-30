@@ -1,5 +1,7 @@
 # EdgeTap product catalog, operating costs and delivery plan
 
+**Implementation update, 30 October:** standard catalog/checkout, public prices, admin/backups, compression and core business sections are released. Annual/trial foundations are implemented but disabled pending policy choice; archives/import/retention and app alignment remain later scope. This specification retains broader planning context; use the [actual release guide](PRODUCT_CATALOG_RELEASE_2026-10-30.md) and [milestone status](../updateplan.md) for current behavior.
+
 Planning and scoped admin implementation revision: **30 October 2026**, Pakistan time. The owner requested a detailed plan before implementation. This document specifies the work to build; it does not apply prices, enable billing, expire profiles, send email, move/delete customer records, ship cards or release the app. Follow the ordered [milestones](../updateplan.md).
 
 ## 1. Decisions and scope

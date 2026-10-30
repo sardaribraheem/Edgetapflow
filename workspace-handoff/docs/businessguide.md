@@ -1,5 +1,7 @@
 # EdgeTap business guide
 
+**30 October released standard range:** raw/programmed NFC tags Rs. 400/500, unprinted cards Rs. 500/600, standard printed cards Rs. 600/700; optional setup Rs. 500 once. These are pickup prices, distinct from the legacy customizable offers below and their saved delivery terms. Annual digital service Rs. 1,499 is prepared but unavailable until deliberately enabled. Staff changes future rates in Pricing; old quotes/terms and current free profiles remain intact. See [catalog and operational limits](PRODUCT_CATALOG_RELEASE_2026-10-30.md).
+
 Updated 30 October 2026; operating plan and 100-payer profit model added, live offer unchanged. [Launch status](LAUNCH_STATUS.md) records readiness; this guide records commercial decisions and operating context.
 
 ## Brand and offers

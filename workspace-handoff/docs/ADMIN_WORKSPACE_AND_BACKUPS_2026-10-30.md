@@ -1,6 +1,6 @@
 # Admin workspace and local business backups
 
-Updated **30 October 2026**, Pakistan time. Implementation branch: `codex/admin-layout-backups-2026-10-30`, source commit `bc575ce`, pushed and remote-verified in the separate `EdgetapFlow/` repository. **Implemented and tested locally; not deployed. Migration 028 is pending.** Recorded production remains Hosting `6f8c18e26f9a80c5` and migrations 001–015 plus 017–027; 016 remains unapplied. No live customer export, deletion, email, pricing change or app change was performed.
+Released **30 October 2026** under the owner’s explicit publication request. Hosting **`d94632fc5fe1f7e4`** at **https://edgetap.tech**; exact migrations **028–032** applied after the prior history. Optional **016 remains unapplied**; existing **019 app function definitions and all guarded existing records were preserved**. Source branch `codex/product-pricing-milestones-2026-10-30` includes feature commits `6866d0c` and `6b10d86`. Future-cohort trials and annual purchases remain **disabled**, existing free profiles/terms are preserved, and email transport remains inactive. See [full release evidence](PRODUCT_CATALOG_RELEASE_2026-10-30.md). The initial admin implementation was `bc575ce`; it is included in this production release. No actual customer export, deletion, email or app-source change was performed.
 
 ## Workspace layout
 
@@ -41,9 +41,9 @@ The independent test extracts files using Python's standard ZIP reader, validate
 
 ## Backend and release boundary
 
-Pending `supabase/migrations/202610300028_admin_business_backups.sql` creates only `admin_backup_overview()` and `admin_export_business_data(text,uuid)`, grants authenticated execution and denies anonymous execution. Both call `private.require_staff()`, use empty search paths and are read-only. Installing the definitions must leave customer/Auth/file/mail data and existing 019 app functions unchanged. No new bucket policy is required.
+Applied `supabase/migrations/202610300028_admin_business_backups.sql` creates only `admin_backup_overview()` and `admin_export_business_data(text,uuid)`, grants authenticated execution and denies anonymous execution. Both call `private.require_staff()`, use empty search paths and are read-only. Installing the definitions must leave customer/Auth/file/mail data and existing 019 app functions unchanged. No new bucket policy is required.
 
-Before release: recheck hosted migration history, preserve private recovery evidence, apply **only** reviewed 028 under corresponding authorization and verify its grants and existing records/app functions. Do not blindly push optional 016 or rerun 019. Publish only the guarded production export to Firebase Hosting `edgetapflow`; never publish the isolated fixture export. Check hosted routes and anonymous RPC denials. A signed-in real export/private download remains a separately evidenced operator check. Until this release, live navigation/prices/deletion behavior is the prior recorded release.
+Release completed with exact 028–032 and the guarded production export. Hosted grants/anonymous denials and existing-record/app preservation checks passed. Future releases must recheck current history and apply only exact authorized new definitions; never rerun these files or blindly include 016. A signed-in real export/private download remains a separately evidenced operator check.
 
 ## Verification
 
@@ -51,4 +51,4 @@ Before release: recheck hosted migration history, preserve private recovery evid
 - Isolated SQL: ten new export/authorization/scope/preservation groups, 17 existing profile/account groups and the legacy Supabase suite.
 - Seven archive/encryption/offline recovery groups, including independent ZIP validation, wrong-key/tamper failure and safe offline output.
 - Browser: 22 new workspace/export/recovery checks, 26 existing pricing/profile checks, 26 account/deletion checks and 28 free-profile/staff-flow checks (102 browser assertions in total). Auth/Storage are simulated; business RPCs run in isolated Postgres-compatible fixtures.
-- No deployment, live private export, actual customer mutation or mail was used to establish these results. See current [launch status](LAUNCH_STATUS.md).
+- These initial automated results used isolated fixtures. Subsequent owner-authorized production publication and read-only verification passed; no live private export, actual customer mutation or mail was used for testing. See current [launch status](LAUNCH_STATUS.md).

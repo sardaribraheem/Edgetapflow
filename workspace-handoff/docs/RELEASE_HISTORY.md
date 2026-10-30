@@ -4,6 +4,7 @@ Consolidated 18 October 2026 from release/audit/implementation reports. [Launch 
 
 | Date/time (Pakistan) | Firebase Hosting version | Scope |
 |---|---|---|
+| 30 Oct | **`d94632fc5fe1f7e4`** | Detailed hardware catalog/checkout, resilient prices, admin/backups, business sections and inactive annual/trial foundations; exact 028–032, existing records/app contracts preserved |
 | 27 Oct, 00:52:10 | **`6f8c18e26f9a80c5`** | Collapsible admin orders, application decisions, account cleanup; exact 027 and owner-requested Umer separation, no mail/deletion |
 | 26 Oct, 8:32:34 am | **`cabbc34a2b3f0358`** | Free website profiles, direct staff/tag workflow, reference payments and moderation; exact 024–026 plus Hosting |
 | 25 Oct, 10:50:53 am | **`39b6167934063bc3`** | Staff pricing catalog, confirmed customer/founder saves, side-menu editing and canonical pre-print publication; exact 022/023 plus Hosting |
@@ -12,6 +13,12 @@ Consolidated 18 October 2026 from release/audit/implementation reports. [Launch 
 | 17 Oct, 9:15:27 am | `e2af92ed956b5fcd` | Preferred-origin SEO, sitemap/social metadata/noindex/legacy-route compatibility; Hosting only |
 | 16 Oct, 12:50:10 pm | `ae83d57dca84c205` | Card products/editor/public logos/private proof after approved 012–015 |
 | 14 Oct, 10:14 pm | `e4635533ce44dcb1` | Previous verified baseline |
+
+## 30 October: detailed pricing and supported website milestones
+
+Released **30 October 2026** under the owner’s explicit publication request. Hosting **`d94632fc5fe1f7e4`** at **https://edgetap.tech**; exact migrations **028–032** applied after the prior history. Optional **016 remains unapplied**; existing **019 app function definitions and all guarded existing records were preserved**. Source branch `codex/product-pricing-milestones-2026-10-30` includes feature commits `6866d0c` and `6b10d86`. Future-cohort trials and annual purchases remain **disabled**, existing free profiles/terms are preserved, and email transport remains inactive. See [full release evidence](PRODUCT_CATALOG_RELEASE_2026-10-30.md).
+
+The database transaction preserved fingerprints for 72 existing tables and all three 019 function definitions. New customer entitlement/business-section tables start empty; no old order was assigned a new quote. The shared avatars cap remains 5 MiB; original physical-card logo bytes remain intact. New standalone portraits/logos are compressed. Verification: 144 local browser assertions; SQL/security/ZIP/encryption/image suites; TypeScript, lint with 18 existing warnings; production build and 119 static checks/154 public text assets. Hosted SQL verifier and 55 anonymous read-only checks passed, plus real mobile/public-price checks. Authentication, private-byte transport, payments and physical handoff remain separately evidenced.
 
 ## 27 October: account separation and clearer admin order controls
 

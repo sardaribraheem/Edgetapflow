@@ -2,7 +2,7 @@
 
 Updated **30 October 2026**, Pakistan time. This is the ordered execution plan. The [product, pricing and operations specification](docs/PRODUCT_CATALOG_AND_OPERATIONS_PLAN.md) contains the detailed combination chart, profit calculations, cloud/archive design and acceptance rules. App-specific work is maintained in [app next steps](EdgeTapApp/docs/NEXT_STEPS_PLAN.md).
 
-**Current scope: implement the owner-requested website admin layout, visible profile cleanup and local business backups.** These are implemented locally; [details and pending release](docs/ADMIN_WORKSPACE_AND_BACKUPS_2026-10-30.md). New catalog combinations, annual billing, trial expiry, compression, cloud-file deletion and app source remain planned. The latest preferred offer is **Rs. 1,499/year plus a Rs. 700 card**, total Rs. 2,199, or an explicit Rs. 2,200 bundle. No live price/term change has been made. 100 customers alone does not require Pro; see the revised cost scenarios.
+**Current scope: implement and publish the owner-requested website catalog, detailed prices, dashboard controls and remaining supported website foundations, then commit/push.** The owner explicitly approved publication after the main card-price fix. See [implementation and release evidence](docs/PRODUCT_CATALOG_RELEASE_2026-10-30.md). Default detailed rates: raw/programmed tag Rs. 400/500; unprinted card Rs. 500/600; standard printed card Rs. 600/700; setup Rs. 500. Annual service is Rs. 1,499 in the prepared catalog, but annual sales/trials stay disabled pending the owner's policy choice. Existing free profiles and customer terms remain unchanged.
 
 ## Starting point and protections
 
@@ -17,11 +17,11 @@ Maintain general docs at root `docs/`. Website source/Git lives in the separate 
 | Order | Milestone | Status | Evidence needed to finish |
 |---|---|---|---|
 | 1 | Finish existing-site cleanup and customer baseline | Partly complete | Public/mobile audit, ordinary core-flow evidence, protected records preserved |
-| 2 | Control costs: images, recovery and archive prototype | Partly implemented locally | Measured uploads/usage, verified non-destructive archive/restore, clear cost baseline |
-| 3 | Build the configurable catalog and quote contract | Planned | All supported combinations priced server-side, private costs isolated, old quotes intact |
-| 4 | Clean the dashboard and publish a consistent pricing/checkout UI | Admin shell implemented locally | Owner price control/read-back, chart matches checkout, mobile/keyboard checks |
-| 5 | Add annual entitlements and future-cohort trial/renewal | Planned | Server-enforced lifecycle, same-profile upgrades, legacy/app compatibility |
-| 6 | Add useful business sections and a small set of presets | Planned | Actual hours/review/service workflows, preserved fields/URLs, bounded storage |
+| 2 | Control costs: images, recovery and archive prototype | Compression and business backup controls implemented | Measured uploads/usage, verified non-destructive archive/restore, clear cost baseline |
+| 3 | Build the configurable catalog and quote contract | Standard catalog/quote implementation complete | All supported combinations priced server-side, private costs isolated, old quotes intact |
+| 4 | Clean the dashboard and publish a consistent pricing/checkout UI | Released; hosted checks passed | Owner price control/read-back, chart matches checkout, mobile/keyboard checks |
+| 5 | Add annual entitlements and future-cohort trial/renewal | Implemented and tested; activation held | Server-enforced lifecycle, same-profile upgrades, legacy/app compatibility |
+| 6 | Add useful business sections and a small set of presets | Core sections implemented | Actual hours/review/service workflows, preserved fields/URLs, bounded storage |
 | 7 | Align and verify the Android companion | Planned | Current catalog/lifecycle, correct profile order handoff, genuine phone evidence |
 | 8 | Validate, release a controlled pilot and check profit | Planned | Reviewed release, actual consenting customer results and contribution/retention data |
 | 9 | Expand only the measured offer | Later | Repeat demand, funded operating budget, real analytics before app statistics |
@@ -32,8 +32,8 @@ Work on one main milestone at a time. New catalog rows, paid features and trials
 
 - [x] Record the owner's protected-profile/test-cleanup boundary and maintained docs structure.
 - [x] Release the first admin/account fixes and exact owner-authorized Umer separation; preserve Tarsil and all profile/order records.
-- [ ] Refresh actual Git/service state and inventory only what is needed; keep private values out of docs/Git.
-- [ ] Audit homepage, pricing, profile, account, order and admin navigation on mobile/desktop: stale copy, duplicate buttons, broken links, optional Email, unknown handles, save/read-back and recoverable failures.
+- [x] Refresh Git/service state and aggregate-only inventory: prior migrations through 027, 8 profiles, 4 orders, 7 accounts, approximately 14.53 MB database / 20.50 MB files before this release. No customer records returned or changed by inventory.
+- [x] Audit implemented public/account/order/admin flows with automated mobile/desktop checks and hosted read-only follow-up; actual inbox/private-byte/physical evidence remains separate. Covered: stale copy, duplicate buttons, broken links, optional Email, unknown handles, save/read-back and recoverable failures.
 - [ ] Verify ordinary confirmed-account creation/sign-in/edit/order using an explicitly scoped consenting test journey; real mail/uploads are separate from mocks.
 - [ ] Check real card/tag destination, QR where printed, print quality and handoff. Do not mark payment/printing/NFC complete without doing it.
 - [ ] If actual test deletion is desired, present exact handles/related records and ask; independent UI work continues while that data decision remains pending.
@@ -44,8 +44,8 @@ Work on one main milestone at a time. New catalog rows, paid features and trials
 
 - [ ] Verify actual provider plan, monthly egress/reset periods, per-bucket growth, production SMTP readiness and domain-renewal input. Record unavailable figures honestly.
 - [ ] Confirm production, packaging, delivery, payment fees and time by SKU. Use owner-reported Rs. 260 finished-card cost and $30 next-domain renewal as inputs pending invoices; do not infer tag/blank costs.
-- [ ] Resize/re-encode **new public portraits/logos**, aiming for about 150 KB/50 KB with acceptable quality; enforce output sizes/ownership on the server. Keep print masters private and print quality intact.
-- [ ] Preserve old customer images unless a separate approved batch change is planned. Check corrupt images, orientation, transparency, oversized output, interrupted uploads and replacement failures.
+- [x] Resize/re-encode **new standalone website portraits/logos** to 150 KiB/640 px and 50 KiB/320 px targets; preserve existing ownership protections. Add staff control for an optional 150 KiB shared bucket cap; retain legacy 5 MiB by default until mobile compression is ready. Keep private print masters and original order-logo bytes intact; print-linked public logos can exceed the standalone web target. Mobile/print compatibility is required before tightening the shared bucket cap.
+- [x] Preserve old customer images; Check corrupt images, orientation, transparency, oversized output, interrupted uploads and replacement failures.
 - [x] Implement non-destructive encrypted **business** exports with optional files, SHA-256 manifest, per-profile/customer scope and isolated decrypt/offline recovery checks. This does not provide a full SQL/Auth restore.
 - [ ] Add historical archive eligibility/hold tracking, independent second-copy confirmation and a separately reviewed restore/import workflow; no cloud-file purge is enabled.
 - [ ] Keep cloud Auth/ownership/profile/subscription and minimal order/payment/audit records. Keep files required for open production/revisions/support online.
@@ -55,47 +55,49 @@ Work on one main milestone at a time. New catalog rows, paid features and trials
 
 ## 3. Configurable catalog and quote contract
 
-- [ ] Model digital service, new/existing profile, hardware tag/card, finish printed/unprinted, direct/profile/unprogrammed destination, assistance, quantity and delivery independently.
-- [ ] Cover the [full product combination chart](docs/PRODUCT_CATALOG_AND_OPERATIONS_PLAN.md#3-product-combinations-and-pricing-chart), including hardware without a profile, existing-profile hardware and renewal without hardware.
-- [ ] Build versioned draft/publish/read-back prices, optional comparisons, stock/availability, explicit bundles, future plan prices and revision history.
-- [ ] Keep private SKU costs/contribution inputs separate from publicly readable selling prices. An unknown cost is not zero.
-- [ ] Produce server-calculated immutable quotes/line items. Reject invalid combinations, client price tampering, stale revisions, another customer's profile and unsupported stock.
-- [ ] Charge annual service once per profile/period, regardless of matching hardware quantity. Additional/replacement hardware does not create a duplicate subscription/profile.
-- [ ] Preserve agreed legacy order prices, delivery terms, allowances and existing app 019 behavior through tested compatible/versioned contracts. Keep unready/unpriced products disabled.
+- [x] Model supported hardware/service/finish/destination/quantity/setup/delivery choices independently. Create or select an owned profile before annual/profile hardware checkout.
+- [x] Cover standard supported rows in the [product combination chart](docs/PRODUCT_CATALOG_AND_OPERATIONS_PLAN.md#3-product-combinations-and-pricing-chart), including hardware without a profile, existing-profile hardware and renewal without hardware.
+- [x] Build detailed draft/publish/read-back rates, availability, annual prices and revision history. Existing customizable-offer comparisons/bundles remain supported in their separate immutable legacy catalog; mixed-SKU carts/inventory and new promotion schemes remain later scope.
+- [x] Keep private SKU costs/contribution inputs separate from publicly readable selling prices. An unknown cost is not zero.
+- [x] Produce server-calculated immutable quotes/line items. Reject invalid combinations, client price tampering, stale revisions, another customer's profile and unsupported stock.
+- [x] Charge annual service once per profile/period, regardless of matching hardware quantity. Additional/replacement hardware does not create a duplicate subscription/profile.
+- [x] Preserve agreed legacy order prices, delivery terms, allowances and existing app 019 behavior through tested compatible/versioned contracts. Keep unready/unpriced products disabled.
 
 **Exit:** isolated quote/security tests exercise every supported row and invalid option, and old orders/clients still work. No price change rewrites a saved quote. Reference: [catalog contract](docs/PRODUCT_CATALOG_AND_OPERATIONS_PLAN.md#4-owner-controlled-catalog-and-quotes).
 
 ## 4. Dashboard cleanup and public pricing/checkout
 
-- [ ] Build **Catalog & plans** so the owner changes prices/availability later without deployment. Preview the exact chart and example totals before publishing; show confirmed save/current revision.
+- [x] Build the **Pricing / Detailed product catalog** so the owner changes prices/availability later without deployment. Preview the exact chart and example totals before publishing; show confirmed save/current revision.
 - [x] Build the LifeOS-inspired sidebar, compact header, aligned overview, mobile drawer and command search while preserving EdgeTap colours. Separate Dashboard, Orders, Clients, Profiles, Reviews, Pricing, Data & backups and Settings. Keep existing identity/security safeguards.
-- [ ] Release the reviewed admin update plus definitions-only migration 028 under the production authorization boundary.
-- [ ] Expand Pricing into the full future catalog and backups into reviewed historical-archive states as their contracts become ready.
-- [ ] Put actionable status/product/amount/destination first in orders. Group secondary details, keep Reject/Request changes and payment actions visible, and retain collapsible print/message/notes/checklist drafts.
-- [ ] Add clear list filters/search, trial/paid/legacy labels, archive states, loading/stale/error recovery and keyboard/mobile support. Closed records remain searchable rather than deleted for tidiness.
-- [ ] Build a readable pricing chart and filters for digital-only/tag/card, printed/unprinted, with/without a new profile and existing owners. Show first-year total, renewal, quantity, assistance and delivery explicitly.
-- [ ] Connect each valid row to matching checkout selections; prove the UI and server quote agree. Disabled or quote-only products cannot accidentally be purchased for zero.
-- [ ] Preview new annual products without enabling public purchase until entitlement/renewal readiness in Milestone 5.
+- [x] Release the reviewed admin/catalog/profile update and exact migrations 028–032 under the owner’s explicit authorization. Hosting `d94632fc5fe1f7e4`; 55 hosted checks and existing-record/app guards passed. Keep annual/trial activation off.
+- [x] Add the standard hardware/programming/profile catalog and server-authoritative checkout; future tiers are unavailable.
+- [ ] Add reviewed historical-archive hold/export/removal states after retention and recovery decisions.
+- [x] Put actionable status/product/amount/destination first in orders. Group secondary details, keep Reject/Request changes and payment actions visible, and retain collapsible print/message/notes/checklist drafts.
+- [x] Retain list filters/search, add trial/annual/legacy/expired states and price-loading timeouts/retry, keep keyboard/mobile support. Archive states remain a separate next step. Closed records remain searchable rather than deleted for tidiness.
+- [x] Build a readable pricing chart and filters for digital-only/tag/card, printed/unprinted, with/without a new profile and existing owners. Show first-year total, renewal, quantity, assistance and delivery explicitly.
+- [x] Connect each available supported row to matching checkout selections; prove the UI and server quote agree. Disabled or quote-only products cannot accidentally be purchased for zero.
+- [x] Preview new annual products without enabling public purchase until entitlement/renewal readiness in Milestone 5.
 
 **Exit:** the owner can edit a future price once and see it consistently in the pricing page, checkout and supported app handoff; mobile/desktop and accessibility checks pass. No giant always-open admin forms or duplicate confusing actions. Reference: [dashboard design](docs/PRODUCT_CATALOG_AND_OPERATIONS_PLAN.md#7-cleaner-dashboard).
 
 ## 5. Annual service, trials and renewal
 
 - [ ] Record the exact launch cohort/effective date and Basic price/support/delivery terms. Preserve current free profiles and existing purchased rights.
-- [ ] Claim one server-owned 14-day trial at first confirmed publication; do not reset it via edits, removed profiles, email changes or web/app switching.
-- [ ] Display trial/annual terms before creation. On expiry, suspend the future cohort's public trial with a recoverable draft/status page; keep account/handle. Define retention separately; do not automatically destroy data.
-- [ ] Activate after real verified payment on the same profile ID/URL. Idempotent billing events grant one defined 12-month period; early renewal preserves remaining paid time.
-- [ ] Separate staff moderation, paid entitlement, purchased link allowance and hardware ownership. A payment cannot silently restore a staff-hidden profile; a hardware order cannot silently change a legacy free entitlement.
-- [ ] Test old/new web/app creation/read/save paths and safe unavailable states. No browser-only enforcement or old-RPC bypass for new cohorts.
-- [ ] Use in-account notices first. Activate customer email or recurring debit only under its own authorized, verified setup; this plan sends nothing.
+- [x] Implement (disabled for rollout): Claim one server-owned 14-day trial at first confirmed publication; do not reset it via edits, removed profiles, email changes or web/app switching.
+- [x] Implement (disabled for rollout): Display trial/annual terms before creation. On expiry, suspend the future cohort's public trial with a recoverable draft/status page; keep account/handle. Define retention separately; do not automatically destroy data.
+- [x] Implement (disabled for rollout): Activate after real verified payment on the same profile ID/URL. Idempotent billing events grant one defined 12-month period; early renewal preserves remaining paid time.
+- [x] Implement (disabled for rollout): Separate staff moderation, paid entitlement, purchased link allowance and hardware ownership. A payment cannot silently restore a staff-hidden profile; a hardware order cannot silently change a legacy free entitlement.
+- [x] Test shared SQL contracts, old-client section preservation, app 019 definition hashes and website lifecycle/recovery.
+- [ ] Verify new native client UI/upload compatibility on real Android before enabling the new cohort for mobile users. No browser-only enforcement or old-RPC bypass for new cohorts.
+- [x] Implement (disabled for rollout): Use in-account notices first. Activate customer email or recurring debit only under its own authorized, verified setup; this plan sends nothing.
 
 **Exit:** trial, paid, early/late renewal, retry, unpaid/rejected, staff-comp, legacy and account-isolation cases pass across clients. Saved physical destinations remain safe. Reference: [lifecycle rules](docs/PRODUCT_CATALOG_AND_OPERATIONS_PLAN.md#6-storage-trial-and-subscription-rules).
 
 ## 6. Useful business profiles
 
-- [ ] Add business hours with timezone/closed/split-day handling, services/WhatsApp actions and an approved outbound Google review link.
-- [ ] Keep EdgeTap product reviews, business review destinations and hosted testimonials distinct. Build real review submission/moderation/spam controls before advertising hosted reviews.
-- [ ] Reuse one profile/section model for Professional, Portfolio and Local Business presets. Preserve content on theme switches and unknown fields on old-client saves.
+- [x] Add timezone-aware hours, closed/split days, services/WhatsApp actions and a validated outbound Google review link; existing real profiles remain untouched until owners supply details.
+- [x] Keep EdgeTap product reviews, business review destinations and hosted testimonials distinct. Build real review submission/moderation/spam controls before advertising hosted reviews.
+- [x] Reuse one profile/section model for Professional, Portfolio and Local Business presets. Preserve content on theme switches and unknown fields on old-client saves.
 - [ ] Add only a capped gallery when the paid offer/usage supports it; no unlimited uploaded video. Keep enquiry forms, bookings and imported ratings as separate scoped dependencies.
 
 **Exit:** the advertised action works on real approved examples; feature availability, storage and annual value match what checkout sells. Reference: [feature sequence](docs/PRODUCT_CATALOG_AND_OPERATIONS_PLAN.md#8-useful-profile-features-and-app-alignment).
@@ -117,7 +119,7 @@ Work on one main milestone at a time. New catalog rows, paid features and trials
 - [ ] Prepare concrete release contents and disabled/enabled offer flags; obtain any required release/data/file-removal authorization only after results are reviewable.
 - [ ] Release a small consenting new cohort, verify live read-only behavior and separately scoped real Auth/upload/fulfillment results. Never deploy a fixture export.
 - [ ] Start with three to five paid fulfillments; record actual production, delivery, support minutes, acquisition, fees and usable card counts privately.
-- [ ] Review 25/50/100 **paying** customers against invoices and contribution, not signup count. At 100 payers, Rs. 1,000/year alone is not a profit guarantee on paid infrastructure; compare the financial table and adjust future prices/tiers or budget consciously.
+- [ ] Review 25/50/100 **paying** customers against invoices and contribution, not signup count. At 100 payers, the proposed Rs. 1,499/year still needs measured costs; no annual price is a profit guarantee on paid infrastructure; compare the financial table and adjust future prices/tiers or budget consciously.
 - [ ] Attempt actual archive/restore before any approved cloud purge; verify customer/staff archived-file messaging and protection of unresolved orders.
 - [ ] Update context/launch/release evidence with what actually happened and what remains unverified.
 

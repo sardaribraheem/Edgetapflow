@@ -1,6 +1,6 @@
 # EdgeTap workspace context
 
-Updated **30 October 2026**, Asia/Karachi, after local implementation of the owner-requested admin workspace and business backup controls; the recorded website release remains 27 October. This is a persistent project handoff, not a full conversation transcript or fresh permission to deploy, send email or modify customer data. Check actual Git status and the current user request before work.
+Updated **30 October 2026**, Asia/Karachi, after owner-authorized production publication of the detailed product catalog, admin/backups and supported website milestones. Hosting **`d94632fc5fe1f7e4`**; hosted migrations **001–015 plus 017–032**, optional 016 unapplied. This is a handoff, not fresh permission to send email or modify customer data. Check Git and the active user request.
 
 ## Current scope and preferences
 
@@ -26,8 +26,8 @@ Root: `/Users/arslananwar/Developer/Active/edgetapStuff`.
 
 There are **two Git repositories**. The outer repository has no remote and ignores `EdgetapFlow/`. Do website commits/pushes inside `EdgetapFlow/`. Preserve the unrelated untracked `revenue.nd`; it was present before this handoff update.
 
-- Current website implementation branch: `codex/admin-layout-backups-2026-10-30`, pushed to origin; inspect Git/remote for later changes. The previous released branch is `codex/admin-profile-order-controls-2026-10-27`, pushed to origin. Previous workflow/docs branches were pushed before implementation. A docs-only GitHub checkpoint branch `codex/workspace-docs-checkpoint-2026-10-30` stores the latest root-guide snapshot (27 October checkpoint retained); maintain originals in root `docs/`.
-- Latest source commit: **`bc575ce`**, pushed and remote-verified on `codex/admin-layout-backups-2026-10-30`; this is local implementation, not a production release. Prior released implementation: `6ceccc0`. Inspect Git for later commits.
+- Current website implementation branch: `codex/product-pricing-milestones-2026-10-30`, pushed to origin; inspect Git/remote for later changes. The previous released branch is `codex/admin-profile-order-controls-2026-10-27`, pushed to origin. Previous workflow/docs branches were pushed before implementation. A docs-only GitHub checkpoint branch `codex/workspace-docs-checkpoint-2026-10-30-products` stores the latest root-guide snapshot (27 October checkpoint retained); maintain originals in root `docs/`.
+- Released feature commits: **`6866d0c` and `6b10d86`** on `codex/product-pricing-milestones-2026-10-30`; inspect Git for the final release/handoff commits and remote verification. Prior released implementation: `6ceccc0`. Inspect Git for later commits.
 - Website remote: `origin` → `git@github.com:sardaribraheem/Edgetapflow.git`.
 - `origin2` is `https://github.com/sardaribraheem/Edgetapflow-new.git`; do not switch publication targets merely because it exists.
 - Root/app history is on `codex/android-companion-2026-10-21`. Root `docs/`, `updateplan.md` and app documentation belong to this outer repository, which still has no remote of its own. The owner-requested docs move preserves files locally; a docs-only website checkpoint branch now also backs up a snapshot to GitHub. Earlier website-doc versions remain in website Git history. No app implementation was changed.
@@ -40,9 +40,13 @@ The root [update plan](updateplan.md) is the ordered execution plan. The owner r
 
 - Brand **EdgeTap**, “One tap. Infinite possibilities.” Preferred origin **https://edgetap.tech**.
 - Next.js App Router/React/TypeScript/Tailwind/GSAP static export to `out/`. Firebase project `edgetapflow` is **Hosting only**; Supabase project `dxyxvervvlxhwwbcbttd` handles Auth/Postgres/RLS/RPCs/Storage.
-- Latest recorded Hosting **`6f8c18e26f9a80c5`**, **27 October 2026, 00:52:10 Pakistan time**. Hosted migrations **001–015 plus 017–027**. **016 remains unapplied**. Do not blindly push pending migrations, rerun/edit applied files or rewrite saved NFC URLs.
+- Latest recorded Hosting **`d94632fc5fe1f7e4`**, **30 October 2026**. Hosted migrations **001–015 plus 017–032**. **016 remains unapplied**. Do not blindly push pending migrations, rerun/edit applied files or rewrite saved NFC URLs.
 - The 024/025/026 release preserved existing profiles, orders, payments, pricing/outbox data and app function definitions. Existing Firebase hosts/Auth callbacks/approved snapshots remain supported. The app source was untouched.
 - Public and private profile/account routes remain noindex. Unknown `/u/*` handles never fall back to the founder. New profile URLs use `edgetap.tech/u/<handle>`.
+
+## Website product release, 30 October
+
+The owner explicitly requested fixing main-card price loading, publishing, then committing/pushing. [Released behavior and evidence](docs/PRODUCT_CATALOG_RELEASE_2026-10-30.md): resilient independent prices with deadline/retry; detailed standard hardware rates Rs. 400–700; server-authoritative catalog checkout and staff draft/published prices; admin layout/encrypted scoped backups; standalone web image compression with original print-logo preservation; business hours/services/review links. Annual Rs. 1,499 and future 14-day cohort contracts are implemented but **both sales and trials stay off pending owner choice**. Existing free profiles, links, orders, Auth/Storage and 019 app definitions are unchanged; 72 existing table fingerprints passed. No emails, customer exports, profile deletions, real payment or app-source changes occurred. The [milestone plan](updateplan.md) distinguishes implemented features from actual inbox/private-byte/physical evidence, retention/archive work and native alignment. Historical planning statements below describe their earlier dates and are superseded by this release where applicable.
 
 ## Current product decisions
 
@@ -132,12 +136,8 @@ Read the complete PRD before implementing; this summary is not a substitute.
 The website source is backed up on its GitHub branch. The outer repository/context/app history has no remote, so its local commits are not a GitHub or live database backup. Generated diagnostics, `.next/`, `out/`, credentials and private snapshots stay ignored. Prior test-data cleanup is historical and must not be repeated without a new scoped request. Current user instructions override any older handoff statements.
 
 
-## Local admin implementation, 30 October
+## Released admin/catalog implementation, 30 October
 
-The owner supplied LifeOS hosted/local source as a layout reference and requested admin alignment, visible permanent deletion and local copies of business/customer data. These scoped website changes are implemented locally: full-height sidebar, compact header/search, aligned overview/mobile drawer, dedicated Pricing and Data & backups, founder editor collapsed, per-profile/customer exports and visible cleanup blockers. [Implementation/recovery guide](docs/ADMIN_WORKSPACE_AND_BACKUPS_2026-10-30.md) records coverage and tests. LifeOS was read only; no dependency or app source change was made.
+The LifeOS-inspired admin layout, dedicated Pricing/Data & backups, scoped encrypted business/file copies and visible deletion blockers are live as part of Hosting `d94632fc5fe1f7e4`. Website source is pushed on `codex/product-pricing-milestones-2026-10-30` at `e7e432f` (feature commits `6866d0c` and `6b10d86`). Exact migrations 028–032 are applied; 016 stays unapplied. See [release evidence](docs/PRODUCT_CATALOG_RELEASE_2026-10-30.md) and [backup coverage/recovery](docs/ADMIN_WORKSPACE_AND_BACKUPS_2026-10-30.md).
 
-Pending migration **028** creates two read-only staff RPCs; it has not been applied. Business ZIP exports optionally include four supported buckets, SHA-256 hashes and default passphrase encryption. Browser/offline unlock produces the exact ZIP without a cloud import. Auth credentials, SQL schema/roles and server settings are excluded; this is not full disaster recovery. Browser limits are 64 MiB/1,500 entries. No production customer was exported/deleted/modified, no cloud file was removed and no email sent. Production remains the 27 October release.
-
-The latest preferred annual proposal supersedes the earlier Rs. 1,000 anchor: **Rs. 1,499/year plus Rs. 700 card = Rs. 2,199**, or explicit Rs. 2,200 bundle; renewal excludes replacement hardware. The updated cost/catalog plan compares free infrastructure and Pro, with 100 payers leaving Rs. 111,500 or Rs. 27,500 after stated domain/other/time assumptions, before tax. 100 users alone does not require Pro. Provider quotas were rechecked officially; the actual billing dashboard/monthly usage were not. No catalog price, annual entitlement, expiry or existing customer term changed.
-
-Continue from the tested source branch/reviewed release boundary. Confirm owner authority for Hosting and exact 028 before production operations; never blindly push 016 or rerun 019. The broader catalog, annual trial/renewal, image compression and archive retention/purge remain milestone work. Preserve owner app PRD/source and unrelated files.
+Business exports exclude Auth credentials, schema/roles and server settings and are not full disaster recovery. No production customer export/deletion, cloud-file purge or email occurred. New annual service remains unavailable and trials disabled. The broader archive/retention/import work, real customer/inbox/physical evidence and native compatibility remain open in [the milestone plan](updateplan.md). LifeOS was read only; the app source and owner PRD remain untouched.

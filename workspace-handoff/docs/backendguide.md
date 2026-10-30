@@ -55,7 +55,7 @@ References use `ET-MMDDYY-sequence`, Pakistan date and a sequence starting at 10
 
 ## Migration and capability map
 
-Hosted state: **001–015 plus 017–027**. **016 is optional and unapplied**. Never edit/rerun applied migrations, reset production or blindly push all pending files. Confirm `supabase/project.json` and inspect linked history before proposing an exact authorized change.
+Hosted state: **001–015 plus 017–032**. **016 is optional and unapplied**. Never edit/rerun applied migrations, reset production or blindly push all pending files. Confirm `supabase/project.json` and inspect linked history before proposing an exact authorized change.
 
 | Migration | Responsibility |
 |---|---|
@@ -138,8 +138,12 @@ Migration [027](../EdgetapFlow/supabase/migrations/202610270027_profile_account_
 Run `npm run test:profile-account-admin` for isolated SQL/security tests (including existing 019), `npm run test:profile-account-admin:browser` against the isolated fixture export on port 4173, and `node scripts/test-profile-account-admin-hosted.mjs` for read-only published checks against the reviewed production export. Do not deploy a fixture export or run cleanup RPCs as tests against real customers. See [account/admin release scope](PROFILE_ACCOUNT_ADMIN_2026-10-27.md).
 
 
-## Pending read-only business backup RPCs, 30 October
+## Released read-only business backup RPCs, 30 October
 
-Migration `202610300028_admin_business_backups.sql` is implemented/tested locally and **not applied**. It adds staff-only read-only overview/export RPCs, explicit table/file-bucket allowlists and scoped account identities without credentials. Existing migrations/functions, especially 019, remain intact; no customer row or file write occurs on installation or export. See [coverage and release boundary](ADMIN_WORKSPACE_AND_BACKUPS_2026-10-30.md).
+Migration `202610300028_admin_business_backups.sql` is applied as part of exact **028–032** release. It adds staff-only read-only overview/export RPCs, explicit table/file-bucket allowlists and scoped account identities without credentials. Existing migrations/functions, especially 019, remain intact; no customer row or file write occurs on installation or export. See [coverage and release boundary](ADMIN_WORKSPACE_AND_BACKUPS_2026-10-30.md).
 
-Run `npm run test:admin-backups` for isolated SQL plus ZIP/encryption/offline tests, and `npm run test:admin-workspace:browser` against the separately built synthetic fixture export. `supabase/verify-ordering-upgrade.sql` accepts optional 028 only after 027 and verifies its function grants/search paths. Do not mistake business JSON for an operator SQL/Auth backup or apply pending 016 with 028.
+Run `npm run test:admin-backups` for isolated SQL plus ZIP/encryption/offline tests, and `npm run test:admin-workspace:browser` against the separately built synthetic fixture export. `supabase/verify-ordering-upgrade.sql` accepts optional 028–032 in dependency order after 027 and verifies its function grants/search paths. Do not mistake business JSON for an operator SQL/Auth backup or apply pending 016 with 028.
+
+## Product catalog, lifecycle and business sections, 30 October
+
+Applied 029 adds private draft/published product prices/costs, public quotes and idempotent authenticated checkout in the existing order ledger; old quotes are unchanged. 030 adds staff inspection/opt-in controls without changing the current 5 MiB public image cap. 031 adds grandfathered future-cohort lifecycle/annual activation contracts, initially disabled. 032 adds separately versioned business sections that survive old-client saves. All new private exports remain staff-scoped; anonymous mutation/backup RPCs are denied. See [defaults, release transaction and tests](PRODUCT_CATALOG_RELEASE_2026-10-30.md). On this machine use `NODE_OPTIONS=--experimental-websocket npm run check:supabase:hosted` with Node 20, or an available supported runtime with native WebSocket. No hosted customer data is seeded by the checks.
