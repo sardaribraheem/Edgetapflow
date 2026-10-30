@@ -97,9 +97,9 @@ export default function ProfilePage({
         <div className="card-paper relative overflow-hidden">
           <SparkleDoodle className="absolute -right-2 -top-2 h-10 w-10 text-[var(--yellow)] md:hidden" aria-hidden="true" />
 
-          <div className="grid gap-8 p-7 sm:p-10 md:grid-cols-[1fr_1.15fr] md:gap-10 md:p-12">
+          <div className="grid min-w-0 gap-8 p-7 sm:p-10 md:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] md:gap-10 md:p-12">
             {/* identity */}
-            <header className="flex flex-col items-center text-center md:items-start md:text-left">
+            <header className="flex min-w-0 flex-col items-center text-center [overflow-wrap:anywhere] md:items-start md:text-left">
               <div className="relative">
                 <div className="grid h-28 w-28 place-items-center overflow-hidden rounded-full bg-[var(--yellow)] ring-4 ring-white shadow-[var(--shadow-card)] md:h-32 md:w-32">
                   {profile.avatar ? (
@@ -117,19 +117,19 @@ export default function ProfilePage({
               </div>
 
               {profile.logo&&<img src={profile.logo} alt={`${profile.displayName} logo`} className="mt-5 h-12 max-w-40 object-contain"/>}
-              <h1 className={"profile-name profile-name-"+(profile.sections?.preset||"professional")+" mt-5 font-display text-[clamp(2rem,5vw,3rem)] font-semibold leading-none text-[var(--ink)]"}>
+              <h1 className={"profile-name profile-name-"+(profile.sections?.preset||"professional")+" mt-5 max-w-full font-display text-[clamp(2rem,5vw,3rem)] font-semibold leading-none text-[var(--ink)]"}>
                 {profile.displayName}
               </h1>
-              <p className="mt-2 text-[16px] font-medium text-[var(--ink-soft)]">
+              <p className="mt-2 max-w-full text-[16px] font-medium text-[var(--ink-soft)]">
                 {profile.title}
               </p>
-              {profile.location && <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[var(--ink)]/5 px-3 py-1 text-[13px] text-[var(--ink-mid)]"><Icon name="pin" size={15}/>{profile.location}</span>}
+              {profile.location && <span className="mt-3 inline-flex max-w-full items-center gap-1.5 rounded-full bg-[var(--ink)]/5 px-3 py-1 text-[13px] text-[var(--ink-mid)]"><span className="shrink-0"><Icon name="pin" size={15}/></span><span className="min-w-0">{profile.location}</span></span>}
 
 
             </header>
 
             {/* contact links always precede optional content in DOM and visual order */}
-            <section className="flex flex-col gap-2.5 pt-1" aria-label="Contact actions">
+            <section className="flex min-w-0 flex-col gap-2.5 pt-1" aria-label="Contact actions">
               <div className="eyebrow mb-1 text-[var(--ink-mid)]">Reach me</div>
               {profile.links.filter(l => isSafeContactUrl(l.url)).map((l) => (
                 <a
@@ -142,7 +142,7 @@ export default function ProfilePage({
                   <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-[var(--ink)]/5 text-[var(--ink)] ring-1 ring-[var(--ink)]/10 transition-colors group-hover:bg-[var(--ink)] group-hover:text-[var(--cream)]">
                     {iconFor(l.type, "h-5 w-5")}
                   </span>
-                  <span className="flex-1 font-display text-[16px] font-semibold text-[var(--ink)]">
+                  <span className="min-w-0 flex-1 font-display text-[16px] font-semibold text-[var(--ink)] [overflow-wrap:anywhere]">
                     {l.label}
                   </span>
                   <span className="text-[16px] text-[var(--ink-faint)] transition-transform group-hover:translate-x-1">

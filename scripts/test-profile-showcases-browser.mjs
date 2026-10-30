@@ -29,5 +29,21 @@ try{
  const imageResult=await page.evaluate(async url=>{const {compressPublicImage}=await import(url),canvas=document.createElement('canvas');canvas.width=120;canvas.height=80;canvas.getContext('2d').fillRect(0,0,120,80);const blob=await new Promise(r=>canvas.toBlob(r,'image/png'));const large=new File([blob,new Uint8Array(6*1024*1024)],'phone.png',{type:'image/png'});const compressed=await compressPublicImage(large,'gallery');const bitmap=await createImageBitmap(compressed);const result={input:large.size,output:compressed.size,edge:Math.max(bitmap.width,bitmap.height)};bitmap.close();try{await compressPublicImage(new File([blob,new Uint8Array(11*1024*1024)],'too-big.png',{type:'image/png'}),'gallery');result.tooLargeRejected=false;}catch{result.tooLargeRejected=true;}
  const jpeg=new Uint8Array(await (await new Promise(r=>canvas.toBlob(r,'image/jpeg',.8))).arrayBuffer()),exif=new Uint8Array([255,225,0,34,69,120,105,102,0,0,73,73,42,0,8,0,0,0,1,0,18,1,3,0,1,0,0,0,6,0,0,0,0,0,0,0]),withExif=new Uint8Array(jpeg.length+exif.length);withExif.set(jpeg.slice(0,2));withExif.set(exif,2);withExif.set(jpeg.slice(2),exif.length+2);const safe=await compressPublicImage(new File([withExif],'camera.jpg',{type:'image/jpeg'}),'gallery');result.smallExifRemoved=!new TextDecoder('latin1').decode(await safe.arrayBuffer()).includes('Exif');return result;},'data:text/javascript;base64,'+Buffer.from(source).toString('base64'));
  verify(imageResult.input>5*1024*1024&&imageResult.output<=256000&&imageResult.edge<=1600,'A real browser accepts a valid photo over the older 5 MB limit and stores a decoded gallery image under 250 KB');verify(imageResult.tooLargeRejected,'Photo inputs over 10 MB are rejected before upload');verify(imageResult.smallExifRemoved,'Even small gallery photos are re-encoded without retaining source EXIF metadata');verify((await f.rpc(null,'get_profile_plan_policy')).futureAccountTrial===false&&(await f.rpc(null,'get_product_catalog')).available.annual===false,'Free media does not silently enable profile trials or annual sales');verify((await f.query('select count(*)::int n from private.order_email_jobs')).rows[0].n===0,'Gallery and staff capacity actions send no messages');verify(f.errors.length===0,f.errors.join('\n')||'No unexpected browser errors');
+ // Check actual content bounds: the card clips overflow, so document width alone
+ // cannot detect an unreachable contact action or a cut-off business name.
+ const longName='DesignStudio'.repeat(6),longLabel='BusinessWebsite'.repeat(4);
+ await f.query('update public.profiles set display_name=$1,title=$2,location=$3 where id=$4',[longName,'ConsultationStudio'.repeat(5),'KarachiStudio'.repeat(6),f.profileId]);
+ await f.query('update public.profile_links set label=$1 where profile_id=$2 and position=0',[longLabel,f.profileId]);
+ await page.goto(f.base+'/u/real-fixture');
+ await page.getByRole('heading',{name:longName,exact:true}).waitFor();
+ for(const width of [320,390,768,1440]){
+  await page.setViewportSize({width,height:900});
+  const fits=await page.evaluate(()=>{
+   const card=document.querySelector('.card-paper').getBoundingClientRect();
+   const elements=[...document.querySelectorAll('.card-paper header h1,.card-paper header p,.card-paper header>span,.card-paper [aria-label="Contact actions"],.card-paper [aria-label="Contact actions"] a')];
+   return elements.every(el=>{const r=el.getBoundingClientRect();return r.left>=card.left&&r.right<=card.right&&el.scrollWidth<=el.clientWidth+1;});
+  });
+  verify(fits,'Long profile names, titles, locations and contact labels remain readable at '+width+'px');
+ }
  console.log(`PASS ${checks} links-first profile, gallery controls, video privacy, storage cleanup and premium-preview browser checks.`);
 }catch(e){console.error('FAIL '+e.message,JSON.stringify(f.flags.lastServiceError||null));for(const c of [ctx,publicCtx,staffCtx].filter(Boolean))for(const p of c.pages())console.error(p.url(),(await p.locator('body').innerText()).slice(-900));process.exitCode=1;}finally{await ctx.close();await publicCtx?.close();await staffCtx?.close();await f.close();}

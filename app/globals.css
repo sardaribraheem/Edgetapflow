@@ -1200,7 +1200,7 @@ button:disabled {
 .profile-name-local_business { text-transform:none;border-bottom:3px solid var(--yellow);padding-bottom:12px; }
 
 /* Public profiles keep contact actions above optional business/media content. */
-.profile-details { display:grid;gap:2rem;padding:0 1.75rem 2rem;min-width:0; }
+.profile-details { display:grid;gap:2rem;padding:0 1.75rem 2rem;min-width:0;overflow-wrap:anywhere; }
 .profile-details:empty { display:none; }
 .profile-about { border-top:1px solid var(--ink-wash);padding-top:1.5rem; }
 .profile-about p { margin-top:.75rem;white-space:pre-wrap;overflow-wrap:anywhere;max-width:65ch;color:var(--ink-soft);font-size:.9375rem;line-height:1.7; }
