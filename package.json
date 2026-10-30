@@ -42,7 +42,9 @@
     "test:free-profiles": "node scripts/test-free-profiles-staff.mjs",
     "test:free-profiles:browser": "node scripts/test-free-profiles-staff-browser.mjs",
     "test:admin-pricing": "node scripts/test-admin-pricing-profiles.mjs",
-    "test:admin-pricing:browser": "node scripts/test-admin-pricing-profiles-browser.mjs"
+    "test:admin-pricing:browser": "node scripts/test-admin-pricing-profiles-browser.mjs",
+    "test:admin-backups": "node scripts/test-admin-backups.mjs && node scripts/test-backup-format.mjs",
+    "test:admin-workspace:browser": "node scripts/test-admin-workspace-browser.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

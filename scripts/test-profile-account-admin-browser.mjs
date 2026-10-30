@@ -47,7 +47,8 @@ try {
   verify(!await page.getByRole('button',{name:'Publish profile',exact:true}).isEnabled().catch(()=>false),'Closed application cannot publish again');
 
   const navigation=page.getByRole('navigation',{name:'Admin sections'});
-  await navigation.getByRole('button',{name:'Profiles',exact:true}).click();
+  const openMenu=async()=>{if(await page.getByRole('button',{name:'Open admin menu',exact:true}).isVisible())await page.getByRole('button',{name:'Open admin menu',exact:true}).click();};
+  await openMenu();await navigation.getByRole('button',{name:'Profiles',exact:true}).click();
   await page.getByLabel('Find a profile',{exact:true}).fill('browser-person');
   const person=page.getByRole('listitem').filter({has:page.getByRole('link',{name:'/u/browser-person',exact:true})});
   page.once('dialog',d=>d.accept('browser-person'));await person.getByRole('button',{name:'Hide profile',exact:true}).click();
@@ -59,11 +60,11 @@ try {
   await dialog.getByRole('button',{name:'Separate this profile',exact:true}).click();await dialog.waitFor({state:'hidden'});
   verify(!(await rpc(owner,'get_my_orders')).some(o=>o.id===id),'Original account no longer sees the separated order');
   verify((await rpc(owner,'get_my_profiles')).some(p=>p.username==='tarsilpk'),'Protected business remains on the original account');
-  await navigation.getByRole('button',{name:'Clients',exact:true}).click();
+  await openMenu();await navigation.getByRole('button',{name:'Clients',exact:true}).click();
   await page.getByText('Staff-managed · No login',{exact:true}).waitFor();
   verify(await page.getByText('Login: customer@example.test',{exact:true}).count()===1,'Clients keeps staff-managed and login customers separate');
 
-  await navigation.getByRole('button',{name:'Profiles',exact:true}).click();await page.getByLabel('Find a profile',{exact:true}).fill('browser-disposable');
+  await openMenu();await navigation.getByRole('button',{name:'Profiles',exact:true}).click();await page.getByLabel('Find a profile',{exact:true}).fill('browser-disposable');
   const disposable=page.getByRole('listitem').filter({has:page.getByRole('link',{name:'/u/browser-disposable',exact:true})});
   page.once('dialog',d=>d.accept('browser-disposable'));await disposable.getByRole('button',{name:'Hide profile',exact:true}).click();await disposable.getByRole('button',{name:'Restore profile',exact:true}).waitFor();await disposable.locator('summary').click();
   await disposable.getByRole('button',{name:'Permanently delete profile',exact:true}).click();dialog=page.getByRole('dialog',{name:'Permanently delete profile',exact:true});
@@ -77,7 +78,7 @@ try {
   verify(!await protectedRow.getByRole('button',{name:'Separate from login account',exact:true}).count(),'Protected business has no account separation control');
   verify(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Profiles fit mobile without horizontal overflow');
   await mkdir('test-results/profile-account-admin',{recursive:true});await page.screenshot({path:'test-results/profile-account-admin/profiles-mobile.png',fullPage:true});
-  await page.setViewportSize({width:1440,height:1000});await navigation.getByRole('button',{name:/^Orders/}).click();await page.getByRole('button',{name:/Browser Person.*ET-/}).click();
+  await page.setViewportSize({width:1440,height:1000});await openMenu();await navigation.getByRole('button',{name:/^Orders/}).click();await page.getByRole('button',{name:/Browser Person.*ET-/}).click();
   verify(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Order controls fit desktop');await page.screenshot({path:'test-results/profile-account-admin/order-desktop.png',fullPage:true});
   verify(emails===0,'No dashboard action invokes the email worker');verify(f.errors.length===0,f.errors.join('\n')||'No unexpected browser errors');
   console.log(`PASS ${checks} admin accordion, rejection, account separation, deletion and customer identity browser checks. Isolated SQL and mocked Auth/Storage only.`);

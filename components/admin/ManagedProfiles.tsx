@@ -7,6 +7,8 @@ import ProfileEditor from '@/components/ProfileEditor';
 import {getCurrentUser} from '@/lib/auth';
 import {notifyProfileChanged} from '@/lib/profile-sync';
 import ProfileAccountAction from './ProfileAccountAction';
+import {ExportBackupDialog} from './BackupTools';
+import type {BackupScope} from '@/lib/admin-backup';
 
 export default function ManagedProfiles({onChanged}:{onChanged?:()=>Promise<void>}) {
   const [profiles,setProfiles]=useState<ManagedProfile[]>([]);
@@ -14,6 +16,7 @@ export default function ManagedProfiles({onChanged}:{onChanged?:()=>Promise<void
   const [ready,setReady]=useState(false),[error,setError]=useState(''),[notice,setNotice]=useState(''),[busy,setBusy]=useState('');
   const [editing,setEditing]=useState<{profile:ManagedProfile;uid:string}|null>(null);
   const [operation,setOperation]=useState<{profile:ManagedProfile;action:'delete'|'separate'}|null>(null);
+  const [exportScope,setExportScope]=useState<BackupScope|null>(null);
   const lock=useRef(false),generation=useRef(0);
 
   useEffect(()=>{
@@ -71,17 +74,20 @@ export default function ManagedProfiles({onChanged}:{onChanged?:()=>Promise<void
     {!ready?<p role="status" className="mt-5">Loading profiles…</p>:<ul className="mt-5 space-y-4">{visible.map(profile=><li key={profile.profileId} className="min-w-0 rounded-xl bg-white p-4">
       <div className="flex flex-wrap items-center justify-between gap-4"><div className="min-w-0"><h2 className="font-display text-lg">{profile.displayName}</h2><a href={'/u/'+profile.username} className="break-all text-sm underline" target="_blank" rel="noreferrer">/u/{profile.username}</a><p className="mt-2 text-xs">{profile.freeProfile?'Free profile':'Customer profile'} · {profile.active===false?'Hidden':'Live'}{profile.protectedProfile?' · Protected':''}</p></div><div className="flex flex-wrap gap-2">
         {profile.active!==false&&<button type="button" className="btn btn-ghost px-4 py-3" disabled={!!busy} onClick={()=>{void getCurrentUser().then(user=>{if(user)setEditing({profile,uid:user.uid});}).catch(()=>setError('Sign in as staff before editing.'));}}>Edit public details</button>}
+        <button type="button" className="btn btn-ghost px-4 py-3" disabled={!!busy||!profile.profileId} onClick={()=>setExportScope({kind:"profile",id:profile.profileId,label:"/u/"+profile.username})}>Export profile</button>
+        <button type="button" className="btn btn-ghost px-4 py-3" onClick={()=>{const node=document.getElementById("profile-cleanup-"+profile.profileId) as HTMLDetailsElement|null;if(node){node.open=true;node.scrollIntoView({block:"nearest"});}}}>Review deletion</button>
         <button type="button" disabled={!!busy} onClick={()=>{void visibility(profile);}} className="btn btn-ghost px-4 py-3">{busy===profile.username?'Confirming…':profile.active===false?'Restore profile':'Hide profile'}</button>
       </div></div>
-      <details className="admin-details mt-4"><summary>Account access & cleanup</summary><div className="space-y-4 p-4 text-sm">
+      <details id={"profile-cleanup-"+profile.profileId} className="admin-details mt-4"><summary>Account access & cleanup</summary><div className="space-y-4 p-4 text-sm">
         <p className="break-all">{profile.account?.kind==='login'?`Login account: ${profile.account.email}`:profile.account?.kind==='staff_managed'?'Staff-managed · No login account':'Account details unavailable.'}</p>
         <p>This is the account that can manage the profile. Public contact links are independent.</p>
         {!!profile.linkedOrders?.length&&<div><p className="font-bold">Linked orders</p><ul className="mt-2 space-y-2">{profile.linkedOrders.map(order=><li key={order.id}><a className="underline" href={'/admin?order='+encodeURIComponent(order.id)} target="_blank" rel="noreferrer">{order.reference}</a> · {order.status.replaceAll('_',' ')}</li>)}</ul></div>}
         {profile.active===false&&!profile.protectedProfile&&profile.account?.kind==='login'&&<button type="button" disabled={!!busy} className="btn btn-ghost px-4 py-3" onClick={()=>setOperation({profile,action:'separate'})}>Separate from login account</button>}
-        {profile.active===false&&profile.deleteBlockers&&<div><h3 className="font-bold">Permanent deletion</h3>{profile.deleteBlockers.length?<ul className="mt-2 list-disc space-y-2 pl-5">{profile.deleteBlockers.map(reason=><li key={reason}>{reason}</li>)}</ul>:<><p className="mt-2">No restore after deletion. Accounts, closed order/payment history and files are kept.</p><button type="button" disabled={!!busy} className="btn btn-ghost mt-3 px-4 py-3 text-[var(--coral-ink)]" onClick={()=>setOperation({profile,action:'delete'})}>Permanently delete profile</button></>}</div>}
+        {profile.deleteBlockers&&<div><h3 className="font-bold">Permanent deletion</h3>{profile.deleteBlockers.length?<ul className="mt-2 list-disc space-y-2 pl-5">{profile.deleteBlockers.map(reason=><li key={reason}>{reason}</li>)}</ul>:<><p className="mt-2">No restore after deletion. Accounts, closed order/payment history and files are kept.</p><button type="button" disabled={!!busy} className="btn btn-ghost mt-3 px-4 py-3 text-[var(--coral-ink)]" onClick={()=>setOperation({profile,action:'delete'})}>Permanently delete profile</button></>}</div>}
       </div></details>
     </li>)}{!visible.length&&<li>No customer profiles match.</li>}</ul>}
     {editing&&<ProfileEditor profile={editing.profile} uid={editing.uid} onClose={()=>setEditing(null)} onSaved={()=>{setEditing(null);void refresh().catch(()=>setError('The profile was saved; reload the directory to see it.'));}}/>}
+    {exportScope&&<ExportBackupDialog scope={exportScope} onClose={()=>setExportScope(null)}/>}
     {operation&&<ProfileAccountAction key={operation.profile.profileId+operation.action} {...operation} busy={!!busy} error={error} onClose={()=>{if(!busy)setOperation(null);}} onConfirm={confirmAction}/>}
   </section>;
 }

@@ -1,295 +1,115 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
-import type { User } from "@/lib/auth";
-import { NfcWaves, SparkleDoodle } from "@/components/doodles";
-import { getOrders, listReviews } from "@/lib/data-service";
-import { Order } from "@/lib/data/order";
-import { Review } from "@/lib/models";
-import OrdersView from "./OrdersView";
-import ProfilesView from "./ProfilesView";
+import {useEffect,useRef,useState} from 'react';
+import Link from 'next/link';
+import type {User} from '@/lib/auth';
+import {NfcWaves,SparkleDoodle} from '@/components/doodles';
+import {getOrders,listReviews} from '@/lib/data-service';
+import type {Order} from '@/lib/data/order';
+import type {Review} from '@/lib/models';
+import {orderCustomerKey} from '@/lib/admin-account';
+import {getBackupOverview,type BackupOverview,type BackupScope} from '@/lib/admin-backup';
+import OrdersView from './OrdersView';
+import ProfilesView from './ProfilesView';
 import OrderSettingsPanel from './OrderSettings';
-import Icon, { type IconName } from '@/components/ui/Icon';
+import PricingSettings from './PricingSettings';
+import BackupTools,{ExportBackupDialog} from './BackupTools';
+import Icon,{type IconName} from '@/components/ui/Icon';
 import InfoHelp from '@/components/ui/InfoHelp';
 import DefaultAvatar from '@/components/ui/DefaultAvatar';
-import {orderCustomerKey} from '@/lib/admin-account';
 
-export type AdminView = "dashboard" | "orders" | "clients" | "profiles" | "reviews" | "settings";
-
-const VIEWS: { id: AdminView; label: string }[] = [
-  { id: "dashboard", label: "Dashboard" },
-  { id: "orders", label: "Orders" },
-  { id: "clients", label: "Clients" },
-  { id: "profiles", label: "Profiles" },
-  { id: "reviews", label: "Reviews" },
-  { id: "settings", label: "Settings" },
+export type AdminView='dashboard'|'orders'|'clients'|'profiles'|'reviews'|'pricing'|'backups'|'settings';
+const VIEWS:{id:AdminView;label:string;icon:IconName;group:string}[]=[
+ {id:'dashboard',label:'Dashboard',icon:'eye',group:'Workspace'},
+ {id:'orders',label:'Orders',icon:'card',group:'Workspace'},
+ {id:'clients',label:'Clients',icon:'user',group:'Workspace'},
+ {id:'profiles',label:'Profiles',icon:'avatar',group:'Workspace'},
+ {id:'reviews',label:'Reviews',icon:'star',group:'Workspace'},
+ {id:'pricing',label:'Pricing',icon:'receipt',group:'Manage'},
+ {id:'backups',label:'Data & backups',icon:'save',group:'Manage'},
+ {id:'settings',label:'Settings',icon:'shield',group:'Manage'},
 ];
-const VIEW_ICONS: Record<AdminView, IconName> = {dashboard:'eye',orders:'card',clients:'user',profiles:'avatar',reviews:'check',settings:'shield'};
+function initialRoute(){
+ if(typeof window==='undefined')return {view:'dashboard' as AdminView,order:''};
+ const params=new URLSearchParams(window.location.search),value=params.get('view');
+ const candidate=params.get('order')||'',order=/^[a-zA-Z0-9_-]{1,128}$/.test(candidate)?candidate:'';
+ return {view:order?'orders' as AdminView:VIEWS.find(v=>v.id===value)?.id||'dashboard',order};
+}
+function AdminNavigation({view,count,onNavigate}:{view:AdminView;count:number;onNavigate:(id:AdminView)=>void}){
+ return <nav aria-label="Admin sections">{['Workspace','Manage'].map(group=><div className="admin-nav-group" key={group}><p className="admin-nav-label">{group}</p>{VIEWS.filter(v=>v.group===group).map(v=><button type="button" key={v.id} onClick={()=>onNavigate(v.id)} className="admin-nav-button" aria-current={view===v.id?'page':undefined}><Icon name={v.icon} size={18}/><span>{v.label}</span>{v.id==='orders'&&count>0&&<span className="admin-nav-count">{count}</span>}</button>)}</div>)}</nav>;
+}
+function Brand(){return <Link href="/" className="admin-brand"><span className="admin-brand-mark"><NfcWaves className="h-5 w-5"/></span><span className="font-display font-bold">EdgeTap <span className="font-normal opacity-60">Admin</span></span></Link>;}
 
-export default function AdminApp({ user, onLogout }: { user: User; onLogout: () => void }) {
-  const [initialOrder] = useState(()=>{
-    if(typeof window==='undefined')return '';
-    const id=new URLSearchParams(window.location.search).get('order');
-    return id&&/^[a-zA-Z0-9_-]{1,128}$/.test(id)?id:'';
-  });
-  const [view, setView] = useState<AdminView>(initialOrder?'orders':'dashboard');
-  const [selectedOrder, setSelectedOrder] = useState(initialOrder);
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [reviews, setReviews] = useState<Review[]>([]);
-  const [loadError, setLoadError] = useState("");
-  const [loadedOnce, setLoadedOnce] = useState(false);
-
-  const applyData = (o: Order[], r: Review[]) => {
-    setOrders(current=>o.map(next=>{const known=current.find(order=>order.id===next.id);return known&&Number(known.version)>Number(next.version)?known:next;}));
-    setReviews(r);
-    setLoadError("");
-  };
-
-  const failData = (e: unknown) => {
-    console.error("[EdgeTap] Admin data load failed:", e);
-    setOrders([]);
-    setReviews([]);
-    setLoadError(
-      e instanceof Error ? e.message : "Couldn't load service data. Verify configuration and staff access."
-    );
-  };
-
-  const refresh = async () => {
-    try {
-      const [o, r] = await Promise.all([getOrders(), listReviews(20)]);
-      applyData(o, r);
-    } catch (e) {
-      failData(e);
-    } finally {
-      setLoadedOnce(true);
-    }
-  };
-
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      try {
-        const [o, r] = await Promise.all([getOrders(), listReviews(20)]);
-        if (!active) return;
-        applyData(o, r);
-      } catch (e) {
-        if (!active) return;
-        failData(e);
-      } finally {
-        if (active) setLoadedOnce(true);
-      }
-    })();
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    const timer = setInterval(() => { if (document.visibilityState === 'visible') void refresh(); }, 20000);
-    const focus = () => { void refresh(); };
-    window.addEventListener('focus', focus);
-    return () => { clearInterval(timer); window.removeEventListener('focus', focus); };
-    // refresh uses state setters and the same account-scoped service calls.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  return (
-    <div className="min-h-screen bg-[var(--cream)]">
-      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 lg:flex-row">
-        {/* sidebar / tabs */}
-        <aside className="lg:w-60 lg:shrink-0">
-          <div className="card-paper p-4">
-            <Link href="/" className="mb-4 flex items-center gap-2 rounded-xl px-2 py-2">
-              <span className="grid h-9 w-9 place-items-center rounded-full bg-[var(--yellow)]">
-                <NfcWaves className="h-5 w-5 text-[var(--ink)]" />
-              </span>
-              <div>
-                <p className="font-display text-sm font-bold leading-none text-[var(--ink)]">EdgeTap Admin</p>
-                <p className="mt-1 text-[11px] text-[var(--ink-faint)]">{user.email}</p>
-              </div>
-            </Link>
-
-            <nav className="flex flex-wrap gap-1 lg:flex-col" aria-label="Admin sections">
-              {VIEWS.map((v) => (
-                <button
-                  key={v.id}
-                  onClick={() => setView(v.id)}
-                  aria-current={view === v.id ? "page" : undefined}
-                  className={`admin-nav-button rounded-xl px-4 py-2.5 text-left text-[13px] font-bold transition-colors ${
-                    view === v.id
-                      ? "bg-[var(--ink)] text-white"
-                      : "hover:bg-[var(--ink)]/5"
-                  }`}
-                >
-                  <Icon name={VIEW_ICONS[v.id]} size={18}/>
-                  {v.label}
-                  {v.id === "orders" && orders.filter((o) =>
-                    ["submitted", "under_review", "changes_required"].includes(o.applicationStatus || '')
-                  ).length > 0 && (
-                    <span className="ml-2 rounded-full bg-[var(--coral)] px-1.5 text-[10px] font-bold text-white">
-                      {orders.filter((o) =>
-                        ["submitted", "under_review", "changes_required"].includes(o.applicationStatus || '')
-                      ).length}
-                    </span>
-                  )}
-                </button>
-              ))}
-            </nav>
-
-            <div className="mt-4 flex flex-col gap-2 border-t border-[var(--ink)]/10 pt-4">
-              <Link href="/u/ibraheem" target="_blank" className="rounded-xl bg-[var(--yellow-soft)] px-4 py-2 text-center text-[12px] font-bold text-[var(--ink)] hover:bg-[var(--yellow)]">
-                View Live Profile ↗
-              </Link>
-              <button onClick={onLogout} className="rounded-xl bg-[var(--ink)]/5 px-4 py-2 text-[12px] font-bold text-[var(--ink)] hover:bg-[var(--ink)]/10">
-                Sign Out
-              </button>
-            </div>
-          </div>
-        </aside>
-
-        {/* content */}
-        <main className="min-w-0 flex-1">
-          {!loadedOnce ? (
-            <div className="card-paper flex items-center justify-center p-16 font-display text-[var(--ink)]">
-              Loading dashboard…
-            </div>
-          ) : loadError ? (
-            <div className="card-paper p-8">
-              <div className="flex items-start gap-4">
-                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[var(--coral)]/15 text-[var(--coral)]">⚠️</span>
-                <div>
-                  <h2 className="font-display text-lg font-bold text-[var(--ink)]">Couldn&apos;t load dashboard data</h2>
-                  <p className="mt-1 text-sm text-[var(--ink-soft)]">{loadError}</p>
-                  <button onClick={refresh} className="btn btn-ink mt-4 px-5 py-2 text-[12px]">Retry</button>
-                </div>
-              </div>
-            </div>
-          ) : view === "dashboard" ? (
-            <DashboardView orders={orders} reviews={reviews} onOpenOrders={() => setView("orders")} />
-          ) : view === "orders" ? (
-            <OrdersView orders={orders} onChanged={refresh} initialOrderId={selectedOrder} />
-          ) : view === "clients" ? (
-            <ClientsView orders={orders} onOpenOrder={id=>{setSelectedOrder(id);setView('orders');}} />
-          ) : view === "profiles" ? (
-            <ProfilesView user={user} onChanged={refresh}/>
-          ) : view === "reviews" ? (
-            <ReviewsView reviews={reviews} />
-          ) : (
-            <SettingsView user={user} />
-          )}
-        </main>
-      </div>
-    </div>
-  );
+export default function AdminApp({user,onLogout}:{user:User;onLogout:()=>void}){
+ const [initial]=useState(initialRoute),[view,setView]=useState<AdminView>(initial.view),[selectedOrder,setSelectedOrder]=useState(initial.order);
+ const [orders,setOrders]=useState<Order[]>([]),[reviews,setReviews]=useState<Review[]>([]),[overview,setOverview]=useState<BackupOverview|null>(null);
+ const [loadError,setLoadError]=useState(''),[loadedOnce,setLoadedOnce]=useState(false),[refreshing,setRefreshing]=useState(false);
+ const [commandQuery,setCommandQuery]=useState(''),[exportScope,setExportScope]=useState<BackupScope|null>(null);
+ const menu=useRef<HTMLDialogElement>(null),command=useRef<HTMLDialogElement>(null),search=useRef<HTMLInputElement>(null);
+ const refreshLock=useRef(false);
+ const applyData=(o:Order[],r:Review[])=>{setOrders(current=>o.map(next=>{const known=current.find(row=>row.id===next.id);return known&&Number(known.version)>Number(next.version)?known:next;}));setReviews(r);setLoadError('');};
+ const failData=(error:unknown)=>{setLoadError(error instanceof Error?error.message:'Could not load service data. Check staff access and retry.');};
+ async function refresh(){
+  if(refreshLock.current)return;refreshLock.current=true;setRefreshing(true);
+  try{const [o,r]=await Promise.all([getOrders(),listReviews(20)]);applyData(o,r);void getBackupOverview().then(setOverview).catch(()=>{});}
+  catch(error){failData(error);}finally{setLoadedOnce(true);setRefreshing(false);refreshLock.current=false;}
+ }
+ useEffect(()=>{let active=true;void Promise.all([getOrders(),listReviews(20)]).then(([o,r])=>{if(active)applyData(o,r);}).catch(error=>{if(active)failData(error);}).finally(()=>{if(active)setLoadedOnce(true);});void getBackupOverview().then(value=>{if(active)setOverview(value);}).catch(()=>{});return()=>{active=false;};},[]);
+ useEffect(()=>{const timer=setInterval(()=>{if(document.visibilityState==='visible')void refresh();},20000);const focus=()=>{void refresh();};window.addEventListener('focus',focus);return()=>{clearInterval(timer);window.removeEventListener('focus',focus);};
+ // These handlers use account-scoped calls and state setters only.
+ // eslint-disable-next-line react-hooks/exhaustive-deps
+ },[]);
+ useEffect(()=>{const pop=()=>{const route=initialRoute();setView(route.view);setSelectedOrder(route.order);};const shortcut=(event:KeyboardEvent)=>{if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==='k'){event.preventDefault();menu.current?.close();if(command.current?.open)command.current.close();else{setCommandQuery('');command.current?.showModal();search.current?.focus();}}};window.addEventListener('popstate',pop);window.addEventListener('keydown',shortcut);return()=>{window.removeEventListener('popstate',pop);window.removeEventListener('keydown',shortcut);};},[]);
+ function navigate(id:AdminView,order?:string){
+  setView(id);if(order!==undefined)setSelectedOrder(order);menu.current?.close();command.current?.close();
+  const url=new URL(window.location.href);url.searchParams.set('view',id);url.searchParams.delete('order');if(id==='orders'&&(order||selectedOrder))url.searchParams.set('order',order||selectedOrder);window.history.pushState({},'',url.pathname+url.search);window.scrollTo({top:0});
+ }
+ const pending=orders.filter(o=>['submitted','under_review','changes_required'].includes(o.applicationStatus||'')).length;
+ const current=VIEWS.find(v=>v.id===view)!;
+ const normalized=commandQuery.toLowerCase().trim();
+ const foundSections=VIEWS.filter(v=>!normalized||v.label.toLowerCase().includes(normalized));
+ const foundOrders=normalized?orders.filter(o=>[o.orderNumber,o.customer.fullName,o.customer.email,o.profileDraft.usernameSuggested].some(v=>v?.toLowerCase().includes(normalized))).slice(0,8):[];
+ const navigation=<AdminNavigation view={view} count={pending} onNavigate={navigate}/>;
+ return <div className="admin-workspace"><a href="#admin-content" className="admin-skip-link">Skip to admin content</a>
+  <aside className="admin-sidebar"><Brand/>{navigation}<div className="admin-sidebar-footer"><Link href="/u/ibraheem" target="_blank" className="admin-site-link"><Icon name="link" size={16}/>View live profile</Link><p className="admin-signed-in" title={user.email||''}>{user.email}</p><button type="button" onClick={onLogout} className="admin-sign-out">Sign Out</button></div></aside>
+  <div className="admin-main-shell"><header className="admin-topbar"><button type="button" className="admin-menu-trigger btn btn-ghost px-3 py-2" aria-label="Open admin menu" aria-haspopup="dialog" onClick={()=>menu.current?.showModal()}>Menu</button><p className="admin-current-section">{current.label}</p><div className="admin-topbar-actions"><button type="button" className="admin-search-trigger" onClick={()=>{setCommandQuery('');command.current?.showModal();search.current?.focus();}} aria-label="Search admin"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4.5 4.5"/></svg><span>Search admin…</span><kbd>⌘K</kbd></button><button type="button" className="icon-button" aria-label="Refresh dashboard" disabled={refreshing} onClick={()=>{void refresh();}}><Icon name="refresh" size={18}/></button></div></header>
+   <main id="admin-content" className="admin-content" tabIndex={-1}>
+    {!loadedOnce?<div className="card-paper p-10" role="status">Loading dashboard…</div>:loadError?<div className="card-paper p-7" role="alert"><h1 className="font-display text-2xl">Dashboard data unavailable</h1><p className="mt-3 text-sm">{loadError}</p><button className="btn btn-ink mt-5 px-5 py-3" onClick={()=>{void refresh();}}>Retry</button></div>:
+     view==='dashboard'?<DashboardView orders={orders} reviews={reviews} overview={overview} onOpenOrder={id=>navigate('orders',id)} onNavigate={navigate}/>:view==='orders'?<OrdersView key={selectedOrder} orders={orders} onChanged={refresh} initialOrderId={selectedOrder}/>:view==='clients'?<ClientsView orders={orders} onOpenOrder={id=>navigate('orders',id)} onExport={setExportScope}/>:view==='profiles'?<ProfilesView user={user} onChanged={refresh}/>:view==='reviews'?<ReviewsView reviews={reviews}/>:view==='pricing'?<div><p className="admin-eyebrow">Your offers</p><h1 className="font-display text-3xl">Pricing</h1><p className="mt-2 text-sm text-[var(--ink-soft)]">Control current selling prices. Submitted orders keep their agreed quotes.</p><PricingSettings/></div>:view==='backups'?<BackupTools/>:<SettingsView user={user}/>}
+   </main>
+  </div>
+  <dialog ref={menu} aria-label="Admin menu" className="admin-menu-dialog"><div className="admin-mobile-brand"><Brand/><button className="icon-button" aria-label="Close admin menu" onClick={()=>menu.current?.close()}><Icon name="close"/></button></div>{navigation}<div className="admin-sidebar-footer"><p className="admin-signed-in">{user.email}</p><button className="admin-sign-out" onClick={onLogout}>Sign Out</button></div></dialog>
+  <dialog ref={command} aria-label="Search admin" className="admin-command-dialog"><div className="admin-command-input"><input ref={search} aria-label="Search sections and orders" placeholder="Search sections, customer or order…" value={commandQuery} onChange={event=>setCommandQuery(event.target.value)}/><button className="icon-button" aria-label="Close search" onClick={()=>command.current?.close()}><Icon name="close" size={18}/></button></div><div className="admin-command-results">{foundSections.length>0&&<p className="admin-nav-label">Sections</p>}{foundSections.map(v=><button key={v.id} onClick={()=>navigate(v.id)}><Icon name={v.icon} size={18}/>{v.label}</button>)}{foundOrders.length>0&&<p className="admin-nav-label">Orders</p>}{foundOrders.map(o=><button key={o.id} onClick={()=>navigate('orders',o.id)}><Icon name="card" size={18}/><span>{o.customer.fullName}<small>{o.orderNumber}</small></span></button>)}{!foundSections.length&&!foundOrders.length&&<p className="p-5 text-sm">No matching sections or loaded orders. Search the profile directory for profiles.</p>}</div></dialog>
+  {exportScope&&<ExportBackupDialog scope={exportScope} onClose={()=>setExportScope(null)}/>}
+ </div>;
 }
 
-// ── Dashboard metrics ────────────────────────────────────────────
-function DashboardView({
-  orders,
-  reviews,
-  onOpenOrders,
-}: {
-  orders: Order[];
-  reviews: Review[];
-  onOpenOrders: () => void;
-}) {
-  const openOrders = orders.filter(o=>!['rejected','cancelled'].includes(o.applicationStatus||''));
-  const awaiting = openOrders.filter((o) =>
-    ["new", "payment_pending", "paid", "cod_pending_confirmation"].includes(o.fulfillment.status)
-  ).length;
-  const inProduction = openOrders.filter((o) =>
-    ["profile_created", "production_ready", "printing", "ready_for_nfc", "nfc_programmed", "qa_passed"].includes(o.fulfillment.status)
-  ).length;
-  const readyToShip = openOrders.filter((o) =>
-    ["ready_to_ship", "shipped"].includes(o.fulfillment.status)
-  ).length;
-  const completed = orders.filter((o) => o.fulfillment.status === "delivered").length;
-  const recentCompleted = orders.filter((o) => o.fulfillment.status === "delivered").slice(0, 5);
-  const clients = new Set(orders.map(orderCustomerKey)).size;
-  const profiles = orders.filter((o) => o.profileId).length; // profiles created from orders
-  const freshReviews = reviews.length;
-
-  const metrics = [
-    { label: "Orders awaiting action", value: awaiting, tone: "text-[var(--coral)]" },
-    { label: "Total clients", value: clients, tone: "text-[var(--ink)]" },
-    { label: "Order profiles", value: profiles, tone: "text-[var(--ink)]" },
-    { label: "Reviews", value: freshReviews, tone: "text-[var(--ink)]" },
-    { label: "In production", value: inProduction, tone: "text-[var(--ink)]" },
-    { label: "Ready for NFC", value: orders.filter((o) => o.fulfillment.status === "ready_for_nfc").length, tone: "text-[var(--ink)]" },
-    { label: "Ready to ship", value: readyToShip, tone: "text-[var(--ink)]" },
-    { label: "Recently completed", value: completed, tone: "text-[var(--mint)]" },
-  ];
-
-  return (
-    <div>
-      <h1 className="font-display text-2xl font-bold text-[var(--ink)]">Dashboard</h1>
-      <p className="text-sm text-[var(--ink-soft)]">A live snapshot of your EdgeTap pipeline.</p>
-
-      <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-        {metrics.map((m) => (
-          <div key={m.label} className="card-paper p-5">
-            <p className={`font-display text-3xl font-bold ${m.tone}`}>{m.value}</p>
-            <p className="mt-1 text-[12px] font-semibold text-[var(--ink-soft)]">{m.label}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-6 grid gap-4 lg:grid-cols-2">
-        <div className="card-paper p-6">
-          <div className="flex items-center justify-between">
-            <h2 className="font-display text-base font-bold text-[var(--ink)]">Orders awaiting action</h2>
-            <button onClick={onOpenOrders} className="text-[12px] font-bold text-[var(--sky)] hover:underline">View all →</button>
-          </div>
-          <div className="mt-4 space-y-2">
-            {openOrders.slice(0, 6).map((o) => (
-              <div key={o.id} className="flex items-center justify-between rounded-xl bg-white px-4 py-3 ring-1 ring-[var(--ink)]/8">
-                <div>
-                  <p className="text-sm font-bold text-[var(--ink)]">{o.customer.fullName}</p>
-                  <p className="text-[12px] text-[var(--ink-soft)]">{o.orderNumber} · {o.card.template}</p>
-                </div>
-                <span className="rounded-full bg-[var(--coral)]/10 px-2.5 py-1 text-[11px] font-bold text-[var(--coral)]">
-                  {o.fulfillment.status.replace(/_/g, " ")}
-                </span>
-              </div>
-            ))}
-            {openOrders.length === 0 && <p className="text-sm text-[var(--ink-faint)]">No open orders.</p>}
-          </div>
-        </div>
-
-        <div className="card-paper p-6">
-          <h2 className="font-display text-base font-bold text-[var(--ink)]">Recently completed</h2>
-          <div className="mt-4 space-y-2">
-            {recentCompleted.length === 0 && <p className="text-sm text-[var(--ink-faint)]">None yet.</p>}
-            {recentCompleted.map((o) => (
-              <div key={o.id} className="flex items-center justify-between rounded-xl bg-white px-4 py-3 ring-1 ring-[var(--ink)]/8">
-                <p className="text-sm font-bold text-[var(--ink)]">{o.customer.fullName}</p>
-                <span className="rounded-full bg-[var(--mint)]/15 px-2.5 py-1 text-[11px] font-bold text-[var(--ink)]">✓ Delivered</span>
-              </div>
-            ))}
-          </div>
-          <div className="mt-6 border-t border-[var(--ink)]/8 pt-4">
-            <p className="text-[12px] font-bold uppercase tracking-widest text-[var(--ink-faint)]">Latest reviews</p>
-            {freshReviews === 0 ? (
-              <p className="mt-2 text-sm text-[var(--ink-faint)]">No reviews yet — review cards go out after delivery.</p>
-            ) : (
-              <ul className="mt-2 space-y-1">
-                {reviews.slice(0, 3).map((r) => (
-                  <li key={r.id} className="text-sm text-[var(--ink)]">
-                    <strong>{"★".repeat(r.rating)}</strong> {r.text.slice(0, 80)}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+function DashboardView({orders,reviews,overview,onOpenOrder,onNavigate}:{orders:Order[];reviews:Review[];overview:BackupOverview|null;onOpenOrder:(id:string)=>void;onNavigate:(id:AdminView)=>void}){
+ const finished=['delivered','picked_up','completed'];
+ const active=orders.filter(o=>!['rejected','cancelled'].includes(o.applicationStatus||'')&&!finished.includes(o.fulfillment.status));
+ const awaiting=active.filter(o=>['new','payment_pending','paid','cod_pending_confirmation'].includes(o.fulfillment.status));
+ const production=active.filter(o=>['profile_created','production_ready','printing','ready_for_nfc','nfc_programmed','qa_passed'].includes(o.fulfillment.status));
+ const completed=orders.filter(o=>finished.includes(o.fulfillment.status));
+ const metrics:{label:string;value:number|string;icon:IconName;view:AdminView}[]=[
+  {label:'Orders awaiting action',value:awaiting.length,icon:'card',view:'orders'},
+  {label:'In production',value:production.length,icon:'edit',view:'orders'},
+  {label:'Completed orders',value:completed.length,icon:'check',view:'orders'},
+  {label:'Ordering clients',value:new Set(orders.map(orderCustomerKey)).size,icon:'user',view:'clients'},
+  {label:overview?'Profiles':'Order profiles',value:overview?.profiles??new Set(orders.map(o=>o.profileId).filter(Boolean)).size,icon:'avatar',view:'profiles'},
+  {label:'Reviews loaded',value:reviews.length,icon:'star',view:'reviews'},
+ ];
+ return <div><div className="admin-page-heading"><div><p className="admin-eyebrow">Workspace overview</p><h1 className="font-display text-3xl">Your EdgeTap workspace</h1><p className="mt-2 text-sm text-[var(--ink-soft)]">{active.length} open orders in your inbox. Keep the next step easy to find.</p></div><button className="btn btn-ink px-4 py-3" onClick={()=>onNavigate('orders')}>Open orders <span aria-hidden="true">→</span></button></div>
+  <div className="admin-metrics-grid">{metrics.map(m=><button key={m.label} onClick={()=>onNavigate(m.view)} className="card-paper admin-metric"><span className="admin-metric-label">{m.label}<Icon name={m.icon} size={18}/></span><strong>{m.value}</strong></button>)}</div>
+  <div className="admin-overview-grid"><section className="card-paper p-6"><div className="admin-panel-heading"><div><h2 className="font-display text-lg">Open orders</h2><p className="mt-1 text-xs text-[var(--ink-soft)]">Profile, payment and fulfillment remain separate.</p></div><button className="admin-text-link" onClick={()=>onNavigate('orders')}>View all</button></div><div className="admin-order-rows">{active.slice(0,6).map(o=><button key={o.id} onClick={()=>onOpenOrder(o.id||'')}><span><strong>{o.customer.fullName}</strong><small>{o.orderNumber}</small></span><span className="admin-badge">{o.fulfillment.status.replaceAll('_',' ')}</span></button>)}{!active.length&&<p className="py-6 text-sm text-[var(--ink-soft)]">No open orders. New applications will appear here.</p>}</div></section>
+   <section className="card-paper p-6"><h2 className="font-display text-lg">Workspace tools</h2><div className="admin-tool-list"><button onClick={()=>onNavigate('profiles')}><Icon name="avatar"/><span><strong>Manage profiles</strong><small>Edit details, visibility and account access.</small></span></button><button onClick={()=>onNavigate('pricing')}><Icon name="receipt"/><span><strong>Prices and offers</strong><small>Update selling prices for new orders.</small></span></button><button onClick={()=>onNavigate('backups')}><Icon name="save"/><span><strong>Local backups</strong><small>Keep your business records and files.</small></span></button></div></section>
+   <section className="card-paper p-6"><h2 className="font-display text-lg">Recently completed</h2><div className="admin-order-rows">{completed.slice(0,5).map(o=><button key={o.id} onClick={()=>onOpenOrder(o.id||'')}><span><strong>{o.customer.fullName}</strong><small>{o.orderNumber}</small></span><span className="admin-badge">{o.fulfillment.status.replaceAll('_',' ')}</span></button>)}{!completed.length&&<p className="py-6 text-sm text-[var(--ink-soft)]">No completed orders in the loaded inbox.</p>}</div></section>
+   <section className="card-paper p-6"><h2 className="font-display text-lg">Latest profile reviews</h2><div className="admin-review-rows">{reviews.slice(0,3).map(r=><div key={r.id}><p className="text-xs font-bold">{r.authorName} · {r.rating}/5</p><p className="mt-2 text-sm text-[var(--ink-soft)]">{r.text.slice(0,150)}</p></div>)}{!reviews.length&&<p className="py-6 text-sm text-[var(--ink-soft)]">No profile reviews yet.</p>}</div></section>
+  </div><p className="mt-5 text-xs text-[var(--ink-soft)]">Order activity reflects the loaded inbox, up to 200 recent orders. These are operational records, not traffic analytics.</p>
+ </div>;
 }
 
 // ── Clients ──────────────────────────────────────────────────────
-function ClientsView({ orders, onOpenOrder }: { orders: Order[]; onOpenOrder:(id:string)=>void }) {
+function ClientsView({ orders, onOpenOrder,onExport }: { orders: Order[]; onOpenOrder:(id:string)=>void;onExport:(scope:BackupScope)=>void }) {
   const [query, setQuery] = useState('');
   const clients: (Order["customer"] & { customerKey:string; account:Order['account']; orderId: string; orderNumber: string; createdAt: number })[] = [];
   for (const o of orders) {
@@ -313,6 +133,7 @@ function ClientsView({ orders, onOpenOrder }: { orders: Order[]; onOpenOrder:(id
               </div>
             </div>
             <div className="flex items-center gap-2">
+              {c.account?.customerId&&<button type="button" aria-label={"Export "+c.fullName+" records"} title="Export customer records" className="icon-button" onClick={()=>onExport({kind:"customer",id:c.account!.customerId,label:c.fullName})}><Icon name="save"/></button>}
               <InfoHelp title={'Contact '+c.fullName}><p>{c.email}</p><p>{c.phone}</p>{c.city&&<p>{c.city}</p>}<p>Latest order: {c.orderNumber}</p><p>{new Date(c.createdAt).toLocaleDateString()}</p></InfoHelp>
               <button type="button" aria-label={'Open order '+c.orderNumber} title="Open order" className="icon-button" onClick={()=>onOpenOrder(c.orderId)}><Icon name="card"/></button>
             </div>

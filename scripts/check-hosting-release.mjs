@@ -12,14 +12,14 @@ try {
   assert.equal(config.hosting.cleanUrls, true, 'Clean account/profile URLs are required.');
   assert(config.hosting.rewrites.some(rule => rule.source === '/u/**' && rule.destination === '/profile.html'), 'Profile handle rewrite is missing.');
 
-  const required = ['index.html', 'admin.html', 'account.html', 'account/recovery.html', 'account/orders.html', 'account/profile.html', 'create-profile.html', 'order.html', 'profile.html', 'privacy.html', 'terms.html', 'cookies.html', 'robots.txt', 'sitemap.xml'];
+  const required = ['index.html', 'admin.html', 'account.html', 'account/recovery.html', 'account/orders.html', 'account/profile.html', 'create-profile.html', 'order.html', 'profile.html', 'privacy.html', 'terms.html', 'cookies.html', 'robots.txt', 'sitemap.xml', 'tools/edgetap-unlock.mjs'];
   for (const file of required) await readFile(join('out', file));
   const files = await readdir('out', { recursive: true });
   // Webpack metadata chunks live inside directories named robots.txt/sitemap.xml.
   // Scan their contents as usual, while reading only actual text files.
   const publicFiles = [];
   for (const file of files) {
-    if (/\.(html|js|json|txt|css|xml)$/.test(file) && (await stat(join('out', file))).isFile()) publicFiles.push(file);
+    if (/\.(html|m?js|json|txt|css|xml)$/.test(file) && (await stat(join('out', file))).isFile()) publicFiles.push(file);
   }
   assert(!files.some(file => file.split(/[\\/]/).some(part => part.startsWith('.env'))), 'Environment files must not enter the export.');
   let compiled = '';

@@ -1,9 +1,12 @@
 -- Post-upgrade verification permits existing real accounts/data. No fixtures.
 begin read only;
 do $$
-declare versions text[]; t text; fn text; settings jsonb; products boolean; offers boolean; website_reviews boolean; catalog_enabled boolean; console_enabled boolean; free_enabled boolean; account_admin_enabled boolean; catalog jsonb;
+declare versions text[]; t text; fn text; settings jsonb; products boolean; offers boolean; website_reviews boolean; catalog_enabled boolean; console_enabled boolean; free_enabled boolean; account_admin_enabled boolean; backups_enabled boolean; catalog jsonb;
 begin
  select array_agg(version::text order by version) into versions from supabase_migrations.schema_migrations;
+ backups_enabled='202610300028'=any(versions);
+ if backups_enabled and not ('202610270027'=any(versions)) then raise exception 'Backup controls require account controls';end if;
+ versions=array_remove(versions,'202610300028');
  account_admin_enabled='202610270027'=any(versions);
  if account_admin_enabled and not ('202610260026'=any(versions)) then raise exception 'Account controls require the free-profile foundation';end if;
  versions=array_remove(versions,'202610270027');
@@ -42,6 +45,11 @@ begin
  if not exists(select 1 from pg_policies where schemaname='storage' and tablename='objects' and policyname='edgetap_prepared_artwork_owner_read') then raise exception 'Prepared artwork owner policy missing'; end if;
  if not exists(select 1 from storage.buckets where id='avatars' and public) or (select count(*) from storage.buckets where id in ('order-artwork','payment-receipts','migration-quarantine') and not public)<>3 then raise exception 'Bucket visibility mismatch'; end if;
  if products and (not has_function_privilege('authenticated','public.confirm_link_destination(text,bigint)','EXECUTE') or has_function_privilege('anon','public.confirm_link_destination(text,bigint)','EXECUTE')) then raise exception 'Unsafe direct-link RPC grants';end if;
+ if backups_enabled then
+  foreach fn in array array['admin_backup_overview()','admin_export_business_data(text,uuid)'] loop
+   if to_regprocedure('public.'||fn) is null or has_function_privilege('anon','public.'||fn,'EXECUTE') or not has_function_privilege('authenticated','public.'||fn,'EXECUTE') or not exists(select 1 from pg_proc where oid=to_regprocedure('public.'||fn) and prosecdef and 'search_path=""'=any(proconfig)) then raise exception 'Unsafe backup RPC: %',fn;end if;
+  end loop;
+ end if;
  settings=public.get_order_settings();
  if website_reviews and (not has_function_privilege('anon','public.list_website_reviews(integer,numeric,timestamptz,text)','EXECUTE') or has_function_privilege('anon','public.submit_website_review(text,text,numeric)','EXECUTE') or not has_function_privilege('authenticated','public.submit_website_review(text,text,numeric)','EXECUTE')) then raise exception 'Unsafe public review grants';end if;
  if offers and not catalog_enabled and (settings->>'offerPricingVersion' is distinct from '3' or settings->>'additionalCardPrice' is distinct from '700' or settings->>'twoCardBundlePrice' is distinct from '2099' or settings->>'threeCardBundlePrice' is distinct from '2499' or settings->>'linkThreeCardBundlePrice' is distinct from '1999' or settings->>'linkTwoCardBundlePrice' is distinct from '1599' or settings->>'deliveryIncluded' is distinct from 'true' or has_function_privilege('anon','public.attach_existing_order_profile(text,bigint)','EXECUTE') or not has_function_privilege('authenticated','public.attach_existing_order_profile(text,bigint)','EXECUTE')) then raise exception 'Missing website offer capability or unsafe profile-binding grants';end if;
@@ -92,5 +100,5 @@ do $$ begin
  begin perform 1 from private.admin_members;raise exception 'Private staff directory visible';exception when insufficient_privilege then null;end;
 end $$;
 reset role;
-select 'Ordering upgrade verified against allowed histories through 015/016 and optional 017–027, pricing catalogs, profile confirmation, account controls, RLS/RPC grants, private artwork/receipts and proof-email gates. No data changed.' as result;
+select 'Ordering upgrade verified against allowed histories through 015/016 and optional 017–028, pricing catalogs, profile confirmation, account controls, RLS/RPC grants, private artwork/receipts and proof-email gates. No data changed.' as result;
 commit;

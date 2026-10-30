@@ -77,7 +77,7 @@ export default function ProfilesView({ user,onChanged }: { user: User;onChanged?
 
   return (
     <div>
-      <ManagedProfiles onChanged={onChanged}/>
+      <ManagedProfiles onChanged={onChanged}/><details className="card-paper p-6"><summary className="cursor-pointer font-display text-xl">Founder profile editor</summary><div className="mt-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h1 className="font-display text-2xl font-bold text-[var(--ink)]">Profiles</h1>
@@ -262,6 +262,7 @@ export default function ProfilesView({ user,onChanged }: { user: User;onChanged?
       </fieldset></form>
 
       <InfoHelp title="Publishing client profiles" label="Publication help"><p>Free profiles publish directly after account verification. For orders, you can use Publish profile at any time. Payment, optional review and printing remain separate.</p><p>Handles are reserved atomically so another profile cannot be overwritten.</p></InfoHelp>
+    </div></details>
     </div>
   );
 }
