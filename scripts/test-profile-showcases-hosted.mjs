@@ -77,9 +77,17 @@ try{
  check(true,'Unknown handle never falls back to the founder');
  await page.goto(origin+'/pricing');
  check(!await page.locator('.price-details-table').isVisible()&&!await page.locator('.profile-media-offer').isVisible(),'Detailed catalog and premium previews stay hidden on initial pricing view');
+ check(await page.locator('.pricing-option').count()===3,'Pricing leads with three main offers');
+ check((await page.locator('.pricing-page').innerText()).split(/\s+/).length<280,'Default pricing copy stays concise');
  await page.getByRole('button',{name:'Show detailed prices',exact:true}).click();
  await page.getByRole('heading',{name:'Show the work behind your links.',exact:true}).waitFor();
  check((await page.locator('.profile-media-offer').innerText()).includes('Premium checkout is not open'),'Live gallery offer discloses the premium preview');
+ check(await page.getByRole('button',{name:'Hide detailed prices',exact:true}).getAttribute('aria-expanded')==='true','Detailed-price control reports its expanded state');
+ await page.getByRole('button',{name:'Hide detailed prices',exact:true}).click();
+ check(!await page.locator('.price-details-table').isVisible(),'Visitors can hide the catalog again');
+ await page.goto(origin+'/pricing#price-details');
+ await page.getByRole('heading',{name:'Every option, priced clearly.',exact:true}).waitFor();
+ check(true,'Existing detailed-price links open the catalog directly');
  check(errors.length===0,'No uncaught browser errors');
  check(emailRequests===0,'No email worker requests');
  await context.close();
