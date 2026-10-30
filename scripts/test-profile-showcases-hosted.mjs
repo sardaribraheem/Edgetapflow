@@ -55,6 +55,7 @@ try{
   assert.equal(profile?.username,handle,'Protected profile unavailable');
   await page.goto(origin+'/u/'+handle);
   await page.getByRole('heading',{name:profile.displayName,exact:true}).waitFor();
+  if(profile.bio)check(await page.locator('.card-paper header .profile-bio').innerText()===profile.bio,'Saved About text stays with the identity: '+handle);
   const contacts=page.getByRole('region',{name:'Contact actions',exact:true});
   await contacts.waitFor();
   const rendered=await contacts.locator('a').evaluateAll(links=>links.map(link=>link.getAttribute('href')));
@@ -75,6 +76,8 @@ try{
  await page.getByRole('heading',{name:'Profile not found',exact:true}).waitFor();
  check(true,'Unknown handle never falls back to the founder');
  await page.goto(origin+'/pricing');
+ check(!await page.locator('.price-details-table').isVisible()&&!await page.locator('.profile-media-offer').isVisible(),'Detailed catalog and premium previews stay hidden on initial pricing view');
+ await page.getByRole('button',{name:'Show detailed prices',exact:true}).click();
  await page.getByRole('heading',{name:'Show the work behind your links.',exact:true}).waitFor();
  check((await page.locator('.profile-media-offer').innerText()).includes('Premium checkout is not open'),'Live gallery offer discloses the premium preview');
  check(errors.length===0,'No uncaught browser errors');

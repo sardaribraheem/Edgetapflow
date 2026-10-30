@@ -208,7 +208,7 @@ body {
 .pricing-option h2 { font-size: 1.125rem; font-weight: 600; }
 .pricing-price { margin-top: 1.5rem; font-size: clamp(2rem, 2.65vw, 2.5rem); font-weight: 600; line-height: 1.15; letter-spacing: -0.025em; white-space: nowrap; }
 .pricing-price-detail { margin-top: 0.25rem; font-size: 0.875rem; }
-.pricing-description { min-height: 5.25rem; margin-top: 1rem; font-size: 0.9375rem; line-height: 1.5; }
+.pricing-description { min-height: 3rem; margin-top: 1rem; font-size: 0.9375rem; line-height: 1.5; }
 .pricing-features { display: grid; align-content: start; gap: 1rem; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--ink-wash); font-size: 0.875rem; line-height: 1.5; }
 .pricing-features li { display: flex; align-items: baseline; gap: 0.75rem; }
 .pricing-features li > span:first-child { flex-shrink: 0; }
@@ -1200,10 +1200,10 @@ button:disabled {
 .profile-name-local_business { text-transform:none;border-bottom:3px solid var(--yellow);padding-bottom:12px; }
 
 /* Public profiles keep contact actions above optional business/media content. */
+.profile-bio { white-space:pre-wrap; }
+.profile-card-link { display:inline-flex;align-items:center;gap:.4rem;min-height:44px;font-size:.75rem;font-weight:600;text-decoration:underline;text-underline-offset:3px;text-align:right; }
 .profile-details { display:grid;gap:2rem;padding:0 1.75rem 2rem;min-width:0;overflow-wrap:anywhere; }
 .profile-details:empty { display:none; }
-.profile-about { border-top:1px solid var(--ink-wash);padding-top:1.5rem; }
-.profile-about p { margin-top:.75rem;white-space:pre-wrap;overflow-wrap:anywhere;max-width:65ch;color:var(--ink-soft);font-size:.9375rem;line-height:1.7; }
 .profile-photo-grid { display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem;margin-top:1rem; }
 .profile-photo-grid figure { min-width:0;margin:0; }
 .profile-photo-grid img,.profile-photo-unavailable { display:block;width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:1rem;background:var(--paper-2); }
@@ -1233,3 +1233,13 @@ button:disabled {
 @media(max-width:380px) { .profile-photo-grid {grid-template-columns:minmax(0,1fr);} }
 
 .profile-media-offer { border-top:1px solid var(--ink-wash);margin-top:2.5rem;padding-top:2rem;max-width:70ch; }
+
+.pricing-details { margin-top:2rem;scroll-margin-top:7rem; }
+.pricing-details-toggle { display:flex;width:100%;align-items:center;justify-content:space-between;gap:1rem;min-height:60px;border:1px solid var(--ink-wash);border-radius:var(--radius-md);background:var(--paper);padding:1rem 1.25rem;font-weight:600;text-align:left;cursor:pointer; }
+.pricing-details-toggle:hover { background:var(--paper-2); }
+.pricing-details-toggle > :last-child { flex-shrink:0; }
+.pricing-details #pricing-details-content { padding:0 1.25rem 1.25rem; }
+.pricing-details .price-details-section { margin:2rem 0 0; }
+.pricing-details-renewal { margin-top:1.5rem;font-size:.8125rem;color:var(--ink-soft); }
+.pricing-details .profile-media-offer { margin-top:1.5rem;padding-top:1.5rem; }
+@media(max-width:540px) { .profile-powered { max-width:45%; } .profile-card-link { max-width:50%; } }
