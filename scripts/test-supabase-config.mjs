@@ -38,3 +38,7 @@ assert.equal(profileReturnPath('/create-profile'),'/create-profile');
 assert.equal(profileReturnPath('/order?product=profile&profile=owned-handle'),'/order?product=profile&profile=owned-handle');
 for(const path of ['/order?product=profile&profile=..','/order?product=profile&profile=good&next=https://outside.example','/order?product=profile&profile=%2f%2foutside.example'])assert.equal(profileReturnPath(path),'/account/orders');
 console.log('PASS free-profile and owned-card return paths preserve only explicit safe internal destinations.');
+
+for(const path of ['/order?item=tag-blank','/order?item=card-print&service=annual&destination=profile','/order?item=profile-annual&profileId=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'])assert.equal(accountReturnPath(path),path);
+for(const path of ['/order?item=tag-blank&next=https://outside.example','/order?item=tag-blank&item=card-blank','/order?item=unknown','/order?item=tag-blank#https://outside.example','/order?item=profile-annual&profileId=not-a-profile'])assert.equal(accountReturnPath(path),'/account/orders');
+console.log('PASS catalog checkout sign-in preserves only validated product/profile hints, without tokens or arbitrary redirects.');

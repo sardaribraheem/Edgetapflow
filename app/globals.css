@@ -1167,3 +1167,34 @@ button:disabled {
 
 .admin-content #selected-order { scroll-margin-top:90px; }
 @media(min-width:1100px) { .admin-workspace .admin-order-list { top:90px;max-height:calc(100dvh - 110px); } }
+
+.price-details-section { margin:3.5rem 0;scroll-margin-top:100px; }
+.price-detail-controls { display:flex;justify-content:space-between;align-items:center;gap:1.5rem;flex-wrap:wrap;margin:1.75rem 0 1rem; }
+.price-detail-filters { display:flex;gap:4px;flex-wrap:wrap;padding:4px;border:1px solid var(--ink-wash);border-radius:12px; }
+.price-detail-filters button { min-height:40px;padding:8px 12px;font-size:12px;font-weight:600;border-radius:8px; }
+.price-detail-filters button[aria-pressed=true] { background:var(--ink);color:var(--paper); }
+.price-details-table-wrap { position:relative;min-width:0;max-width:100%;overflow:auto;border:1px solid var(--ink-wash);border-radius:16px;background:var(--paper); }
+.price-details-table { width:100%;border-collapse:collapse;text-align:left;font-size:13px; }
+.price-details-table thead { background:var(--yellow-soft); }
+.price-details-table th,.price-details-table td { padding:18px 20px;vertical-align:top; }
+.price-details-table tbody tr+tr { border-top:1px solid var(--ink-wash); }
+.price-details-table tbody th { width:42%;font-weight:400; }
+.price-details-table th strong,.price-details-table td strong { display:block;font-weight:600; }
+.price-details-table th span,.price-details-table small { display:block;margin-top:6px;font-size:11px;font-weight:400;color:var(--ink-soft);line-height:1.5; }
+.price-detail-action { display:inline-flex;align-items:center;gap:12px;font-weight:700;min-height:32px;text-decoration:underline;text-underline-offset:4px;white-space:nowrap; }
+.price-detail-notes { display:grid;grid-template-columns:1fr 1fr;gap:16px 32px;margin-top:20px;font-size:12px;line-height:1.6;color:var(--ink-soft); }
+.price-detail-notes p:last-child { grid-column:1/-1; }
+@media(max-width:767px){.price-details-table th,.price-details-table td{padding:14px 12px;}.price-details-table{min-width:650px;}.price-detail-notes{grid-template-columns:1fr;}.price-detail-controls{align-items:flex-start;gap:16px;}.price-details-section{margin-top:2.5rem;margin-inline:1.25rem;}}
+.profile-business-sections { margin:20px 0;display:grid;gap:18px; }
+.profile-business-hours { border:1px solid var(--ink-wash);border-radius:14px;padding:16px; }
+.profile-business-hours summary { cursor:pointer;display:flex;justify-content:space-between;gap:12px;font-size:13px; }
+.profile-business-hours summary span { color:var(--ink-soft); }
+.profile-business-hours dl { margin-top:16px;display:grid;gap:9px;font-size:12px; }
+.profile-business-hours dl > div { display:flex;justify-content:space-between;gap:16px; }
+.profile-business-hours dd { text-align:right; }
+.profile-services > div { margin-top:14px;padding-top:14px;border-top:1px solid var(--ink-wash); }
+.profile-section-editor { padding:20px;border:1px solid var(--ink-wash);border-radius:14px;margin:20px 0; }
+.profile-section-editor summary { cursor:pointer; }
+.profile-editor > .profile-section-editor { margin:20px; }
+.profile-name-portfolio { letter-spacing:-.04em; }
+.profile-name-local_business { text-transform:none;border-bottom:3px solid var(--yellow);padding-bottom:12px; }

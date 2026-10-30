@@ -10,7 +10,7 @@ async function test(name,fn){await fn();checks++;console.log('PASS '+name);}
 const dump=async()=>(await db.query("select jsonb_build_object('profiles',(select jsonb_agg(to_jsonb(p) order by id) from public.profiles p),'orders',(select jsonb_agg(to_jsonb(o) order by id) from public.orders o),'payments',(select jsonb_agg(to_jsonb(p) order by order_id) from public.payments p),'owners',(select jsonb_agg(to_jsonb(p) order by profile_id) from private.profile_owners p),'auth',(select jsonb_agg(to_jsonb(u) order by id) from auth.users u),'files',(select jsonb_agg(to_jsonb(o) order by id) from storage.objects o),'jobs',(select jsonb_agg(to_jsonb(j) order by id) from private.order_email_jobs j)) value")).rows[0].value;
 try{
  await db.exec('alter table auth.users add column email_confirmed_at timestamptz default now()');
- for(const name of (await readdir('supabase/migrations')).filter(n=>n.endsWith('.sql')&&!n.includes('0016_')&&!n.includes('0028_')).sort()){
+ for(const name of (await readdir('supabase/migrations')).filter(n=>n.endsWith('.sql')&&!n.includes('0016_')&&n<'202610300028').sort()){
   await db.exec(await readFile('supabase/migrations/'+name,'utf8'));
   if(name.includes('0018_'))await db.exec(await readFile('../EdgeTapApp/docs/proposals/202610200019_mobile_digital_profiles.sql','utf8'));
  }

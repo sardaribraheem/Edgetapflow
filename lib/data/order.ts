@@ -1,3 +1,4 @@
+import type {ProductQuote} from '../product-catalog';
 import type {PricingCatalog} from '@/lib/pricing';
 import type {StaffAccount} from '@/lib/admin-account';
 import { extraLinkCost } from '../checkout';
@@ -143,8 +144,10 @@ export const FULFILLMENT_STATES: FulfillmentState[] = FULFILLMENT_FLOW.map((s) =
 
 // ── Order ─────────────────────────────────────────────────────────
 export type Order = {
+  profileAvailable?:boolean;profilePlan?:import('../profile-plans').ProfilePlan;
+  productQuote?:ProductQuote;productCatalogVersion?:number;
   account?: StaffAccount | null; // Staff-only account identity, separate from submitted contact details.
-  physicalFormat?:'printed_card'|'nfc_tag'|'profile_only';
+  physicalFormat?:'printed_card'|'unprinted_card'|'nfc_tag'|'profile_only';
   staffReviewStarted?:boolean;staffReviewComplete?:boolean;staffChecks?:Record<string,boolean>;
   pricingVersion?:3|4; pricingCatalogVersion?:number; pricingSnapshot?:PricingCatalog; offer?:'two_card_bundle'|'three_card_bundle'; existingProfileId?:string;
   applicationStatus?: "submitted" | "under_review" | "changes_required" | "accepted" | "rejected" | "cancelled";

@@ -1,3 +1,5 @@
+import type {ProfileSections} from '../profile-sections';
+import type {ProfilePlan} from '../profile-plans';
 // Types and demonstration fallback data. Live public profiles and homepage
 // social destinations must read the saved backend profile.
 
@@ -10,6 +12,7 @@ export type ProfileLink = {
 };
 
 export type Profile = {
+  plan?:ProfilePlan;sections?:ProfileSections;
   freeProfile?: boolean;
   username: string;
   displayName: string;

@@ -3,6 +3,8 @@
 import {useEffect,useRef,useState} from 'react';
 import {listManagedProfiles,setProfileVisibility,separateProfileAccount,deleteManagedProfile,type ManagedProfile} from '@/lib/website-profiles';
 import {getStaffProfile,getProfile} from '@/lib/data-service';
+import ProfilePlanNotice from '@/components/ProfilePlanNotice';
+import ProfileSectionsEditor from '@/components/ProfileSectionsEditor';
 import ProfileEditor from '@/components/ProfileEditor';
 import {getCurrentUser} from '@/lib/auth';
 import {notifyProfileChanged} from '@/lib/profile-sync';
@@ -72,12 +74,13 @@ export default function ManagedProfiles({onChanged}:{onChanged?:()=>Promise<void
     {error&&<p role="alert" className="mt-4 rounded-xl bg-[var(--coral)]/10 p-4">{error}</p>}
     {notice&&<p role="status" className="mt-4 rounded-xl bg-[var(--mint-soft)] p-4">{notice}</p>}
     {!ready?<p role="status" className="mt-5">Loading profiles…</p>:<ul className="mt-5 space-y-4">{visible.map(profile=><li key={profile.profileId} className="min-w-0 rounded-xl bg-white p-4">
-      <div className="flex flex-wrap items-center justify-between gap-4"><div className="min-w-0"><h2 className="font-display text-lg">{profile.displayName}</h2><a href={'/u/'+profile.username} className="break-all text-sm underline" target="_blank" rel="noreferrer">/u/{profile.username}</a><p className="mt-2 text-xs">{profile.freeProfile?'Free profile':'Customer profile'} · {profile.active===false?'Hidden':'Live'}{profile.protectedProfile?' · Protected':''}</p></div><div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap items-center justify-between gap-4"><div className="min-w-0"><h2 className="font-display text-lg">{profile.displayName}</h2><a href={'/u/'+profile.username} className="break-all text-sm underline" target="_blank" rel="noreferrer">/u/{profile.username}</a><p className="mt-2 text-xs">{profile.freeProfile?'Free profile':'Customer profile'} · {profile.active===false?'Hidden':profile.plan?.status==='expired'&&!profile.plan.legacyRights?'Service expired':'Live'}{profile.protectedProfile?' · Protected':''}</p></div><div className="flex flex-wrap gap-2">
         {profile.active!==false&&<button type="button" className="btn btn-ghost px-4 py-3" disabled={!!busy} onClick={()=>{void getCurrentUser().then(user=>{if(user)setEditing({profile,uid:user.uid});}).catch(()=>setError('Sign in as staff before editing.'));}}>Edit public details</button>}
         <button type="button" className="btn btn-ghost px-4 py-3" disabled={!!busy||!profile.profileId} onClick={()=>setExportScope({kind:"profile",id:profile.profileId,label:"/u/"+profile.username})}>Export profile</button>
         <button type="button" className="btn btn-ghost px-4 py-3" onClick={()=>{const node=document.getElementById("profile-cleanup-"+profile.profileId) as HTMLDetailsElement|null;if(node){node.open=true;node.scrollIntoView({block:"nearest"});}}}>Review deletion</button>
         <button type="button" disabled={!!busy} onClick={()=>{void visibility(profile);}} className="btn btn-ghost px-4 py-3">{busy===profile.username?'Confirming…':profile.active===false?'Restore profile':'Hide profile'}</button>
       </div></div>
+      <ProfilePlanNotice profile={profile} allowRenew={false}/><ProfileSectionsEditor profile={profile}/>
       <details id={"profile-cleanup-"+profile.profileId} className="admin-details mt-4"><summary>Account access & cleanup</summary><div className="space-y-4 p-4 text-sm">
         <p className="break-all">{profile.account?.kind==='login'?`Login account: ${profile.account.email}`:profile.account?.kind==='staff_managed'?'Staff-managed · No login account':'Account details unavailable.'}</p>
         <p>This is the account that can manage the profile. Public contact links are independent.</p>

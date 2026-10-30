@@ -52,7 +52,7 @@ try {
   await page.getByLabel('Find a profile',{exact:true}).fill('browser-person');
   const person=page.getByRole('listitem').filter({has:page.getByRole('link',{name:'/u/browser-person',exact:true})});
   page.once('dialog',d=>d.accept('browser-person'));await person.getByRole('button',{name:'Hide profile',exact:true}).click();
-  await person.getByRole('button',{name:'Restore profile',exact:true}).waitFor();await person.locator('summary').click();
+  await person.getByRole('button',{name:'Restore profile',exact:true}).waitFor();await person.getByText('Account access & cleanup',{exact:true}).click();
   await person.getByRole('button',{name:'Separate from login account',exact:true}).click();
   let dialog=page.getByRole('dialog',{name:'Separate from login account',exact:true});
   verify(await dialog.getByRole('button',{name:'Separate this profile',exact:true}).isDisabled(),'Account separation requires typed confirmation and a reason');
@@ -66,7 +66,7 @@ try {
 
   await openMenu();await navigation.getByRole('button',{name:'Profiles',exact:true}).click();await page.getByLabel('Find a profile',{exact:true}).fill('browser-disposable');
   const disposable=page.getByRole('listitem').filter({has:page.getByRole('link',{name:'/u/browser-disposable',exact:true})});
-  page.once('dialog',d=>d.accept('browser-disposable'));await disposable.getByRole('button',{name:'Hide profile',exact:true}).click();await disposable.getByRole('button',{name:'Restore profile',exact:true}).waitFor();await disposable.locator('summary').click();
+  page.once('dialog',d=>d.accept('browser-disposable'));await disposable.getByRole('button',{name:'Hide profile',exact:true}).click();await disposable.getByRole('button',{name:'Restore profile',exact:true}).waitFor();await disposable.getByText('Account access & cleanup',{exact:true}).click();
   await disposable.getByRole('button',{name:'Permanently delete profile',exact:true}).click();dialog=page.getByRole('dialog',{name:'Permanently delete profile',exact:true});
   await dialog.getByLabel('Type the profile handle',{exact:true}).fill('wrong-handle');await dialog.getByLabel('Reason for this action',{exact:true}).fill('Delete disposable local fixture');
   verify(await dialog.getByRole('button',{name:'Permanently delete this profile',exact:true}).isDisabled(),'Wrong handle cannot confirm permanent deletion');
@@ -74,7 +74,7 @@ try {
   verify((await rpc(staff,'list_managed_website_profiles',['browser-disposable'])).length===0,'Permanently deleted profile has no restore row');
   verify(await rpc(owner,'website_handle_available',['browser-disposable'])===false,'Deleted profile handle stays unavailable for takeover');
   await page.getByLabel('Find a profile',{exact:true}).fill('tarsilpk');
-  const protectedRow=page.getByRole('listitem').filter({has:page.getByRole('link',{name:'/u/tarsilpk',exact:true})});await protectedRow.locator('summary').click();
+  const protectedRow=page.getByRole('listitem').filter({has:page.getByRole('link',{name:'/u/tarsilpk',exact:true})});await protectedRow.getByText('Account access & cleanup',{exact:true}).click();
   verify(!await protectedRow.getByRole('button',{name:'Separate from login account',exact:true}).count(),'Protected business has no account separation control');
   verify(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'Profiles fit mobile without horizontal overflow');
   await mkdir('test-results/profile-account-admin',{recursive:true});await page.screenshot({path:'test-results/profile-account-admin/profiles-mobile.png',fullPage:true});

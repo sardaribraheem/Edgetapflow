@@ -26,7 +26,15 @@ export const SUPPORT_EMAIL = "sardaribraheem277@gmail.com";
 export const DESIGNER_URL = 'https://wa.me/923271360809';
 export const SUPPORT_URL = "https://wa.me/923044149674";
 
+function safeCatalogReturn(value:string|null):boolean {
+ if(!value?.startsWith('/order?')||value.includes('#'))return false;
+ const params=new URLSearchParams(value.slice(7)),keys=Array.from(params.keys());
+ if(new Set(keys).size!==keys.length||keys.some(k=>!['item','service','destination','profileId'].includes(k)))return false;
+ if(!['tag-blank','tag-link','card-blank','card-link','card-print-blank','card-print','profile-annual'].includes(params.get('item')||''))return false;
+ return (!params.has('service')||params.get('service')==='annual')&&(!params.has('destination')||params.get('destination')==='profile')&&(!params.has('profileId')||/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(params.get('profileId')||''));
+}
 export function profileReturnPath(value: string | null): string {
+  if(value&&safeCatalogReturn(value))return value;
   return (!!value&&/^\/order\?product=profile&profile=[a-z0-9._-]{1,30}$/.test(value)&&!['.','..'].includes(value.split('profile=')[1])) || value === "/create-profile" || value === "/account/profile" || value === "/#custom" || value === "/order" || value === "/account/orders" || (value && (/^\/account\/orders\?order=[a-zA-Z0-9_-]{1,128}$/.test(value) || (/^\/u\/[a-z0-9._-]{1,30}$/.test(value) && !["/u/.", "/u/.."].includes(value)))) ? value : "/account/orders";
 }
 

@@ -51,12 +51,13 @@ async function confirmProfileRead(profile:Profile,acknowledged:Profile|undefined
  for(let attempt=0;attempt<3;attempt++){
   if(attempt)await new Promise(resolve=>setTimeout(resolve,attempt*250));
   try{
-   const saved=staff?await getStaffProfile(profile.username):await getProfile(profile.username);
+   const expired=profile.plan?.status==='expired'&&!profile.plan.legacyRights;
+   const saved=staff?await getStaffProfile(profile.username):expired?(await getMyProfiles()).find(p=>p.profileId===profile.profileId):await getProfile(profile.username);
    if(!saved||!profileMatches(profile,saved)||Number(saved.version)<=Number(profile.version||0)||acknowledged&&Number(saved.version)<Number(acknowledged.version))continue;
    if(staff){
     if((saved.active!==false)!==(profile.active!==false))continue;
     const visible=await rpc<Profile|null>('get_public_profile',{p_username:profile.username});
-    if(saved.active===false?visible!==null:!visible||!profileMatches(profile,visible)||Number(visible.version)<Number(saved.version))continue;
+    if(saved.active===false||saved.plan?.status==='expired'&&!saved.plan.legacyRights?visible!==null:!visible||!profileMatches(profile,visible)||Number(visible.version)<Number(saved.version))continue;
    }
    return saved;
   }catch{}

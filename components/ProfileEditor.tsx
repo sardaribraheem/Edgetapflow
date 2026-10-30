@@ -6,6 +6,8 @@ import type { Profile, ProfileLink } from '@/lib/data/profile';
 import { LINK_PRESETS, LINK_ACCENTS } from '@/lib/data/order';
 import { getCurrentUser } from '@/lib/auth';
 import { saveProfileConfirmed } from '@/lib/data-service';
+import ProfileSectionsEditor from './ProfileSectionsEditor';
+import ProfilePlanNotice from './ProfilePlanNotice';
 import { uploadPublicAvatar } from '@/lib/upload-service';
 import { isSafeContactUrl } from '@/lib/links';
 import {notifyProfileChanged} from '@/lib/profile-sync';
@@ -43,14 +45,14 @@ export default function ProfileEditor({profile,uid,onClose,onSaved,inline=false}
         if(uploaded.current?.file!==photo)uploaded.current={file:photo,url:await uploadPublicAvatar(uid,photo)};
         avatar=uploaded.current.url;await check();
       }
-      let logo=draft.logo;if(logoFile){if(uploadedLogo.current?.file!==logoFile)uploadedLogo.current={file:logoFile,url:await uploadPublicAvatar(uid,logoFile)};logo=uploadedLogo.current.url;await check();}
+      let logo=draft.logo;if(logoFile){if(uploadedLogo.current?.file!==logoFile)uploadedLogo.current={file:logoFile,url:await uploadPublicAvatar(uid,logoFile,'logo')};logo=uploadedLogo.current.url;await check();}
       const parts=draft.displayName.trim().split(/\s+/);
       const saved=await saveProfileConfirmed(profile.username,{...draft,username:profile.username,avatar,logo,firstName:parts[0],lastName:parts.slice(1).join(' ')});
       await check();notifyProfileChanged(profile.username);onSaved(saved);
     }catch(e){if(mounted.current)setError(e instanceof Error&&/changed|Reload|reopen/i.test(e.message)?e.message:'Could not publish your changes. Your edits are still here; try again.');}
     finally{operation.current=false;if(mounted.current)setBusy(false);}
   };
-  const form=<form onSubmit={event=>{void save(event);}}>
+  const form=<><ProfilePlanNotice profile={profile}/><form onSubmit={event=>{void save(event);}}>
       <header className="profile-editor-header"><div><h2 className="font-display text-2xl">Edit profile</h2><p className="mt-1 text-xs text-[var(--ink-soft)]">/u/{profile.username} <Icon name="shield" size={13}/></p></div><button type="button" aria-label="Close profile editor" disabled={busy} className="icon-button" onClick={onClose}><Icon name="close"/></button></header>
       <fieldset disabled={busy} className="profile-editor-fields">
         <div className="flex flex-wrap items-center gap-4">
@@ -70,6 +72,6 @@ export default function ProfileEditor({profile,uid,onClose,onSaved,inline=false}
         </section>
       </fieldset>
       <footer className="profile-editor-footer">{error&&<p role="alert" className="w-full text-sm text-[var(--coral-ink)]">{error}</p>}<button type="button" disabled={busy} className="btn btn-ghost px-4 py-3" onClick={onClose}>Cancel</button><button type="submit" disabled={busy} className="btn btn-ink px-5 py-3"><Icon name="save" size={18}/>{busy?'Publishing…':'Save & publish'}</button></footer>
-    </form>;
+    </form><ProfileSectionsEditor profile={profile}/></>;
   return inline?<section aria-label="Profile editor" className="profile-editor profile-editor-inline">{form}</section>:<dialog ref={dialog} aria-label="Edit profile" className="profile-editor" onCancel={event=>{event.preventDefault();if(!operation.current)onClose();}} onClick={event=>{if(event.target===event.currentTarget&&!operation.current)onClose();}}>{form}</dialog>;
 }

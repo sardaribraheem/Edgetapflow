@@ -1,9 +1,17 @@
 -- Post-upgrade verification permits existing real accounts/data. No fixtures.
 begin read only;
 do $$
-declare versions text[]; t text; fn text; settings jsonb; products boolean; offers boolean; website_reviews boolean; catalog_enabled boolean; console_enabled boolean; free_enabled boolean; account_admin_enabled boolean; backups_enabled boolean; catalog jsonb;
+declare versions text[]; t text; fn text; settings jsonb; products boolean; offers boolean; website_reviews boolean; catalog_enabled boolean; console_enabled boolean; free_enabled boolean; account_admin_enabled boolean; backups_enabled boolean; products_catalog_enabled boolean; plans_enabled boolean; sections_enabled boolean; catalog jsonb;
 begin
  select array_agg(version::text order by version) into versions from supabase_migrations.schema_migrations;
+ sections_enabled='202610300032'=any(versions);
+ plans_enabled='202610300031'=any(versions);
+ products_catalog_enabled='202610300029'=any(versions);
+ if sections_enabled and not plans_enabled then raise exception 'Sections require plan foundation';end if;
+ if plans_enabled and not products_catalog_enabled then raise exception 'Plans require product catalog';end if;
+ if products_catalog_enabled and not ('202610300028'=any(versions)) then raise exception 'Product catalog requires backup foundation';end if;
+ if '202610300030'=any(versions) and ((select file_size_limit from storage.buckets where id='avatars') not in (153600,5242880) or has_function_privilege('anon','public.admin_set_public_image_limit(boolean,bigint,text)','EXECUTE')) then raise exception 'Public image policy mismatch';end if;
+ versions=array_remove(array_remove(array_remove(array_remove(versions,'202610300032'),'202610300031'),'202610300030'),'202610300029');
  backups_enabled='202610300028'=any(versions);
  if backups_enabled and not ('202610270027'=any(versions)) then raise exception 'Backup controls require account controls';end if;
  versions=array_remove(versions,'202610300028');
@@ -50,6 +58,13 @@ begin
    if to_regprocedure('public.'||fn) is null or has_function_privilege('anon','public.'||fn,'EXECUTE') or not has_function_privilege('authenticated','public.'||fn,'EXECUTE') or not exists(select 1 from pg_proc where oid=to_regprocedure('public.'||fn) and prosecdef and 'search_path=""'=any(proconfig)) then raise exception 'Unsafe backup RPC: %',fn;end if;
   end loop;
  end if;
+ if products_catalog_enabled then
+  foreach fn in array array['admin_product_catalog()','admin_save_product_catalog(jsonb,bigint,boolean)','admin_save_product_costs(jsonb,bigint)','create_product_order(jsonb,jsonb,jsonb,bigint,uuid)'] loop
+   if to_regprocedure('public.'||fn) is null or has_function_privilege('anon','public.'||fn,'EXECUTE') or not has_function_privilege('authenticated','public.'||fn,'EXECUTE') then raise exception 'Unsafe product catalog RPC: %',fn;end if;
+  end loop;
+ end if;
+ if plans_enabled and (to_regprocedure('public.create_website_profile(jsonb,uuid,boolean)') is null or has_function_privilege('anon','public.create_website_profile(jsonb,uuid,boolean)','EXECUTE') or has_function_privilege('authenticated','private.activate_catalog_annual(text)','EXECUTE')) then raise exception 'Unsafe profile plan grants';end if;
+ if sections_enabled and (to_regprocedure('public.save_my_profile_sections(uuid,jsonb,bigint)') is null or has_function_privilege('anon','public.save_my_profile_sections(uuid,jsonb,bigint)','EXECUTE')) then raise exception 'Unsafe business section grants';end if;
  settings=public.get_order_settings();
  if website_reviews and (not has_function_privilege('anon','public.list_website_reviews(integer,numeric,timestamptz,text)','EXECUTE') or has_function_privilege('anon','public.submit_website_review(text,text,numeric)','EXECUTE') or not has_function_privilege('authenticated','public.submit_website_review(text,text,numeric)','EXECUTE')) then raise exception 'Unsafe public review grants';end if;
  if offers and not catalog_enabled and (settings->>'offerPricingVersion' is distinct from '3' or settings->>'additionalCardPrice' is distinct from '700' or settings->>'twoCardBundlePrice' is distinct from '2099' or settings->>'threeCardBundlePrice' is distinct from '2499' or settings->>'linkThreeCardBundlePrice' is distinct from '1999' or settings->>'linkTwoCardBundlePrice' is distinct from '1599' or settings->>'deliveryIncluded' is distinct from 'true' or has_function_privilege('anon','public.attach_existing_order_profile(text,bigint)','EXECUTE') or not has_function_privilege('authenticated','public.attach_existing_order_profile(text,bigint)','EXECUTE')) then raise exception 'Missing website offer capability or unsafe profile-binding grants';end if;
@@ -100,5 +115,5 @@ do $$ begin
  begin perform 1 from private.admin_members;raise exception 'Private staff directory visible';exception when insufficient_privilege then null;end;
 end $$;
 reset role;
-select 'Ordering upgrade verified against allowed histories through 015/016 and optional 017–028, pricing catalogs, profile confirmation, account controls, RLS/RPC grants, private artwork/receipts and proof-email gates. No data changed.' as result;
+select 'Ordering upgrade verified against allowed histories through 015/016 and optional 017–032, pricing catalogs, profile confirmation, account controls, RLS/RPC grants, private artwork/receipts and proof-email gates. No data changed.' as result;
 commit;

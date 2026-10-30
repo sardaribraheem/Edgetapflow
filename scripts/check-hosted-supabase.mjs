@@ -25,7 +25,7 @@ try{
  const ordering=await probe('get_order_settings');
  assert.equal(ordering.cardPrice,999);assert.equal(ordering.jazzcashNumber,'0304 4149674');
  assert.equal(ordering.emailNotificationsEnabled,false);assert.equal(ordering.designProofScope,'all_personalized');
- assert.deepEqual(ordering.offerPrices,{direct_link:999,profile:1499},'Released offers must match the approved backend.');
+ const legacyCatalog=await probe('get_pricing_catalog',{p_version:null});assert.deepEqual(ordering.offerPrices,{direct_link:legacyCatalog.direct_link.price,profile:legacyCatalog.profile.price},'Order settings must match the current immutable legacy offer catalog.');
  assert.equal(ordering.cardEditorVersion,4,'Released artwork/editor capability is missing.');
  assert.equal(ordering.designReviewVersion,1,'Released private-proof review capability is missing.');checks++;
  await probe('confirm_link_destination',{p_id:'nonexistent',p_version:1},true);
@@ -52,6 +52,18 @@ try{
  for(const table of ['profiles','customers','orders','payments','reviews','order_applications']){
   const {error}=await client.from(table).select('*').limit(1);assert(error&&['42501','PGRST301','PGRST302'].includes(error.code),`${table}: unexpected anonymous table access`);checks++;
  }
+ const detailed=await probe('get_product_catalog',{});assert(detailed.version>0);assert(!('costs' in detailed));for(const value of Object.values(detailed.prices))assert(Number.isFinite(value)&&value>0);
+ const tagQuote=await probe('get_product_quote',{p_selection:{hardware:'tag',finish:'unprinted',destination:'unprogrammed',service:'none',quantity:1,assisted:false,delivery:'pickup'},p_catalog_version:detailed.version});assert.equal(tagQuote.total,detailed.prices.tagBlank);
+ const plans=await probe('get_profile_plan_policy',{});assert.equal(plans.trialDays,14);assert.equal(plans.annualPrice,detailed.prices.profileAnnual);
+ for(const [name,args] of [
+  ['admin_backup_overview',{}],['admin_export_business_data',{p_scope:'all',p_id:null}],['admin_product_catalog',{}],
+  ['admin_save_product_catalog',{p_data:{},p_expected_version:0,p_publish:false}],['admin_save_product_costs',{p_data:{},p_version:0}],
+  ['admin_public_image_policy',{}],['admin_set_public_image_limit',{p_strict:true,p_expected_limit:0,p_confirmation:''}],
+  ['admin_profile_plan_policy',{}],['admin_set_profile_plan_policy',{p_enabled:true,p_version:0,p_confirmation:''}],
+  ['create_product_order',{p_selection:{},p_contact:{},p_payment:{},p_catalog_version:0,p_request_key:crypto.randomUUID()}],
+  ['create_website_profile',{p_profile:{},p_request_key:crypto.randomUUID(),p_accept_trial:true}],
+  ['get_my_profile_sections',{p_id:crypto.randomUUID()}],['save_my_profile_sections',{p_id:crypto.randomUUID(),p_data:{},p_version:0}]
+ ])await probe(name,args,true);
  const deniedSchema=await fetch(`${url}/rest/v1/profiles?limit=1`,{headers:{apikey:key,'Accept-Profile':'private'}});
  assert.equal(deniedSchema.status,406);assert.equal((await deniedSchema.json()).code,'PGRST106');checks++;
  const invalidJwt=await fetch(`${url}/rest/v1/rpc/get_public_profile`,{method:'POST',headers:{apikey:key,Authorization:'Bearer invalid-verification-probe','Content-Type':'application/json'},body:JSON.stringify({p_username:'ibraheem'})});

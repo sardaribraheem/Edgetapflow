@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ibraheemProfile, Profile } from "@/lib/data/profile";
 import { isSafeContactUrl } from "@/lib/links";
 import { contactPdf } from "@/lib/contact-pdf";
+import ProfileSections from './ProfileSections';
 import DoodleField from "./DoodleField";
 import DefaultAvatar from "./ui/DefaultAvatar";
 import Icon from "./ui/Icon";
@@ -116,7 +117,7 @@ export default function ProfilePage({
               </div>
 
               {profile.logo&&<img src={profile.logo} alt={`${profile.displayName} logo`} className="mt-5 h-12 max-w-40 object-contain"/>}
-              <h1 className="mt-5 font-display text-[clamp(2rem,5vw,3rem)] font-semibold leading-none text-[var(--ink)]">
+              <h1 className={"profile-name profile-name-"+(profile.sections?.preset||"professional")+" mt-5 font-display text-[clamp(2rem,5vw,3rem)] font-semibold leading-none text-[var(--ink)]"}>
                 {profile.displayName}
               </h1>
               <p className="mt-2 text-[16px] font-medium text-[var(--ink-soft)]">
@@ -127,7 +128,7 @@ export default function ProfilePage({
 
             </header>
 
-            {/* actions */}
+            <ProfileSections sections={profile.sections}/>{/* actions */}
             <section className="flex flex-col gap-2.5 pt-1" aria-label="Contact actions">
               <div className="eyebrow mb-1 text-[var(--ink-mid)]">Reach me</div>
               {profile.links.filter(l => isSafeContactUrl(l.url)).map((l) => (

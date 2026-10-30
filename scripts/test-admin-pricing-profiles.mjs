@@ -14,11 +14,11 @@ try{
   if(f.includes('0022')){
    await db.query('insert into auth.users values($1,$2),($3,$4),($5,$6)',[owner,'customer@example.test',other,'other@example.test',staff,'staff@example.test']);
    await db.query("insert into private.admin_members(user_id,provenance) values($1,'Local admin pricing test')",[staff]);await db.query("insert into storage.objects(bucket_id,name) values('payment-receipts',$1)",[owner+'/receipt.png']);
-   legacyOrder=await as(owner,()=>rpc('create_order',[base,crypto.randomUUID()]));legacySnapshot=(await db.query('select to_jsonb(o) value from public.orders o where id=$1',[legacyOrder])).rows[0].value;
+   legacyOrder=await as(owner,()=>rpc('create_order',[base,crypto.randomUUID()]));legacySnapshot=(await db.query("select to_jsonb(o)-'product_catalog_version'-'product_quote' value from public.orders o where id=$1",[legacyOrder])).rows[0].value;
   }
   await db.exec(await readFile('supabase/migrations/'+f,'utf8'));
  }
- await test('new migrations preserve submitted legacy orders and old pricing',async()=>{const after=(await db.query("select to_jsonb(o)-'pricing_catalog_version' value from public.orders o where id=$1",[legacyOrder])).rows[0].value;assert.deepEqual(after,legacySnapshot);assert.equal((await as(owner,()=>rpc('get_my_orders')))[0].subtotal,1499);});
+ await test('new migrations preserve submitted legacy orders and old pricing',async()=>{const after=(await db.query("select to_jsonb(o)-'pricing_catalog_version'-'product_catalog_version'-'product_quote' value from public.orders o where id=$1",[legacyOrder])).rows[0].value;assert.deepEqual(after,legacySnapshot);assert.equal((await as(owner,()=>rpc('get_my_orders')))[0].subtotal,1499);});
  initial=await as(null,()=>rpc('get_pricing_catalog'));
  await test('anonymous catalog reads expose current public prices without staff identity',()=>{assert.equal(initial.version,1);assert.equal(initial.profile.price,1499);assert.equal(initial.profile.comparison,2200);assert.equal(initial.extraLinkPrice,50);assert(!('created_by' in initial));});
  const {version,...data}=structuredClone(initial);data.profile.price=1700;data.profile.comparison=2500;data.profile.offers.two_card_bundle.price=2400;data.profile.offers.three_card_bundle.price=3100;data.direct_link.price=1100;data.direct_link.comparison=1500;data.direct_link.offers.two_card_bundle.price=1800;data.additionalCardPrice=850;data.extraLinkPrice=65.5;data.website.price=35000;data.website.comparison=40000;data.website.renewal=4500;

@@ -89,6 +89,13 @@ export const FULFILLMENT_LABELS:Record<string,string>={new:'Awaiting review',pai
 export function nextOrderAction(o:Order):string{
   if(o.applicationStatus==='changes_required')return 'Read the EdgeTap message, update your saved application and resubmit it.';
   if(o.applicationStatus==='rejected'||o.applicationStatus==='cancelled')return 'This application is closed. Contact EdgeTap about any payment or remedy questions.';
+  if(o.productQuote){
+   const s=o.productQuote.selection;
+   if(s.hardware==='none')return o.events?.some(e=>e.kind==='annual_activated')?'Your annual service was activated for this profile. Review its current period in Edit profile.':'Your annual service awaits payment verification. Your existing profile and draft are kept.';
+   if(['completed','delivered','picked_up'].includes(o.fulfillment.status))return 'Your hardware has been marked received. Existing profile service terms and payment records remain separate.';
+   if(s.destination==='unprogrammed')return 'This order is for unprogrammed hardware. No profile, printing beyond the quoted finish, or saved NFC link is implied. Follow preparation and collection updates below.';
+   if(o.profileAvailable===false)return 'Your hardware order is saved, but its profile is currently unavailable. Open Edit profile to review the service period or contact EdgeTap about visibility.';
+  }
   if(o.applicationStatus!=='accepted'&&!o.profileId&&!o.nfcUrl)return "We're reviewing your request. Any updates will appear here.";
   if(o.fulfillment.status==='ready_for_pickup')return o.fulfillmentInstructions||'Your card is ready at NASTP Delta 3. Pickup Monday–Friday, 9 am–5 pm. Contact +92 304 414 9674 after reaching NASTP.';
   if(o.fulfillment.status==='shipped'&&o.deliveryIncluded)return 'Your rider is on the way. Follow the delivery updates here.';

@@ -1,4 +1,6 @@
 "use client";
+import {getProfilePlanPolicy,type ProfilePlanPolicy} from '@/lib/profile-plans';
+import ProductCheckout from './ProductCheckout';
 import {paymentEvidenceError} from '@/lib/checkout';
 import {useDraftPricing} from './useDraftPricing';
 import PriceReviewNotice from './PriceReviewNotice';
@@ -26,16 +28,22 @@ import {clearCardArtworkCache} from '@/lib/card-renderer';
 
 const STEPS=['Card','Profile','Links','Profile preview','Fulfillment','Payment','Submit'];
 export default function OrderWizard(){
+ const policyRequest=useRef(0);
+ const [catalogRoute,setCatalogRoute]=useState(false),[planPolicy,setPlanPolicy]=useState<ProfilePlanPolicy|null>(null),[policyChecked,setPolicyChecked]=useState(false);
  const [user,setUser]=useState<User|null>(null),[checked,setChecked]=useState(false),[cloudId,setCloudId]=useState('');
- useEffect(()=>onAuthStateChanged(auth,value=>{setCloudId(new URLSearchParams(window.location.search).get('draft')||'');setUser(value);setChecked(true);}),[]);
+ useEffect(()=>onAuthStateChanged(auth,value=>{setCatalogRoute(new URLSearchParams(window.location.search).has('item'));setCloudId(new URLSearchParams(window.location.search).get('draft')||'');setUser(value);setChecked(true);setPolicyChecked(false);setPlanPolicy(null);const request=++policyRequest.current;void getProfilePlanPolicy().then(p=>{if(request===policyRequest.current){setPlanPolicy(p);setPolicyChecked(true);}}).catch(()=>{if(request===policyRequest.current)setPolicyChecked(true);});}),[]);
  const onCloudReady=useCallback((id:string)=>setCloudId(id),[]);
  if(!checked)return <main className="min-h-screen px-4 py-28"><p role="status">Opening your card builder…</p></main>;
  if(!usesSupabase)return <main className="min-h-screen px-4 py-28">Applications require the configured Supabase backend.</main>;
+ if(catalogRoute)return <ProductCheckout/>;
+ if(!policyChecked)return <main className="min-h-screen px-4 py-28"><p role="status">Checking profile terms…</p></main>;
+ if(!planPolicy)return <main className="container-x min-h-screen py-28"><p role="alert">Profile terms could not be checked. Reload before ordering.</p><a href="/pricing" className="underline">Return to pricing</a></main>;
+ if(planPolicy?.newAccountTrial&&!cloudId&&!new URLSearchParams(location.search).get("profile")&&new URLSearchParams(location.search).get("product")!=="direct_link")return <main className="container-x min-h-screen max-w-2xl py-28"><h1 className="font-display text-3xl">Start with your profile trial.</h1><p className="mt-4">Your account can publish one 14-day trial. Annual service is Rs. {planPolicy.annualPrice}; cards and tags are separate. Create the profile first, then choose hardware or annual service without creating a second profile.</p><Link href="/create-profile" className="btn btn-ink mt-6 px-5 py-3">Create my trial profile</Link><Link href="/pricing#price-details" className="ml-4 underline">See detailed prices</Link></main>;
  return cloudId?<CloudOrderWizard/>:<GuestOrderWizard user={user} onCloudReady={onCloudReady}/>;
 }
 function CloudOrderWizard(){
  const router=useRouter();
- const [quoteLocked,setQuoteLocked]=useState(false);
+ const [quoteLocked,setQuoteLocked]=useState(false),[cloudPolicy,setCloudPolicy]=useState<ProfilePlanPolicy|null>(null);
  const [user,setUser]=useState<User|null>(null),[authReady,setAuthReady]=useState(false);
  const [ready,setReady]=useState(false),[draft,setDraft]=useState<WizardDraft>(blankApplication('')),[step,setStep]=useState(0);
  const [settings,setSettings]=useState<OrderSettings|null>(null),[error,setError]=useState(''),[saveError,setSaveError]=useState('');
@@ -49,13 +57,13 @@ function CloudOrderWizard(){
  useEffect(()=>{
   if(!user||!usesSupabase)return;
   let active=true;
-  void Promise.all([getMyApplications(),getOrderSettings(),getMyOrders()]).then(([apps,config,orders])=>{
+  void Promise.all([getMyApplications(),getOrderSettings(),getMyOrders(),getProfilePlanPolicy()]).then(([apps,config,orders,policy])=>{
    if(!active)return;
    const requested=new URLSearchParams(window.location.search).get('draft');
    const fresh=new URLSearchParams(window.location.search).get('new')==='true';
    const saved=requested?apps.find(a=>a.id===requested):fresh?undefined:apps[0];
    if(requested&&!saved)throw new Error('This draft is unavailable. View your submitted applications on My orders.');
-   setQuoteLocked(!!saved?.orderId);
+   setCloudPolicy(policy);setQuoteLocked(!!saved?.orderId);
    meta.current={id:saved?.id||crypto.randomUUID(),version:saved?.version||0,uid:user.uid};
    setDraft(saved?{...wizardFromApplication(saved.payload),...(!saved.orderId?{pricingVersion:4 as const}:{}),...(!saved.orderId||orders.find(o=>o.id===saved.orderId)?.plan==='profile'?{product:saved.payload.product||'profile',physical:{...wizardFromApplication(saved.payload).physical,schemaVersion:2 as const}}:{})}:{...blankApplication(user.email||''),size:config.cardSizes[0]});setStep(saved?.step||0);setSettings(config);setReady(true);
   }).catch(e=>{if(active)setError(isOrderingUnavailable(e)?'You are signed in, but saved applications are temporarily unavailable. Try again later or contact EdgeTap.':e.message==='This draft is unavailable. View your submitted applications on My orders.'?e.message:'Could not recover your application. Reload to try again.');});
@@ -90,7 +98,7 @@ function CloudOrderWizard(){
   if(!user)return;if(!file){setDraft(d=>{if(kind==='logo'){const physical={...d.physical};delete physical.logoUrl;return {...d,physical,logoPreview:undefined};}if(kind==='receipt')return {...d,payment:{...d.payment,receiptUrl:undefined}};if(kind==='artwork')return {...d,customDesignUrl:undefined,customDesignPreview:undefined};if(kind==='backArtwork')return {...d,backDesignPreview:undefined,physical:{...d.physical,standardBack:false,backDesignUrl:undefined}};return {...d,avatarUrl:undefined,avatarPreview:undefined};});setDirty(true);return;}
   const uploadUid=user.uid;const uploadDraft=meta.current;setUploading(true);setError('');
   try{
-   const path=(kind==='avatar'||kind==='logo')?await uploadPublicAvatar(user.uid,file):(kind==='artwork'||kind==='backArtwork')?await uploadCustomDesign(user.uid,file):await uploadPaymentReceipt(user.uid,file);
+   const path=(kind==='avatar'||kind==='logo')?await uploadPublicAvatar(user.uid,file,kind==='logo'?'logo':'portrait'):(kind==='artwork'||kind==='backArtwork')?await uploadCustomDesign(user.uid,file):await uploadPaymentReceipt(user.uid,file);
    if(accountUid.current!==uploadUid||meta.current!==uploadDraft)return;
    setDraft(d=>({...d,...(kind==='avatar'?{avatarUrl:path,avatarUploadPending:false}:kind==='logo'?{physical:{...d.physical,logoUrl:path},logoUploadPending:false}:kind==='artwork'?{customDesignUrl:path}:kind==='backArtwork'?{physical:{...d.physical,standardBack:false,backDesignUrl:path}}:{payment:{...d.payment,receiptUrl:path}})}));setDirty(true);
   }catch(e){if(accountUid.current===uploadUid)setError(e instanceof Error?e.message:'Upload failed.');throw e;}
@@ -98,7 +106,7 @@ function CloudOrderWizard(){
  };
  const preview=useMemo<Profile>(()=>({username:draft.usernameSuggested||suggestProfileHandle(draft.displayName)||'yourprofile',displayName:draft.displayName||'Your Name',firstName:draft.customer.fullName.split(' ')[0]||'',lastName:'',title:draft.title,bio:draft.bio,location:draft.location||'',avatar:draft.avatarPreview||draft.avatarUrl||'',logo:draft.logoPreview||draft.physical.logoUrl,links:draft.links.filter(l=>isSafeContactUrl(l.url))}),[draft]);
  const direct=draft.product==='direct_link',sequence=direct?[2,0,1,3,4,5,6]:draft.existingProfileId?[0,3,4,5,6]:[0,1,2,3,4,5,6],position=sequence.indexOf(step),steps=direct?['Link','Card','Details','Review','Fulfillment','Payment','Submit']:draft.existingProfileId?['Card','Profile preview','Fulfillment','Payment','Submit']:STEPS;
- const offerAvailable=(draft.pricingVersion!==4||settings?.offerPricingVersion===4)&&(settings?.checkoutVersion||0)>=2&&supportsCardEditor(settings,draft)&&supportsProofReview(settings,draft);
+ const offerAvailable=(!cloudPolicy?.newAccountTrial||quoteLocked||!!draft.existingProfileId||direct)&&(draft.pricingVersion!==4||settings?.offerPricingVersion===4)&&(settings?.checkoutVersion||0)>=2&&supportsCardEditor(settings,draft)&&supportsProofReview(settings,draft);
  const validate=(s:number)=>{
   if(s===1&&!draft.displayName.trim())return 'Add a name or main heading.';
   if(direct&&s===2)return directLinkError(draft.directLink||'');

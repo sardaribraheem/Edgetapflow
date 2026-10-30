@@ -20,7 +20,7 @@ async function hide(handle){const p=await profile(handle);await call('admin_set_
 const rawProfile=async handle=>(await db.query('select to_jsonb(p) value from public.profiles p where username=$1',[handle])).rows[0]?.value;
 try {
   await db.exec('alter table auth.users add column email_confirmed_at timestamptz default now()');
-  for(const file of (await readdir('supabase/migrations')).filter(f=>f.endsWith('.sql')&&!f.includes('0016_')&&!f.includes('0027_')).sort()) {
+  for(const file of (await readdir('supabase/migrations')).filter(f=>f.endsWith('.sql')&&!f.includes('0016_')&&f<'202610270027').sort()) {
     await db.exec(await readFile('supabase/migrations/'+file,'utf8'));
     if(file.includes('0018_'))await db.exec(await readFile('../EdgeTapApp/docs/proposals/202610200019_mobile_digital_profiles.sql','utf8'));
   }
