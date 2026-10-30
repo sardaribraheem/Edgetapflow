@@ -1,3 +1,4 @@
+import type {ProfileShowcase} from '../profile-showcase';
 import type {ProfileSections} from '../profile-sections';
 import type {ProfilePlan} from '../profile-plans';
 // Types and demonstration fallback data. Live public profiles and homepage
@@ -12,7 +13,7 @@ export type ProfileLink = {
 };
 
 export type Profile = {
-  plan?:ProfilePlan;sections?:ProfileSections;
+  plan?:ProfilePlan;sections?:ProfileSections;showcase?:ProfileShowcase;
   freeProfile?: boolean;
   username: string;
   displayName: string;

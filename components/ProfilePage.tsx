@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ibraheemProfile, Profile } from "@/lib/data/profile";
 import { isSafeContactUrl } from "@/lib/links";
 import { contactPdf } from "@/lib/contact-pdf";
-import ProfileSections from './ProfileSections';
+import ProfileDetails from './ProfileDetails';
 import DoodleField from "./DoodleField";
 import DefaultAvatar from "./ui/DefaultAvatar";
 import Icon from "./ui/Icon";
@@ -92,7 +92,7 @@ export default function ProfilePage({
       </DoodleField>
 
       {!previewOnly&&<p className="relative mx-auto mb-4 text-center text-xs"><Link href="/create-profile" className="font-semibold underline">Powered by EdgeTap · Create your free profile</Link></p>}
-      <ProfileContainer id={previewOnly?undefined:"main-content"} tabIndex={previewOnly?undefined:-1} className="container-x relative mx-auto w-full max-w-5xl py-6 my-auto">
+      <ProfileContainer id={previewOnly?undefined:"main-content"} tabIndex={previewOnly?undefined:-1} className="container-x relative mx-auto w-full max-w-5xl py-6">
         {/* the card */}
         <div className="card-paper relative overflow-hidden">
           <SparkleDoodle className="absolute -right-2 -top-2 h-10 w-10 text-[var(--yellow)] md:hidden" aria-hidden="true" />
@@ -105,7 +105,7 @@ export default function ProfilePage({
                   {profile.avatar ? (
                     <img
                       src={profile.avatar}
-                      alt={`${profile.displayName} — profile photo`}
+                      alt={`${profile.displayName} profile photo`}
                       className="h-full w-full object-cover"
                       draggable={false}
                     />
@@ -124,11 +124,11 @@ export default function ProfilePage({
                 {profile.title}
               </p>
               {profile.location && <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-[var(--ink)]/5 px-3 py-1 text-[13px] text-[var(--ink-mid)]"><Icon name="pin" size={15}/>{profile.location}</span>}
-              {profile.bio && <p className="mt-4 max-w-sm whitespace-pre-wrap text-[15px] leading-relaxed text-[var(--ink-soft)]">{profile.bio}</p>}
+
 
             </header>
 
-            <ProfileSections sections={profile.sections}/>{/* actions */}
+            {/* contact links always precede optional content in DOM and visual order */}
             <section className="flex flex-col gap-2.5 pt-1" aria-label="Contact actions">
               <div className="eyebrow mb-1 text-[var(--ink-mid)]">Reach me</div>
               {profile.links.filter(l => isSafeContactUrl(l.url)).map((l) => (
@@ -168,6 +168,8 @@ export default function ProfilePage({
 
             </section>
           </div>
+
+          <ProfileDetails profile={profile}/>
 
           {!previewOnly&&<section className="border-t border-[var(--ink)]/8 px-7 py-6 sm:px-10"><p className="font-display text-xl">Take your profile with you.</p><p className="mt-2 text-sm">Share your links with a tap. Order an EdgeTap card for your profile.</p><Link href={'/order?product=profile&profile='+encodeURIComponent(profile.username)} className="btn btn-ink mt-4 px-5 py-3">Order an EdgeTap card</Link></section>}
           {/* foot bar (hidden in preview mode — the /order shell provides Edit/Continue) */}

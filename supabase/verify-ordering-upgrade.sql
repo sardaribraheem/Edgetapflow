@@ -1,9 +1,23 @@
 -- Post-upgrade verification permits existing real accounts/data. No fixtures.
 begin read only;
 do $$
-declare versions text[]; t text; fn text; settings jsonb; products boolean; offers boolean; website_reviews boolean; catalog_enabled boolean; console_enabled boolean; free_enabled boolean; account_admin_enabled boolean; backups_enabled boolean; products_catalog_enabled boolean; plans_enabled boolean; sections_enabled boolean; catalog jsonb;
+declare versions text[]; t text; fn text; settings jsonb; products boolean; offers boolean; website_reviews boolean; catalog_enabled boolean; console_enabled boolean; free_enabled boolean; account_admin_enabled boolean; backups_enabled boolean; products_catalog_enabled boolean; plans_enabled boolean; sections_enabled boolean; showcases_enabled boolean; catalog jsonb;
 begin
  select array_agg(version::text order by version) into versions from supabase_migrations.schema_migrations;
+ showcases_enabled='202610300033'=any(versions);
+ if showcases_enabled then
+  if not ('202610300032'=any(versions)) then raise exception 'Showcase controls require business sections';end if;
+  if not exists(select 1 from storage.buckets where id='profile-media' and public and file_size_limit=256000 and allowed_mime_types @> array['image/jpeg','image/png','image/webp'] and cardinality(allowed_mime_types)=3) then raise exception 'Gallery bucket policy mismatch';end if;
+  foreach t in array array['profile_showcases','profile_media_policy','profile_media_capacity','profile_media_capacity_actions'] loop
+   if not exists(select 1 from pg_class c join pg_namespace n on n.oid=c.relnamespace where n.nspname='private' and c.relname=t and c.relrowsecurity) then raise exception 'Private media table protection missing';end if;
+  end loop;
+  foreach fn in array array['get_my_profile_showcase(uuid)','save_my_profile_showcase(uuid,jsonb,bigint)','admin_set_profile_media_capacity(uuid,timestamp with time zone,text,bigint)','admin_set_profile_media_price(numeric,bigint)','can_manage_profile_media(text,text)'] loop
+   if to_regprocedure('public.'||fn) is null or has_function_privilege('anon','public.'||fn,'EXECUTE') or not has_function_privilege('authenticated','public.'||fn,'EXECUTE') then raise exception 'Media RPC grant mismatch';end if;
+  end loop;
+  if (select count(*) from pg_policies where schemaname='storage' and tablename='objects' and policyname in ('profile_media_owner_read','profile_media_owner_insert','profile_media_unused_delete'))<>3 then raise exception 'Gallery storage policies missing';end if;
+  if (public.get_profile_media_policy()->>'premiumPurchasable')::boolean then raise exception 'Premium media checkout is not implemented';end if;
+ end if;
+ versions=array_remove(versions,'202610300033');
  sections_enabled='202610300032'=any(versions);
  plans_enabled='202610300031'=any(versions);
  products_catalog_enabled='202610300029'=any(versions);
@@ -115,5 +129,5 @@ do $$ begin
  begin perform 1 from private.admin_members;raise exception 'Private staff directory visible';exception when insufficient_privilege then null;end;
 end $$;
 reset role;
-select 'Ordering upgrade verified against allowed histories through 015/016 and optional 017–032, pricing catalogs, profile confirmation, account controls, RLS/RPC grants, private artwork/receipts and proof-email gates. No data changed.' as result;
+select 'Ordering upgrade verified against allowed histories through 015/016 and optional 017–033, pricing catalogs, profile confirmation, account controls, RLS/RPC grants, private artwork/receipts and proof-email gates. No data changed.' as result;
 commit;

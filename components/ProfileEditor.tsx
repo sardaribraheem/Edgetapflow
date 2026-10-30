@@ -7,6 +7,7 @@ import { LINK_PRESETS, LINK_ACCENTS } from '@/lib/data/order';
 import { getCurrentUser } from '@/lib/auth';
 import { saveProfileConfirmed } from '@/lib/data-service';
 import ProfileSectionsEditor from './ProfileSectionsEditor';
+import ProfileShowcaseEditor from './ProfileShowcaseEditor';
 import ProfilePlanNotice from './ProfilePlanNotice';
 import { uploadPublicAvatar } from '@/lib/upload-service';
 import { isSafeContactUrl } from '@/lib/links';
@@ -19,6 +20,7 @@ export default function ProfileEditor({profile,uid,onClose,onSaved,inline=false}
   const [draft,setDraft]=useState<Profile>(()=>({...profile,links:profile.links.map(link=>({...link}))}));
   const [photo,setPhoto]=useState<File|null>(null),[preview,setPreview]=useState('');
   const [logoFile,setLogoFile]=useState<File|null>(null),[logoPreview,setLogoPreview]=useState('');
+  const showcaseDirty=useRef(false);
   const uploadedLogo=useRef<{file:File;url:string}|null>(null);
   const [busy,setBusy]=useState(false),[error,setError]=useState('');
   const dialog=useRef<HTMLDialogElement>(null),operation=useRef(false),mounted=useRef(false);
@@ -36,6 +38,7 @@ export default function ProfileEditor({profile,uid,onClose,onSaved,inline=false}
   const selectPhoto=async(file:File|undefined)=>{if(!file)return;setError('');try{file=await prepareImageUpload(file,5);setPhoto(file);setPreview(URL.createObjectURL(file));uploaded.current=null;}catch(error){setError(error instanceof Error?error.message:'Could not open your photo.');}};
   const save=async(event:FormEvent)=>{
     event.preventDefault();if(operation.current)return;
+    if(showcaseDirty.current){setError('Save your layout, photos and videos first, or reload saved media to discard that draft, before saving profile details.');return;}
     if(!draft.displayName.trim()||draft.links.length>linkCapacity||draft.links.some(link=>!link.label.trim()||!isSafeContactUrl(link.url))){setError('Add a name and valid contact URLs within your purchased link allowance.');return;}
     operation.current=true;setBusy(true);setError('');
     try{
@@ -72,6 +75,6 @@ export default function ProfileEditor({profile,uid,onClose,onSaved,inline=false}
         </section>
       </fieldset>
       <footer className="profile-editor-footer">{error&&<p role="alert" className="w-full text-sm text-[var(--coral-ink)]">{error}</p>}<button type="button" disabled={busy} className="btn btn-ghost px-4 py-3" onClick={onClose}>Cancel</button><button type="submit" disabled={busy} className="btn btn-ink px-5 py-3"><Icon name="save" size={18}/>{busy?'Publishing…':'Save & publish'}</button></footer>
-    </form><ProfileSectionsEditor profile={profile}/></>;
+    </form><ProfileSectionsEditor profile={profile}/><ProfileShowcaseEditor key={profile.profileId} profile={profile} onDirtyChange={dirty=>{showcaseDirty.current=dirty;}}/></>;
   return inline?<section aria-label="Profile editor" className="profile-editor profile-editor-inline">{form}</section>:<dialog ref={dialog} aria-label="Edit profile" className="profile-editor" onCancel={event=>{event.preventDefault();if(!operation.current)onClose();}} onClick={event=>{if(event.target===event.currentTarget&&!operation.current)onClose();}}>{form}</dialog>;
 }

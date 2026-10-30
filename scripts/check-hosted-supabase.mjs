@@ -52,10 +52,12 @@ try{
  for(const table of ['profiles','customers','orders','payments','reviews','order_applications']){
   const {error}=await client.from(table).select('*').limit(1);assert(error&&['42501','PGRST301','PGRST302'].includes(error.code),`${table}: unexpected anonymous table access`);checks++;
  }
+ const mediaPolicy=await probe('get_profile_media_policy',{});assert.equal(mediaPolicy.freePhotos,5);assert.equal(mediaPolicy.maxInputMb,10);assert.equal(mediaPolicy.maxPhotoBytes,256000);assert.equal(mediaPolicy.premiumPurchasable,false);
  const detailed=await probe('get_product_catalog',{});assert(detailed.version>0);assert(!('costs' in detailed));for(const value of Object.values(detailed.prices))assert(Number.isFinite(value)&&value>0);
  const tagQuote=await probe('get_product_quote',{p_selection:{hardware:'tag',finish:'unprinted',destination:'unprogrammed',service:'none',quantity:1,assisted:false,delivery:'pickup'},p_catalog_version:detailed.version});assert.equal(tagQuote.total,detailed.prices.tagBlank);
  const plans=await probe('get_profile_plan_policy',{});assert.equal(plans.trialDays,14);assert.equal(plans.annualPrice,detailed.prices.profileAnnual);
  for(const [name,args] of [
+  ['get_my_profile_showcase',{p_id:crypto.randomUUID()}],['save_my_profile_showcase',{p_id:crypto.randomUUID(),p_data:{},p_version:0}],['admin_set_profile_media_capacity',{p_id:crypto.randomUUID(),p_until:null,p_reason:'anonymous denial probe',p_version:0}],['admin_set_profile_media_price',{p_price:999,p_version:0}],['can_manage_profile_media',{p_name:'invalid',p_action:'insert'}],
   ['admin_backup_overview',{}],['admin_export_business_data',{p_scope:'all',p_id:null}],['admin_product_catalog',{}],
   ['admin_save_product_catalog',{p_data:{},p_expected_version:0,p_publish:false}],['admin_save_product_costs',{p_data:{},p_version:0}],
   ['admin_public_image_policy',{}],['admin_set_public_image_limit',{p_strict:true,p_expected_limit:0,p_confirmation:''}],

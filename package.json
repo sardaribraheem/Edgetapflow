@@ -46,7 +46,9 @@
     "test:admin-backups": "node scripts/test-admin-backups.mjs && node scripts/test-backup-format.mjs",
     "test:admin-workspace:browser": "node scripts/test-admin-workspace-browser.mjs",
     "test:product-milestones": "node scripts/test-product-catalog.mjs && node scripts/test-profile-plans.mjs && node scripts/test-profile-sections.mjs && node scripts/test-image-uploads.mjs && node scripts/test-catalog-loading.mjs",
-    "test:product-milestones:browser": "node scripts/test-product-milestones-browser.mjs"
+    "test:product-milestones:browser": "node scripts/test-product-milestones-browser.mjs",
+    "test:profile-showcases": "node scripts/test-profile-showcases.mjs",
+    "test:profile-showcases:browser": "node scripts/test-profile-showcases-browser.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.117.2",

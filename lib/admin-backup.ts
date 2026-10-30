@@ -18,7 +18,7 @@ export async function buildBusinessArchive(snapshot:BusinessBackup,includeFiles:
  if(includeFiles&&snapshot.files.length>1498)throw new Error('Too many files for the browser. Export one customer at a time.');
  if(includeFiles)for(let i=0;i<snapshot.files.length;i++){
   signal.throwIfAborted();const file=snapshot.files[i];
-  if(!['avatars','order-artwork','payment-receipts','print-packages'].includes(file.bucket))throw new Error('The export contains an unsupported file bucket.');
+  if(!['avatars','order-artwork','payment-receipts','print-packages','profile-media'].includes(file.bucket))throw new Error('The export contains an unsupported file bucket.');
   const path=safeArchivePath('files/'+file.bucket+'/'+file.name);
   if(file.bytes!==null&&size+file.bytes>BACKUP_MAX_BYTES-1024*1024)throw new Error('The files exceed the 64 MB browser limit. Export one customer at a time.');
   progress(`Downloading file ${i+1} of ${snapshot.files.length}…`);

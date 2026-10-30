@@ -17,19 +17,20 @@ export async function prepareImageUpload(file:File,maxMb:number):Promise<File> {
   return image;
 }
 
-export type PublicImagePurpose='portrait'|'logo';
-export const PUBLIC_IMAGE_LIMITS={portrait:{edge:640,bytes:150*1024},logo:{edge:320,bytes:50*1024}} as const;
+export type PublicImagePurpose='portrait'|'logo'|'gallery';
+export const PUBLIC_IMAGE_LIMITS={portrait:{edge:640,bytes:150*1024},logo:{edge:320,bytes:50*1024},gallery:{edge:1600,bytes:250*1024}} as const;
 // Only new public images pass through this path. Private print masters/receipts
 // retain their original bytes and quality; existing cloud images are untouched.
 export async function compressPublicImage(file:File,purpose:PublicImagePurpose='portrait'):Promise<File>{
- const source=await prepareImageUpload(file,5),limit=PUBLIC_IMAGE_LIMITS[purpose];
+ const source=await prepareImageUpload(file,purpose==='gallery'?10:5),limit=PUBLIC_IMAGE_LIMITS[purpose];
  if(typeof document==='undefined'||typeof Image==='undefined')throw new Error('Photo processing is unavailable. Use a current browser and retry.');
  const url=URL.createObjectURL(source),image=new Image();
  try{
   image.src=url;await image.decode();
   const width=image.naturalWidth,height=image.naturalHeight;
   if(width*height>64000000||width>16000||height>16000)throw new Error('This image has too many pixels. Export a smaller photo and retry.');
-  if(Math.max(width,height)<=limit.edge&&source.size<=limit.bytes)return source;
+  // Always re-encode gallery photos so uploaded files do not retain source EXIF/GPS metadata.
+  if(purpose!=='gallery'&&Math.max(width,height)<=limit.edge&&source.size<=limit.bytes)return source;
   let edge:number=limit.edge;
   for(let attempt=0;attempt<9;attempt++){
    const ratio=Math.min(1,edge/Math.max(width,height)),canvas=document.createElement('canvas');

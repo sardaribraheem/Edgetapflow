@@ -5,6 +5,7 @@ import {listManagedProfiles,setProfileVisibility,separateProfileAccount,deleteMa
 import {getStaffProfile,getProfile} from '@/lib/data-service';
 import ProfilePlanNotice from '@/components/ProfilePlanNotice';
 import ProfileSectionsEditor from '@/components/ProfileSectionsEditor';
+import ProfileShowcaseEditor from '@/components/ProfileShowcaseEditor';
 import ProfileEditor from '@/components/ProfileEditor';
 import {getCurrentUser} from '@/lib/auth';
 import {notifyProfileChanged} from '@/lib/profile-sync';
@@ -80,7 +81,7 @@ export default function ManagedProfiles({onChanged}:{onChanged?:()=>Promise<void
         <button type="button" className="btn btn-ghost px-4 py-3" onClick={()=>{const node=document.getElementById("profile-cleanup-"+profile.profileId) as HTMLDetailsElement|null;if(node){node.open=true;node.scrollIntoView({block:"nearest"});}}}>Review deletion</button>
         <button type="button" disabled={!!busy} onClick={()=>{void visibility(profile);}} className="btn btn-ghost px-4 py-3">{busy===profile.username?'Confirming…':profile.active===false?'Restore profile':'Hide profile'}</button>
       </div></div>
-      <ProfilePlanNotice profile={profile} allowRenew={false}/><ProfileSectionsEditor profile={profile}/>
+      <ProfilePlanNotice profile={profile} allowRenew={false}/><ProfileSectionsEditor profile={profile}/><ProfileShowcaseEditor key={profile.profileId} profile={profile} staff/>
       <details id={"profile-cleanup-"+profile.profileId} className="admin-details mt-4"><summary>Account access & cleanup</summary><div className="space-y-4 p-4 text-sm">
         <p className="break-all">{profile.account?.kind==='login'?`Login account: ${profile.account.email}`:profile.account?.kind==='staff_managed'?'Staff-managed · No login account':'Account details unavailable.'}</p>
         <p>This is the account that can manage the profile. Public contact links are independent.</p>
