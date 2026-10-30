@@ -4,6 +4,7 @@ Consolidated 18 October 2026 from release/audit/implementation reports. [Launch 
 
 | Date/time (Pakistan) | Firebase Hosting version | Scope |
 |---|---|---|
+| 30 Oct, follow-up | **`a0df4c3bc6c57c7f`** | Pricing consistency, independent catalog recovery, valid-destination quotes and HTML revalidation; Hosting only, catalog/customer/app state unchanged |
 | 30 Oct | **`d94632fc5fe1f7e4`** | Detailed hardware catalog/checkout, resilient prices, admin/backups, business sections and inactive annual/trial foundations; exact 028–032, existing records/app contracts preserved |
 | 27 Oct, 00:52:10 | **`6f8c18e26f9a80c5`** | Collapsible admin orders, application decisions, account cleanup; exact 027 and owner-requested Umer separation, no mail/deletion |
 | 26 Oct, 8:32:34 am | **`cabbc34a2b3f0358`** | Free website profiles, direct staff/tag workflow, reference payments and moderation; exact 024–026 plus Hosting |
@@ -13,6 +14,10 @@ Consolidated 18 October 2026 from release/audit/implementation reports. [Launch 
 | 17 Oct, 9:15:27 am | `e2af92ed956b5fcd` | Preferred-origin SEO, sitemap/social metadata/noindex/legacy-route compatibility; Hosting only |
 | 16 Oct, 12:50:10 pm | `ae83d57dca84c205` | Card products/editor/public logos/private proof after approved 012–015 |
 | 14 Oct, 10:14 pm | `e4635533ce44dcb1` | Previous verified baseline |
+
+## 30 October follow-up: coherent prices and current browser content
+
+Hosting `a0df4c3bc6c57c7f`; commits `7853fc0` and `6ab18ad`. [Pricing audit](PRICING_LOGIC_AUDIT_2026-10-30.md) records offer scope, market/cost assumptions and remaining business evidence. No catalog rate or saved order was changed. Fresh checks passed: 50 product browser + 26 admin browser assertions; 15 quote/security SQL groups, 9 lifecycle, 6 business sections, 9 image checks and bounded-read tests; production/fixture builds and release guards. Live 55 read-only backend probes passed. Six final hosted HTML pages match the production export and return `public, max-age=0, must-revalidate`; hashed assets retain year-long immutable caching. Fresh mobile and existing-browser reload checks show current prices/copy without overflow/errors. The prior intermediate Hosting version `3775ee0bfdfc9a10` contained the same export before the final header correction. Existing customer and app state are unchanged; physical/private-byte/mail/funds remain outside this evidence.
 
 ## 30 October: detailed pricing and supported website milestones
 

@@ -13,9 +13,9 @@ EdgeTap — **One tap. Infinite possibilities.** Help people share useful contac
 | Free website profile | Rs. 0 | Not applicable | One per confirmed account, up to ten links, owner edits, EdgeTap branding and card-order CTA; staff can remove/restore public visibility |
 | Link Card | Rs. 999 first card | Rs. 1,399 | One customer-supplied existing public URL |
 | EdgeTap Profile | Rs. 1499 first card + profile | Rs. 2,200 | Editable profile; first ten links included, each extra link Rs. 50 once per profile, not per card |
-| Website + four cards | Rs. 29,999 | Rs. 36,999 | Contact-only agreed website/portfolio scope; first year included, Rs. 3,000 annually from year two; cards now or within first year |
+| Website + four cards | Rs. 29,999 | Rs. 36,999 | Contact-only agreed website/portfolio scope; first year included, renewal estimate Rs. 3,000/year, with exact domain/hosting quote agreed before starting; cards now or within first year |
 
-These are the initial catalog values. Staff can edit website prices/comparisons, bundles, renewal and extra-card/link rates in Settings. Submitted prices/terms remain unchanged. New version-3/4 orders include delivery, disclosed at payment; historical delivery terms remain intact. Profile links have a technical limit of 100; do not advertise unlimited links.
+These are the initial catalog values. Staff can edit website prices/comparisons, bundles, renewal and extra-card/link rates in Pricing. Submitted prices/terms remain unchanged. New version-3/4 orders include delivery, disclosed at payment; historical delivery terms remain intact. Profile links have a technical limit of 100; do not advertise unlimited links.
 
 Cards are PVC NFC, **85.60 × 53.98 mm**; Wood is a printed style. Identical cards in one order share one design and destination. QR is optional and must encode the same destination as NFC. Keep public handles stable and existing printed URLs working. No universal phone-compatibility or instant-open promise.
 
@@ -105,3 +105,5 @@ Use the [catalog and operations specification](PRODUCT_CATALOG_AND_OPERATIONS_PL
 
 
 The [30 October admin/backup implementation](ADMIN_WORKSPACE_AND_BACKUPS_2026-10-30.md) adds local business exports and clearer cleanup controls in a reviewed source branch. It has not changed production or enabled annual billing. Export downloads consume provider egress and do not reduce stored cloud bytes. Full SQL/Auth recovery remains an operator task; no file purge or actual customer deletion is included.
+
+The [pricing logic review](PRICING_LOGIC_AUDIT_2026-10-30.md) explains the Rs. 700 self-service standard route versus customizable/assisted packages, optional setup, delivery and website-renewal limits. Actual catalog amounts and existing quoted customer terms are unchanged by that follow-up.

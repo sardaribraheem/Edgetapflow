@@ -80,6 +80,8 @@ Work on one main milestone at a time. New catalog rows, paid features and trials
 
 **Exit:** the owner can edit a future price once and see it consistently in the pricing page, checkout and supported app handoff; mobile/desktop and accessibility checks pass. No giant always-open admin forms or duplicate confusing actions. Reference: [dashboard design](docs/PRODUCT_CATALOG_AND_OPERATIONS_PLAN.md#7-cleaner-dashboard).
 
+Follow-up pricing review: [economic and consistency audit](docs/PRICING_LOGIC_AUDIT_2026-10-30.md) records the standard versus customizable scope, free-profile route, once-per-order assistance, renewal quote limits and independent catalog error handling. Publication/check results are maintained in launch status. No catalog amount or agreed customer term is changed by that review.
+
 ## 5. Annual service, trials and renewal
 
 - [ ] Record the exact launch cohort/effective date and Basic price/support/delivery terms. Preserve current free profiles and existing purchased rights.

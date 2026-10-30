@@ -1,6 +1,6 @@
 # EdgeTap workspace context
 
-Updated **30 October 2026**, Asia/Karachi, after owner-authorized production publication of the detailed product catalog, admin/backups and supported website milestones. Hosting **`d94632fc5fe1f7e4`**; hosted migrations **001–015 plus 017–032**, optional 016 unapplied. This is a handoff, not fresh permission to send email or modify customer data. Check Git and the active user request.
+Updated **30 October 2026**, Asia/Karachi, after owner-authorized production publication of the detailed product catalog, admin/backups and supported website milestones. Hosting **`a0df4c3bc6c57c7f`**; hosted migrations **001–015 plus 017–032**, optional 016 unapplied. This is a handoff, not fresh permission to send email or modify customer data. Check Git and the active user request.
 
 ## Current scope and preferences
 
@@ -40,7 +40,7 @@ The root [update plan](updateplan.md) is the ordered execution plan. The owner r
 
 - Brand **EdgeTap**, “One tap. Infinite possibilities.” Preferred origin **https://edgetap.tech**.
 - Next.js App Router/React/TypeScript/Tailwind/GSAP static export to `out/`. Firebase project `edgetapflow` is **Hosting only**; Supabase project `dxyxvervvlxhwwbcbttd` handles Auth/Postgres/RLS/RPCs/Storage.
-- Latest recorded Hosting **`d94632fc5fe1f7e4`**, **30 October 2026**. Hosted migrations **001–015 plus 017–032**. **016 remains unapplied**. Do not blindly push pending migrations, rerun/edit applied files or rewrite saved NFC URLs.
+- Latest recorded Hosting **`a0df4c3bc6c57c7f`**, **30 October 2026**. Hosted migrations **001–015 plus 017–032**. **016 remains unapplied**. Do not blindly push pending migrations, rerun/edit applied files or rewrite saved NFC URLs.
 - The 024/025/026 release preserved existing profiles, orders, payments, pricing/outbox data and app function definitions. Existing Firebase hosts/Auth callbacks/approved snapshots remain supported. The app source was untouched.
 - Public and private profile/account routes remain noindex. Unknown `/u/*` handles never fall back to the founder. New profile URLs use `edgetap.tech/u/<handle>`.
 
@@ -141,3 +141,7 @@ The website source is backed up on its GitHub branch. The outer repository/conte
 The LifeOS-inspired admin layout, dedicated Pricing/Data & backups, scoped encrypted business/file copies and visible deletion blockers are live as part of Hosting `d94632fc5fe1f7e4`. Website source is pushed on `codex/product-pricing-milestones-2026-10-30` at `e7e432f` (feature commits `6866d0c` and `6b10d86`). Exact migrations 028–032 are applied; 016 stays unapplied. See [release evidence](docs/PRODUCT_CATALOG_RELEASE_2026-10-30.md) and [backup coverage/recovery](docs/ADMIN_WORKSPACE_AND_BACKUPS_2026-10-30.md).
 
 Business exports exclude Auth credentials, schema/roles and server settings and are not full disaster recovery. No production customer export/deletion, cloud-file purge or email occurred. New annual service remains unavailable and trials disabled. The broader archive/retention/import work, real customer/inbox/physical evidence and native compatibility remain open in [the milestone plan](updateplan.md). LifeOS was read only; the app source and owner PRD remain untouched.
+
+## Pricing consistency follow-up, 30 October
+
+The owner requested another logical price/offer review, fixes and publication/push. [Pricing audit](docs/PRICING_LOGIC_AUDIT_2026-10-30.md) records actual launch-price reasoning and limits. Website commits `7853fc0` and `6ab18ad` clarify standard pickup versus customizable delivery/setup, optional once-per-order assistance, planned annual pricing and domain-specific renewal quotes. Hardware pricing reads are independent of profile policy; no invented fallback rates appear during an outage. Checkout waits for a valid destination, and quotes have timeouts. Hosting `a0df4c3bc6c57c7f` publishes those changes plus HTML revalidation while retaining immutable hashed assets. Existing-browser reload and fresh mobile/public checks passed; six live HTML pages match the reviewed export. Fresh verification: 76 browser assertions, quote/lifecycle/business/image SQL checks, build/lint/release guards and 55 read-only backend probes. This follow-up is Hosting-only: no database/catalog amount/customer/app/email changes. Existing cached pages may need one refresh. Source and guide checkpoint are pushed to their existing branches.

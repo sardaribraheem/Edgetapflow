@@ -8,6 +8,7 @@ Unless stated otherwise, website commands and inline source paths in these guide
 
 | Need | Read |
 |---|---|
+| Price consistency, unit economics and follow-up fixes | [Pricing logic audit](PRICING_LOGIC_AUDIT_2026-10-30.md) |
 | Detailed tag/card prices, immutable checkout, price loading, compression, trial foundation and business sections | [Product catalog implementation](PRODUCT_CATALOG_RELEASE_2026-10-30.md) |
 | Ordered milestones and test-profile cleanup approval boundary | [Update plan](../updateplan.md) |
 | Detailed website, product and business overview | [Project information](../EdgetapFlow/info.md) |
