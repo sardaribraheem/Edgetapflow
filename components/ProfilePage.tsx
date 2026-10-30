@@ -106,6 +106,10 @@ export default function ProfilePage({
                     <img
                       src={profile.avatar}
                       alt={`${profile.displayName} profile photo`}
+                      width={128}
+                      height={128}
+                      fetchPriority="high"
+                      loading="eager"
                       className="h-full w-full object-cover"
                       draggable={false}
                     />
@@ -123,14 +127,14 @@ export default function ProfilePage({
               <p className="mt-2 max-w-full text-[16px] font-medium text-[var(--ink-soft)]">
                 {profile.title}
               </p>
-              {profile.location && <span className="mt-3 inline-flex max-w-full items-center gap-1.5 rounded-full bg-[var(--ink)]/5 px-3 py-1 text-[13px] text-[var(--ink-mid)]"><span className="shrink-0"><Icon name="pin" size={15}/></span><span className="min-w-0">{profile.location}</span></span>}
+              {profile.location && <span className="mt-3 inline-flex max-w-full items-center gap-1.5 rounded-full bg-[var(--ink)]/5 px-3 py-1 text-[13px] text-[var(--ink-soft)]"><span className="shrink-0"><Icon name="pin" size={15}/></span><span className="min-w-0">{profile.location}</span></span>}
 
 
             </header>
 
             {/* contact links always precede optional content in DOM and visual order */}
             <section className="flex min-w-0 flex-col gap-2.5 pt-1" aria-label="Contact actions">
-              <div className="eyebrow mb-1 text-[var(--ink-mid)]">Reach me</div>
+              <div className="eyebrow mb-1 text-[var(--ink-soft)]">Reach me</div>
               {profile.links.filter(l => isSafeContactUrl(l.url)).map((l) => (
                 <a
                   key={l.type + l.url}
