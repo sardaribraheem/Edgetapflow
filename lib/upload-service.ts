@@ -17,8 +17,8 @@ async function upload(bucket: string, uid: string, file: File, maxMb: number): P
   }
   return `${bucket}/${path}`;
 }
-export async function uploadPublicAvatar(uid: string, file: File,purpose:PublicImagePurpose='portrait'): Promise<string> {
-  file=await compressPublicImage(file,purpose);
+export async function uploadPublicAvatar(uid: string, file: File,purpose:PublicImagePurpose|'print'='portrait'): Promise<string> {
+  file=purpose==='print'?await prepareImageUpload(file,5):await compressPublicImage(file,purpose);
   if (!usesSupabase) return (await import('./storage')).uploadPublicAvatar(uid,file);
   const path = await upload('avatars',uid,file,5);
   return getSupabase().storage.from('avatars').getPublicUrl(path.slice('avatars/'.length)).data.publicUrl;

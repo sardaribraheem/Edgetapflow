@@ -95,7 +95,7 @@ alter table private.order_admin_workflows add constraint order_admin_workflows_p
 alter table public.orders add column product_catalog_version bigint references private.product_catalogs(version);
 alter table public.orders add column product_quote jsonb;
 alter table public.orders drop constraint orders_quantity_check;
-alter table public.orders add constraint orders_quantity_check check(quantity between 1 and 20 or (quantity=0 and product_catalog_version is not null and product_quote#>>'{selection,hardware}'='none'));
+alter table public.orders add constraint orders_quantity_check check(quantity between 1 and 20 or (quantity=0 and product_catalog_version is not null and product_quote is not null and (product_quote#>>'{selection,hardware}'='none') is true));
 create function public.create_product_order(p_selection jsonb,p_contact jsonb,p_payment jsonb,p_catalog_version bigint,p_request_key uuid) returns text language plpgsql security definer set search_path='' as $$
 declare c uuid;oid text;old text;quote jsonb;pr public.profiles;qty integer;fingerprint text=jsonb_build_object('selection',p_selection,'contact',p_contact,'payment',p_payment,'catalogVersion',p_catalog_version)::text;physical jsonb;begin
  if auth.uid() is null or p_request_key is null or not exists(select 1 from auth.users where id=auth.uid() and email_confirmed_at is not null) then raise exception 'Confirm your email and sign in before ordering' using errcode='42501';end if;

@@ -7,7 +7,7 @@ const {outputText}=ts.transpileModule(await readFile('lib/image-upload.ts','utf8
 const {prepareImageUpload}=await import('data:text/javascript,'+encodeURIComponent(outputText));
 let checks=0;
 for(const [path,type] of [['assets/edgetapcard/Umarpic.jpeg','image/jpeg'],['public/apple-touch-icon.png','image/png'],['public/card-previews/maincard-v2.webp','image/webp']]){
- const bytes=await readFile(path);const file=await prepareImageUpload(new File([bytes],'phone-image',{type:''}),25);assert.equal(file.type,type);checks++;
+ const bytes=await readFile(path);const file=await prepareImageUpload(new File([bytes],'phone-image',{type:''}),25);assert.equal(file.type,type);assert.deepEqual(new Uint8Array(await file.arrayBuffer()),new Uint8Array(bytes));checks++;
 }
 for(const max of [5,8,25]){await assert.rejects(()=>prepareImageUpload(new File([new Uint8Array(max*1024*1024+1)],'large.png',{type:'image/png'}),max),new RegExp('up to '+max+' MB'));checks++;}
 await assert.rejects(()=>prepareImageUpload(new File([],'empty.png',{type:'image/png'}),5),/empty/);checks++;

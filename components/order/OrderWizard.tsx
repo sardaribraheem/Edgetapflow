@@ -98,7 +98,7 @@ function CloudOrderWizard(){
   if(!user)return;if(!file){setDraft(d=>{if(kind==='logo'){const physical={...d.physical};delete physical.logoUrl;return {...d,physical,logoPreview:undefined};}if(kind==='receipt')return {...d,payment:{...d.payment,receiptUrl:undefined}};if(kind==='artwork')return {...d,customDesignUrl:undefined,customDesignPreview:undefined};if(kind==='backArtwork')return {...d,backDesignPreview:undefined,physical:{...d.physical,standardBack:false,backDesignUrl:undefined}};return {...d,avatarUrl:undefined,avatarPreview:undefined};});setDirty(true);return;}
   const uploadUid=user.uid;const uploadDraft=meta.current;setUploading(true);setError('');
   try{
-   const path=(kind==='avatar'||kind==='logo')?await uploadPublicAvatar(user.uid,file,kind==='logo'?'logo':'portrait'):(kind==='artwork'||kind==='backArtwork')?await uploadCustomDesign(user.uid,file):await uploadPaymentReceipt(user.uid,file);
+   const path=(kind==='avatar'||kind==='logo')?await uploadPublicAvatar(user.uid,file,kind==='logo'?'print':'portrait'):(kind==='artwork'||kind==='backArtwork')?await uploadCustomDesign(user.uid,file):await uploadPaymentReceipt(user.uid,file);
    if(accountUid.current!==uploadUid||meta.current!==uploadDraft)return;
    setDraft(d=>({...d,...(kind==='avatar'?{avatarUrl:path,avatarUploadPending:false}:kind==='logo'?{physical:{...d.physical,logoUrl:path},logoUploadPending:false}:kind==='artwork'?{customDesignUrl:path}:kind==='backArtwork'?{physical:{...d.physical,standardBack:false,backDesignUrl:path}}:{payment:{...d.payment,receiptUrl:path}})}));setDirty(true);
   }catch(e){if(accountUid.current===uploadUid)setError(e instanceof Error?e.message:'Upload failed.');throw e;}
